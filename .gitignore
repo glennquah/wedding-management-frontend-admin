@@ -1,0 +1,9 @@
+/.turbo
+/node_modules
+/apps/external/node_modules
+/apps/external/.next
+/apps/internal/.turbo
+/apps/internal/.next
+/apps/internal/node_modules
+/packages/ui/.turbo
+/packages/ui/dist
