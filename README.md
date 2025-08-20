@@ -8,8 +8,8 @@ A monorepo containing both external (customer-facing) and internal (admin) Next.
 ├── apps/
 │   ├── external/          # Customer-facing portal (port 3000)
 │   └── internal/          # Admin portal (port 3001)
-├── packages/
-│   └── ui/               # Shared UI components library
+├── shared/
+│   └── ui/               # Shared UI components (direct imports)
 └── package.json          # Root workspace configuration
 ```
 
@@ -36,22 +36,27 @@ This will start:
 
 ## Shared UI Components
 
-The `@wedding/ui` package provides shared React components that can be used across both applications:
+The `shared/ui/` folder provides shared React components that can be imported directly from source:
 
-- `Button` - Primary, secondary, and outline button variants
-- `Card`, `CardHeader`, `CardTitle`, `CardContent` - Card layout components
-- `Input` - Styled input field
+- `Button` - shadcn/ui Button with all variants (default, destructive, outline, secondary, ghost, link)
+- `Card`, `CardHeader`, `CardTitle`, `CardContent` - shadcn/ui Card system
+- `Input` - Basic input field
 
 ### Usage
 
 ```tsx
-import { Button, Card, Input } from "@wedding/ui";
+import { Button } from "../../../../shared/ui/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../../shared/ui/components/ui/card";
 
 export default function MyPage() {
   return (
     <Card>
-      <Input placeholder="Enter text" />
-      <Button variant="primary">Submit</Button>
+      <CardHeader>
+        <CardTitle>My Page</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Button variant="default">Submit</Button>
+      </CardContent>
     </Card>
   );
 }
@@ -59,8 +64,23 @@ export default function MyPage() {
 
 ## Development
 
-- **Add new UI components**: Add to `packages/ui/src/components/` and export from `packages/ui/src/index.ts`
-- **Build UI package**: `npm run build --workspace=packages/ui`
+### Adding UI Components
+
+**Add New Components:**
+1. Create component in `shared/ui/components/ui/`
+2. Import directly in your apps using relative paths
+3. No build step needed - live editing!
+
+**Add shadcn/ui Components:**
+```bash
+# Copy from shadcn/ui and add to shared/ui/components/ui/
+# Then import directly in your apps
+```
+
+### Development Commands
+
+- **Start development**: `npm run dev`
+- **Build all apps**: `npm run build` 
 - **Lint all packages**: `npm run lint`
 
 ## Tech Stack
@@ -70,4 +90,4 @@ export default function MyPage() {
 - TypeScript
 - Tailwind CSS
 - Turbo (monorepo build system)
-- tsup (package bundling)
+- Direct imports (no build step for UI components)

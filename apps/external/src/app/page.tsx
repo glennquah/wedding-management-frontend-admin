@@ -1,5 +1,7 @@
+import { Button } from "../../../../shared/ui/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../../shared/ui/components/ui/card";
+import { Input } from "../../../../shared/ui/components/Input";
 import Image from "next/image";
-import { Button, Card, CardHeader, CardTitle, CardContent, Input } from "@wedding/ui";
 
 export default function Home() {
   return (
@@ -24,7 +26,7 @@ export default function Home() {
           <CardContent className="space-y-4">
             <Input placeholder="Enter your name" />
             <div className="flex gap-2">
-              <Button variant="primary">Primary Button</Button>
+              <Button variant="default">Default Button</Button>
               <Button variant="secondary">Secondary</Button>
             </div>
             <Button variant="outline" className="w-full">Outline Button</Button>
@@ -32,7 +34,7 @@ export default function Home() {
         </Card>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <Button variant="primary" size="lg">
+          <Button variant="default" size="lg">
             <Image
               className="dark:invert mr-2"
               src="/vercel.svg"

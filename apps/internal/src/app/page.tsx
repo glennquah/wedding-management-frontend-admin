@@ -1,5 +1,7 @@
 import Image from "next/image";
-import { Button, Card, CardHeader, CardTitle, CardContent, Input } from "@wedding/ui";
+import { Button } from "../../../../shared/ui/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../../shared/ui/components/ui/card";
+import { Input } from "../../../../shared/ui/components/Input";
 
 export default function Home() {
   return (
@@ -24,7 +26,7 @@ export default function Home() {
           <CardContent className="space-y-4">
             <Input placeholder="Search weddings..." />
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" size="sm">Create Wedding</Button>
+              <Button variant="default" size="sm">Create Wedding</Button>
               <Button variant="secondary" size="sm">View Reports</Button>
               <Button variant="outline" size="sm">Manage Vendors</Button>
               <Button variant="outline" size="sm">Settings</Button>
@@ -33,7 +35,7 @@ export default function Home() {
         </Card>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <Button variant="primary" size="lg">
+          <Button variant="default" size="lg">
             <Image
               className="dark:invert mr-2"
               src="/vercel.svg"

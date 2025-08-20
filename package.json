@@ -3,8 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/*"
   ],
   "scripts": {
     "dev": "turbo run dev",
@@ -19,5 +18,9 @@
   "packageManager": "npm@10.9.0",
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.15",
+    "lucide-react": "^0.540.0"
   }
 }
