@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import * as Menubar from "@radix-ui/react-menubar";
-import useIsMobileScreen from "@hooks/useIsMobileScreen";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import useIsMobileScreen from "../hooks/useIsMobileScreen";
 
 export const menubar_items = [
   "CHECKLIST",
@@ -14,14 +14,16 @@ export const menubar_items = [
 
 const MobileMenubar = () => {
   const [isClient, setIsClient] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  
   useEffect(() => {
     setIsClient(true);
   }, []);
+  
   if (!isClient) {
     return null;
   }
-  const pathname = usePathname();
-  const router = useRouter();
 
   return (
     <div className="fixed top-6 z-[100] ml-[1rem] flex w-[calc(100vw-1.75rem)] items-center justify-between rounded-3xl bg-base-white px-6 py-1 shadow-md">
@@ -87,14 +89,16 @@ function HamburgerIcon() {
 
 const DesktopMenubar = () => {
   const [isClient, setIsClient] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  
   useEffect(() => {
     setIsClient(true);
   }, []);
+  
   if (!isClient) {
     return null;
   }
-  const pathname = usePathname();
-  const router = useRouter();
   return (
     <div className="fixed top-0 z-[100] flex w-screen items-center justify-between px-8 py-2">
       {/* LG Icon Far-left */}
