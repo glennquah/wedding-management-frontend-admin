@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
+import Image from "next/image";
 
 export default function LandingPage() {
   return (
