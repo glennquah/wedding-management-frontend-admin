@@ -5,3 +5,4 @@
 /apps/internal/.turbo
 /apps/internal/.next
 /apps/internal/node_modules
+*.env
