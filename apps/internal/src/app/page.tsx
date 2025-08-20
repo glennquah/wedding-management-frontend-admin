@@ -1,7 +1,7 @@
 import Image from "next/image";
-import { Button } from "../../../../shared/ui/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../../shared/ui/components/ui/card";
-import { Input } from "../../../../shared/ui/components/Input";
+import { Button } from "@shared/components/ui/button";
+import { Input } from "@shared/components/Input";
+import { Card, CardContent, CardHeader, CardTitle } from "@shared/components/ui/card";
 
 export default function Home() {
   return (

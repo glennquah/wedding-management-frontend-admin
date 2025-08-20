@@ -1,6 +1,3 @@
-// Legacy components (can be removed if you prefer shadcn versions)
-export * from './components/Input'
+export * from './ui/button';
+export * from './ui/card';
 
-// Shadcn UI components
-export * from './components/ui/button'
-export * from './components/ui/card'export * from './components/ui/dialog'
