@@ -1,114 +1,139 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import ResponsiveMenubar from "@components/common/responsive-menubar";
+import Footer from "@components/common/footer";
+
+const heroImages = [
+  "/images/landing-pg (1).jpg",
+  "/images/landing-pg (2).jpg",
+  "/images/landing-pg (3).jpg",
+  "/images/landing-pg (4).jpg",
+];
 
 export default function LandingPage() {
+  const [current, setCurrent] = useState(0);
+  const [fade, setFade] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFade(false);
+      setTimeout(() => {
+        setCurrent((prev) => (prev + 1) % heroImages.length);
+        setFade(true);
+      }, 400); // fade out duration
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="font-sans min-h-screen flex flex-col">
       {/* Menubar */}
       <ResponsiveMenubar />
 
       {/* Hero Section */}
-      <main className="flex flex-col items-center justify-center text-center pt-40 py-20 px-6 sm:px-20 gap-8 bg-brand-25">
-        <h1 className="text-4xl sm:text-6xl font-header text-primary">
-          Your Dream Wedding, Simplified
-        </h1>
-        <p className="max-w-xl text-lg sm:text-xl text-secondary-foreground/90">
-          Plan, organize, and track every detail of your special day in one
-          intuitive platform. Say goodbye to stress and hello to joy.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-4 mt-6">
-          <a
-            href="/get-started"
-            className="rounded-full bg-primary text-primary-foreground px-6 py-3 font-semibold shadow-lg hover:bg-primary-hover transition"
-          >
-            Get Started
-          </a>
-          <a
-            href="/features"
-            className="rounded-full border border-secondary text-secondary-foreground px-6 py-3 font-semibold hover:bg-secondary-hover transition"
-          >
-            Explore Features
-          </a>
+      <section className="relative flex-1 min-h-screen w-full flex items-center justify-center bg-base-black overflow-hidden">
+        {/* Rotating Background Image */}
+        <div className="absolute inset-0 w-full h-full z-0">
+          {heroImages.map((src, idx) => (
+            <Image
+              key={src}
+              src={src}
+              alt="happy couple illustration"
+              fill
+              priority={idx === 0}
+              className={`object-cover w-full h-full absolute inset-0 transition-opacity duration-500 ${
+                idx === current && fade ? "opacity-70" : "opacity-0"
+              }`}
+              style={{ transitionProperty: "opacity" }}
+            />
+          ))}
         </div>
-
-        <Image
-          src="/images/landing-pg.jpg"
-          alt="Happy couple illustration"
-          width={500}
-          height={300}
-          className="mt-10"
-        />
-      </main>
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/30 z-10" />
+        {/* Centered Content */}
+        <div className="relative z-20 flex flex-col items-center justify-center text-center w-full px-6 sm:px-20 gap-8">
+          <h1 className="text-4xl sm:text-6xl font-header text-secondary drop-shadow-lg">
+            Your Dream Wedding, Seamlessly Planned
+          </h1>
+          <h5 className="max-w-xl text-xl text-secondary drop-shadow font-semibold">
+            Organize every detail, track every task, and coordinate your big day
+            effortlessly — all in one intuitive platform.
+          </h5>
+          <div className="flex flex-col sm:flex-row gap-4 mt-6">
+            <a
+              href="/get-started"
+              className="rounded-full bg-gray-700 text-primary-foreground px-6 py-3 font-semibold shadow-lg hover:bg-primary-hover transition"
+            >
+              Get Started
+            </a>
+            <a
+              href="/features"
+              className="rounded-full border border-secondary text-background px-6 py-3 font-semibold hover:bg-secondary-hover transition"
+            >
+              Explore Features
+            </a>
+          </div>
+        </div>
+      </section>
 
       {/* Features Section */}
       <section className="py-20 px-6 sm:px-20 bg-background flex flex-col gap-16">
-        <h2 className="text-3xl font-header text-center text-primary">
-          Why Choose Us?
+        <h2 className="text-3xl font-header font-bold text-center text-primary">
+          Our Services
         </h2>
         <div className="grid sm:grid-cols-3 gap-10 max-w-6xl mx-auto">
-          <div className="flex flex-col items-center gap-4 text-center">
+          <div className="flex flex-col items-center gap-4 text-center hover:scale-110 cursor-pointer transition-transform">
             <Image
-              src="/images/feature-one.jpg"
-              alt="Calendar"
-              width={300}
-              height={300}
+              src="/images/checklist.png"
+              alt="Checklist"
+              width={150}
+              height={150}
             />
-            <h3 className="font-header text-xl text-primary">Smart Planning</h3>
-            <p className="text-secondary-foreground/80">
-              Organize every detail of your wedding with our easy-to-use
-              planner.
+            <h3 className="font-header text-xl text-brand-900 font-semibold">
+              Essentials
+            </h3>
+            <p className="text-foreground">
+              Set your vision, lock your date, track your budget, and cover
+              every blindspot—your wedding starts here.
             </p>
           </div>
-          <div className="flex flex-col items-center gap-4 text-center">
+          <div className="flex flex-col items-center cursor-pointer gap-4 text-center">
             <Image
-              src="/images/feature-two.jpg"
-              alt="Budget"
-              width={300}
-              height={300}
+              src="/images/group.png"
+              alt="Group of people"
+              width={150}
+              height={150}
             />
-            <h3 className="font-header text-xl text-primary">
-              Budget Management
+            <h3 className="font-header text-xl text-brand-900 font-semibold">
+              Guests & Vendors
             </h3>
-            <p className="text-secondary-foreground/80">
-              Track your expenses and stay within budget without the stress.
+            <p className="text-foreground">
+              Manage your guest list, secure the perfect vendors, and style your
+              big day—all in one place.
             </p>
           </div>
-          <div className="flex flex-col items-center gap-4 text-center">
+          <div className="flex flex-col items-center  cursor-pointer gap-4 text-center">
             <Image
-              src="/images/feature-three.jpg"
-              alt="Guest List"
-              width={300}
-              height={300}
+              src="/images/wedding-cake.png"
+              alt="Wedding Cake"
+              width={150}
+              height={150}
             />
-            <h3 className="font-header text-xl text-primary">
-              Guest Management
+            <h3 className="font-header text-xl text-brand-900 font-semibold">
+              The Big Day
             </h3>
-            <p className="text-secondary-foreground/80">
-              Easily manage invites, RSVPs, and seating arrangements in one
-              place.
+            <p className="text-foreground">
+              Stay stress-free with last-minute checklists, day-of coordination,
+              and effortless photo collation to relive every moment.
             </p>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-brand-25 py-10 px-6 sm:px-20 text-center text-secondary-foreground/90">
-        <p>© {new Date().getFullYear()} WeddingPlanner. All rights reserved.</p>
-        <div className="flex justify-center gap-6 mt-4">
-          <a href="/about" className="hover:underline">
-            About
-          </a>
-          <a href="/contact" className="hover:underline">
-            Contact
-          </a>
-          <a href="/privacy" className="hover:underline">
-            Privacy Policy
-          </a>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
