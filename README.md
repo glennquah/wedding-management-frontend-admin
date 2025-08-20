@@ -9,7 +9,7 @@ A monorepo containing both external (customer-facing) and internal (admin) Next.
 │   ├── external/          # Customer-facing portal (port 3000)
 │   └── internal/          # Admin portal (port 3001)
 ├── shared/
-│   └── ui/               # Shared UI components (direct imports)
+│   └── components/               # Shared UI components (direct imports)
 └── package.json          # Root workspace configuration
 ```
 
@@ -36,17 +36,13 @@ This will start:
 
 ## Shared UI Components
 
-The `shared/ui/` folder provides shared React components that can be imported directly from source:
-
-- `Button` - shadcn/ui Button with all variants (default, destructive, outline, secondary, ghost, link)
-- `Card`, `CardHeader`, `CardTitle`, `CardContent` - shadcn/ui Card system
-- `Input` - Basic input field
+The `shared/components/` folder provides shared React components that can be imported directly from source:
 
 ### Usage
 
 ```tsx
-import { Button } from "../../../../shared/ui/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../../shared/ui/components/ui/card";
+import { Button } from "@shared/components/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@shared/components/card";
 
 export default function MyPage() {
   return (
