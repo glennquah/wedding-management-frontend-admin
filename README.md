@@ -67,11 +67,15 @@ export default function MyPage() {
 ### Adding UI Components
 
 **Add New Components:**
-1. Create component in `shared/components/ui/`
+1. Create component in `shared/ui/components/ui/`
 2. Import directly in your apps using relative paths
+3. No build step needed - live editing!
 
 **Add shadcn/ui Components:**
-- Copy them manually from the shadcn website & add it into the `shared/components/ui` path.
+```bash
+# Copy from shadcn/ui and add to shared/ui/components/ui/
+# Then import directly in your apps
+```
 
 ### Development Commands
 
