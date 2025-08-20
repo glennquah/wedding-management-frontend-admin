@@ -1,7 +1,7 @@
-import Image from "next/image";
-import { Button } from "@shared/components/ui/button";
 import { Input } from "@shared/components/Input";
+import { Button } from "@shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@shared/components/ui/card";
+import Image from "next/image";
 
 export default function Home() {
   return (
