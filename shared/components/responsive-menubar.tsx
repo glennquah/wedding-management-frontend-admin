@@ -1,11 +1,11 @@
 "use client";
 
-import * as Menubar from "@radix-ui/react-menubar";
-
-import useIsMobileScreen from "../hooks/useIsMobileScreen";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import useIsMobileScreen from "../hooks/useIsMobileScreen";
+import { Button } from "./ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 
 export const menubar_items = ["Essentials", "Guest & Vendor", "The Big Day"];
 
@@ -41,48 +41,50 @@ const MobileMenubar = () => {
       </div>
       {/* Hamburger menubar */}
       <div className="flex items-center gap-4 ">
-        <Menubar.Root>
-          <Menubar.Menu>
-            <Menubar.Trigger className="group mr-[-16px] flex p-4 scale-150">
-              <HamburgerIcon />
-            </Menubar.Trigger>
-            <Menubar.Portal>
-              <Menubar.Content
-                sideOffset={10}
-                className="items-center py-2 z-50 mx-[7px] flex w-[calc(100vw-1.75rem)] flex-col gap-2 rounded-3xl font-sans bg-base-white py-2 text-center text-base-black data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+        <Sheet>
+          <SheetTrigger className="group mr-[-16px] flex p-4 scale-150">
+            <HamburgerIcon />
+          </SheetTrigger>
+          <SheetContent 
+            side="top"
+            className="items-center py-2 z-50 mx-[7px] flex w-[calc(100vw-1.75rem)] flex-col gap-2 rounded-3xl font-sans bg-base-white py-2 text-center text-base-black"
+          >
+            <SheetHeader>
+              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+            </SheetHeader>
+            <div className="flex flex-col gap-2 items-center">
+              {menubar_items.map((item) => {
+                const isActive = pathname === `/${item.toLowerCase()}/`;
+                return (
+                  <div
+                    key={item}
+                    className={`hover:font-bold font-normal text-lg hover:text-red cursor-pointer ${
+                      isActive ? "font-bold text-red" : "font-light"
+                    }`}
+                    onClick={() =>
+                      !isActive && router.push(`/${item.toLowerCase()}`)
+                    }
+                  >
+                    {item}
+                  </div>
+                );
+              })}
+              <Button
+                className="mt-2 w-[8rem] rounded-full bg-primary text-primary-foreground px-3 py-2 font-semibold shadow hover:bg-primary-hover transition text-sm"
+                onClick={() => router.push("/get-started")}
               >
-                {menubar_items.map((item, index) => {
-                  const isActive = pathname === `/${item.toLowerCase()}/`;
-                  return (
-                    <Menubar.Item
-                      key={item}
-                      className={`hover:font-bold font-normal text-lg hover:text-red ${
-                        isActive ? "font-bold text-red" : "font-light"
-                      }`}
-                      onClick={() =>
-                        !isActive && router.push(`/${item.toLowerCase()}`)
-                      }
-                    >
-                      {item}
-                    </Menubar.Item>
-                  );
-                })}
-                <Menubar.Item
-                  className="mt-2 w-[8rem] rounded-full bg-primary text-primary-foreground px-3 py-2 font-semibold shadow hover:bg-primary-hover transition text-sm"
-                  onClick={() => router.push("/get-started")}
-                >
-                  Get Started
-                </Menubar.Item>
-                <Menubar.Item
-                  className="mt-1 w-[8rem] rounded-full border border-primary text-primary px-3 py-2 font-semibold hover:bg-primary/10 transition text-sm"
-                  onClick={() => router.push("/login")}
-                >
-                  Login
-                </Menubar.Item>
-              </Menubar.Content>
-            </Menubar.Portal>
-          </Menubar.Menu>
-        </Menubar.Root>
+                Get Started
+              </Button>
+              <Button
+                variant="outline"
+                className="mt-1 w-[8rem] rounded-full border border-primary text-primary px-3 py-2 font-semibold hover:bg-primary/10 transition text-sm"
+                onClick={() => router.push("/login")}
+              >
+                Login
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </div>
   );
@@ -134,7 +136,7 @@ const DesktopMenubar = () => {
           />
         </div>
         <div className="flex items-center gap-8 text-[14px] font-thin font-montserrat text-base-yellow">
-          {menubar_items.map((item, index) => {
+          {menubar_items.map((item) => {
             const isActive = pathname === `/${item.toLowerCase()}/`;
             return (
               <h6
@@ -156,18 +158,16 @@ const DesktopMenubar = () => {
       </div>
       {/* Right: Buttons */}
       <div className="flex items-center gap-2">
-        <button
+        <Button
           onClick={() => router.push("/get-started")}
-          className="ml-4 cursor-pointer rounded-full bg-primary text-primary-foreground px-5 py-2 font-semibold shadow hover:bg-primary-hover transition text-sm"
         >
           Get Started
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => router.push("/login")}
-          className="ml-2 cursor-pointer rounded-full border border-primary text-primary px-5 py-2 font-semibold hover:bg-primary/10 transition text-sm"
         >
           Login
-        </button>
+        </Button>
       </div>
     </div>
   );

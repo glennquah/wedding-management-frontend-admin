@@ -26,10 +26,10 @@ export default function Home() {
           <CardContent className="space-y-4">
             <Input placeholder="Search weddings..." />
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="default" size="sm">Create Wedding</Button>
+              <Button variant="secondary" size="sm">Create Wedding</Button>
               <Button variant="secondary" size="sm">View Reports</Button>
-              <Button variant="outline" size="sm">Manage Vendors</Button>
-              <Button variant="outline" size="sm">Settings</Button>
+              <Button variant="secondary" size="sm">Manage Vendors</Button>
+              <Button variant="secondary" size="sm">Settings</Button>
             </div>
           </CardContent>
         </Card>

@@ -6,3 +6,5 @@
 /apps/internal/.next
 /apps/internal/node_modules
 *.env
+/apps/external/.turbo
+/apps/external/.turbo

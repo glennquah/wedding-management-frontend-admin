@@ -1,9 +1,9 @@
 "use client";
 
+import Footer from "@shared/components/footer";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import Footer from "@shared/components/footer";
 
 const heroImages = [
   "/images/landing-pg (1).jpg",
