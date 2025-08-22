@@ -4,8 +4,15 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import useIsMobileScreen from "../hooks/useIsMobileScreen";
+import logoUrl from "../public/images/logo.png";
 import { Button } from "./ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
 
 export const menubar_items = ["Essentials", "Guest & Vendor", "The Big Day"];
 
@@ -31,7 +38,7 @@ const MobileMenubar = () => {
         style={{ minWidth: 40, minHeight: 40 }}
       >
         <Image
-          src="/images/logo.png"
+          src={logoUrl}
           alt="Logo"
           width={100}
           height={100}
@@ -45,7 +52,7 @@ const MobileMenubar = () => {
           <SheetTrigger className="group mr-[-16px] flex p-4 scale-150">
             <HamburgerIcon />
           </SheetTrigger>
-          <SheetContent 
+          <SheetContent
             side="top"
             className="items-center py-2 z-50 mx-[7px] flex w-[calc(100vw-1.75rem)] flex-col gap-2 rounded-3xl font-sans bg-base-white py-2 text-center text-base-black"
           >
@@ -158,16 +165,8 @@ const DesktopMenubar = () => {
       </div>
       {/* Right: Buttons */}
       <div className="flex items-center gap-2">
-        <Button
-          onClick={() => router.push("/get-started")}
-        >
-          Get Started
-        </Button>
-        <Button
-          onClick={() => router.push("/login")}
-        >
-          Login
-        </Button>
+        <Button onClick={() => router.push("/get-started")}>Get Started</Button>
+        <Button onClick={() => router.push("/login")}>Login</Button>
       </div>
     </div>
   );
