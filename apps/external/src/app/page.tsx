@@ -4,6 +4,7 @@ import Footer from "@shared/components/footer";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { Button } from "@shared/components/ui/button";
 
 const heroImages = [
   "/images/landing-pg (1).jpg",
@@ -62,18 +63,16 @@ export default function LandingPage() {
             effortlessly — all in one intuitive platform.
           </h5>
           <div className="flex flex-col sm:flex-row gap-4 mt-6">
-            <a
-              href="/get-started"
-              className="rounded-full bg-gray-700 text-primary-foreground px-6 py-3 font-semibold shadow-lg hover:bg-primary-hover transition"
+            <Button
+              variant={"secondary"}
             >
               Get Started
-            </a>
-            <a
-              href="/features"
-              className="rounded-full border border-secondary text-background px-6 py-3 font-semibold hover:bg-secondary-hover transition"
+            </Button>
+            <Button
+              variant={"outline"}
             >
               Explore Features
-            </a>
+            </Button>
           </div>
         </div>
       </section>

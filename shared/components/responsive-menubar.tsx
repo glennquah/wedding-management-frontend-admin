@@ -77,14 +77,13 @@ const MobileMenubar = () => {
                 );
               })}
               <Button
-                className="mt-2 w-[8rem] rounded-full bg-primary text-primary-foreground px-3 py-2 font-semibold shadow hover:bg-primary-hover transition text-sm"
+                variant={"default"}
                 onClick={() => router.push("/get-started")}
               >
                 Get Started
               </Button>
               <Button
-                variant="outline"
-                className="mt-1 w-[8rem] rounded-full border border-primary text-primary px-3 py-2 font-semibold hover:bg-primary/10 transition text-sm"
+                variant={"darkOutline"}
                 onClick={() => router.push("/login")}
               >
                 Login
@@ -165,8 +164,18 @@ const DesktopMenubar = () => {
       </div>
       {/* Right: Buttons */}
       <div className="flex items-center gap-2">
-        <Button onClick={() => router.push("/get-started")}>Get Started</Button>
-        <Button onClick={() => router.push("/login")}>Login</Button>
+            <Button
+                variant={"default"}
+                onClick={() => router.push("/get-started")}
+              >
+                Get Started
+              </Button>
+              <Button
+                variant={"darkOutline"}
+                onClick={() => router.push("/login")}
+              >
+                Login
+              </Button>
       </div>
     </div>
   );
