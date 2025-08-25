@@ -62,7 +62,7 @@ export default function LandingPage() {
             Organize every detail, track every task, and coordinate your big day
             effortlessly — all in one intuitive platform.
           </h5>
-          <div className="flex flex-col sm:flex-row gap-4 mt-6">
+          <div className="flex sm:flex-row gap-4 mt-6">
             <Button
               variant={"secondary"}
             >
