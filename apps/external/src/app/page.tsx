@@ -1,9 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import Footer from "@shared/components/footer";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@shared/components/ui/button";
 
 const heroImages = [
@@ -16,6 +17,8 @@ const heroImages = [
 export default function LandingPage() {
   const [current, setCurrent] = useState(0);
   const [fade, setFade] = useState(true);
+  const featuresRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -34,7 +37,7 @@ export default function LandingPage() {
       <ResponsiveMenubar />
 
       {/* Hero Section */}
-      <section className="relative flex-1 min-h-screen w-full flex items-center justify-center bg-base-black overflow-hidden">
+      <section className="relative flex-1 min-h-screen w-full flex items-center pt-[48px] justify-center bg-base-black overflow-hidden">
         {/* Rotating Background Image */}
         <div className="absolute inset-0 w-full h-full z-0">
           {heroImages.map((src, idx) => (
@@ -54,7 +57,7 @@ export default function LandingPage() {
         {/* Overlay */}
         <div className="absolute inset-0 bg-black/30 z-10" />
         {/* Centered Content */}
-        <div className="relative z-20 flex flex-col items-center justify-center text-center w-full px-6 sm:px-20 gap-8">
+        <div className="relative z-20 flex flex-col items-center justify-center text-center w-full px-6 sm:px-20 gap-6">
           <h1 className="text-4xl sm:text-6xl font-header text-base-white drop-shadow-lg">
             Your Dream Wedding, Seamlessly Planned
           </h1>
@@ -62,7 +65,7 @@ export default function LandingPage() {
             Organize every detail, track every task, and coordinate your big day
             effortlessly — all in one intuitive platform.
           </h5>
-          <div className="flex sm:flex-row gap-4 mt-6">
+          <div className="flex sm:flex-row gap-4 mt-4">
             <Button
               variant={"default"}
             >
@@ -70,6 +73,9 @@ export default function LandingPage() {
             </Button>
             <Button
               variant={"outline"}
+              onClick={() => {
+                featuresRef.current?.scrollIntoView({ behavior: "smooth" });
+              }}
             >
               Explore Features
             </Button>
@@ -77,57 +83,78 @@ export default function LandingPage() {
         </div>
       </section>
 
+
       {/* Features Section */}
-      <section className="py-20 px-6 sm:px-20 bg-background flex flex-col gap-16">
+      <section ref={featuresRef} className="py-20 px-6 sm:px-20 bg-background flex flex-col gap-16">
         <h2 className="text-3xl font-header font-bold text-center text-foreground">
           Our Services
         </h2>
-        <div className="grid sm:grid-cols-3 gap-10 max-w-6xl mx-auto">
-          <div className="flex flex-col items-center gap-4 text-center hover:scale-110 cursor-pointer transition-transform">
-            <Image
-              src="/images/checklist.png"
-              alt="Checklist"
-              width={150}
-              height={150}
-            />
-            <h3 className="font-header text-xl text-foreground font-semibold">
-              Essentials
-            </h3>
-            <p className="text-foreground">
-              Set your vision, lock your date, track your budget, and cover
-              every blindspot—your wedding starts here.
-            </p>
-          </div>
-          <div className="flex flex-col items-center cursor-pointer gap-4 text-center">
-            <Image
-              src="/images/group.png"
-              alt="Group of people"
-              width={150}
-              height={150}
-            />
-            <h3 className="font-header text-xl text-foreground font-semibold">
-              Guests & Vendors
-            </h3>
-            <p className="text-foreground">
-              Manage your guest list, secure the perfect vendors, and style your
-              big day—all in one place.
-            </p>
-          </div>
-          <div className="flex flex-col items-center  cursor-pointer gap-4 text-center">
-            <Image
-              src="/images/wedding-cake.png"
-              alt="Wedding Cake"
-              width={150}
-              height={150}
-            />
-            <h3 className="font-header text-xl text-foreground font-semibold">
-              The Big Day
-            </h3>
-            <p className="text-foreground">
-              Stay stress-free with last-minute checklists, day-of coordination,
-              and effortless photo collation to relive every moment.
-            </p>
-          </div>
+        {(() => {
+          const services = [
+            {
+              image: "/images/checklist.png",
+              alt: "Checklist",
+              header: "Essentials",
+              description:
+                "Set your vision, lock your date, track your budget, and cover every blindspot—your wedding starts here.",
+            },
+            {
+              image: "/images/group.png",
+              alt: "Group of people",
+              header: "Guests & Vendors",
+              description:
+                "Manage your guest list, secure the perfect vendors, and style your big day—all in one place.",
+            },
+            {
+              image: "/images/wedding-invitation.png",
+              alt: "Wedding Cake",
+              header: "The Big Day",
+              description:
+                "Stay stress-free with last-minute checklists, day-of coordination, and effortless photo collation to relive every moment.",
+            },
+          ];
+
+          
+          function ServiceCard({ image, alt, header, description }: { image: string; alt: string; header: string; description: string }) {
+            return (
+              <div
+                className="flex flex-col items-center gap-4 text-center hover:scale-110 cursor-pointer transition-transform"
+                onClick={() => router.push(`/${header.toLowerCase().replace(/\s+/g, '-')}`)}
+              >
+                <Image src={image} alt={alt} width={150} height={150} />
+                <h3 className="font-header text-xl text-foreground font-semibold">{header}</h3>
+                <p className="text-foreground">{description}</p>
+              </div>
+            );
+          }
+
+          return (
+            <div className="grid sm:grid-cols-3 gap-10 max-w-6xl mx-auto">
+              {services.map((service) => (
+                <ServiceCard key={service.header} {...service} />
+              ))}
+            </div>
+          );
+        })()}
+      </section>
+
+      {/* Vendor B2B Section */}
+      <section className="py-20 px-6 sm:px-20 bg-gradient-to-b from-background to-base-white flex flex-col items-center">
+        <h2 className="text-3xl font-header font-bold text-center text-foreground">
+          Are You a Vendor?
+        </h2>
+        <div className="flex flex-col items-center max-w-3xl w-full">
+          <Image src="/images/vendor-illustration.png" alt="Vendor too illustration" width={320} height={220} className="bg-transparent" />
+          <p className="text-lg text-center text-foreground font-nunito">
+            Join our platform to easily list your goods and services, track your sales and bookings, and connect with couples looking for the best wedding experiences. Our simple yet effective B2B tools empower you to grow your business and manage everything in one place.
+          </p>
+          <Button
+              variant={"secondary"}
+              className="mt-6"
+              onClick={() => router.push(`/vendor`)}
+          >
+              Learn More
+          </Button>
         </div>
       </section>
 

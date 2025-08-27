@@ -53,30 +53,43 @@ const MobileMenubar = () => {
               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
             </SheetHeader>
             <div className="flex flex-col gap-2 items-center">
-              {menubar_items.map((item) => {
+              {menubar_items.map((item, idx) => {
                 const isActive = pathname === `/${item.toLowerCase()}/`;
+                const isLast = idx === menubar_items.length - 1;
                 return (
-                  <div
-                    key={item}
-                    className={`hover:font-bold font-normal text-lg hover:text-red cursor-pointer ${
-                      isActive ? "font-bold text-red" : "font-light"
-                    }`}
-                    onClick={() =>
-                      !isActive && router.push(`/${item.toLowerCase()}`)
-                    }
-                  >
-                    {item}
-                  </div>
+                  <>
+                    <div
+                      key={item}
+                      className={`hover:font-bold font-normal text-lg hover:text-red cursor-pointer ${
+                        isActive ? "font-bold text-red" : "font-light"
+                      }`}
+                      onClick={() =>
+                        !isActive && router.push(`/${item.toLowerCase().replace(/\s+/g, '-')}`)
+                      }
+                    >
+                      {item}
+                    </div>
+                    {isLast && (
+                      <Button
+                        variant={"ghost"}
+                        onClick={() => router.push("/vendor")}
+                        className="text-base text-secondary hover:bg-secondary/10"
+                      >
+                        For Businesses
+                      </Button>
+                    )}
+                  </>
                 );
               })}
               <Button
                 variant={"default"}
                 onClick={() => router.push("/get-started")}
+                className="-mb-2"
               >
                 Get Started
               </Button>
               <Button
-                variant={"darkOutline"}
+                variant={"ghost"}
                 onClick={() => router.push("/login")}
               >
                 Login
@@ -135,22 +148,34 @@ const DesktopMenubar = () => {
           />
         </div>
         <div className="flex items-center gap-8 text-[14px] font-thin font-montserrat text-base-yellow">
-          {menubar_items.map((item) => {
+          {menubar_items.map((item, idx) => {
             const isActive = pathname === `/${item.toLowerCase()}/`;
+            const isLast = idx === menubar_items.length - 1;
             return (
-              <h6
-                key={item}
-                onClick={() =>
-                  !isActive && router.push(`/${item.toLowerCase()}`)
-                }
-                className={`font-medium ${
-                  isActive
-                    ? "cursor-not-allowed"
-                    : "cursor-pointer hover:font-bold hover:text-red"
-                }`}
-              >
-                {item}
-              </h6>
+              <>
+                <h6
+                  key={item}
+                  onClick={() =>
+                    !isActive && router.push(`/${item.toLowerCase().replace(/\s+/g, '-')}`)
+                  }
+                  className={`font-medium ${
+                    isActive
+                      ? "cursor-not-allowed"
+                      : "cursor-pointer hover:font-bold hover:text-red"
+                  }`}
+                >
+                  {item}
+                </h6>
+                {isLast && (
+                  <Button
+                    variant={"ghost"}
+                    onClick={() => router.push("/vendor")}
+                    className="font-montserrat text-lg text-secondary hover:bg-secondary/10"
+                  >
+                    For Businesses
+                  </Button>
+                )}
+              </>
             );
           })}
         </div>
