@@ -249,7 +249,6 @@
 
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Montserrat', sans-serif;
-  font-weight: 300;
 }
 
 h1 {
@@ -287,6 +286,27 @@ h6 {
   font-weight: 400;
   line-height: 22px;
 }
+
+/* Tablet (≤ 768px) */
+@media (max-width: 768px) {
+  h1 { font-size: 36px; line-height: 44px; }
+  h2 { font-size: 28px; line-height: 34px; }
+  h3 { font-size: 24px; line-height: 30px; }
+  h4 { font-size: 20px; line-height: 26px; }
+  h5 { font-size: 18px; line-height: 24px; }
+  h6 { font-size: 16px; line-height: 22px; }
+}
+
+/* Mobile (≤ 480px) */
+@media (max-width: 480px) {
+  h1 { font-size: 28px; line-height: 36px; }
+  h2 { font-size: 24px; line-height: 30px; }
+  h3 { font-size: 20px; line-height: 26px; }
+  h4 { font-size: 18px; line-height: 24px; }
+  h5 { font-size: 16px; line-height: 22px; }
+  h6 { font-size: 14px; line-height: 20px; }
+}
+
 
 body {
   font-family: "Nunito", sans-serif;

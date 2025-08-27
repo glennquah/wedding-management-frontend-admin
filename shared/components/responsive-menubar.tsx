@@ -37,14 +37,7 @@ const MobileMenubar = () => {
         className="m-[-16px] mt-[-14px] cursor-pointer p-2 flex items-center"
         style={{ minWidth: 40, minHeight: 40 }}
       >
-        <Image
-          src={logoUrl}
-          alt="Logo"
-          width={100}
-          height={100}
-          className="h-10 w-auto object-contain"
-          priority
-        />
+        C
       </div>
       {/* Hamburger menubar */}
       <div className="flex items-center gap-4 ">
@@ -54,7 +47,7 @@ const MobileMenubar = () => {
           </SheetTrigger>
           <SheetContent
             side="top"
-            className="items-center py-2 z-50 mx-[7px] flex w-[calc(100vw-1.75rem)] flex-col gap-2 rounded-3xl font-sans bg-base-white py-2 text-center text-base-black"
+            className="items-center mt-[30px] z-50 mx-[7px] flex w-[calc(100vw-1.75rem)] flex-col gap-2 rounded-3xl font-sans bg-base-white py-2 text-center text-base-black"
           >
             <SheetHeader>
               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>

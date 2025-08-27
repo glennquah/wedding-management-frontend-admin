@@ -58,7 +58,7 @@ export default function LandingPage() {
           <h1 className="text-4xl sm:text-6xl font-header text-base-white drop-shadow-lg">
             Your Dream Wedding, Seamlessly Planned
           </h1>
-          <h5 className="max-w-xl text-xl text-base-white drop-shadow font-semibold">
+          <h5 className="max-w-xl text-xl text-base-white drop-shadow font-nunito font-semibold">
             Organize every detail, track every task, and coordinate your big day
             effortlessly — all in one intuitive platform.
           </h5>
