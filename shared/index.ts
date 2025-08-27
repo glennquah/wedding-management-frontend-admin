@@ -2,15 +2,14 @@
 export { default as ResponsiveMenubar } from "./components/responsive-menubar";
 export { default as Test123 } from "./components/test";
 export { Button } from "./components/ui/button";
-export { Progress } from "./components/ui/progress";
-export { 
-  Sheet, 
-  SheetContent, 
-  SheetDescription, 
-  SheetFooter, 
-  SheetHeader, 
-  SheetTitle, 
-  SheetTrigger 
+export {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
 } from "./components/ui/sheet";
 
 // Export hooks
