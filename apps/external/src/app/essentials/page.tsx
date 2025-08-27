@@ -5,9 +5,11 @@ import { Button } from "@shared/components/ui/button";
 import { Calendar, CheckSquare, DollarSign, Sparkles } from "lucide-react";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
+import { useRouter } from "next/navigation";
 
 export default function EssentialsPage() {
   const isMobile = useIsMobileScreen();
+    const router = useRouter();
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-brand-100 to-white text-gray-800 font-sans">
     <ResponsiveMenubar />
@@ -44,7 +46,7 @@ export default function EssentialsPage() {
           </motion.p>
 
           <motion.div whileHover={{ scale: 1.05 }}>
-            <Button size={"lg"}  className="rounded-2xl text-xl">
+            <Button size={"lg"}  className="rounded-2xl text-xl" onClick={() => router.push(`/get-started`)}>
                 Get Started
             </Button>
           </motion.div>
@@ -89,7 +91,7 @@ export default function EssentialsPage() {
           Make sure you're on track for the big day.
         </motion.h2>
         <motion.div whileHover={{ scale: 1.05 }}>
-          <Button size={"lg"}  className="rounded-2xl text-xl">
+          <Button size={"lg"}  className="rounded-2xl text-xl" onClick={() => router.push(`/get-started`)}>
             Get Started
           </Button>
         </motion.div>

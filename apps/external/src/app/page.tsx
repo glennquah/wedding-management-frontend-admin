@@ -68,6 +68,7 @@ export default function LandingPage() {
           <div className="flex sm:flex-row gap-4 mt-4">
             <Button
               variant={"default"}
+              onClick={() => router.push(`/get-started`)}
             >
               Get Started
             </Button>

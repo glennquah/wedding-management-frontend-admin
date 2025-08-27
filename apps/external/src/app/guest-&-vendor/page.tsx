@@ -11,9 +11,11 @@ import {
 } from "lucide-react";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
+import { useRouter } from "next/navigation";
 
 export default function GuestVendorPage() {
     const isMobile = useIsMobileScreen();
+    const router = useRouter();
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-brand-100 to-white text-gray-800 font-sans">
       <ResponsiveMenubar />
@@ -52,7 +54,7 @@ export default function GuestVendorPage() {
           </motion.p>
 
           <motion.div whileHover={{ scale: 1.05 }}>
-            <Button size={"lg"} className="rounded-2xl text-xl">
+            <Button size={"lg"} className="rounded-2xl text-xl" onClick={() => router.push(`/get-started`)}>
               Get Started
             </Button>
           </motion.div>
@@ -101,7 +103,7 @@ export default function GuestVendorPage() {
           Make every guest and vendor connection seamless.
         </motion.h2>
         <motion.div whileHover={{ scale: 1.05 }}>
-          <Button size={"lg"} className="rounded-2xl text-xl">
+          <Button size={"lg"} className="rounded-2xl text-xl" onClick={() => router.push(`/get-started`)}>
             Get Started
           </Button>
         </motion.div>

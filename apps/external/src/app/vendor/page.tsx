@@ -5,8 +5,10 @@ import { Button } from "@shared/components/ui/button";
 import { Users, ClipboardList, Gift, LayoutGrid } from "lucide-react";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
+import { useRouter } from "next/navigation";
 
 export default function VendorPage() {
+  const router = useRouter();
   const isMobile = useIsMobileScreen();
 
   return (
@@ -52,7 +54,7 @@ export default function VendorPage() {
           </motion.p>
 
           <motion.div whileHover={{ scale: 1.05 }}>
-            <Button size={"lg"} className="rounded-2xl text-xl bg-secondary hover:bg-secondary-hover">
+            <Button size={"lg"} className="rounded-2xl text-xl bg-secondary hover:bg-secondary-hover" onClick={() => router.push(`/get-started`)}>
               Get Started
             </Button>
           </motion.div>
@@ -103,7 +105,7 @@ export default function VendorPage() {
           Connect, Track, and Grow Your Wedding Business.
         </motion.h2>
         <motion.div whileHover={{ scale: 1.05 }}>
-          <Button size={"lg"} className="rounded-2xl text-xl bg-secondary hover:bg-secondary-hover">
+          <Button size={"lg"} className="rounded-2xl text-xl bg-secondary hover:bg-secondary-hover" onClick={() => router.push(`/get-started`)}>
             Get Started
           </Button>
         </motion.div>
