@@ -55,16 +55,16 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-black/30 z-10" />
         {/* Centered Content */}
         <div className="relative z-20 flex flex-col items-center justify-center text-center w-full px-6 sm:px-20 gap-8">
-          <h1 className="text-4xl sm:text-6xl font-header text-secondary drop-shadow-lg">
+          <h1 className="text-4xl sm:text-6xl font-header text-base-white drop-shadow-lg">
             Your Dream Wedding, Seamlessly Planned
           </h1>
-          <h5 className="max-w-xl text-xl text-secondary drop-shadow font-semibold">
+          <h5 className="max-w-xl text-xl text-base-white drop-shadow font-semibold">
             Organize every detail, track every task, and coordinate your big day
             effortlessly — all in one intuitive platform.
           </h5>
           <div className="flex sm:flex-row gap-4 mt-6">
             <Button
-              variant={"secondary"}
+              variant={"default"}
             >
               Get Started
             </Button>
@@ -79,7 +79,7 @@ export default function LandingPage() {
 
       {/* Features Section */}
       <section className="py-20 px-6 sm:px-20 bg-background flex flex-col gap-16">
-        <h2 className="text-3xl font-header font-bold text-center text-primary">
+        <h2 className="text-3xl font-header font-bold text-center text-foreground">
           Our Services
         </h2>
         <div className="grid sm:grid-cols-3 gap-10 max-w-6xl mx-auto">
@@ -90,7 +90,7 @@ export default function LandingPage() {
               width={150}
               height={150}
             />
-            <h3 className="font-header text-xl text-brand-900 font-semibold">
+            <h3 className="font-header text-xl text-foreground font-semibold">
               Essentials
             </h3>
             <p className="text-foreground">
@@ -105,7 +105,7 @@ export default function LandingPage() {
               width={150}
               height={150}
             />
-            <h3 className="font-header text-xl text-brand-900 font-semibold">
+            <h3 className="font-header text-xl text-foreground font-semibold">
               Guests & Vendors
             </h3>
             <p className="text-foreground">
@@ -120,7 +120,7 @@ export default function LandingPage() {
               width={150}
               height={150}
             />
-            <h3 className="font-header text-xl text-brand-900 font-semibold">
+            <h3 className="font-header text-xl text-foreground font-semibold">
               The Big Day
             </h3>
             <p className="text-foreground">
@@ -131,6 +131,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      
       {/* Footer */}
       <Footer />
     </div>

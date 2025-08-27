@@ -125,7 +125,7 @@ const DesktopMenubar = () => {
     return null;
   }
   return (
-    <div className="fixed bg-secondary/80 top-0 z-[100] flex w-screen items-center justify-between px-8 py-4">
+    <div className="fixed bg-gray-200/70 top-0 z-[100] flex w-screen items-center justify-between px-8 py-4">
       {/* Left: Logo + Menubar Items */}
       <div className="flex items-center gap-8">
         <div
