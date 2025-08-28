@@ -1,9 +1,29 @@
 "use client";
 
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
+import { AppService } from "@wedding/api-types";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 export default function LandingPage() {
+  const [apiMessage, setApiMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHello = async () => {
+      try {
+        const response = await AppService.appControllerGetHello();
+        setApiMessage(response);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch API:", error);
+        setApiMessage("Failed to load API message");
+        setIsLoading(false);
+      }
+    };
+
+    fetchHello();
+  }, []);
   return (
     <div className="font-sans min-h-screen flex flex-col">
       {/* Menubar */}
@@ -11,6 +31,16 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <main className="flex flex-col items-center justify-center text-center pt-40 py-20 px-6 sm:px-20 gap-8 bg-brand-25">
+        {/* API Message Display */}
+        <div className="mb-4 p-4 bg-white rounded-lg shadow-md">
+          <h2 className="text-lg font-semibold text-primary mb-2">API Response:</h2>
+          {isLoading ? (
+            <p className="text-gray-600">Loading...</p>
+          ) : (
+            <p className="text-gray-800">{apiMessage}</p>
+          )}
+        </div>
+
         <h1 className="text-4xl sm:text-6xl font-header text-primary">
           Your Dream Wedding, Simplified
         </h1>
