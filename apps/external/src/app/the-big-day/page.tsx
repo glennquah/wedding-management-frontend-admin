@@ -1,7 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Button } from "@shared/components/ui/button";
 import {
   Bell,
   UserCheck,

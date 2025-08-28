@@ -54,14 +54,14 @@ export default function LandingPage() {
       {/* Menubar */}
       <ResponsiveMenubar />
       {/* API Message Display */}
-        <div className="mb-4 p-4 bg-white rounded-lg shadow-md">
+        {/* <div className="mb-4 p-4 bg-white rounded-lg shadow-md">
           <h2 className="text-lg font-semibold text-primary mb-2">API Response:</h2>
           {isLoading ? (
             <p className="text-gray-600">Loading...</p>
           ) : (
             <p className="text-gray-800">{apiMessage}</p>
           )}
-        </div>
+        </div> */}
       {/* Hero Section */}
       <section className="relative flex-1 min-h-screen w-full flex items-center pt-[48px] justify-center bg-base-black overflow-hidden">
         {/* Rotating Background Image */}

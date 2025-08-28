@@ -1,6 +1,7 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
+import { useSessionStore } from "../store/sessionStore";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@shared/components/ui/button";
@@ -15,6 +16,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState<'couple' | 'vendor' | null>(null);
+  const sessionStore = useSessionStore();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,8 +34,12 @@ export default function LoginPage() {
     if (result?.error) {
       Toast({ title: "Login Failed" });
     } else {
+      const session = await getSession();
+      if (session?.user?.email) {
+        sessionStore.setToken(session.user.email);
+      }
       Toast({ title: "Logged in successfully!" });
-      router.push("/vendor"); // redirect after login
+      router.push("/vendor"); 
     }
   };
 

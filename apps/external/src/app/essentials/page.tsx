@@ -1,7 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Button } from "@shared/components/ui/button";
 import { Calendar, CheckSquare, DollarSign, Sparkles } from "lucide-react";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
