@@ -3,15 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "shared/*"
   ],
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "generate-api-types": "openapi --input http://localhost:8080/api-json --output ./shared/api && node scripts/update-openapi-config.js"
   },
   "devDependencies": {
+    "openapi-typescript-codegen": "^0.29.0",
     "turbo": "^2.3.0",
     "typescript": "^5"
   },
