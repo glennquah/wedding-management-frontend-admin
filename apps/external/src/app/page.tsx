@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import Footer from "@shared/components/footer";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
+import { AppService } from "@wedding/api-types";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@shared/components/ui/button";
@@ -15,10 +16,28 @@ const heroImages = [
 ];
 
 export default function LandingPage() {
+  const [apiMessage, setApiMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
   const [current, setCurrent] = useState(0);
   const [fade, setFade] = useState(true);
   const featuresRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchHello = async () => {
+      try {
+        const response = await AppService.appControllerGetHello();
+        setApiMessage(response);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch API:", error);
+        setApiMessage("Failed to load API message");
+        setIsLoading(false);
+      }
+    };
+
+    fetchHello();
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -30,12 +49,19 @@ export default function LandingPage() {
     }, 3000);
     return () => clearInterval(interval);
   }, []);
-
   return (
     <div className="font-sans min-h-screen flex flex-col">
       {/* Menubar */}
       <ResponsiveMenubar />
-
+      {/* API Message Display */}
+        <div className="mb-4 p-4 bg-white rounded-lg shadow-md">
+          <h2 className="text-lg font-semibold text-primary mb-2">API Response:</h2>
+          {isLoading ? (
+            <p className="text-gray-600">Loading...</p>
+          ) : (
+            <p className="text-gray-800">{apiMessage}</p>
+          )}
+        </div>
       {/* Hero Section */}
       <section className="relative flex-1 min-h-screen w-full flex items-center pt-[48px] justify-center bg-base-black overflow-hidden">
         {/* Rotating Background Image */}
