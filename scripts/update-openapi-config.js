@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const fs = require('fs');
 const path = require('path');
 
@@ -18,7 +16,6 @@ if (fs.existsSync(indexPath)) {
   if (fs.existsSync(openApiPath)) {
     let openApiContent = fs.readFileSync(openApiPath, 'utf8');
     
-    // Replace the empty BASE with localhost:8080
     openApiContent = openApiContent.replace(
       "BASE: '',",
       "BASE: 'http://localhost:8080',"
