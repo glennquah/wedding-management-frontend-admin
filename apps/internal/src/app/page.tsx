@@ -1,102 +1,51 @@
-import { Input } from "@shared/components/Input";
+
+
+"use client";
+import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import { Button } from "@shared/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@shared/components/ui/card";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-export default function Home() {
+export default function DummyLogin() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = (role: "admin" | "vendor") => {
+    setLoading(true);
+    setTimeout(() => {
+      if (role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/vendors");
+      }
+    }, 500);
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <h1 className="text-3xl font-bold text-center sm:text-left">
-          Wedding Management - Internal Portal
-        </h1>
-        
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Admin Dashboard</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Input placeholder="Search weddings..." />
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="default" size="sm">Create Wedding</Button>
-              <Button variant="secondary" size="sm">View Reports</Button>
-              <Button variant="outline" size="sm">Manage Vendors</Button>
-              <Button variant="outline" size="sm">Settings</Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <Button variant="default" size="lg">
-            <Image
-              className="dark:invert mr-2"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy Internal
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background font-sans p-8 gap-8">
+      <ResponsiveMenubar />
+      <div className="flex flex-col items-center gap-6 bg-white/80 rounded-xl shadow-lg p-10">
+        <h1 className="text-3xl font-bold mb-2">Internal Portal Login</h1>
+        <p className="mb-4 text-secondary-foreground">Choose your role to continue:</p>
+        <div className="flex gap-6">
+          <Button
+            variant="default"
+            size="lg"
+            disabled={loading}
+            onClick={() => handleLogin("admin")}
+          >
+            Login as Admin
           </Button>
-          <Button variant="outline" size="lg">
-            Admin Docs
+          <Button
+            variant="secondary"
+            size="lg"
+            disabled={loading}
+            onClick={() => handleLogin("vendor")}
+          >
+            Login as Vendor
           </Button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
   );
 }

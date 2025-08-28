@@ -4,18 +4,18 @@ import * as React from "react"
 import { cn } from "../lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center cursor-pointer justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "rounded-full bg-accent text-background px-6 py-3 font-semibold shadow-lg hover:bg-accent-hover transition",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+          "rounded-full bg-transparent border-2 border-primary text-primary px-6 py-3 font-semibold hover:bg-primary/10 transition",
+        ghost: "rounded-full bg-transparent text-primary underline hover:bg-primary/10 font-semibold",
+        outline: "rounded-full bg-transparent border border-base-white text-base-white hover:bg-base-white/10 font-semibold",
+        darkOutline: "rounded-full bg-transparent border border-base-black text-base-black hover:bg-base-black/10 font-semibold",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

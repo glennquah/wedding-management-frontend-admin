@@ -2,211 +2,14 @@
 > @wedding/external@0.1.0 build
 > next build
 
- ⚠ Found lockfile missing swc dependencies, patching...
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
- ⨯ Failed to patch lockfile, please try uninstalling and reinstalling next in this workspace
-[Error: Failed to get registry from "yarn".] {
-  [cause]: [Error: Command failed: yarn config get registry 
-  error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-  
-  Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-  Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-  ] {
-    status: 1,
-    signal: null,
-    output: [
-      null,
-      <Buffer >,
-      <Buffer 65 72 72 6f 72 20 54 68 69 73 20 70 72 6f 6a 65 63 74 27 73 20 70 61 63 6b 61 67 65 2e 6a 73 6f 6e 20 64 65 66 69 6e 65 73 20 22 70 61 63 6b 61 67 65 ... 425 more bytes>
-    ],
-    pid: 61003,
-    stdout: <Buffer >,
-    stderr: <Buffer 65 72 72 6f 72 20 54 68 69 73 20 70 72 6f 6a 65 63 74 27 73 20 70 61 63 6b 61 67 65 2e 6a 73 6f 6e 20 64 65 66 69 6e 65 73 20 22 70 61 63 6b 61 67 65 ... 425 more bytes>
-  }
-}
  ⚠ Warning: Found multiple lockfiles. Selecting /Users/quahhanrongglenn/package-lock.json.
    Consider removing the lockfiles at:
    * /Users/quahhanrongglenn/Desktop/github projects/capstone/wedding-management-frontend/package-lock.json
 
    ▲ Next.js 15.4.6
-   - Environments: .env
 
    Creating an optimized production build ...
- ⚠ Found lockfile missing swc dependencies, patching...
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
- ⨯ Failed to patch lockfile, please try uninstalling and reinstalling next in this workspace
-[Error: Failed to get registry from "yarn".] {
-  [cause]: [Error: Command failed: yarn config get registry 
-  error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-  
-  Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-  Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-  ] {
-    status: 1,
-    signal: null,
-    output: [
-      null,
-      <Buffer >,
-      <Buffer 65 72 72 6f 72 20 54 68 69 73 20 70 72 6f 6a 65 63 74 27 73 20 70 61 63 6b 61 67 65 2e 6a 73 6f 6e 20 64 65 66 69 6e 65 73 20 22 70 61 63 6b 61 67 65 ... 425 more bytes>
-    ],
-    pid: 61036,
-    stdout: <Buffer >,
-    stderr: <Buffer 65 72 72 6f 72 20 54 68 69 73 20 70 72 6f 6a 65 63 74 27 73 20 70 61 63 6b 61 67 65 2e 6a 73 6f 6e 20 64 65 66 69 6e 65 73 20 22 70 61 63 6b 61 67 65 ... 425 more bytes>
-  }
-}
- ⚠ Found lockfile missing swc dependencies, patching...
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
- ⨯ Failed to patch lockfile, please try uninstalling and reinstalling next in this workspace
-[Error: Failed to get registry from "yarn".] {
-  [cause]: [Error: Command failed: yarn config get registry 
-  error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-  
-  Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-  Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-  ] {
-    status: 1,
-    signal: null,
-    output: [
-      null,
-      <Buffer >,
-      <Buffer 65 72 72 6f 72 20 54 68 69 73 20 70 72 6f 6a 65 63 74 27 73 20 70 61 63 6b 61 67 65 2e 6a 73 6f 6e 20 64 65 66 69 6e 65 73 20 22 70 61 63 6b 61 67 65 ... 425 more bytes>
-    ],
-    pid: 61084,
-    stdout: <Buffer >,
-    stderr: <Buffer 65 72 72 6f 72 20 54 68 69 73 20 70 72 6f 6a 65 63 74 27 73 20 70 61 63 6b 61 67 65 2e 6a 73 6f 6e 20 64 65 66 69 6e 65 73 20 22 70 61 63 6b 61 67 65 ... 425 more bytes>
-  }
-}
- ⚠ Found lockfile missing swc dependencies, patching...
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-
-Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
- ⨯ Failed to patch lockfile, please try uninstalling and reinstalling next in this workspace
-[Error: Failed to get registry from "yarn".] {
-  [cause]: [Error: Command failed: yarn config get registry 
-  error This project's package.json defines "packageManager": "yarn@npm@10.9.0". However the current global version of Yarn is 1.22.22.
-  
-  Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
-  Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
-  ] {
-    status: 1,
-    signal: null,
-    output: [
-      null,
-      <Buffer >,
-      <Buffer 65 72 72 6f 72 20 54 68 69 73 20 70 72 6f 6a 65 63 74 27 73 20 70 61 63 6b 61 67 65 2e 6a 73 6f 6e 20 64 65 66 69 6e 65 73 20 22 70 61 63 6b 61 67 65 ... 425 more bytes>
-    ],
-    pid: 61117,
-    stdout: <Buffer >,
-    stderr: <Buffer 65 72 72 6f 72 20 54 68 69 73 20 70 72 6f 6a 65 63 74 27 73 20 70 61 63 6b 61 67 65 2e 6a 73 6f 6e 20 64 65 66 69 6e 65 73 20 22 70 61 63 6b 61 67 65 ... 425 more bytes>
-  }
-}
- ✓ Compiled successfully in 0ms
+ ✓ Compiled successfully in 1000ms
    Linting and checking validity of types ...
    Collecting page data ...
    Generating static pages (0/5) ...
@@ -218,12 +21,12 @@ Corepack must currently be enabled by running corepack enable in your terminal. 
    Collecting build traces ...
 
 Route (app)                                 Size  First Load JS
-┌ ○ /                                    5.44 kB         105 kB
+┌ ○ /                                      27 kB         127 kB
 └ ○ /_not-found                            989 B         101 kB
 + First Load JS shared by all            99.6 kB
   ├ chunks/4bd1b696-cf72ae8a39fa05aa.js  54.1 kB
-  ├ chunks/964-7a34cadcb7695cec.js       43.5 kB
-  └ other shared chunks (total)           1.9 kB
+  ├ chunks/964-78a358603a02ce1b.js       43.5 kB
+  └ other shared chunks (total)          1.94 kB
 
 
 ○  (Static)  prerendered as static content
