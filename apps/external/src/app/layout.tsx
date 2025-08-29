@@ -1,4 +1,8 @@
 import type { Metadata } from "next";
+
+// Force dynamic rendering to prevent static generation issues
+export const dynamic = 'force-dynamic';
+
 import { Montserrat, Nunito } from "next/font/google";
 import "../../../../shared/components/globals.css";
 import "./globals.css";

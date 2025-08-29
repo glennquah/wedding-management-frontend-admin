@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function FeaturesPanel(
     {color_theme = "primary", features}: {color_theme?: "primary" | "secondary", features: {title: string, desc: string, icon: React.ReactNode}[]}
@@ -24,9 +25,11 @@ export default function FeaturesPanel(
                     {feature.title}
                   </h3>
                   <p className="text-gray-600 mb-4">{feature.desc}</p>
-                  <img
+                  <Image
                     src="https://placehold.co/300x180/e0e0e0/555?text=Illustration"
                     alt="Feature illustration"
+                    width={300}
+                    height={180}
                     className="rounded-lg"
                   />
                 </motion.div>
