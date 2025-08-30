@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Montserrat, Nunito } from "next/font/google";
 import "../../../../shared/components/globals.css";
 import "./globals.css";
+import Providers from "./components/Providers";
+import { Toaster } from "@shared/components/ui/sonner";
 
 const montserrat = Montserrat({
   weight: ["100", "200", "300", "400", "500", "600", "700"],
@@ -31,7 +33,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${montserrat.variable} ${nunito.variable} antialiased`}>
-        {children}
+        <Providers>
+          <Toaster />
+          {children}
+        </Providers>
       </body>
     </html>
   );
