@@ -7,5 +7,13 @@ export type CreateTestUserDto = {
      * The name of the test user
      */
     name: string;
+    /**
+     * The email of the test user
+     */
+    email: string;
+    /**
+     * The password of the test user
+     */
+    password: string;
 };
 
