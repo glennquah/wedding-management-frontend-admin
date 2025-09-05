@@ -13,7 +13,6 @@ async function refreshToken(token: JWT): Promise<JWT> {
       authorization: `Refresh ${token.backendTokens.refreshToken}`,
     },
   });
-  console.log("refreshed");
 
   const response = await res.json();
 
@@ -49,7 +48,7 @@ export const authOptions: NextAuthOptions = {
           },
         });
         if (res.status == 401) {
-          console.log(res.statusText);
+          console.log(res.statusText);          
 
           return null;
         }
@@ -65,7 +64,7 @@ export const authOptions: NextAuthOptions = {
 
       if (new Date().getTime() < token.backendTokens.expiresIn)
         return token;
-
+      
       return await refreshToken(token);
     },
 
@@ -75,6 +74,10 @@ export const authOptions: NextAuthOptions = {
 
       return session;
     },
+  },
+
+  pages: {
+    signIn: "/login", 
   },
 };
 

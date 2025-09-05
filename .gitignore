@@ -1,11 +1,12 @@
 /.turbo
+/.next
 /node_modules
+*.env
 /apps/external/node_modules
 /apps/external/.next
 /apps/internal/.turbo
 /apps/internal/.next
 /apps/internal/node_modules
-*.env
 /apps/external/.turbo
 /apps/external/.turbo
-/.next
+/shared/node_modules
