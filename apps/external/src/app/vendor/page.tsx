@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, ClipboardList, Gift, LayoutGrid } from "lucide-react";
+import { Users, ClipboardList, LayoutGrid } from "lucide-react";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
 import Hero from "../components/unauthenticated/hero";

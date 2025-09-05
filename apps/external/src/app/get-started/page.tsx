@@ -31,6 +31,7 @@ export default function GetStartedPage() {
       Toast({ title: "Account created!"});
       router.push("/login");
     } catch (err) {
+      console.log(err);
       Toast({ title: "Error"});
     } finally {
       setLoading(false);

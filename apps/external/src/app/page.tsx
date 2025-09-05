@@ -16,28 +16,28 @@ const heroImages = [
 ];
 
 export default function LandingPage() {
-  const [apiMessage, setApiMessage] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
+  // const [apiMessage, setApiMessage] = useState<string>("");
+  // const [isLoading, setIsLoading] = useState(true);
   const [current, setCurrent] = useState(0);
   const [fade, setFade] = useState(true);
   const featuresRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchHello = async () => {
-      try {
-        const response = await AppService.appControllerGetHello();
-        setApiMessage(response);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Failed to fetch API:", error);
-        setApiMessage("Failed to load API message");
-        setIsLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchHello = async () => {
+  //     try {
+  //       const response = await AppService.appControllerGetHello();
+  //       setApiMessage(response);
+  //       setIsLoading(false);
+  //     } catch (error) {
+  //       console.error("Failed to fetch API:", error);
+  //       setApiMessage("Failed to load API message");
+  //       setIsLoading(false);
+  //     }
+  //   };
 
-    fetchHello();
-  }, []);
+  //   fetchHello();
+  // }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
