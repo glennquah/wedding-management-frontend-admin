@@ -12,7 +12,11 @@ export type { TestUserResponseDto } from './models/TestUserResponseDto';
 export type { CreateGuestDto } from './models/CreateGuestDto';
 export type { GuestResponseDto } from './models/GuestResponseDto';
 export type { UpdateGuestDto } from './models/UpdateGuestDto';
+export type { CreateWeddingDto } from './models/CreateWeddingDto';
+export type { UpdateWeddingDto } from './models/UpdateWeddingDto';
+export type { WeddingResponseDto } from './models/WeddingResponseDto';
 
 export { AppService } from './services/AppService';
 export { TestUsersService } from './services/TestUsersService';
 export { GuestsService } from './services/GuestsService';
+export { WeddingsService } from './services/WeddingsService';

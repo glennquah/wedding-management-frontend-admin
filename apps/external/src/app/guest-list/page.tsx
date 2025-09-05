@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@shared/components/ui/button";
 import { Input } from "@shared/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@shared/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@shared/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@shared/components/ui/dialog";
 import { Plus, Edit2, Trash2, UserCheck, UserX, Clock, Loader2 } from "lucide-react";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
@@ -23,6 +23,7 @@ export default function GuestListPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteConfirmGuest, setDeleteConfirmGuest] = useState<Guest | null>(null);
   const [newGuest, setNewGuest] = useState<Partial<ExtendedCreateGuestDto & { accompanyingGuestNames: string[] }>>({
     name: "",
     allergies: "",
@@ -180,9 +181,16 @@ export default function GuestListPage() {
         await GuestApiService.deleteGuest(guest.id);
       }
       await fetchGuests();
+      setDeleteConfirmGuest(null);
     } catch (err) {
       setError('Failed to delete guest. Please try again.');
       console.error('Error deleting guest:', err);
+    }
+  };
+
+  const confirmDeleteGuest = () => {
+    if (deleteConfirmGuest) {
+      handleDeleteGuest(deleteConfirmGuest.id);
     }
   };
 
@@ -637,8 +645,9 @@ export default function GuestListPage() {
                                 </Button>
                                 <Button
                                   size="sm"
-                                  variant="destructive"
-                                  onClick={() => handleDeleteGuest(guest.id)}
+                                  variant="ghost"
+                                  onClick={() => setDeleteConfirmGuest(guest)}
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
@@ -653,6 +662,32 @@ export default function GuestListPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Delete Confirmation Modal */}
+        <Dialog open={!!deleteConfirmGuest} onOpenChange={(open) => !open && setDeleteConfirmGuest(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm Deletion</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete {deleteConfirmGuest?.name}? 
+                {(() => {
+                  const accompanyingCount = guests.filter(g => g.primaryGuestId === deleteConfirmGuest?.id).length;
+                  return accompanyingCount > 0 
+                    ? `This will also delete ${accompanyingCount} accompanying guest${accompanyingCount === 1 ? '' : 's'}.`
+                    : '';
+                })()} This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="secondary" onClick={() => setDeleteConfirmGuest(null)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={confirmDeleteGuest}>
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
