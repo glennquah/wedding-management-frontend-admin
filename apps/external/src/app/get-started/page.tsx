@@ -1,5 +1,6 @@
 "use client";
 
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@shared/components/ui/button";
@@ -22,14 +23,26 @@ export default function GetStartedPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(NEXTAUTH_URL + "/auth/register", {
+      const register_res = await fetch(NEXTAUTH_URL + "/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password  }),
       });
-      if (!res.ok) throw new Error("Signup failed");
+      if (!register_res.ok) throw new Error("Signup failed");
+
       toast.success("Signup Successful.")
-      router.push("/user");
+
+      const signin_res = await signIn("credentials", {
+        username: email, 
+        password,
+        redirect: false,
+      });
+
+      if (signin_res?.error) {
+        toast.error("Login failed after signup: " + signin_res.error);
+      } else {
+        router.push("/user");
+      }
     } catch (err) {
       console.log(err)
       toast.error("Signup Failed.")

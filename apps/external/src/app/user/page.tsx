@@ -1,14 +1,17 @@
 "use client";
 
-import { useSession } from "next-auth/react";;
-import { authOptions } from "../api/auth/[...nextauth]/route";
-import { redirect } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 
-export default async function UserDashboardPage() {
-  const { data: session } = useSession();
+export default function UserDashboardPage() {
+  const { data: session, status } = useSession();
 
-  if (!session) {
-    redirect("/login");
+  useEffect(() => {
+    if (status === "loading") return; 
+  }, [status, session]);
+
+  if (status === "loading" || !session) {
+    return <p className="text-center mt-16">Loading...</p>;
   }
 
   return (
