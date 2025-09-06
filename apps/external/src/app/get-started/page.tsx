@@ -30,7 +30,8 @@ export default function GetStartedPage() {
       if (!res.ok) throw new Error("Signup failed");
       Toast({ title: "Account created!"});
       router.push("/login");
-    } catch {
+    } catch (err) {
+      console.log(err);
       Toast({ title: "Error"});
     } finally {
       setLoading(false);
