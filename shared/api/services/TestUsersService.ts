@@ -28,18 +28,22 @@ export class TestUsersService {
         });
     }
     /**
+     * Get a test user profile by ID
      * @param id
-     * @returns any
+     * @returns TestUserResponseDto The test user profile
      * @throws ApiError
      */
     public static testUserControllerGetUserProfile(
         id: number,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<TestUserResponseDto> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/test-users/{id}',
             path: {
                 'id': id,
+            },
+            errors: {
+                404: `User not found.`,
             },
         });
     }

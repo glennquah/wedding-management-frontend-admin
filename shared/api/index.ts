@@ -7,10 +7,12 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export type { AuthResponseDto } from './models/AuthResponseDto';
 export type { CreateTestUserDto } from './models/CreateTestUserDto';
 export { CreateVendorDto } from './models/CreateVendorDto';
 export type { LoginDto } from './models/LoginDto';
 export type { TestUserResponseDto } from './models/TestUserResponseDto';
+export type { TokensDto } from './models/TokensDto';
 export { UpdateVendorDto } from './models/UpdateVendorDto';
 export { VendorResponseDto } from './models/VendorResponseDto';
 
