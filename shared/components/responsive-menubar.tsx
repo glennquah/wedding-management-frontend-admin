@@ -156,9 +156,8 @@ const DesktopMenubar = () => {
             const isActive = pathname === `/${item.toLowerCase()}/`;
             const isLast = idx === menubar_items.length - 1;
             return (
-              <>
+              <div key={item}>
                 <h6
-                  key={item}
                   onClick={() =>
                     !isActive && router.push(`/${item.toLowerCase().replace(/\s+/g, '-')}`)
                   }
@@ -179,7 +178,7 @@ const DesktopMenubar = () => {
                     For Businesses
                   </Button>
                 )}
-              </>
+              </div>
             );
           })}
         </div>
