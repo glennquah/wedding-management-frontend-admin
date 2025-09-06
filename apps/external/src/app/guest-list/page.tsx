@@ -8,10 +8,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Plus, Edit2, Trash2, UserCheck, UserX, Clock, Loader2 } from "lucide-react";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
-import { GuestApiService, ExtendedGuestResponseDto, ExtendedCreateGuestDto, ExtendedUpdateGuestDto } from "@shared/services/guest-api";
+import { GuestsService, GuestResponseDto, CreateGuestDto, UpdateGuestDto } from "@shared/api";
 
 // Use the API types directly
-type Guest = ExtendedGuestResponseDto & {
+type Guest = GuestResponseDto & {
   accompanyingGuestNames?: string[]; // For form handling
 };
 
@@ -24,7 +24,7 @@ export default function GuestListPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirmGuest, setDeleteConfirmGuest] = useState<Guest | null>(null);
-  const [newGuest, setNewGuest] = useState<Partial<ExtendedCreateGuestDto & { accompanyingGuestNames: string[] }>>({
+  const [newGuest, setNewGuest] = useState<Partial<CreateGuestDto & { accompanyingGuestNames: string[] }>>({
     name: "",
     allergies: "",
     group: "",
@@ -43,7 +43,7 @@ export default function GuestListPage() {
     try {
       setIsLoading(true);
       setError(null);
-      const fetchedGuests = await GuestApiService.getGuestsByWedding(1); // Default wedding ID
+      const fetchedGuests = await GuestsService.guestControllerGetGuestsByWedding(1); // Default wedding ID
       setGuests(fetchedGuests);
     } catch (err) {
       setError('Failed to fetch guests. Please try again.');
@@ -61,7 +61,7 @@ export default function GuestListPage() {
       setError(null);
 
       // Create primary guest
-      const primaryGuestData: ExtendedCreateGuestDto = {
+      const primaryGuestData: CreateGuestDto = {
         name: newGuest.name,
         allergies: newGuest.allergies || undefined,
         group: newGuest.group,
@@ -70,10 +70,10 @@ export default function GuestListPage() {
         primaryGuestId: undefined,
       };
 
-      const createdPrimaryGuest = await GuestApiService.createGuest(primaryGuestData);
+      const createdPrimaryGuest = await GuestsService.guestControllerCreate(primaryGuestData);
 
       // Create accompanying guests if any
-      const accompanyingGuestsData: ExtendedCreateGuestDto[] = [];
+      const accompanyingGuestsData: CreateGuestDto[] = [];
       if (newGuest.accompanyingGuestNames) {
         const validAccompanyingNames = newGuest.accompanyingGuestNames.filter(name => name.trim());
         
@@ -90,7 +90,9 @@ export default function GuestListPage() {
       }
 
       if (accompanyingGuestsData.length > 0) {
-        await GuestApiService.createMultipleGuests(accompanyingGuestsData);
+        for (const guestData of accompanyingGuestsData) {
+          await GuestsService.guestControllerCreate(guestData);
+        }
       }
 
       // Refresh the guest list
@@ -123,29 +125,26 @@ export default function GuestListPage() {
       setError(null);
 
       // Update the primary guest
-      const updateData: ExtendedUpdateGuestDto = {
+      const updateData: UpdateGuestDto = {
         name: editingGuest.name,
         allergies: editingGuest.allergies || undefined,
         group: editingGuest.group,
         confirmationStatus: editingGuest.confirmationStatus,
       };
 
-      await GuestApiService.updateGuest(editingGuest.id, updateData);
-
-      // Handle accompanying guests - for simplicity, we'll delete old ones and create new ones
-      // In a more sophisticated app, you might want to update them individually
+      await GuestsService.guestControllerUpdate(editingGuest.id, updateData);
       
       // First, delete existing accompanying guests
       const existingAccompanyingGuests = guests.filter(g => g.primaryGuestId === editingGuest.id);
       for (const guest of existingAccompanyingGuests) {
-        await GuestApiService.deleteGuest(guest.id);
+        await GuestsService.guestControllerDelete(guest.id);
       }
 
       // Create new accompanying guests if any
       if (editingGuest.accompanyingGuestNames) {
         const validAccompanyingNames = editingGuest.accompanyingGuestNames.filter(name => name.trim());
         
-        const accompanyingGuestsData: ExtendedCreateGuestDto[] = validAccompanyingNames.map(name => ({
+        const accompanyingGuestsData: CreateGuestDto[] = validAccompanyingNames.map(name => ({
           name: name.trim(),
           allergies: editingGuest.allergies || undefined,
           group: editingGuest.group,
@@ -155,7 +154,9 @@ export default function GuestListPage() {
         }));
 
         if (accompanyingGuestsData.length > 0) {
-          await GuestApiService.createMultipleGuests(accompanyingGuestsData);
+          for (const guestData of accompanyingGuestsData) {
+            await GuestsService.guestControllerCreate(guestData);
+          }
         }
       }
 
@@ -173,11 +174,11 @@ export default function GuestListPage() {
   const handleDeleteGuest = async (id: number) => {
     try {
       setError(null);
-      await GuestApiService.deleteGuest(id);
+      await GuestsService.guestControllerDelete(id);
       // Also delete any accompanying guests
       const accompanyingGuests = guests.filter(g => g.primaryGuestId === id);
       for (const guest of accompanyingGuests) {
-        await GuestApiService.deleteGuest(guest.id);
+        await GuestsService.guestControllerDelete(guest.id);
       }
       await fetchGuests();
       setDeleteConfirmGuest(null);

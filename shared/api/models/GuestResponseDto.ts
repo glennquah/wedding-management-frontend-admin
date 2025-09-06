@@ -28,9 +28,9 @@ export type GuestResponseDto = {
      */
     primaryGuestId?: number;
     /**
-     * Whether the guest has confirmed their attendance
+     * Confirmation status of the guest
      */
-    confirmed: boolean;
+    confirmationStatus: 'pending' | 'confirmed' | 'rejected';
     /**
      * List of accompanying guests
      */
