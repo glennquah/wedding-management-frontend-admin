@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
-
-// Force dynamic rendering to prevent static generation issues
-export const dynamic = 'force-dynamic';
-
 import { Montserrat, Nunito } from "next/font/google";
 import "../../../../shared/components/globals.css";
 import "./globals.css";
+import Providers from "./components/Providers";
+import { Toaster } from "@shared/components/ui/sonner";
 
 const montserrat = Montserrat({
   weight: ["100", "200", "300", "400", "500", "600", "700"],
@@ -22,12 +20,9 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "Knotly - Wedding Management Made Simple",
+  title: "Covenant - Wedding Management Made Simple",
   description:
-    "Knotly is a wedding management platform that simplifies the planning process, making it easy to organize your dream wedding.",
-  icons: {
-    icon: "/favicon.ico",
-  },
+    "Covenant is a wedding management platform that simplifies the planning process, making it easy to organize your dream wedding.",
 };
 
 export default function RootLayout({
@@ -38,7 +33,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${montserrat.variable} ${nunito.variable} antialiased`}>
-        {children}
+        <Providers>
+          <Toaster />
+          {children}
+        </Providers>
       </body>
     </html>
   );
