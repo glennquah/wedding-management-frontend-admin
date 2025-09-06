@@ -5,7 +5,6 @@ export const dynamic = 'force-dynamic'
 import { useRouter } from "next/navigation";
 import Footer from "@shared/components/footer";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
-import { AppService } from "@wedding/api-types";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@shared/components/ui/button";

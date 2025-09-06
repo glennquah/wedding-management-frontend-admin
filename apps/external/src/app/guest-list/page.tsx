@@ -89,9 +89,8 @@ export default function GuestListPage() {
         }
       }
 
-      let createdAccompanyingGuests: ExtendedGuestResponseDto[] = [];
       if (accompanyingGuestsData.length > 0) {
-        createdAccompanyingGuests = await GuestApiService.createMultipleGuests(accompanyingGuestsData);
+        await GuestApiService.createMultipleGuests(accompanyingGuestsData);
       }
 
       // Refresh the guest list
@@ -587,7 +586,7 @@ export default function GuestListPage() {
               </div>
             ) : guests.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                <p>No guests added yet. Click "Add Guest" to get started!</p>
+                <p>No guests added yet. Click &quot;Add Guest&quot; to get started!</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
