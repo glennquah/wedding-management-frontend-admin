@@ -20,7 +20,7 @@ export default function GuestVendorPage() {
       <ResponsiveMenubar />
       {!isMobile && <div className="mt-[72px] w-full"></div>}
       {/* Hero Section */}
-      <Hero img_src="/images/guests-vendors.jpg" header="Guests & Vendors, Simplified." subheader="Manage RSVPs, vendors, gifts, and seating in one seamless platform.
+      <Hero img_src="/images/guest.png" header="Guests & Vendors, Simplified." subheader="Manage RSVPs, vendors, gifts, and seating in one seamless platform.
             From AI-generated couple stories to intelligent vendor recommendations,
             we’ve got you covered." />
       {/* Features Section */}

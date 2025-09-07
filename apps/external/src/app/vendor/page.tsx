@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, ClipboardList, LayoutGrid } from "lucide-react";
+import { Users, ClipboardList, Gift, LayoutGrid } from "lucide-react";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
 import Hero from "../components/unauthenticated/hero";
@@ -15,7 +15,7 @@ export default function VendorPage() {
       <ResponsiveMenubar />
       {!isMobile && <div className="mt-[72px] w-full"></div>}
       {/* Hero Section */}
-      <Hero color_theme="secondary" img_src="/images/vendor.jpg" header="Grow Your Wedding Business." subheader="List your products and services, track sales with a powerful dashboard, and connect with wedding couples to grow your network." />
+      <Hero color_theme="secondary" img_src="/images/vendor.png" header="Grow Your Wedding Business." subheader="List your products and services, track sales with a powerful dashboard, and connect with wedding couples to grow your network." />
       {/* Features Section */}
       <FeaturesPanel color_theme="secondary" features={features} />
       {/* Closing CTA */}

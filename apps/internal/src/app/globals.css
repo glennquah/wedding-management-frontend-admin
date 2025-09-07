@@ -203,8 +203,8 @@
   --foreground: #000000;
   --card: #FF5A5F;
   --card-foreground: #ffffff;
-  --popover: #FF5A5F;
-  --popover-foreground:  #ffffff;
+  --popover: #eaecf5;
+  --popover-foreground:  #000000;
   --primary: #FF5A5F;     
   --primary-hover: #da3c41; 
   --primary-foreground:  #ffffff;

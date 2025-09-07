@@ -10,6 +10,7 @@ import { toast } from "sonner"
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 
 export default function LoginPage() {
+  const NEXTAUTH_URL = process.env.NEXT_PUBLIC_NEXTAUTH_URL;
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

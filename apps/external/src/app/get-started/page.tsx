@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@shared/components/ui/button";
 import { Input } from "@shared/components/ui/input";
 import { Label } from "@shared/components/ui/label";
-import { toast } from "sonner"
+import { toast } from "sonner";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 
 export default function GetStartedPage() {
@@ -28,8 +28,10 @@ export default function GetStartedPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password  }),
       });
-      if (!register_res.ok) throw new Error("Signup failed");
-
+      if (!register_res.ok) {
+        const errorData = await register_res.json();
+        throw new Error(errorData.message || "Unknown error");
+      }
       toast.success("Signup Successful.")
 
       const signin_res = await signIn("credentials", {
@@ -45,7 +47,7 @@ export default function GetStartedPage() {
       }
     } catch (err) {
       console.log(err)
-      toast.error("Signup Failed.")
+      toast.error(`Signup Failed. ${err instanceof Error && err.message}.`);
     } finally {
       setLoading(false);
     }
