@@ -32,8 +32,6 @@ export default function GetStartedPage() {
         const errorData = await register_res.json();
         throw new Error(errorData.message || "Unknown error");
       }
-
-
       toast.success("Signup Successful.")
 
       const signin_res = await signIn("credentials", {
