@@ -1,6 +1,9 @@
 
 
 "use client";
+
+export const dynamic = 'force-dynamic'
+
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import { Button } from "@shared/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -14,9 +17,9 @@ export default function DummyLogin() {
     setLoading(true);
     setTimeout(() => {
       if (role === "admin") {
-        router.push("/admin");
+        router.push("/login");
       } else {
-        router.push("/vendors");
+        router.push("/login");
       }
     }, 500);
   };
