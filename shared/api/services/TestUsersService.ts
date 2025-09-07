@@ -27,20 +27,4 @@ export class TestUsersService {
             },
         });
     }
-    /**
-     * @param id
-     * @returns any
-     * @throws ApiError
-     */
-    public static testUserControllerGetUserProfile(
-        id: number,
-    ): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/test-users/{id}',
-            path: {
-                'id': id,
-            },
-        });
-    }
 }

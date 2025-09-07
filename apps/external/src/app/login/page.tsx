@@ -1,39 +1,45 @@
 "use client";
 
 import { getSession, signIn } from "next-auth/react";
+import { useSessionStore } from "../store/sessionStore";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@shared/components/ui/button";
 import { Input } from "@shared/components/ui/input";
 import { Label } from "@shared/components/ui/label";
-import { toast } from "sonner"
+import { Toast } from "@shared/components/ui/use-toast";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 
 export default function LoginPage() {
-  const NEXTAUTH_URL = process.env.NEXT_PUBLIC_NEXTAUTH_URL;
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState<'couple' | 'vendor' | null>(null);
+  const sessionStore = useSessionStore();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const res = await fetch(NEXTAUTH_URL + "/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-      if (!res.ok) throw new Error("Signin failed");
-      toast("Successfully Login.")
-      router.push("/user");
-    } catch (err) {
-      console.log(err)
-    } finally {
-      setLoading(false);
+    const result = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+      role,
+    });
+
+    setLoading(false);
+
+    if (result?.error) {
+      Toast({ title: "Login Failed" });
+    } else {
+      const session = await getSession();
+      if (session?.user?.email) {
+        sessionStore.setToken(session.user.email);
+      }
+      Toast({ title: "Logged in successfully!" });
+      router.push("/vendor"); 
     }
   };
 
@@ -44,14 +50,14 @@ export default function LoginPage() {
         <h2 className="text-3xl font-bold text-center mb-8">Login to your account</h2>
         <form onSubmit={handleSignIn} className="space-y-4">
           <div className="mt-4 gap-2 flex flex-col">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
-              type="username"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="your username"
+              placeholder="you@example.com"
             />
           </div>
           <div className="mt-4 gap-2 flex flex-col">

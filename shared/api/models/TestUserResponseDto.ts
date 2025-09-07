@@ -12,10 +12,6 @@ export type TestUserResponseDto = {
      */
     name: string;
     /**
-     * The email of the test user
-     */
-    email: string;
-    /**
      * The date when the test user was created
      */
     createdAt: string;
