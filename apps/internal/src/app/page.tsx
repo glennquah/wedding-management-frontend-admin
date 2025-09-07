@@ -1,6 +1,9 @@
 
 
 "use client";
+
+export const dynamic = 'force-dynamic'
+
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import { Button } from "@shared/components/ui/button";
 import { useRouter } from "next/navigation";

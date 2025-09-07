@@ -39,6 +39,11 @@ export default function GetStartedPage() {
         password,
         redirect: false,
       });
+      if (!register_res.ok) {
+        const errorData = await register_res.json();
+        throw new Error(errorData.message || "Unknown error");
+      }
+      toast.success("Signup Successful.")
 
       if (signin_res?.error) {
         toast.error("Login failed after signup: " + signin_res.error);
