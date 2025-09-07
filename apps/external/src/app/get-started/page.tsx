@@ -8,6 +8,7 @@ import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import FormField from "@shared/components/FormField";
 import { useOpenAICall } from "@shared/hooks/useOpenAICall";
 import { useHandleSession } from "../hooks/useHandleSession";
+import { useSessionStore } from "../store/sessionStore";
 import { Wand2, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
@@ -30,10 +31,6 @@ export default function GetStartedPage() {
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState<UserRole | null>(null);
-  
-  // Admin / Couple specific fields
-  /// ... useState for couple fields
-  // const { handleSignUpCouple } = useHandleSession();
 
   // Vendor specific fields
   const [vendorWebsite, setVendorWebsite] = useState<string>("");
@@ -135,7 +132,10 @@ export default function GetStartedPage() {
             className="w-full mt-4"
             disabled={loading}
             onClick={() => {
-              if (role === 'admin') router.push("/get-started/couple");
+              if (role === 'admin') useSessionStore.getState().setEmail(email); 
+              useSessionStore.getState().setName(name); 
+              useSessionStore.getState().setPassword(password); 
+              router.push("/get-started/couple");
             }}
           >
             {role === 'admin' ? "Next" : loading ? "Creating..." : "Sign Up"}
