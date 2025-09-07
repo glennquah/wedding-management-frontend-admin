@@ -17,9 +17,9 @@ export default function DummyLogin() {
     setLoading(true);
     setTimeout(() => {
       if (role === "admin") {
-        router.push("/admin");
+        router.push("/login");
       } else {
-        router.push("/vendors");
+        router.push("/login");
       }
     }, 500);
   };

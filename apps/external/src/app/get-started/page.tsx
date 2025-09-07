@@ -1,17 +1,20 @@
 "use client";
 
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@shared/components/ui/button";
 import { Input } from "@shared/components/ui/input";
 import { Label } from "@shared/components/ui/label";
-import { Toast } from "@shared/components/ui/use-toast";
+import { toast } from "sonner";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 
 export default function GetStartedPage() {
+  const NEXTAUTH_URL = process.env.NEXT_PUBLIC_NEXTAUTH_URL;
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState<'couple' | 'vendor' | null>(null);
 
@@ -20,18 +23,36 @@ export default function GetStartedPage() {
     setLoading(true);
 
     try {
-      // Example: call your backend API for signup
-      const res = await fetch("/api/auth/signup", {
+      const register_res = await fetch(NEXTAUTH_URL + "/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, role  }),
+        body: JSON.stringify({ name, email, password  }),
       });
+      if (!register_res.ok) {
+        const errorData = await register_res.json();
+        throw new Error(errorData.message || "Unknown error");
+      }
+      toast.success("Signup Successful.")
 
-      if (!res.ok) throw new Error("Signup failed");
-      Toast({ title: "Account created!"});
-      router.push("/login");
-    } catch {
-      Toast({ title: "Error"});
+      const signin_res = await signIn("credentials", {
+        username: email, 
+        password,
+        redirect: false,
+      });
+      if (!register_res.ok) {
+        const errorData = await register_res.json();
+        throw new Error(errorData.message || "Unknown error");
+      }
+      toast.success("Signup Successful.")
+
+      if (signin_res?.error) {
+        toast.error("Login failed after signup: " + signin_res.error);
+      } else {
+        router.push("/user");
+      }
+    } catch (err) {
+      console.log(err)
+      toast.error(`Signup Failed. ${err instanceof Error && err.message}.`);
     } finally {
       setLoading(false);
     }
@@ -43,6 +64,18 @@ export default function GetStartedPage() {
       <div className="w-full max-w-lg bg-white p-8 rounded-2xl mt-[72px] shadow-md">
         <h2 className="text-3xl font-bold text-center mb-8">Create an account</h2>
         <form onSubmit={handleSignUp} className="space-y-4">
+          
+          <div className="mt-4 gap-2 flex flex-col">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              type="name"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              placeholder="your name"
+            />
+          </div>
           <div className="mt-4 gap-2 flex flex-col">
             <Label htmlFor="email">Email</Label>
             <Input

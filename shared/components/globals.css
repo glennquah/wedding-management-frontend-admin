@@ -4,8 +4,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600;700;800;900&display=swap');
 
 @custom-variant dark (&:is(.dark *));
-
 @theme {
+  /* Container settings */
+  --container-center: true;
+  --container-padding: 2rem;
+  --container-2xl: 1400px;
+  
+  /* Screen@theme {
   /* Container settings */
   --container-center: true;
   --container-padding: 2rem;
@@ -108,18 +113,18 @@
   --color-blue-light-800: #065986;
   --color-blue-light-900: #0b4a6f;
   --color-blue-light-950: #062c41;
-  --color-brand-25:  #f9fcfc;
-  --color-brand-50:  #f3f9f9;
-  --color-brand-100: #e6f1f2;
-  --color-brand-200: #d3e6e8;
-  --color-brand-300: #bdd8db;
-  --color-brand-400: #9fc5ca;
-  --color-brand-500: #7aa9b0;
-  --color-brand-600: #5e8f97;
-  --color-brand-700: #4b7178;
-  --color-brand-800: #39575c;
-  --color-brand-900: #263b40;
-  --color-brand-950: #142023;
+  --color-brand-25: #fdf2f3;
+  --color-brand-50: #fae4e6;
+  --color-brand-100: #f6d8da;
+  --color-brand-200: #efb9bd;
+  --color-brand-300: #e28e96;
+  --color-brand-400: #d16b76;
+  --color-brand-500: #c24b59;
+  --color-brand-600: #a5404b;
+  --color-brand-700: #88343e;
+  --color-brand-800: #6b2931;
+  --color-brand-900: #4e1e24;
+  --color-brand-950: #321317;
   --color-error-100: #fee4e2;
   --color-error-200: #fecdca;
   --color-error-25: #fffbfa;
@@ -132,17 +137,17 @@
   --color-error-800: #912018;
   --color-error-900: #7a271a;
   --color-error-950: #55160c;
-  --gray-50:  210 20% 98%;
-  --gray-100: 220 14.3% 95.9%;
-  --gray-200: 220 13% 91%;
-  --gray-300: 216 12.2% 83.9%;
-  --gray-400: 217.9 10.6% 64.9%;
-  --gray-500: 220 8.9% 46.1%;
-  --gray-600: 215 13.8% 34.1%;
-  --gray-700: 216.9 19.1% 26.7%;
-  --gray-800: 215 27.9% 16.9%;
-  --gray-900: 220.9 39.3% 11%;
-  --gray-950: 224 71.4% 4.1%;
+  --color-gray-50:  #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+  --color-gray-950: #030712;
   --color-gray-blue-100: #eaecf5;
   --color-gray-blue-200: #d5d9eb;
   --color-gray-blue-25: #fcfcfd;
@@ -196,20 +201,20 @@
   --radius: 0.625rem;
   --background: #ffffff;
   --foreground: #000000;
-  --card: #388ea3;
+  --card: #FF5A5F;
   --card-foreground: #ffffff;
-  --popover: #388ea3;
-  --popover-foreground:  #ffffff;
-  --primary: #388ea3;     
-  --primary-hover: #2f7688; 
+  --popover: #eaecf5;
+  --popover-foreground:  #000000;
+  --primary: #FF5A5F;     
+  --primary-hover: #da3c41; 
   --primary-foreground:  #ffffff;
   --secondary: #45292f;    
   --secondary-hover: #3a2126;
-  --secondary-foreground: #388ea3;
+  --secondary-foreground: #FF5A5F;
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: #388ea3;
-  --accent-hover: #2c6e7e;
+  --accent: #FF5A5F;
+  --accent-hover: #da3c41;
   --accent-foreground: #ffffff;
   --destructive: #d92d20;
   --border: #000000;
@@ -229,6 +234,7 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 }
+
 
 
 @keyframes accordion-down {
