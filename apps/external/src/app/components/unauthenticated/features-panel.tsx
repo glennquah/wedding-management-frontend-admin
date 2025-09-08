@@ -26,7 +26,7 @@ export default function FeaturesPanel(
                   </h3>
                   <p className="text-gray-600 mb-4">{feature.desc}</p>
                   <Image
-                    src="https://placehold.co/300x180/e0e0e0/555?text=Illustration"
+                    src="/images/placeholder-image.png"
                     alt="Feature illustration"
                     width={300}
                     height={180}
