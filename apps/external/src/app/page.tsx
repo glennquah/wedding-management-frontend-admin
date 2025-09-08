@@ -2,12 +2,13 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useRouter } from "next/navigation";
+import { AppService } from "@shared/api/services/AppService";
 import Footer from "@shared/components/footer";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
-import Image from "next/image";
-import { useEffect, useState, useRef } from "react";
 import { Button } from "@shared/components/ui/button";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 const heroImages = [
   "/images/landing-pg (1).jpg",
@@ -17,7 +18,9 @@ const heroImages = [
 ];
 
 export default function LandingPage() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [apiMessage, setApiMessage] = useState<string>("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(true);
   const [current, setCurrent] = useState(0);
   const [fade, setFade] = useState(true);

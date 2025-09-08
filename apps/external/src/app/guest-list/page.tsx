@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button } from "@shared/components/ui/button";
-import { Input } from "@shared/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@shared/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@shared/components/ui/dialog";
-import { Plus, Edit2, Trash2, UserCheck, UserX, Clock, Loader2 } from "lucide-react";
+import { CreateGuestDto, GuestResponseDto, GuestsService, UpdateGuestDto } from "@shared/api";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
+import { Button } from "@shared/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@shared/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@shared/components/ui/dialog";
+import { Input } from "@shared/components/ui/input";
 import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
-import { GuestsService, GuestResponseDto, CreateGuestDto, UpdateGuestDto } from "@shared/api";
+import { Clock, Edit2, Loader2, Plus, Trash2, UserCheck, UserX } from "lucide-react";
+import { useEffect, useState } from "react";
 
 // Use the API types directly
 type Guest = GuestResponseDto & {
@@ -306,7 +306,7 @@ export default function GuestListPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-brand-100 to-white text-foreground">
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
       <ResponsiveMenubar />
       {!isMobile && <div className="mt-[72px] w-full"></div>}
       
