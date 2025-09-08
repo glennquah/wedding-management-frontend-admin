@@ -2,18 +2,18 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type CreateTestUserDto = {
+export type CreateWeddingDto = {
     /**
-     * The name of the test user
+     * The name of the wedding
      */
     name: string;
     /**
-     * The email of the test user
+     * Wedding date
      */
-    email: string;
+    date: string;
     /**
-     * The password of the test user
+     * Wedding location
      */
-    password: string;
+    location?: string;
 };
 
