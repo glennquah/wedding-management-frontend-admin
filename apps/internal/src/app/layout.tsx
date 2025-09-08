@@ -22,12 +22,9 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "Knotly - Wedding Management Made Simple",
+  title: "Covenant - Wedding Management Made Simple",
   description:
-    "Knotly is a wedding management platform that simplifies the planning process, making it easy to organize your dream wedding.",
-  icons: {
-    icon: "/favicon.ico",
-  },
+    "Covenant is a wedding management platform that simplifies the planning process, making it easy to organize your dream wedding.",
 };
 
 export default function RootLayout({

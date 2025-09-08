@@ -14,7 +14,7 @@ export default function EssentialsPage() {
       <ResponsiveMenubar />
       {!isMobile && <div className="mt-[72px] w-full"></div>}
       {/* Hero Section */}
-      <Hero img_src="/images/essentials.jpg" header="Never miss a detail." subheader="We break down the major stages of wedding planning in the ultimate wedding checklist, with AI-powered tools that helps you cover every essential from picking your wedding date to tracking your budget." />
+      <Hero img_src="/images/line-chart.png" header="Never miss a detail." subheader="We break down the major stages of wedding planning in the ultimate wedding checklist, with AI-powered tools that helps you cover every essential from picking your wedding date to tracking your budget." />
       {/* Features Section */}
       <FeaturesPanel features={features} />
       {/* Closing CTA */}

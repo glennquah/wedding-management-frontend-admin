@@ -9,7 +9,7 @@ export default function Hero(
     const isMobile = useIsMobileScreen();
     const router = useRouter();
     return (
-    <section className={`relative flex flex-col items-center justify-center text-center px-6 overflow-hidden min-h-[500px] ${isMobile ? 'pt-[120px] pb-0' : 'py-5'}`}>
+    <section className={`relative flex flex-col items-center justify-center text-center px-6 overflow-hidden min-h-[400px] ${isMobile ? 'pt-[120px] pb-0' : 'py-20'}`}>
         {/* Background Illustration */}
         <motion.img
           src={img_src}
@@ -17,7 +17,7 @@ export default function Hero(
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.2 }}
           transition={{ delay: 0.5, duration: 1 }}
-          className={`${isMobile ? "h-full w-auto":"h-auto w-full top-1/2 -translate-y-1/4"} absolute  object-cover inset-0 mx-auto pointer-events-none select-none`}
+          className="absolute inset-0 w-auto mx-auto h-full object-cover pointer-events-none select-none"
           style={{ zIndex: 0 }}
         />
         <div className="relative z-10 flex flex-col items-center w-full">
@@ -25,7 +25,7 @@ export default function Hero(
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className={`text-5xl font-extrabold text-secondary-hover mb-4`} 
+            className={`text-5xl font-extrabold ${color_theme == "primary" ? "text-brand-900":"text-secondary-hover"} mb-4`} 
           >
             {header}
           </motion.h1>

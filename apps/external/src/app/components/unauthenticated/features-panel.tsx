@@ -5,7 +5,7 @@ export default function FeaturesPanel(
     {color_theme = "primary", features}: {color_theme?: "primary" | "secondary", features: {title: string, desc: string, icon: React.ReactNode}[]}
 ) {
     return (
-     <section className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto py-10 px-6">
+     <section className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto py-20 px-6">
             {features.map((feature, i) => {
               // Center last card if odd number of features
               const isLast = i === features.length - 1;
@@ -20,16 +20,16 @@ export default function FeaturesPanel(
                   transition={{ delay: i * 0.2, duration: 0.6 }}
                   className={cardClass}
                 >
-                  <div className={`mb-4 p-4 ${color_theme == "primary" ? "bg-gray-100":"bg-brand-100"} rounded-full`}>{feature.icon}</div>
-                  <h3 className="text-xl font-semibold text-foreground mb-2">
+                  <div className={`mb-4 p-4 ${color_theme == "primary" ? "bg-brand-100":"bg-secondary/20"} rounded-full`}>{feature.icon}</div>
+                  <h3 className="text-xl font-semibold text-brand-900 mb-2">
                     {feature.title}
                   </h3>
                   <p className="text-gray-600 mb-4">{feature.desc}</p>
                   <Image
-                    src="/images/placeholder-image.png"
+                    src="https://placehold.co/300x180/e0e0e0/555?text=Illustration"
                     alt="Feature illustration"
                     width={300}
-                    height={225}
+                    height={180}
                     className="rounded-lg"
                   />
                 </motion.div>

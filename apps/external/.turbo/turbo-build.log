@@ -1,0 +1,33 @@
+
+> @wedding/external@0.1.0 build
+> next build
+
+ ⚠ Warning: Found multiple lockfiles. Selecting /Users/quahhanrongglenn/package-lock.json.
+   Consider removing the lockfiles at:
+   * /Users/quahhanrongglenn/Desktop/github projects/capstone/wedding-management-frontend/package-lock.json
+
+   ▲ Next.js 15.4.6
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 1000ms
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/5) ...
+   Generating static pages (1/5) 
+   Generating static pages (2/5) 
+   Generating static pages (3/5) 
+ ✓ Generating static pages (5/5)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                      27 kB         127 kB
+└ ○ /_not-found                            989 B         101 kB
++ First Load JS shared by all            99.6 kB
+  ├ chunks/4bd1b696-cf72ae8a39fa05aa.js  54.1 kB
+  ├ chunks/964-78a358603a02ce1b.js       43.5 kB
+  └ other shared chunks (total)          1.94 kB
+
+
+○  (Static)  prerendered as static content
+
