@@ -21,7 +21,7 @@ export default function TheBigDayPage() {
       <ResponsiveMenubar />
       {!isMobile && <div className="mt-[72px] w-full"></div>}
       {/* Hero Section */}
-      <Hero img_src="/images/big-day.png" header="Make the Big Day Seamless." subheader="From real-time check-ins to digital angbaos and live photo uploads —
+      <Hero img_src="/images/the-big-day.jpg" header="Make the Big Day Seamless." subheader="From real-time check-ins to digital angbaos and live photo uploads —
             ensure your wedding day flows effortlessly and memories last forever." />
       {/* Features Section */}
       <FeaturesPanel features={features} />

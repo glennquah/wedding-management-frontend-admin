@@ -30,28 +30,32 @@ const MobileMenubar = () => {
   }
 
   return (
-    <div className="fixed top-6 z-[100] ml-[0.5rem] flex w-[calc(100vw-1.75rem)] items-center justify-between rounded-3xl bg-base-white px-6 py-1 shadow-md">
+    <div className="fixed top-6 z-[100] ml-[0.8rem] flex w-[calc(100vw-1.75rem)] items-center justify-between rounded-3xl bg-base-white px-6 py-1 shadow-md">
       {/* LG Icon Far-left */}
       <div
         onClick={() => router.push("/")}
         className="m-[-16px] mt-[-14px] cursor-pointer p-2 flex items-center"
         style={{ minWidth: 40, minHeight: 40 }}
       >
-        C
+          <Image
+            src="/images/logo-single.png"
+            alt="Logo"
+            width={25}
+            height={25}
+            className="w-auto object-contain"
+            priority
+          />
       </div>
       {/* Hamburger menubar */}
       <div className="flex items-center gap-4 ">
         <Sheet>
-          <SheetTrigger className="group mr-[-16px] flex p-4 scale-150">
+          <SheetTrigger className="group mr-[-15px] flex p-4 scale-150">
             <HamburgerIcon />
           </SheetTrigger>
           <SheetContent
             side="top"
-            className="items-center mt-[30px] z-50 mx-[7px] flex w-[calc(100vw-1.75rem)] flex-col gap-2 rounded-3xl font-sans bg-base-white py-2 text-center text-base-black"
+            className="items-center mt-[80px] z-50 mx-[15px] flex w-[calc(100vw-2rem)] flex-col gap-2 rounded-3xl font-sans bg-base-white py-2 text-center text-base-black"
           >
-            <SheetHeader>
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-            </SheetHeader>
             <div className="flex flex-col gap-2 items-center">
               {menubar_items.map((item, idx) => {
                 const isActive = pathname === `/${item.toLowerCase()}/`;
@@ -131,7 +135,7 @@ const DesktopMenubar = () => {
     return null;
   }
   return (
-    <div className="fixed bg-gray-200/70 top-0 z-[100] flex w-screen items-center justify-between px-8 py-4">
+    <div className="fixed bg-gray-100/80 top-0 z-[100] flex w-screen items-center justify-between px-8 py-4">
       {/* Left: Logo + Menubar Items */}
       <div className="flex items-center gap-8">
         <div
@@ -142,7 +146,7 @@ const DesktopMenubar = () => {
             src="/images/logo.png"
             alt="Logo"
             width={100}
-            height={100}
+            height={80}
             className="w-auto object-contain"
             priority
           />
