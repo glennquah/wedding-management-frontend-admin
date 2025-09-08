@@ -1,3 +1,4 @@
+import { AuthService, CreateVendorDto, UserRole, WeddingService, WeddingStyle, WeddingType } from "@shared/api";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -45,11 +46,11 @@ export function useHandleSession() {
         }: {
         email: string;
         password: string;
-        role: string | null;
+        role: UserRole | undefined;
         name: string;
-        serviceOffered: string | null;
-        styleOffered: string | null;
-        weddingTypes: string[] | null;
+        serviceOffered: WeddingService | undefined;
+        styleOffered: WeddingStyle | undefined;
+        weddingTypes: WeddingType[] | undefined;
         vendorWebsite: string;
         uenNumber: string;
         bio: string;
@@ -59,10 +60,10 @@ export function useHandleSession() {
         e.preventDefault();
         setLoading(true);
         try {
-        const register_res = await fetch(NEXTAUTH_URL + "/auth/register/vendor", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
+        if (!role || !serviceOffered || !styleOffered || !weddingTypes) {
+            throw new Error(`Missing field.`);
+        }
+        await AuthService.authControllerRegisterVendor({
             email,
             password,
             role,
@@ -74,12 +75,8 @@ export function useHandleSession() {
             uenNumber,
             bio,
             onboardedDate: new Date().toISOString(),
-            }),
-        });
-        if (!register_res.ok) {
-            const errorData = await register_res.json();
-            throw new Error(errorData.message || "Unknown error");
-        }
+        } satisfies CreateVendorDto)
+
         toast.success("Signup Successful.");
         const signin_res = await signIn("credentials", {
             username: email,

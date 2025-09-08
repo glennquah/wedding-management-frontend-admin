@@ -2,10 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { TestUserResponseDto } from './TestUserResponseDto';
 import type { TokensDto } from './TokensDto';
+import type { UserResponseDto } from './UserResponseDto';
 export type AuthResponseDto = {
-    user: TestUserResponseDto;
+    user: UserResponseDto;
     backendTokens: TokensDto;
 };
 

@@ -1,18 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSessionStore } from "../../store/sessionStore";
-import { Button } from "@shared/components/ui/button";
-import { Label } from "@shared/components/ui/label";
 import { useHandleSession } from "../../hooks/useHandleSession";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@shared/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { useSessionStore } from "../../store/sessionStore";
 
 
 export default function GetStartedCouplePage() {

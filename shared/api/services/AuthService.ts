@@ -2,7 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AdminResponseDto } from '../models/AdminResponseDto';
 import type { AuthResponseDto } from '../models/AuthResponseDto';
+import type { CreateAdminDto } from '../models/CreateAdminDto';
 import type { CreateVendorDto } from '../models/CreateVendorDto';
 import type { LoginDto } from '../models/LoginDto';
 import type { VendorResponseDto } from '../models/VendorResponseDto';
@@ -16,12 +18,31 @@ export class AuthService {
      * @returns VendorResponseDto The test user has been successfully created.
      * @throws ApiError
      */
-    public static authControllerRegisterTestUser(
+    public static authControllerRegisterVendor(
         requestBody: CreateVendorDto,
     ): CancelablePromise<VendorResponseDto> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/auth/register/vendor',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                400: `Bad request.`,
+            },
+        });
+    }
+    /**
+     * Create a new admin
+     * @param requestBody
+     * @returns AdminResponseDto The admin has been successfully created.
+     * @throws ApiError
+     */
+    public static authControllerRegisterAdmin(
+        requestBody: CreateAdminDto,
+    ): CancelablePromise<AdminResponseDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/auth/register/admin',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
