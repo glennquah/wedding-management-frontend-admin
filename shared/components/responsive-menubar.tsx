@@ -4,14 +4,11 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import useIsMobileScreen from "../hooks/useIsMobileScreen";
-import logoUrl from "../public/images/logo.png";
 import { Button } from "./ui/button";
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
+  SheetTrigger
 } from "./ui/sheet";
 
 export const menubar_items = ["Essentials", "Guest & Vendor", "The Big Day"];
