@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic'
 
-import { AppService } from "@shared/api/services/AppService";
 import Footer from "@shared/components/footer";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import { Button } from "@shared/components/ui/button";
@@ -27,21 +26,21 @@ export default function LandingPage() {
   const featuresRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchHello = async () => {
-      try {
-        const response = await AppService.appControllerGetHello();
-        setApiMessage(response);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Failed to fetch API:", error);
-        setApiMessage("Failed to load API message");
-        setIsLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchHello = async () => {
+  //     try {
+  //       const response = await AppService.appControllerGetHello();
+  //       setApiMessage(response);
+  //       setIsLoading(false);
+  //     } catch (error) {
+  //       console.error("Failed to fetch API:", error);
+  //       setApiMessage("Failed to load API message");
+  //       setIsLoading(false);
+  //     }
+  //   };
 
-    fetchHello();
-  }, []);
+  //   fetchHello();
+  // }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {

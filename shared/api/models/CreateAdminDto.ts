@@ -2,6 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { BudgetBucket } from './BudgetBucket';
+import type { GuestCountBucket } from './GuestCountBucket';
+import type { WeddingService } from './WeddingService';
+import type { WeddingStyle } from './WeddingStyle';
+import type { WeddingType } from './WeddingType';
 export type CreateAdminDto = {
     /**
      * The name of the user
@@ -27,26 +32,11 @@ export type CreateAdminDto = {
      * Date when the admin was onboarded
      */
     onboardedDate: string;
-    /**
-     * Wedding type
-     */
-    weddingType: CreateAdminDto.weddingType;
-    /**
-     * Budget bucket
-     */
-    budgetBucket: CreateAdminDto.budgetBucket;
-    /**
-     * Guest count bucket
-     */
-    guestCountBucket: CreateAdminDto.guestCountBucket;
-    /**
-     * Preferred wedding style
-     */
-    preferredStyle: CreateAdminDto.preferredStyle;
-    /**
-     * Preferred wedding services
-     */
-    preferredServices: Array<'venue' | 'catering' | 'photography' | 'decoration' | 'music' | 'attire' | 'makeup' | 'transportation'>;
+    weddingType: WeddingType;
+    budgetBucket: BudgetBucket;
+    guestCountBucket: GuestCountBucket;
+    preferredStyle: WeddingStyle;
+    preferredServices: Array<WeddingService>;
 };
 export namespace CreateAdminDto {
     /**
@@ -56,42 +46,6 @@ export namespace CreateAdminDto {
         ADMIN = 'admin',
         SUPER_ADMIN = 'superAdmin',
         VENDOR = 'vendor',
-    }
-    /**
-     * Wedding type
-     */
-    export enum weddingType {
-        CHINESE = 'chinese',
-        MALAY = 'malay',
-        INDIAN = 'indian',
-        WESTERN = 'western',
-        OTHERS = 'others',
-    }
-    /**
-     * Budget bucket
-     */
-    export enum budgetBucket {
-        LOW = 'low',
-        MEDIUM = 'medium',
-        HIGH = 'high',
-        LUXURY = 'luxury',
-    }
-    /**
-     * Guest count bucket
-     */
-    export enum guestCountBucket {
-        SMALL = 'small',
-        MEDIUM = 'medium',
-        LARGE = 'large',
-    }
-    /**
-     * Preferred wedding style
-     */
-    export enum preferredStyle {
-        LUXURY = 'luxury',
-        MODERN = 'modern',
-        TRADITIONAL = 'traditional',
-        RUSTIC = 'rustic',
     }
 }
 

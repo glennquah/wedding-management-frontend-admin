@@ -13,14 +13,14 @@
 [2K[1G[?25h [37m[1m [22m[39m Finalizing page optimization     [32m[1m✓[22m[39m Finalizing page optimization 
 
 [4mRoute (app)[24m                                 [4mSize[24m  [4mFirst Load JS[24m  [4m[24m  [4m[24m
-┌ ƒ /                                    2.21 kB         [37m[1m137 kB[22m[39m
+┌ ƒ /                                    4.02 kB         [37m[1m127 kB[22m[39m
 ├ ƒ /_not-found                            123 B        [37m[1m99.8 kB[22m[39m
 ├ ƒ /api/auth/[...nextauth]                123 B        [37m[1m99.8 kB[22m[39m
 ├ ƒ /essentials                          1.29 kB         [37m[1m164 kB[22m[39m
-├ ƒ /get-started                          3.9 kB         [37m[1m145 kB[22m[39m
+├ ƒ /get-started                         3.93 kB         [37m[1m145 kB[22m[39m
 ├ ƒ /guest-&-vendor                       1.6 kB         [37m[1m164 kB[22m[39m
-├ ƒ /guest-list                          48.1 kB         [37m[1m183 kB[22m[39m
-├ ƒ /login                               3.65 kB         [37m[1m145 kB[22m[39m
+├ ƒ /guest-list                          60.2 kB         [37m[1m193 kB[22m[39m
+├ ƒ /login                               3.67 kB         [37m[1m145 kB[22m[39m
 ├ ƒ /the-big-day                         1.66 kB         [37m[1m164 kB[22m[39m
 ├ ƒ /user                                  641 B         [37m[1m109 kB[22m[39m
 └ ƒ /vendor                              1.15 kB         [37m[1m164 kB[22m[39m

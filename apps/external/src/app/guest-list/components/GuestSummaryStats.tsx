@@ -42,14 +42,14 @@ export default function GuestSummaryStats({ guests }: GuestSummaryStatsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
       {summaryStats.map((stat, index) => (
         <Card key={index} className="bg-transparent border-brand-200">
-          <CardContent className="p-4">
-            <div className={`text-2xl font-bold ${stat.color}`}>
+          <CardContent className="p-3 sm:p-4">
+            <div className={`text-xl sm:text-2xl font-bold ${stat.color}`}>
               {stat.value}
             </div>
-            <div className="text-sm text-muted-foreground">{stat.label}</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">{stat.label}</div>
           </CardContent>
         </Card>
       ))}
