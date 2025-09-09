@@ -16,3 +16,4 @@ export type CreateWeddingDto = {
      */
     location?: string;
 };
+

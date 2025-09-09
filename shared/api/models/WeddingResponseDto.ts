@@ -3,7 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { GuestResponseDto } from './GuestResponseDto';
-
 export type WeddingResponseDto = {
     /**
      * Wedding ID
@@ -34,3 +33,4 @@ export type WeddingResponseDto = {
      */
     updatedAt: string;
 };
+

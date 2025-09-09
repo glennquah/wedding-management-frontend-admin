@@ -30,7 +30,7 @@ export type GuestResponseDto = {
     /**
      * Confirmation status of the guest
      */
-    confirmationStatus: 'pending' | 'confirmed' | 'rejected';
+    confirmationStatus: GuestResponseDto.confirmationStatus;
     /**
      * List of accompanying guests
      */
@@ -44,4 +44,14 @@ export type GuestResponseDto = {
      */
     updatedAt: string;
 };
+export namespace GuestResponseDto {
+    /**
+     * Confirmation status of the guest
+     */
+    export enum confirmationStatus {
+        PENDING = 'pending',
+        CONFIRMED = 'confirmed',
+        REJECTED = 'rejected',
+    }
+}
 

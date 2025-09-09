@@ -16,3 +16,4 @@ export type UpdateWeddingDto = {
      */
     location?: string;
 };
+

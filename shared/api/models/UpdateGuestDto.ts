@@ -22,6 +22,16 @@ export type UpdateGuestDto = {
     /**
      * Confirmation status of the guest
      */
-    confirmationStatus?: 'pending' | 'confirmed' | 'rejected';
+    confirmationStatus?: UpdateGuestDto.confirmationStatus;
 };
+export namespace UpdateGuestDto {
+    /**
+     * Confirmation status of the guest
+     */
+    export enum confirmationStatus {
+        PENDING = 'pending',
+        CONFIRMED = 'confirmed',
+        REJECTED = 'rejected',
+    }
+}
 

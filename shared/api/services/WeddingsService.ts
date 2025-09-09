@@ -8,7 +8,6 @@ import type { WeddingResponseDto } from '../models/WeddingResponseDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
-
 export class WeddingsService {
     /**
      * Create a new wedding
@@ -29,7 +28,6 @@ export class WeddingsService {
             },
         });
     }
-
     /**
      * Get all weddings
      * @returns WeddingResponseDto List of all weddings
@@ -41,7 +39,6 @@ export class WeddingsService {
             url: '/weddings',
         });
     }
-
     /**
      * Get a wedding by ID
      * @param id
@@ -62,7 +59,6 @@ export class WeddingsService {
             },
         });
     }
-
     /**
      * Update a wedding
      * @param id
@@ -88,7 +84,6 @@ export class WeddingsService {
             },
         });
     }
-
     /**
      * Delete a wedding
      * @param id

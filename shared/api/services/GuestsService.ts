@@ -169,4 +169,24 @@ export class GuestsService {
             },
         });
     }
+    /**
+     * Reject guest attendance
+     * @param id
+     * @returns GuestResponseDto The guest confirmation has been updated.
+     * @throws ApiError
+     */
+    public static guestControllerRejectGuest(
+        id: number,
+    ): CancelablePromise<GuestResponseDto> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/guests/{id}/reject',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Guest not found.`,
+            },
+        });
+    }
 }
