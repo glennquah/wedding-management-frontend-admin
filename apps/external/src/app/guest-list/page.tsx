@@ -1,57 +1,133 @@
 "use client";
 
-import { CreateGuestDto, GuestResponseDto, GuestsService, UpdateGuestDto } from "@shared/api";
+import { CreateGuestDto, UpdateGuestDto } from "@shared/api";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import { Button } from "@shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@shared/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@shared/components/ui/dialog";
 import { Input } from "@shared/components/ui/input";
+import { DataTable } from "@shared/components/ui/table";
 import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
-import { Clock, Edit2, Loader2, Plus, Trash2, UserCheck, UserX } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ColumnDef } from "@tanstack/react-table";
+import { Edit2, Loader2, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+import GuestSummaryStats from "../../components/GuestSummaryStats";
+import { useGuestForm } from "../../hooks/useGuestForm";
+import { useGuests } from "../../hooks/useGuests";
+import { getConfirmationIcon, getConfirmationLabel, getConfirmationStatusColor } from "../../lib/guest-status-utils";
 
-// Use the API types directly
-type Guest = GuestResponseDto & {
-  accompanyingGuestNames?: string[]; // For form handling
+type Guest = {
+  id: number;
+  name: string;
+  allergies?: string;
+  group?: string;
+  confirmationStatus: CreateGuestDto.confirmationStatus;
+  weddingId: number;
+  primaryGuestId?: number;
+  accompanyingGuestNames?: string[];
 };
 
 export default function GuestListPage() {
   const isMobile = useIsMobileScreen();
-  const [guests, setGuests] = useState<Guest[]>([]);
+  const { guests, isLoading, error, setError, addGuest, updateGuest, deleteGuest } = useGuests();
+  const { addAccompanyingGuestField, removeAccompanyingGuestField, updateAccompanyingGuestName } = useGuestForm();
+  
   const [isAddingGuest, setIsAddingGuest] = useState(false);
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [deleteConfirmGuest, setDeleteConfirmGuest] = useState<Guest | null>(null);
   const [newGuest, setNewGuest] = useState<Partial<CreateGuestDto & { accompanyingGuestNames: string[] }>>({
     name: "",
     allergies: "",
     group: "",
-    confirmationStatus: 'pending',
+    confirmationStatus: CreateGuestDto.confirmationStatus.PENDING,
     weddingId: 1, // Default wedding ID - should be dynamic in real app
     primaryGuestId: undefined,
     accompanyingGuestNames: [""],
   });
 
-  // Fetch guests on component mount
-  useEffect(() => {
-    fetchGuests();
-  }, []);
+  // Column definitions for DataTable
+  const columns: ColumnDef<Guest>[] = [
+    {
+      accessorKey: "name",
+      header: "Name",
+      cell: ({ row }) => (
+        <div className="font-medium text-foreground">{row.getValue("name")}</div>
+      ),
+    },
+    {
+      accessorKey: "group", 
+      header: "Group",
+      cell: ({ row }) => (
+        <div className="text-sm text-foreground">{row.getValue("group") || '-'}</div>
+      ),
+    },
+    {
+      accessorKey: "confirmationStatus",
+      header: "Confirmed",
+      cell: ({ row }) => {
+        const status = row.getValue("confirmationStatus") as CreateGuestDto.confirmationStatus;
+        return (
+          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getConfirmationStatusColor(status)}`}>
+            {getConfirmationIcon(status)}
+            {getConfirmationLabel(status)}
+          </span>
+        );
+      },
+    },
+    {
+      id: "accompanyingGuests",
+      header: "Accompanying Guests", 
+      cell: ({ row }) => {
+        const guest = row.original;
+        const accompanyingGuests = guests.filter(g => g.primaryGuestId === guest.id);
+        return (
+          <div className="text-sm text-foreground">
+            {accompanyingGuests.length === 0 
+              ? '0 guests' 
+              : `+${accompanyingGuests.length} guest${accompanyingGuests.length === 1 ? '' : 's'}`
+            }
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "allergies",
+      header: "Dietary Requirements",
+      cell: ({ row }) => (
+        <div className="text-sm text-foreground">{row.getValue("allergies") || '-'}</div>
+      ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const guest = row.original;
+        return (
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleEditGuest(guest)}
+            >
+              <Edit2 className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setDeleteConfirmGuest(guest)}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        );
+      },
+    },
+  ];
 
-  const fetchGuests = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const fetchedGuests = await GuestsService.guestControllerGetGuestsByWedding(1); // Default wedding ID
-      setGuests(fetchedGuests);
-    } catch (err) {
-      setError('Failed to fetch guests. Please try again.');
-      console.error('Error fetching guests:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Primary guests (not accompanying guests)
+  const primaryGuests = guests.filter(guest => !guest.primaryGuestId);
 
   const handleAddGuest = async () => {
     if (!newGuest.name || !newGuest.group) return;
@@ -60,50 +136,35 @@ export default function GuestListPage() {
       setIsSubmitting(true);
       setError(null);
 
-      // Create primary guest
       const primaryGuestData: CreateGuestDto = {
         name: newGuest.name,
         allergies: newGuest.allergies || undefined,
         group: newGuest.group,
-        confirmationStatus: newGuest.confirmationStatus || 'pending',
+        confirmationStatus: CreateGuestDto.confirmationStatus.PENDING,
         weddingId: newGuest.weddingId || 1,
         primaryGuestId: undefined,
       };
 
-      const createdPrimaryGuest = await GuestsService.guestControllerCreate(primaryGuestData);
-
-      // Create accompanying guests if any
       const accompanyingGuestsData: CreateGuestDto[] = [];
       if (newGuest.accompanyingGuestNames) {
         const validAccompanyingNames = newGuest.accompanyingGuestNames.filter(name => name.trim());
-        
-        for (const name of validAccompanyingNames) {
-          accompanyingGuestsData.push({
-            name: name.trim(),
-            allergies: newGuest.allergies || undefined,
-            group: newGuest.group,
-            confirmationStatus: newGuest.confirmationStatus || 'pending',
-            weddingId: newGuest.weddingId || 1,
-            primaryGuestId: createdPrimaryGuest.id,
-          });
-        }
+        accompanyingGuestsData.push(...validAccompanyingNames.map(name => ({
+          name: name.trim(),
+          allergies: newGuest.allergies || undefined,
+          group: newGuest.group,
+          confirmationStatus: CreateGuestDto.confirmationStatus.PENDING,
+          weddingId: newGuest.weddingId || 1,
+          primaryGuestId: undefined,
+        })));
       }
 
-      if (accompanyingGuestsData.length > 0) {
-        for (const guestData of accompanyingGuestsData) {
-          await GuestsService.guestControllerCreate(guestData);
-        }
-      }
+      await addGuest(primaryGuestData, accompanyingGuestsData);
 
-      // Refresh the guest list
-      await fetchGuests();
-
-      // Reset form
       setNewGuest({
         name: "",
         allergies: "",
         group: "",
-        confirmationStatus: 'pending',
+        confirmationStatus: CreateGuestDto.confirmationStatus.PENDING,
         weddingId: 1,
         primaryGuestId: undefined,
         accompanyingGuestNames: [""],
@@ -124,7 +185,6 @@ export default function GuestListPage() {
       setIsSubmitting(true);
       setError(null);
 
-      // Update the primary guest
       const updateData: UpdateGuestDto = {
         name: editingGuest.name,
         allergies: editingGuest.allergies || undefined,
@@ -132,36 +192,20 @@ export default function GuestListPage() {
         confirmationStatus: editingGuest.confirmationStatus,
       };
 
-      await GuestsService.guestControllerUpdate(editingGuest.id, updateData);
-      
-      // First, delete existing accompanying guests
-      const existingAccompanyingGuests = guests.filter(g => g.primaryGuestId === editingGuest.id);
-      for (const guest of existingAccompanyingGuests) {
-        await GuestsService.guestControllerDelete(guest.id);
-      }
-
-      // Create new accompanying guests if any
+      const accompanyingGuestsData: CreateGuestDto[] = [];
       if (editingGuest.accompanyingGuestNames) {
         const validAccompanyingNames = editingGuest.accompanyingGuestNames.filter(name => name.trim());
-        
-        const accompanyingGuestsData: CreateGuestDto[] = validAccompanyingNames.map(name => ({
+        accompanyingGuestsData.push(...validAccompanyingNames.map(name => ({
           name: name.trim(),
           allergies: editingGuest.allergies || undefined,
           group: editingGuest.group,
           confirmationStatus: editingGuest.confirmationStatus,
           weddingId: editingGuest.weddingId,
-          primaryGuestId: editingGuest.id,
-        }));
-
-        if (accompanyingGuestsData.length > 0) {
-          for (const guestData of accompanyingGuestsData) {
-            await GuestsService.guestControllerCreate(guestData);
-          }
-        }
+          primaryGuestId: undefined,
+        })));
       }
 
-      // Refresh the guest list
-      await fetchGuests();
+      await updateGuest(editingGuest.id, updateData, accompanyingGuestsData);
       setEditingGuest(null);
     } catch (err) {
       setError('Failed to update guest. Please try again.');
@@ -174,13 +218,7 @@ export default function GuestListPage() {
   const handleDeleteGuest = async (id: number) => {
     try {
       setError(null);
-      await GuestsService.guestControllerDelete(id);
-      // Also delete any accompanying guests
-      const accompanyingGuests = guests.filter(g => g.primaryGuestId === id);
-      for (const guest of accompanyingGuests) {
-        await GuestsService.guestControllerDelete(guest.id);
-      }
-      await fetchGuests();
+      await deleteGuest(id);
       setDeleteConfirmGuest(null);
     } catch (err) {
       setError('Failed to delete guest. Please try again.');
@@ -194,103 +232,6 @@ export default function GuestListPage() {
     }
   };
 
-  const getConfirmationStatusColor = (status: 'pending' | 'confirmed' | 'rejected') => {
-    switch (status) {
-      case 'confirmed':
-        return "text-green-600 bg-green-100";
-      case 'rejected':
-        return "text-red-600 bg-red-100";
-      case 'pending':
-      default:
-        return "text-yellow-600 bg-yellow-100";
-    }
-  };
-
-  const getConfirmationIcon = (status: 'pending' | 'confirmed' | 'rejected') => {
-    switch (status) {
-      case 'confirmed':
-        return <UserCheck className="w-4 h-4" />;
-      case 'rejected':
-        return <UserX className="w-4 h-4" />;
-      case 'pending':
-      default:
-        return <Clock className="w-4 h-4" />;
-    }
-  };
-
-  const getConfirmationLabel = (status: 'pending' | 'confirmed' | 'rejected') => {
-    switch (status) {
-      case 'confirmed':
-        return 'Confirmed';
-      case 'rejected':
-        return 'Rejected';
-      case 'pending':
-      default:
-        return 'Pending';
-    }
-  };
-
-  const addAccompanyingGuestField = () => {
-    const currentNames = newGuest.accompanyingGuestNames || [];
-    setNewGuest({
-      ...newGuest,
-      accompanyingGuestNames: [...currentNames, ""]
-    });
-  };
-
-  const removeAccompanyingGuestField = (index: number) => {
-    const currentNames = newGuest.accompanyingGuestNames || [];
-    if (currentNames.length > 1) {
-      const newNames = currentNames.filter((_, i) => i !== index);
-      setNewGuest({
-        ...newGuest,
-        accompanyingGuestNames: newNames
-      });
-    }
-  };
-
-  const updateAccompanyingGuestName = (index: number, value: string) => {
-    const currentNames = newGuest.accompanyingGuestNames || [];
-    const newNames = [...currentNames];
-    newNames[index] = value;
-    setNewGuest({
-      ...newGuest,
-      accompanyingGuestNames: newNames
-    });
-  };
-
-  // Edit form helpers
-  const addEditAccompanyingGuestField = () => {
-    if (!editingGuest) return;
-    const currentNames = editingGuest.accompanyingGuestNames || [];
-    setEditingGuest({
-      ...editingGuest,
-      accompanyingGuestNames: [...currentNames, ""]
-    });
-  };
-
-  const removeEditAccompanyingGuestField = (index: number) => {
-    if (!editingGuest) return;
-    const currentNames = editingGuest.accompanyingGuestNames || [];
-    if (currentNames.length > 1) {
-      const newNames = currentNames.filter((_, i) => i !== index);
-      setEditingGuest({
-        ...editingGuest,
-        accompanyingGuestNames: newNames
-      });
-    }
-  };
-
-  const updateEditAccompanyingGuestName = (index: number, value: string) => {
-    if (!editingGuest) return;
-    const currentNames = editingGuest.accompanyingGuestNames || [];
-    const newNames = [...currentNames];
-    newNames[index] = value;
-    setEditingGuest({
-      ...editingGuest,
-      accompanyingGuestNames: newNames
-    });
-  };
 
   const handleEditGuest = (guest: Guest) => {
     // Get accompanying guests for this primary guest
@@ -375,13 +316,13 @@ export default function GuestListPage() {
               <div>
                 <label className="block text-sm font-medium mb-2 text-foreground">Confirmation Status</label>
                 <select
-                  value={newGuest.confirmationStatus || 'pending'}
-                  onChange={(e) => setNewGuest({...newGuest, confirmationStatus: e.target.value as 'pending' | 'confirmed' | 'rejected'})}
+                  value={newGuest.confirmationStatus || CreateGuestDto.confirmationStatus.PENDING}
+                  onChange={(e) => setNewGuest({...newGuest, confirmationStatus: e.target.value as CreateGuestDto.confirmationStatus})}
                   className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground"
                 >
-                  <option value="pending">Pending</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="rejected">Rejected</option>
+                  <option value={CreateGuestDto.confirmationStatus.PENDING}>Pending</option>
+                  <option value={CreateGuestDto.confirmationStatus.CONFIRMED}>Confirmed</option>
+                  <option value={CreateGuestDto.confirmationStatus.REJECTED}>Rejected</option>
                 </select>
               </div>
               <div className="md:col-span-2">
@@ -391,7 +332,7 @@ export default function GuestListPage() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={addAccompanyingGuestField}
+                    onClick={() => addAccompanyingGuestField(newGuest, setNewGuest)}
                     className="text-brand-600 hover:text-brand-700"
                   >
                     <Plus className="w-4 h-4 mr-1" />
@@ -403,7 +344,7 @@ export default function GuestListPage() {
                     <div key={index} className="flex items-center gap-2">
                       <Input
                         value={name}
-                        onChange={(e) => updateAccompanyingGuestName(index, e.target.value)}
+                        onChange={(e) => updateAccompanyingGuestName(index, e.target.value, newGuest, setNewGuest)}
                         placeholder={`Accompanying guest ${index + 1}`}
                         className="flex-1"
                       />
@@ -412,7 +353,7 @@ export default function GuestListPage() {
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={() => removeAccompanyingGuestField(index)}
+                          onClick={() => removeAccompanyingGuestField(index, newGuest, setNewGuest)}
                           className="text-red-600 hover:text-red-700 px-2"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -471,13 +412,13 @@ export default function GuestListPage() {
                   <div>
                     <label className="block text-sm font-medium mb-2 text-foreground">Confirmation Status</label>
                     <select
-                      value={editingGuest.confirmationStatus || 'pending'}
-                      onChange={(e) => setEditingGuest({...editingGuest, confirmationStatus: e.target.value as 'pending' | 'confirmed' | 'rejected'})}
+                      value={editingGuest.confirmationStatus || CreateGuestDto.confirmationStatus.PENDING}
+                      onChange={(e) => setEditingGuest({...editingGuest, confirmationStatus: e.target.value as CreateGuestDto.confirmationStatus})}
                       className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground"
                     >
-                      <option value="pending">Pending</option>
-                      <option value="confirmed">Confirmed</option>
-                      <option value="rejected">Rejected</option>
+                      <option value={CreateGuestDto.confirmationStatus.PENDING}>Pending</option>
+                      <option value={CreateGuestDto.confirmationStatus.CONFIRMED}>Confirmed</option>
+                      <option value={CreateGuestDto.confirmationStatus.REJECTED}>Rejected</option>
                     </select>
                   </div>
                   <div className="md:col-span-2">
@@ -487,7 +428,7 @@ export default function GuestListPage() {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={addEditAccompanyingGuestField}
+                        onClick={() => addAccompanyingGuestField(editingGuest, setEditingGuest)}
                         className="text-brand-600 hover:text-brand-700"
                       >
                         <Plus className="w-4 h-4 mr-1" />
@@ -499,7 +440,7 @@ export default function GuestListPage() {
                         <div key={index} className="flex items-center gap-2">
                           <Input
                             value={name}
-                            onChange={(e) => updateEditAccompanyingGuestName(index, e.target.value)}
+                            onChange={(e) => updateAccompanyingGuestName(index, e.target.value, editingGuest, setEditingGuest)}
                             placeholder={`Accompanying guest ${index + 1}`}
                             className="flex-1"
                           />
@@ -508,7 +449,7 @@ export default function GuestListPage() {
                               type="button"
                               variant="ghost"
                               size="sm"
-                              onClick={() => removeEditAccompanyingGuestField(index)}
+                              onClick={() => removeAccompanyingGuestField(index, editingGuest, setEditingGuest)}
                               className="text-red-600 hover:text-red-700 px-2"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -534,42 +475,7 @@ export default function GuestListPage() {
         </Dialog>
 
         {/* Summary Stats */}
-        {guests.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card className="bg-transparent border-brand-200">
-              <CardContent className="p-4">
-                <div className="text-2xl font-bold text-brand-600">
-                  {guests.length}
-                </div>
-                <div className="text-sm text-muted-foreground">Total Guests</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-transparent border-brand-200">
-              <CardContent className="p-4">
-                <div className="text-2xl font-bold text-green-600">
-                  {guests.filter(g => g.confirmationStatus === 'confirmed').length}
-                </div>
-                <div className="text-sm text-muted-foreground">Confirmed</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-transparent border-brand-200">
-              <CardContent className="p-4">
-                <div className="text-2xl font-bold text-yellow-600">
-                  {guests.filter(g => g.confirmationStatus === 'pending').length}
-                </div>
-                <div className="text-sm text-muted-foreground">Pending Confirmation</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-transparent border-brand-200">
-              <CardContent className="p-4">
-                <div className="text-2xl font-bold text-red-600">
-                  {guests.filter(g => g.confirmationStatus === 'rejected').length}
-                </div>
-                <div className="text-sm text-muted-foreground">Rejected</div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        <GuestSummaryStats guests={guests} />
 
         {/* Guest List Table */}
         <Card className="bg-transparent border-brand-200">
@@ -590,75 +496,17 @@ export default function GuestListPage() {
                 <p>No guests added yet. Click &quot;Add Guest&quot; to get started!</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-brand-200">
-                      <th className="text-left py-2 font-medium text-foreground">Name</th>
-                      <th className="text-left py-2 font-medium text-foreground">Group</th>
-                      <th className="text-left py-2 font-medium text-foreground">Confirmed</th>
-                      <th className="text-left py-2 font-medium text-foreground">Accompanying Guests</th>
-                      <th className="text-left py-2 font-medium text-foreground">Dietary Requirements</th>
-                      <th className="text-left py-2 font-medium text-foreground">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {guests
-                      .filter(guest => !guest.primaryGuestId) // Only show primary guests
-                      .map((guest) => {
-                        const accompanyingGuests = guests.filter(g => g.primaryGuestId === guest.id);
-                        return (
-                          <tr key={guest.id} className="border-b border-brand-100 hover:bg-brand-50/50">
-                            <td className="py-3">
-                              <div>
-                                <div className="font-medium text-foreground">{guest.name}</div>
-                              </div>
-                            </td>
-                            <td className="py-3 text-sm text-foreground">{guest.group || '-'}</td>
-                            <td className="py-3">
-                              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getConfirmationStatusColor(guest.confirmationStatus)}`}>
-                                {getConfirmationIcon(guest.confirmationStatus)}
-                                {getConfirmationLabel(guest.confirmationStatus)}
-                              </span>
-                            </td>
-                            <td className="py-3 text-sm">
-                              <div>
-                                <span className="text-foreground">
-                                  {accompanyingGuests.length === 0 
-                                    ? '0 guests' 
-                                    : `+${accompanyingGuests.length} guest${accompanyingGuests.length === 1 ? '' : 's'}`
-                                  }
-                                </span>
-                              </div>
-                            </td>
-                            <td className="py-3 text-sm text-foreground">
-                              {guest.allergies || '-'}
-                            </td>
-                            <td className="py-3">
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleEditGuest(guest)}
-                                >
-                                  <Edit2 className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => setDeleteConfirmGuest(guest)}
-                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                data={primaryGuests}
+                columns={columns}
+                searchableColumns={[
+                  { id: "name", placeholder: "Search by name..." }
+                ]}
+                enableSelection={false}
+                enableColumnVisibility={true}
+                enablePagination={true}
+                defaultPageSize={10}
+              />
             )}
           </CardContent>
         </Card>

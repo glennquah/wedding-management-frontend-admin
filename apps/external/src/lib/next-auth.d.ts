@@ -1,6 +1,5 @@
-import { UserRole } from "@shared/types/enums";
 import { UserResponseDto } from "@shared/api";
-import NextAuth from "next-auth";
+import "next-auth";
 
 declare module "next-auth" {
   interface Session {
