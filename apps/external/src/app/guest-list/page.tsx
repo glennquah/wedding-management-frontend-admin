@@ -1,16 +1,17 @@
 "use client";
 
-import { CreateGuestDto } from "@shared/api";
-import { Button, DataTable, DeleteConfirmationModal, FormDialog, PageHeader } from "@shared/components";
+import { CreateGuestDto, GuestResponseDto } from "@shared/api";
+import { Button, DataTable, DeleteConfirmationModal, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, GroupSelectDropdown, PageHeader } from "@shared/components";
 import FormField from "@shared/components/FormField";
-import ResponsiveMenubar from "@shared/components/responsive-menubar";
+import { FormDialog } from "@shared/components/ui/form/form-dialog";
 import { Input } from "@shared/components/ui/form/input";
 import { SingleSelectDropdown } from "@shared/components/ui/form/singleSelectDropdown";
 import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
 import { ColumnDef } from "@tanstack/react-table";
-import { Edit2, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, Edit2, Plus, Trash2 } from "lucide-react";
 import { useGuestManager } from "../../hooks/useCRUDGuests";
 import { getConfirmationIcon, getConfirmationLabel, getConfirmationStatusColor } from "../../lib/guest-status-utils";
+import { EmailGuestModal } from "./components/EmailGuestModal";
 import GuestSummaryStats from "./components/GuestSummaryStats";
 
 export default function GuestListPage() {
@@ -19,6 +20,7 @@ export default function GuestListPage() {
     // Core data
     guests,
     primaryGuests,
+    existingGroups,
     isLoading,
     
     // Modal states
@@ -26,14 +28,14 @@ export default function GuestListPage() {
     editingGuest,
     deleteConfirmGuest,
     isSubmitting,
+    emailModalGuest,
+    
     
     // Form data
     newGuest,
     setNewGuest,
     setEditingGuest,
     
-    // Constants
-    confirmationStatusOptions,
     
     // Form field management
     addAccompanyingGuestField,
@@ -52,10 +54,12 @@ export default function GuestListPage() {
     closeEditGuestModal,
     openDeleteConfirmModal,
     closeDeleteConfirmModal,
+    closeEmailModal,
+    handleSendEmail,
   } = useGuestManager();
 
   // Column definitions for DataTable
-  const columns: ColumnDef<CreateGuestDto>[] = [
+  const columns: ColumnDef<GuestResponseDto>[] = [
     {
       accessorKey: "name",
       header: "Name",
@@ -71,10 +75,17 @@ export default function GuestListPage() {
       ),
     },
     {
+      accessorKey: "email",
+      header: "Email",
+      cell: ({ row }) => (
+        <div className="text-sm text-foreground">{row.getValue("email") || '-'}</div>
+      ),
+    },
+    {
       accessorKey: "confirmationStatus",
       header: "Confirmed",
       cell: ({ row }) => {
-        const status = row.getValue("confirmationStatus") as CreateGuestDto.confirmationStatus;
+        const status = row.getValue("confirmationStatus") as GuestResponseDto.confirmationStatus;
         return (
           <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getConfirmationStatusColor(status)}`}>
             {getConfirmationIcon(status)}
@@ -89,13 +100,33 @@ export default function GuestListPage() {
       cell: ({ row }) => {
         const guest = row.original;
         const accompanyingGuests = guests.filter(g => g.primaryGuestId === guest.id);
+        
+        if (accompanyingGuests.length === 0) {
+          return (
+            <div className="text-sm text-foreground">0 guests</div>
+          );
+        }
+
         return (
-          <div className="text-sm text-foreground">
-            {accompanyingGuests.length === 0 
-              ? '0 guests' 
-              : `+${accompanyingGuests.length} guest${accompanyingGuests.length === 1 ? '' : 's'}`
-            }
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto p-1 text-sm font-normal justify-start"
+              >
+                +{accompanyingGuests.length} guest{accompanyingGuests.length === 1 ? '' : 's'}
+                <ChevronDown className="ml-1 h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              {accompanyingGuests.map((accompanyingGuest, index) => (
+                <DropdownMenuItem key={accompanyingGuest.id || index} className="cursor-default">
+                  <span className="font-medium">{accompanyingGuest.name}</span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         );
       },
     },
@@ -134,12 +165,13 @@ export default function GuestListPage() {
     },
   ];
 
+
   // Add/Edit Guest Form Fields
   const guestFormFields = (
-    guest: any,
-    setGuest: React.Dispatch<React.SetStateAction<any>>
+    guest: Partial<CreateGuestDto & { id?: number; accompanyingGuestNames?: string[] }>,
+    setGuest: React.Dispatch<React.SetStateAction<Partial<CreateGuestDto & { id?: number; accompanyingGuestNames?: string[] }>>>
   ) => [
-    <div key="name" className="md:col-span-1">
+    <div key="name" className="md:col-span-2">
       <FormField
         label="Name *"
         id="name"
@@ -151,14 +183,25 @@ export default function GuestListPage() {
       />
     </div>,
 
-    <div key="group" className="md:col-span-1">
+    <div key="group" className="md:col-span-2">
+      <GroupSelectDropdown
+        label="Group *"
+        existingGroups={existingGroups}
+        selected={guest.group || ""}
+        setSelected={(group) => setGuest({ ...guest, group })}
+        placeholder="Select or add group"
+      />
+    </div>,
+
+    <div key="email" className="md:col-span-2">
       <FormField
-        label="Group"
-        id="group"
-        type="text"
-        value={guest.group || ""}
-        onChange={(e) => setGuest({ ...guest, group: e.target.value })}
-        placeholder="Family, Friends, etc."
+        label="Email *"
+        id="email"
+        type="email"
+        value={guest.email || ""}
+        onChange={(e) => setGuest({ ...guest, email: e.target.value })}
+        required
+        placeholder="Guest email address"
       />
     </div>,
 
@@ -184,7 +227,7 @@ export default function GuestListPage() {
         setSelected={(selected) =>
           setGuest({
             ...guest,
-            confirmationStatus: selected as CreateGuestDto["confirmationStatus"],
+            confirmationStatus: selected as CreateGuestDto.confirmationStatus,
           })
         }
         placeholder="Select confirmation status"
@@ -240,7 +283,6 @@ export default function GuestListPage() {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
-      <ResponsiveMenubar />
       {!isMobile && <div className="mt-[72px] w-full"></div>}
       
       <div className="container mx-auto px-4 py-8">
@@ -263,7 +305,9 @@ export default function GuestListPage() {
           onCancel={closeAddGuestModal}
           submitButtonText="Add Guest"
           formFields={guestFormFields(newGuest, setNewGuest)}
+          noOfColumns={2}
         />
+
 
         {/* Edit Guest Modal */}
         {editingGuest && (
@@ -275,7 +319,8 @@ export default function GuestListPage() {
             onSubmit={handleUpdateGuest}
             onCancel={closeEditGuestModal}
             submitButtonText="Update Guest"
-            formFields={guestFormFields(editingGuest, setEditingGuest)}
+            formFields={guestFormFields(editingGuest!, setEditingGuest as React.Dispatch<React.SetStateAction<Partial<CreateGuestDto & { id?: number; accompanyingGuestNames?: string[] }>>>)}
+            noOfColumns={2}
           />
         )}
 
@@ -284,10 +329,13 @@ export default function GuestListPage() {
 
         {/* Guest List Table */}
         <DataTable
-          data={primaryGuests as CreateGuestDto[]}
+          data={primaryGuests.map(guest => ({
+            ...guest,
+            email: guest.email || ''
+          }))}
           columns={columns}
           searchableColumns={[
-            { id: "name", placeholder: "Search by name..." }
+            { id: "name", placeholder: "Seacrch by name..." }
           ]}
           enableSelection={false}
           enableColumnVisibility={true}
@@ -321,6 +369,17 @@ export default function GuestListPage() {
           onConfirm={confirmDeleteGuest}
           onCancel={closeDeleteConfirmModal}
         />
+
+        {/* Email Guest Modal */}
+        {emailModalGuest && (
+          <EmailGuestModal
+            open={!!emailModalGuest}
+            onOpenChange={closeEmailModal}
+            guestName={emailModalGuest.name}
+            guestEmail={emailModalGuest.email}
+            onSendEmail={handleSendEmail}
+          />
+        )}
       </div>
     </div>
   );

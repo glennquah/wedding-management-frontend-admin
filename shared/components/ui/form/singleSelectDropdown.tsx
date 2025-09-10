@@ -27,7 +27,7 @@ export const SingleSelectDropdown: React.FC<SingleSelectDropdownProps> = ({
         {selected ? selected.charAt(0).toUpperCase() + selected.slice(1) : placeholder}
         <ChevronDown className="ml-2 w-4 h-4 text-gray-400" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-full">
+      <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-full">
         {options && options.map((opt) => (
           <DropdownMenuItem
             key={opt}

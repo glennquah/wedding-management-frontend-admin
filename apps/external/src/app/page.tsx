@@ -26,22 +26,6 @@ export default function LandingPage() {
   const featuresRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  // useEffect(() => {
-  //   const fetchHello = async () => {
-  //     try {
-  //       const response = await AppService.appControllerGetHello();
-  //       setApiMessage(response);
-  //       setIsLoading(false);
-  //     } catch (error) {
-  //       console.error("Failed to fetch API:", error);
-  //       setApiMessage("Failed to load API message");
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  //   fetchHello();
-  // }, []);
-
   useEffect(() => {
     const interval = setInterval(() => {
       setFade(false);

@@ -1,21 +1,7 @@
 import { CreateGuestDto } from "@shared/api";
 import { Card, CardContent } from "@shared/components/ui/card";
 
-type Guest = {
-  id: number;
-  name: string;
-  allergies?: string;
-  group?: string;
-  confirmationStatus: CreateGuestDto.confirmationStatus;
-  weddingId: number;
-  primaryGuestId?: number;
-};
-
-interface GuestSummaryStatsProps {
-  guests: Guest[];
-}
-
-export default function GuestSummaryStats({ guests }: GuestSummaryStatsProps) {
+export default function GuestSummaryStats({ guests }: { guests: { confirmationStatus: CreateGuestDto.confirmationStatus }[] }) {
   if (guests.length === 0) return null;
 
   const summaryStats = [

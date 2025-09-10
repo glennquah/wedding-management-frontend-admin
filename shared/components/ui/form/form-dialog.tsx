@@ -12,6 +12,7 @@ interface FormDialogProps {
   onCancel: () => void;
   submitButtonText: string;
   formFields: ReactNode[];
+  noOfColumns?: number;
 }
 
 export function FormDialog({
@@ -22,7 +23,9 @@ export function FormDialog({
   onSubmit,
   onCancel,
   submitButtonText,
-  formFields: FormFields,
+  formFields,
+  noOfColumns = 1,
+
 }: FormDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -30,12 +33,8 @@ export function FormDialog({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {FormFields.map((field, index) => (
-            <div key={index} className="md:col-span-1">
-              {field}
-            </div>
-          ))}
+        <div className={`grid grid-cols-1 md:grid-cols-${noOfColumns} gap-4`}>
+          {formFields}
         </div>
         <DialogFooter>
           <Button variant="secondary" onClick={onCancel} disabled={isSubmitting}>

@@ -236,8 +236,8 @@ function DataTable<TData>({
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
     enableSortingRemoval: false,
-    getPaginationRowModel: enablePagination ? getPaginationRowModel() : undefined,
-    onPaginationChange: enablePagination ? setPagination : undefined,
+    getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: setPagination,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     getFilteredRowModel: getFilteredRowModel(),
@@ -245,7 +245,7 @@ function DataTable<TData>({
     onRowSelectionChange: setRowSelection,
     state: {
       sorting,
-      ...(enablePagination && { pagination }),
+      pagination,
       columnFilters,
       columnVisibility,
       rowSelection,
@@ -445,7 +445,19 @@ function DataTable<TData>({
                 <Label htmlFor={`${id}-page-size`}>Rows per page</Label>
                 <Select
                   value={table.getState().pagination.pageSize.toString()}
-                  onValueChange={(value) => table.setPageSize(Number(value))}
+                  onValueChange={(value) => {
+                    const newPageSize = Number(value)
+                    const currentPageIndex = table.getState().pagination.pageIndex
+                    const totalRows = table.getFilteredRowModel().rows.length
+                    const maxPageIndex = Math.max(0, Math.ceil(totalRows / newPageSize) - 1)
+                    
+                    table.setPageSize(newPageSize)
+                    
+                    // Reset to page 0 if current page would be invalid
+                    if (currentPageIndex > maxPageIndex) {
+                      table.setPageIndex(0)
+                    }
+                  }}
                 >
                   <SelectTrigger id={`${id}-page-size`} className="w-fit border-border ">
                     <SelectValue />
@@ -479,6 +491,7 @@ function DataTable<TData>({
                   variant="darkOutline"
                   onClick={() => table.firstPage()}
                   disabled={!table.getCanPreviousPage()}
+                  aria-label="Go to first page"
                 >
                   <ChevronFirstIcon size={16} />
                 </Button>
@@ -487,6 +500,7 @@ function DataTable<TData>({
                   variant="darkOutline"
                   onClick={() => table.previousPage()}
                   disabled={!table.getCanPreviousPage()}
+                  aria-label="Go to previous page"
                 >
                   <ChevronLeftIcon size={16} />
                 </Button>
@@ -495,6 +509,7 @@ function DataTable<TData>({
                   variant="darkOutline"
                   onClick={() => table.nextPage()}
                   disabled={!table.getCanNextPage()}
+                  aria-label="Go to next page"
                 >
                   <ChevronRightIcon size={16} />
                 </Button>
@@ -503,6 +518,7 @@ function DataTable<TData>({
                   variant="darkOutline"
                   onClick={() => table.lastPage()}
                   disabled={!table.getCanNextPage()}
+                  aria-label="Go to last page"
                 >
                   <ChevronLastIcon size={16} />
                 </Button>
