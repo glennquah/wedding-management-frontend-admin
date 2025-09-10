@@ -46,7 +46,7 @@ export default function LoginPage() {
           <div className="mt-4 gap-2 flex flex-col">
             <Label htmlFor="username">Username</Label>
             <Input
-              type="username"
+              type="email"
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
