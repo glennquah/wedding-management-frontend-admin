@@ -40,9 +40,9 @@ import {
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "./dropdown-menu"
-import { Input } from "./input"
-import { Label } from "./label"
+} from "./form/dropdown-menu"
+import { Input } from "./form/input"
+import { Label } from "./form/label"
 import {
   Select,
   SelectContent,
@@ -549,3 +549,4 @@ export {
 }
 
 export type { DataTableProps }
+

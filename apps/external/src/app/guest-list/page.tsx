@@ -2,7 +2,10 @@
 
 import { CreateGuestDto } from "@shared/api";
 import { Button, DataTable, DeleteConfirmationModal, FormDialog, PageHeader } from "@shared/components";
+import FormField from "@shared/components/FormField";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
+import { Input } from "@shared/components/ui/form/input";
+import { SingleSelectDropdown } from "@shared/components/ui/form/singleSelectDropdown";
 import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
 import { ColumnDef } from "@tanstack/react-table";
 import { Edit2, Plus, Trash2 } from "lucide-react";
@@ -131,6 +134,110 @@ export default function GuestListPage() {
     },
   ];
 
+  // Add/Edit Guest Form Fields
+  const guestFormFields = (
+    guest: any,
+    setGuest: React.Dispatch<React.SetStateAction<any>>
+  ) => [
+    <div key="name" className="md:col-span-1">
+      <FormField
+        label="Name *"
+        id="name"
+        type="text"
+        value={guest.name || ""}
+        onChange={(e) => setGuest({ ...guest, name: e.target.value })}
+        required
+        placeholder="Guest Name"
+      />
+    </div>,
+
+    <div key="group" className="md:col-span-1">
+      <FormField
+        label="Group"
+        id="group"
+        type="text"
+        value={guest.group || ""}
+        onChange={(e) => setGuest({ ...guest, group: e.target.value })}
+        placeholder="Family, Friends, etc."
+      />
+    </div>,
+
+    <div key="allergies" className="md:col-span-2">
+      <FormField
+        label="Dietary Requirements"
+        id="allergies"
+        type="text"
+        value={guest.allergies || ""}
+        onChange={(e) => setGuest({ ...guest, allergies: e.target.value })}
+        placeholder="Vegetarian, Gluten-Free, etc."
+      />
+    </div>,
+
+    <div key="confirmationStatus" className="md:col-span-2">
+      <SingleSelectDropdown
+        label="Confirmation Status"
+        options={Object.values(CreateGuestDto.confirmationStatus)}
+        selected={
+          guest.confirmationStatus ||
+          CreateGuestDto.confirmationStatus.PENDING
+        }
+        setSelected={(selected) =>
+          setGuest({
+            ...guest,
+            confirmationStatus: selected as CreateGuestDto["confirmationStatus"],
+          })
+        }
+        placeholder="Select confirmation status"
+      />
+    </div>,
+
+    <div key="accompanyingGuests" className="md:col-span-2">
+      <div className="flex justify-between items-center mb-2">
+        <label className="block text-sm font-medium text-foreground">
+          Accompanying Guests
+        </label>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => addAccompanyingGuestField(guest, setGuest)}
+          className="text-brand-600 hover:text-brand-700"
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Add Guest
+        </Button>
+      </div>
+      <div className="space-y-2">
+        {(guest.accompanyingGuestNames || [""]).map((name: string, index: number) => (
+          <div key={index} className="flex items-center gap-2">
+            <Input
+              value={name}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                updateAccompanyingGuestName(index, e.target.value, guest, setGuest)
+              }
+              placeholder={`Accompanying guest ${index + 1}`}
+              className="flex-1"
+            />
+            {(guest.accompanyingGuestNames?.length || 0) > 1 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  removeAccompanyingGuestField(index, guest, setGuest)
+                }
+                className="text-red-600 hover:text-red-700 px-2"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>,
+  ];
+
+
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
       <ResponsiveMenubar />
@@ -155,18 +262,7 @@ export default function GuestListPage() {
           onSubmit={handleAddGuest}
           onCancel={closeAddGuestModal}
           submitButtonText="Add Guest"
-          guest={{
-            name: newGuest.name || "",
-            group: newGuest.group || "",
-            allergies: newGuest.allergies || "",
-            confirmationStatus: newGuest.confirmationStatus || CreateGuestDto.confirmationStatus.PENDING,
-            accompanyingGuestNames: newGuest.accompanyingGuestNames || [""]
-          }}
-          onGuestChange={(updates) => setNewGuest({...newGuest, ...updates})}
-          onAddAccompanyingGuest={() => addAccompanyingGuestField(newGuest, setNewGuest)}
-          onRemoveAccompanyingGuest={(index) => removeAccompanyingGuestField(index, newGuest, setNewGuest)}
-          onUpdateAccompanyingGuestName={(index, name) => updateAccompanyingGuestName(index, name, newGuest, setNewGuest)}
-          confirmationStatusOptions={confirmationStatusOptions}
+          formFields={guestFormFields(newGuest, setNewGuest)}
         />
 
         {/* Edit Guest Modal */}
@@ -179,18 +275,7 @@ export default function GuestListPage() {
             onSubmit={handleUpdateGuest}
             onCancel={closeEditGuestModal}
             submitButtonText="Update Guest"
-            guest={{
-              name: editingGuest.name,
-              group: editingGuest.group || "",
-              allergies: editingGuest.allergies || "",
-              confirmationStatus: editingGuest.confirmationStatus || CreateGuestDto.confirmationStatus.PENDING,
-              accompanyingGuestNames: editingGuest.accompanyingGuestNames || [""]
-            }}
-            onGuestChange={(updates) => setEditingGuest({...editingGuest, ...updates})}
-            onAddAccompanyingGuest={() => addAccompanyingGuestField(editingGuest, (guest) => setEditingGuest(guest as typeof editingGuest))}
-            onRemoveAccompanyingGuest={(index) => removeAccompanyingGuestField(index, editingGuest, (guest) => setEditingGuest(guest as typeof editingGuest))}
-            onUpdateAccompanyingGuestName={(index, name) => updateAccompanyingGuestName(index, name, editingGuest, (guest) => setEditingGuest(guest as typeof editingGuest))}
-            confirmationStatusOptions={confirmationStatusOptions}
+            formFields={guestFormFields(editingGuest, setEditingGuest)}
           />
         )}
 
