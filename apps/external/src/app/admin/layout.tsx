@@ -1,19 +1,10 @@
-"use client";
+'use client';
 
-import { useSession } from "next-auth/react";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@shared/components/ui/sidebar";
-import AdminSidebar from "./AdminSidebar";
+import AdminSidebar from './AdminSidebar';
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@shared/components/ui/sidebar';
+import { useSession } from 'next-auth/react';
 
-
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
 
   if (!session || session.user.role !== 'admin') {

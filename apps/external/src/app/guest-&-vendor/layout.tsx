@@ -1,13 +1,9 @@
-"use client";
+'use client';
 
-import ResponsiveMenubar from "@shared/components/responsive-menubar";
-import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
+import ResponsiveMenubar from '@shared/components/responsive-menubar';
+import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
 
-export default function GuestVendorLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function GuestVendorLayout({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobileScreen();
 
   return (

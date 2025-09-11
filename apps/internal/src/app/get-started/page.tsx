@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import ResponsiveMenubar from "@shared/components/responsive-menubar";
-import { Button } from "@shared/components/ui/button";
-import { Input } from "@shared/components/ui/form/input";
-import { Label } from "@shared/components/ui/form/label";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
+import ResponsiveMenubar from '@shared/components/responsive-menubar';
+import { Button } from '@shared/components/ui/button';
+import { Input } from '@shared/components/ui/form/input';
+import { Label } from '@shared/components/ui/form/label';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function GetStartedPage() {
   const NEXTAUTH_URL = process.env.NEXT_PUBLIC_NEXTAUTH_URL;
   const router = useRouter();
-  const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [name, setName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState<'couple' | 'vendor' | null>(null);
 
@@ -23,29 +23,29 @@ export default function GetStartedPage() {
     setLoading(true);
 
     try {
-      const register_res = await fetch(NEXTAUTH_URL + "/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const register_res = await fetch(NEXTAUTH_URL + '/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password  }),
       });
-      if (!register_res.ok) throw new Error("Signup failed");
+      if (!register_res.ok) throw new Error('Signup failed');
 
-      toast.success("Signup Successful.")
+      toast.success('Signup Successful.')
 
-      const signin_res = await signIn("credentials", {
+      const signin_res = await signIn('credentials', {
         username: email, 
         password,
         redirect: false,
       });
 
       if (signin_res?.error) {
-        toast.error("Login failed after signup: " + signin_res.error);
+        toast.error('Login failed after signup: ' + signin_res.error);
       } else {
-        router.push("/user");
+        router.push('/user');
       }
     } catch (err) {
       console.log(err)
-      toast.error("Signup Failed.")
+      toast.error('Signup Failed.')
     } finally {
       setLoading(false);
     }
@@ -114,11 +114,11 @@ export default function GetStartedPage() {
             </div>
           </div>
           <Button type="submit" className="w-full mt-4" disabled={loading}>
-            {loading ? "Creating..." : "Sign Up"}
+            {loading ? 'Creating...' : 'Sign Up'}
           </Button>
         </form>
         <p className="text-center text-sm text-gray-500 mt-4">
-          Already have an account?{" "}
+          Already have an account?{' '}
           <a href="/login" className="text-brand-600 font-medium">
             Sign In
           </a>
