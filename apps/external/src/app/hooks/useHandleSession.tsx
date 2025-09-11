@@ -1,4 +1,4 @@
-import { AuthService, CreateVendorDto, UserRole, WeddingService, WeddingStyle, WeddingType } from "@shared/api";
+import { AuthService, CreateVendorDto, CreateAdminDto, UserRole, WeddingService, WeddingStyle, WeddingType, BudgetBucket, GuestCountBucket } from "@shared/api";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -8,25 +8,78 @@ export function useHandleSession() {
   const NEXTAUTH_URL = process.env.NEXT_PUBLIC_NEXTAUTH_URL;
 
   const handleSignUpAdmin = async (
-        e: React.FormEvent,
         {
         email,
         password,
-        role,
         name,
+        weddingType,
+        budgetBucket,
+        guestCountBucket,
+        preferredStyle,
+        preferredServices,
         }: {
         email: string;
         password: string;
-        role: string | null;
         name: string;
+        weddingType: WeddingType;
+        budgetBucket: BudgetBucket;
+        guestCountBucket: GuestCountBucket;
+        preferredStyle: WeddingStyle;
+        preferredServices: WeddingService[];
         },
         setLoading: (loading: boolean) => void
     ) => {
-        e.preventDefault();
         setLoading(true);
         try {
+            if (!weddingType || !budgetBucket || !guestCountBucket || !preferredStyle || !preferredServices) {
+                throw new Error(`Missing field.`);
+            }
+            await AuthService.authControllerRegisterAdmin({
+                email,
+                password,
+                name,
+                role: UserRole.ADMIN,
+                isCouple: true,
+                onboardedDate: new Date().toISOString(),
+                weddingType,
+                budgetBucket,
+                guestCountBucket,
+                preferredStyle,
+                preferredServices,
+            } satisfies CreateAdminDto);
+
+            toast.success("Signup Successful.");
+            const signin_res = await signIn("credentials", {
+                username: email,
+                password,
+                redirect: false,
+        });
+        if (signin_res?.error) {
+            toast.error("Login failed after signup: " + signin_res.error);
+        } else {
+            router.push("/user");
+        }
         } catch (err) {
-            console.log(err)
+            console.log(err.message);
+            let errorMessage = "An unknown error occurred";
+
+            try {
+                const bodyStart = err.message.indexOf("{");
+            if (bodyStart !== -1) {
+                const bodyString = err.message.slice(bodyStart);
+                const body = JSON.parse(bodyString);
+                if (body.message) {
+                errorMessage = body.message;
+                }
+            }
+            } catch {
+                // fallback to full message if parsing fails
+                errorMessage = err.message;
+            }
+
+            toast.error(`Signup Failed. ${errorMessage}`);
+        } finally {
+            setLoading(false);
         }
     };
 

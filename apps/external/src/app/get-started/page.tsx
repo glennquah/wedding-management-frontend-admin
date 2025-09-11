@@ -16,9 +16,11 @@ import { useSessionStore } from "../store/sessionStore";
 export default function GetStartedPage() {
   const router = useRouter();
   // User Specific Fields
-  const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const { name: savedName, email: savedEmail, password: savedPassword } = useSessionStore();
+
+  const [name, setName] = useState<string>(savedName || "");
+  const [email, setEmail] = useState<string>(savedEmail || "");
+  const [password, setPassword] = useState<string>(savedPassword || "");
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState<UserRole>();
 
