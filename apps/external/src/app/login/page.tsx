@@ -5,13 +5,8 @@ import { Button } from "@shared/components/ui/button";
 import { Input } from "@shared/components/ui/form/input";
 import { Label } from "@shared/components/ui/form/label";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
-import { useHandleSession } from "../hooks/useHandleSession";
-import { Button } from "@shared/components/ui/button";
-import { Input } from "@shared/components/ui/form/input";
-import { Label } from "@shared/components/ui/form/label";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { toast } from "sonner";
 
 export default function LoginPage() {
@@ -48,7 +43,7 @@ export default function LoginPage() {
         <ResponsiveMenubar />
       <div className="w-full max-w-lg bg-white p-8 mt-[72px] rounded-2xl shadow-md">
         <h2 className="text-3xl font-bold text-center mb-8">Login to your account</h2>
-        <form onSubmit={e => handleSignIn(e, { username, password }, setLoading)} className="space-y-4">
+        <form onSubmit={handleSignIn} className="space-y-4">
           <div className="mt-4 gap-2 flex flex-col">
             <Label htmlFor="username">Username</Label>
             <Input

@@ -154,7 +154,7 @@ export default function GetStartedCouplePage() {
     switch (step.key) {
       case 'weddingType':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-4 md:grid-cols-2 gap-4">
             {WEDDING_TYPES.map((type) => (
               <Card
                 key={type.value}
@@ -184,7 +184,7 @@ export default function GetStartedCouplePage() {
 
       case 'budgetBucket':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-4 md:grid-cols-2 gap-4">
             {BUDGET_BUCKETS.map((budget) => (
               <Card
                 key={budget.value}
@@ -214,7 +214,7 @@ export default function GetStartedCouplePage() {
 
       case 'guestCountBucket':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {GUEST_COUNT_BUCKETS.map((count) => (
               <Card
                 key={count.value}
@@ -244,7 +244,7 @@ export default function GetStartedCouplePage() {
 
       case 'preferredStyle':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-4 md:grid-cols-2 gap-4">
             {WEDDING_STYLES.map((style) => (
               <Card
                 key={style.value}
@@ -274,7 +274,7 @@ export default function GetStartedCouplePage() {
 
       case 'preferredServices':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {WEDDING_SERVICES.map((service) => (
               <Card
                 key={service.value}

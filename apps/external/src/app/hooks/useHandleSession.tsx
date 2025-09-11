@@ -60,21 +60,25 @@ export function useHandleSession() {
             router.push("/user");
         }
         } catch (err) {
-            console.log(err.message);
+            console.log(err);
             let errorMessage = "An unknown error occurred";
 
             try {
-                const bodyStart = err.message.indexOf("{");
-            if (bodyStart !== -1) {
-                const bodyString = err.message.slice(bodyStart);
-                const body = JSON.parse(bodyString);
-                if (body.message) {
-                errorMessage = body.message;
+                if (err instanceof Error) {
+                    const bodyStart = err.message.indexOf("{");
+                    if (bodyStart !== -1) {
+                        const bodyString = err.message.slice(bodyStart);
+                        const body = JSON.parse(bodyString);
+                        if (body.message) {
+                        errorMessage = body.message;
+                        }
+                    }
+                } else if (typeof err == "string") {
+                    errorMessage = err;
                 }
-            }
             } catch {
                 // fallback to full message if parsing fails
-                errorMessage = err.message;
+                errorMessage = errorMessage;
             }
 
             toast.error(`Signup Failed. ${errorMessage}`);

@@ -49,8 +49,4 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
           </DropdownMenuContent>
         </DropdownMenu>
   </div>
-<<<<<<< HEAD
 );
-=======
-);
->>>>>>> origin/main
