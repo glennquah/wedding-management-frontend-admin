@@ -39,18 +39,36 @@ export default function GetStartedPage() {
       <ResponsiveMenubar />
       <div className="w-full max-w-lg bg-white p-8 rounded-2xl my-[100px] shadow-md">
         <h2 className="text-3xl font-bold text-center mb-8">Create an account</h2>
-        <form onSubmit={e => handleSignUpVendor(e, {
-          email,
-          password,
-          role,
-          name,
-          serviceOffered,
-          styleOffered,
-          weddingTypes,
-          vendorWebsite,
-          uenNumber,
-          bio,
-        }, setLoading)} className="space-y-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+
+            // Format vendorWebsite to include https:// if missing
+            const formattedVendorWebsite = vendorWebsite?.trim()
+              ? /^https?:\/\//i.test(vendorWebsite)
+                ? vendorWebsite
+                : `https://${vendorWebsite}`
+              : "";
+
+            handleSignUpVendor(
+              e,
+              {
+                email,
+                password,
+                role,
+                name,
+                serviceOffered,
+                styleOffered,
+                weddingTypes,
+                vendorWebsite: formattedVendorWebsite, // use formatted version
+                uenNumber,
+                bio,
+              },
+              setLoading
+            );
+          }}
+          className="space-y-4"
+        >
           <FormField
             label="Name"
             id="name"
@@ -126,7 +144,7 @@ export default function GetStartedPage() {
             <FormField
               label="Vendor Website"
               id="vendorWebsite"
-              type="url"
+              type="text" // use type=text for UX since users do not need to type https://
               value={vendorWebsite}
               onChange={(e) => setVendorWebsite(e.target.value)}
               placeholder="Enter your website"
@@ -142,19 +160,29 @@ export default function GetStartedPage() {
             />            
             </>
           )}
-          <Button
-            type={role === 'admin' ? "button" : "submit"}
-            className="w-full mt-4"
-            disabled={loading}
-            onClick={() => {
-              if (role === 'admin') useSessionStore.getState().setEmail(email); 
-              useSessionStore.getState().setName(name); 
-              useSessionStore.getState().setPassword(password); 
-              router.push("/get-started/couple");
-            }}
-          >
-            {role === 'admin' ? "Next" : loading ? "Creating..." : "Sign Up"}
-          </Button>
+          {role === "admin" ? (
+            <Button
+              type="button"
+              className="w-full mt-4"
+              disabled={loading}
+              onClick={() => {
+                useSessionStore.getState().setEmail(email);
+                useSessionStore.getState().setName(name);
+                useSessionStore.getState().setPassword(password);
+                router.push("/get-started/couple");
+              }}
+            >
+              Next
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              className="w-full mt-4"
+              disabled={loading}
+            >
+              {loading ? "Creating..." : "Sign Up"}
+            </Button>
+          )}
         </form>
         <p className="text-center text-sm text-gray-500 mt-4">
           Already have an account?{" "}

@@ -57,7 +57,7 @@ export function useHandleSession() {
         if (signin_res?.error) {
             toast.error("Login failed after signup: " + signin_res.error);
         } else {
-            router.push("/user");
+            router.push("/user"); // why is this routing to /user not /admin?
         }
         } catch (err) {
             console.log(err);
@@ -117,39 +117,59 @@ export function useHandleSession() {
         e.preventDefault();
         setLoading(true);
         try {
-        if (!role || !serviceOffered || !styleOffered || !weddingTypes) {
-            throw new Error(`Missing field.`);
-        }
-        await AuthService.authControllerRegisterVendor({
-            email,
-            password,
-            role,
-            name,
-            serviceOffered,
-            styleOffered,
-            weddingTypes,
-            vendorWebsite,
-            uenNumber,
-            bio,
-            onboardedDate: new Date().toISOString(),
-        } satisfies CreateVendorDto)
+            if (!role || !serviceOffered || !styleOffered || !weddingTypes) {
+                throw new Error(`Missing field.`);
+            }
+            await AuthService.authControllerRegisterVendor({
+                email,
+                password,
+                role,
+                name,
+                serviceOffered,
+                styleOffered,
+                weddingTypes,
+                vendorWebsite,
+                uenNumber,
+                bio,
+                onboardedDate: new Date().toISOString(),
+            } satisfies CreateVendorDto)
 
-        toast.success("Signup Successful.");
-        const signin_res = await signIn("credentials", {
-            username: email,
-            password,
-            redirect: false,
-        });
-        if (signin_res?.error) {
-            toast.error("Login failed after signup: " + signin_res.error);
-        } else {
-            router.push("/user");
-        }
+            toast.success("Signup Successful.");
+            const signin_res = await signIn("credentials", {
+                username: email,
+                password,
+                redirect: false,
+            });
+            if (signin_res?.error) {
+                toast.error("Login failed after signup: " + signin_res.error);
+            } else {
+                router.push("/user"); // same for this - why is this routing to /user not /vendor?
+            }
         } catch (err) {
-        console.log(err);
-        toast.error(`Signup Failed. ${err instanceof Error && err.message}.`);
+            console.log(err);
+            let errorMessage = "An unknown error occurred";
+
+            try {
+                if (err instanceof Error) {
+                    const bodyStart = err.message.indexOf("{");
+                    if (bodyStart !== -1) {
+                        const bodyString = err.message.slice(bodyStart);
+                        const body = JSON.parse(bodyString);
+                        if (body.message) {
+                        errorMessage = body.message;
+                        }
+                    }
+                } else if (typeof err == "string") {
+                    errorMessage = err;
+                }
+            } catch {
+                // fallback to full message if parsing fails
+                errorMessage = errorMessage;
+            }
+
+            toast.error(`Signup Failed. ${errorMessage}`);
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
     };
 
@@ -165,7 +185,7 @@ export function useHandleSession() {
         });
         if (!res?.ok) throw new Error("Signin failed");
         toast("Successfully Login.")
-        router.push("/user");
+        router.push("/user"); 
         } catch (err) {
         console.log(err)
         } finally {
