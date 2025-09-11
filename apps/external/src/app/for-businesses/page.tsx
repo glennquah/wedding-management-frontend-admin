@@ -3,7 +3,6 @@
 import { Users, ClipboardList, LayoutGrid } from "lucide-react";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
-import { ClipboardList, LayoutGrid, Users } from "lucide-react";
 import ClosingCTA from "../components/unauthenticated/closing-cta";
 import FeaturesPanel from "../components/unauthenticated/features-panel";
 import Hero from "../components/unauthenticated/hero";
