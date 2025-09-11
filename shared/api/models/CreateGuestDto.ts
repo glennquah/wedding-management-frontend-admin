@@ -4,6 +4,10 @@
 /* eslint-disable */
 export type CreateGuestDto = {
     /**
+     * The ID of the guest
+     */
+    id?: number;
+    /**
      * The name of the guest
      */
     name: string;
@@ -27,6 +31,10 @@ export type CreateGuestDto = {
      * Confirmation status of the guest
      */
     confirmationStatus?: CreateGuestDto.confirmationStatus;
+    /**
+     * Names of accompanying guests
+     */
+    accompanyingGuestNames?: Array<string>;
 };
 export namespace CreateGuestDto {
     /**

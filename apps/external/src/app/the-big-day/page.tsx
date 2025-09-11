@@ -8,18 +8,13 @@ import {
   Heart,
   Images,
 } from "lucide-react";
-import ResponsiveMenubar from "@shared/components/responsive-menubar";
-import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
 import Hero from "../components/unauthenticated/hero";
 import FeaturesPanel from "../components/unauthenticated/features-panel";
 import ClosingCTA from "../components/unauthenticated/closing-cta";
 
 export default function TheBigDayPage() {
-  const isMobile = useIsMobileScreen();
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-brand-100 to-white text-gray-800 font-sans">
-      <ResponsiveMenubar />
-      {!isMobile && <div className="mt-[72px] w-full"></div>}
+    <div className="text-gray-800 font-sans">
       {/* Hero Section */}
       <Hero img_src="/images/the-big-day.jpg" header="Make the Big Day Seamless." subheader="From real-time check-ins to digital angbaos and live photo uploads —
             ensure your wedding day flows effortlessly and memories last forever." />

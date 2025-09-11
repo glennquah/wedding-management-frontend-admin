@@ -1,33 +1,37 @@
 
+
 > @wedding/external@0.1.0 build
 > next build
 
- ⚠ Warning: Found multiple lockfiles. Selecting /Users/quahhanrongglenn/package-lock.json.
-   Consider removing the lockfiles at:
-   * /Users/quahhanrongglenn/Desktop/github projects/capstone/wedding-management-frontend/package-lock.json
+[1G[0K   [1m[38;2;173;127;168m▲ Next.js 15.4.6[39m[22m
 
-   ▲ Next.js 15.4.6
+ [37m[1m [22m[39m Creating an optimized production build ...
+ [32m[1m✓[22m[39m Compiled successfully in 1000ms
+[?25l [37m[1m [22m[39m Linting and checking validity of types  [36m.[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m..[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m...[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m.[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m..[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m...[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m.[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m..[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m...[39m[2K[1G[?25h [37m[1m [22m[39m Linting and checking validity of types     [32m[1m✓[22m[39m Linting and checking validity of types 
+[?25l [37m[1m [22m[39m Collecting page data  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting page data  [36m..[39m[2K[1G[?25h [37m[1m [22m[39m Collecting page data     [32m[1m✓[22m[39m Collecting page data 
+[?25l [37m[1m [22m[39m Finalizing page optimization  [36m.[39m[?25l [37m[1m [22m[39m Collecting build traces  [36m.[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m..[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m...[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m...[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m.[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m..[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m...[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m...[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m.[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m..[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m...[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m...[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m.[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m..[39m[2K[1G[?25h [37m[1m [22m[39m Collecting build traces     [32m[1m✓[22m[39m Collecting build traces 
+[2K[1G[?25h [37m[1m [22m[39m Finalizing page optimization     [32m[1m✓[22m[39m Finalizing page optimization 
 
-   Creating an optimized production build ...
- ✓ Compiled successfully in 1000ms
-   Linting and checking validity of types ...
-   Collecting page data ...
-   Generating static pages (0/5) ...
-   Generating static pages (1/5) 
-   Generating static pages (2/5) 
-   Generating static pages (3/5) 
- ✓ Generating static pages (5/5)
-   Finalizing page optimization ...
-   Collecting build traces ...
-
-Route (app)                                 Size  First Load JS
-┌ ○ /                                      27 kB         127 kB
-└ ○ /_not-found                            989 B         101 kB
-+ First Load JS shared by all            99.6 kB
+[4mRoute (app)[24m                                 [4mSize[24m  [4mFirst Load JS[24m  [4m[24m  [4m[24m
+┌ ƒ /                                    4.03 kB         [37m[1m127 kB[22m[39m
+├ ƒ /_not-found                            123 B        [37m[1m99.8 kB[22m[39m
+├ ƒ /api/auth/[...nextauth]                123 B        [37m[1m99.8 kB[22m[39m
+├ ƒ /essentials                          1.29 kB         [37m[1m164 kB[22m[39m
+├ ƒ /get-started                         3.93 kB         [37m[1m146 kB[22m[39m
+├ ƒ /guest-&-vendor                       1.6 kB         [37m[1m165 kB[22m[39m
+├ ƒ /guest-list                          61.3 kB         [37m[1m188 kB[22m[39m
+├ ƒ /login                               3.66 kB         [37m[1m145 kB[22m[39m
+├ ƒ /the-big-day                         1.67 kB         [37m[1m165 kB[22m[39m
+├ ƒ /user                                  641 B         [37m[1m109 kB[22m[39m
+└ ƒ /vendor                              1.16 kB         [37m[1m164 kB[22m[39m
++ First Load JS shared by all            [37m[1m99.6 kB[22m[39m
   ├ chunks/4bd1b696-cf72ae8a39fa05aa.js  54.1 kB
-  ├ chunks/964-78a358603a02ce1b.js       43.5 kB
-  └ other shared chunks (total)          1.94 kB
+  ├ chunks/964-78a358603a02ce1b.js       43.6 kB
+  └ other shared chunks (total)          1.92 kB
 
 
-○  (Static)  prerendered as static content
+ƒ Middleware                               [37m[1m60 kB[22m[39m
 
+ƒ  (Dynamic)  server-rendered on demand
+
+[?25h[1G[0K⠙[1G[0K

@@ -2,12 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CancelablePromise } from '../core/CancelablePromise';
-import { OpenAPI } from '../core/OpenAPI';
-import { request as __request } from '../core/request';
 import type { CreateVendorDto } from '../models/CreateVendorDto';
 import type { UpdateVendorDto } from '../models/UpdateVendorDto';
 import type { VendorResponseDto } from '../models/VendorResponseDto';
+import type { CancelablePromise } from '../core/CancelablePromise';
+import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from '../core/request';
 export class VendorsService {
     /**
      * Create a new vendor

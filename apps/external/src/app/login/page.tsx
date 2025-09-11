@@ -6,12 +6,42 @@ import { Input } from "@shared/components/ui/form/input";
 import { Label } from "@shared/components/ui/form/label";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import { useHandleSession } from "../hooks/useHandleSession";
+import { Button } from "@shared/components/ui/button";
+import { Input } from "@shared/components/ui/form/input";
+import { Label } from "@shared/components/ui/form/label";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { handleSignIn } = useHandleSession();
+  const [role, setRole] = useState<'couple' | 'vendor' | null>(null);
+  const { data: session } = useSession();
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {      
+      const res = await signIn("credentials", {
+        redirect: false,
+        username,
+        password,
+      });
+      if (!res?.ok) throw new Error("Signin failed");
+      if (session?.user.role == "superAdmin") throw new Error("Super Admins must use the Super Admin login page.");
+      toast("Successfully Login.")
+      router.push(session ? `/${session.user.role}` : "/");
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-t from-brand-200 to-brand-25 px-6">

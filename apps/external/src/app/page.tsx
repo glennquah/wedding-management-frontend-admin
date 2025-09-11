@@ -2,13 +2,12 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useRouter } from "next/navigation";
 import Footer from "@shared/components/footer";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
-import { AppService } from "@wedding/api-types";
-import Image from "next/image";
-import { useEffect, useState, useRef } from "react";
 import { Button } from "@shared/components/ui/button";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 const heroImages = [
   "/images/landing-pg (1).jpg",
@@ -18,28 +17,14 @@ const heroImages = [
 ];
 
 export default function LandingPage() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [apiMessage, setApiMessage] = useState<string>("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(true);
   const [current, setCurrent] = useState(0);
   const [fade, setFade] = useState(true);
   const featuresRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    const fetchHello = async () => {
-      try {
-        const response = await AppService.appControllerGetHello();
-        setApiMessage(response);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Failed to fetch API:", error);
-        setApiMessage("Failed to load API message");
-        setIsLoading(false);
-      }
-    };
-
-    fetchHello();
-  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {

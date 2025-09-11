@@ -1,13 +1,12 @@
 "use client";
 
-import { signIn } from "next-auth/react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@shared/components/ui/button";
-import { Input } from "@shared/components/ui/input";
-import { Label } from "@shared/components/ui/label";
-import { toast } from "sonner"
-import ResponsiveMenubar from "@shared/components/responsive-menubar";
+import { Input } from "@shared/components/ui/form/input";
+import { Label } from "@shared/components/ui/form/label";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,11 +24,15 @@ export default function LoginPage() {
         username,
         password,
       });
-      if (!res?.ok) throw new Error("Signin failed");
+      if (res?.error) {
+        toast.error("Invalid username or password");
+        return;
+      }
       toast("Successfully Login.")
-      router.push("/admin");
+      router.push("/");
     } catch (err) {
-      console.log(err)
+      console.error("Unexpected error:", err);
+      toast.error("Something went wrong. Please try again.");     
     } finally {
       setLoading(false);
     }
@@ -37,9 +40,8 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-t from-brand-200 to-brand-25 px-6">
-        <ResponsiveMenubar />
       <div className="w-full max-w-lg bg-white p-8 mt-[72px] rounded-2xl shadow-md">
-        <h2 className="text-3xl font-bold text-center mb-8">Admin Login</h2>
+        <h2 className="text-3xl font-bold text-center mb-8">Super Admin Login</h2>
         <form onSubmit={handleSignIn} className="space-y-4">
           <div className="mt-4 gap-2 flex flex-col">
             <Label htmlFor="username">Username</Label>
@@ -67,12 +69,6 @@ export default function LoginPage() {
             {loading ? "Signing in..." : "Sign In"}
           </Button>
         </form>
-        <p className="text-center text-sm text-gray-500 mt-4">
-          Don’t have an account?{" "}
-          <a href="/get-started" className="text-brand-600 font-medium">
-            Sign Up
-          </a>
-        </p>
       </div>
     </div>
   );

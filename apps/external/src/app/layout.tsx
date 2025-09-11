@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-
 // Force dynamic rendering to prevent static generation issues
 export const dynamic = 'force-dynamic';
 
@@ -8,6 +7,7 @@ import "../../../../shared/components/globals.css";
 import "./globals.css";
 import Providers from "./components/Providers";
 import { Toaster } from "@shared/components/ui/sonner";
+import { AuthRedirect } from "./components/AuthRedirect";
 
 const montserrat = Montserrat({
   weight: ["100", "200", "300", "400", "500", "600", "700"],
@@ -40,11 +40,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${montserrat.variable} ${nunito.variable} antialiased`}>
-        <Providers>
-          <Toaster />
-          {children}
-        </Providers>
-      </body>
-    </html>
+          <Providers>
+            <Toaster />
+            <AuthRedirect />
+            {children}
+          </Providers>
+        </body>
+      </html>
   );
 }
