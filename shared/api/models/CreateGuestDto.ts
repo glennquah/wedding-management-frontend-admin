@@ -4,9 +4,17 @@
 /* eslint-disable */
 export type CreateGuestDto = {
     /**
+     * The ID of the guest
+     */
+    id?: number;
+    /**
      * The name of the guest
      */
     name: string;
+    /**
+     * The email of the guest
+     */
+    email: string;
     /**
      * Allergies or dietary restrictions
      */
@@ -27,6 +35,10 @@ export type CreateGuestDto = {
      * Confirmation status of the guest
      */
     confirmationStatus?: CreateGuestDto.confirmationStatus;
+    /**
+     * Names of accompanying guests
+     */
+    accompanyingGuestNames?: Array<string>;
 };
 export namespace CreateGuestDto {
     /**
