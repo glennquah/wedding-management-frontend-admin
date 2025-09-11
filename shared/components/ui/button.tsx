@@ -10,7 +10,7 @@ const buttonVariants = cva(
       variant: {
         default: "rounded-full bg-accent text-background px-6 py-3 font-semibold shadow-lg hover:bg-accent-hover transition",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+          "rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90",
         secondary:
           "rounded-full bg-transparent border-2 border-primary text-primary px-6 py-3 font-semibold hover:bg-primary/10 transition",
         ghost: "rounded-full bg-transparent text-primary underline hover:bg-primary/10 font-semibold",
