@@ -1,6 +1,6 @@
 "use client";
 
-import { CreateGuestDto, GuestResponseDto } from "@shared/api";
+import { CreateGuestDto, GuestResponseDto, ConfirmationStatus } from "@shared/api";
 import { Button, DataTable, DeleteConfirmationModal, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, GroupSelectDropdown, PageHeader } from "@shared/components";
 import FormField from "@shared/components/FormField";
 import { FormDialog } from "@shared/components/ui/form/form-dialog";
@@ -219,15 +219,15 @@ export default function GuestListPage() {
     <div key="confirmationStatus" className="md:col-span-2">
       <SingleSelectDropdown
         label="Confirmation Status"
-        options={Object.values(CreateGuestDto.confirmationStatus)}
+        options={Object.values(ConfirmationStatus)}
         selected={
           guest.confirmationStatus ||
-          CreateGuestDto.confirmationStatus.PENDING
+          ConfirmationStatus.PENDING
         }
         setSelected={(selected) =>
           setGuest({
             ...guest,
-            confirmationStatus: selected as CreateGuestDto.confirmationStatus,
+            confirmationStatus: selected as ConfirmationStatus,
           })
         }
         placeholder="Select confirmation status"

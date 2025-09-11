@@ -8,6 +8,10 @@ export type UpdateGuestDto = {
      */
     name?: string;
     /**
+     * Email address of the guest
+     */
+    email?: string;
+    /**
      * Allergies or dietary restrictions
      */
     allergies?: string;
