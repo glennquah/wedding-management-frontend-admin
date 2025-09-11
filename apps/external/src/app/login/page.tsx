@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@shared/components/ui/button";
@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState<'couple' | 'vendor' | null>(null);
+  const { data: session } = useSession();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,8 +29,9 @@ export default function LoginPage() {
         password,
       });
       if (!res?.ok) throw new Error("Signin failed");
+      if (session?.user.role == "superAdmin") throw new Error("Super Admins must use the Super Admin login page.");
       toast("Successfully Login.")
-      router.push("/user");
+      router.push(session ? `/${session.user.role}` : "/");
     } catch (err) {
       console.log(err)
     } finally {

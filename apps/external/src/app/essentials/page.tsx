@@ -1,18 +1,13 @@
 "use client";
 
 import { Calendar, CheckSquare, DollarSign, Sparkles } from "lucide-react";
-import ResponsiveMenubar from "@shared/components/responsive-menubar";
-import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
 import Hero from "../components/unauthenticated/hero";
 import FeaturesPanel from "../components/unauthenticated/features-panel";
 import ClosingCTA from "../components/unauthenticated/closing-cta";
 
 export default function EssentialsPage() {
-  const isMobile = useIsMobileScreen();
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-brand-100 to-white text-gray-800 font-sans">
-      <ResponsiveMenubar />
-      {!isMobile && <div className="mt-[72px] w-full"></div>}
+    <div className="text-gray-800 font-sans">
       {/* Hero Section */}
       <Hero img_src="/images/essentials.jpg" header="Never miss a detail." subheader="We break down the major stages of wedding planning in the ultimate wedding checklist, with AI-powered tools that helps you cover every essential from picking your wedding date to tracking your budget." />
       {/* Features Section */}
