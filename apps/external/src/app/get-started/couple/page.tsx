@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useHandleSession } from "../../hooks/useHandleSession";
 import { useSessionStore } from "../../store/sessionStore";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../../../../shared/components/ui/card";
-import { Button } from "../../../../../../shared/components/ui/button";
-import { WeddingType as APIWeddingType, BudgetBucket as APIBudgetBucket, GuestCountBucket as APIGuestCountBucket, WeddingStyle as APIWeddingStyle, WeddingService as APIWeddingService } from "../../../../../../shared/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@shared/components/ui/card";
+import { Button } from "@shared/components/ui/button";
+import { WeddingType as APIWeddingType, BudgetBucket as APIBudgetBucket, GuestCountBucket as APIGuestCountBucket, WeddingStyle as APIWeddingStyle, WeddingService as APIWeddingService } from "@shared/api";
 
 type WeddingType = "chinese" | "malay" | "indian" | "western" | "others";
 type BudgetBucket = "low" | "medium" | "high" | "luxury";
