@@ -7,7 +7,7 @@ import { Montserrat, Nunito } from "next/font/google";
 import "../../../../shared/components/globals.css";
 import "./globals.css";
 import Providers from "./components/Providers";
-import { Toaster } from "@shared/components/ui/sonner";
+import MainLayout from "./components/MainLayout";
 
 const montserrat = Montserrat({
   weight: ["100", "200", "300", "400", "500", "600", "700"],
@@ -37,13 +37,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
   return (
     <html lang="en">
       <body className={`${montserrat.variable} ${nunito.variable} antialiased`}>
-        <Providers>
-          <Toaster />
-          {children}
-        </Providers>
+          <Providers>
+              <MainLayout>{children}</MainLayout>
+          </Providers>
       </body>
     </html>
   );

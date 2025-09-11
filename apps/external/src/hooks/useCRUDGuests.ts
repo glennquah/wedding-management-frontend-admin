@@ -1,33 +1,37 @@
-import { CreateGuestDto, GuestResponseDto, GuestsService, UpdateGuestDto } from "@shared/api";
-import { useEffect, useState } from "react";
+import { ConfirmationStatus, CreateGuestDto, GuestResponseDto, GuestsService, OpenAPI, UpdateGuestDto, WeddingsService } from "@shared/api";
+import { useSession } from "next-auth/react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 type GuestFormData = Partial<CreateGuestDto & { accompanyingGuestNames: string[] }>;
 
 type GuestFormSetter = (guest: GuestFormData) => void;
 
-const defaultNewGuest: GuestFormData = {
+const getDefaultNewGuest = (weddingId: number): GuestFormData => ({
   name: "",
   email: "",
   allergies: "",
   group: "",
-  confirmationStatus: CreateGuestDto.confirmationStatus.PENDING,
-  weddingId: 1,
+  confirmationStatus: ConfirmationStatus.PENDING,
+  weddingId,
   primaryGuestId: undefined,
   accompanyingGuestNames: [""],
-};
+});
 
 const confirmationStatusOptions = [
-  { value: CreateGuestDto.confirmationStatus.PENDING, label: 'Pending' },
-  { value: CreateGuestDto.confirmationStatus.CONFIRMED, label: 'Confirmed' },
-  { value: CreateGuestDto.confirmationStatus.REJECTED, label: 'Rejected' }
+  { value: ConfirmationStatus.PENDING, label: 'Pending' },
+  { value: ConfirmationStatus.CONFIRMED, label: 'Confirmed' },
+  { value: ConfirmationStatus.REJECTED, label: 'Rejected' }
 ];
 
 export function useGuestManager() {
+  const { data: session, status } = useSession();
+  
   // Core guest data
   const [guests, setGuests] = useState<GuestResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentWeddingId, setCurrentWeddingId] = useState<number | null>(null);
 
   // Modal states
   const [isAddingGuest, setIsAddingGuest] = useState(false);
@@ -45,14 +49,52 @@ export function useGuestManager() {
   
 
   // Form data
-  const [newGuest, setNewGuest] = useState<GuestFormData>(defaultNewGuest);
+  const [newGuest, setNewGuest] = useState<GuestFormData>(getDefaultNewGuest(1));
+
+  // Authentication setup
+  const setupAuth = useCallback(() => {
+    if (session?.backendTokens?.accessToken) {
+      OpenAPI.TOKEN = session.backendTokens.accessToken;
+    }
+  }, [session]);
+
+  // Fetch wedding ID for the current user (use first wedding in array)
+  const fetchUserWeddingId = useCallback(async (): Promise<number | null> => {
+    try {
+      setupAuth();
+      const weddings = await WeddingsService.weddingControllerFindAll();
+      if (weddings.length > 0) {
+        return weddings[0].id;
+      }
+      return null;
+    } catch (err) {
+      console.error('Error fetching user wedding:', err);
+      toast.error('Failed to fetch wedding information');
+      return null;
+    }
+  }, [setupAuth]);
 
   // Core CRUD operations
-  const fetchGuests = async () => {
+  const fetchGuests = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const fetchedGuests = await GuestsService.guestControllerGetGuestsByWedding(1);
+      
+      // Setup authentication
+      setupAuth();
+      
+      // Get wedding ID if not already set
+      let weddingId = currentWeddingId;
+      if (!weddingId) {
+        weddingId = await fetchUserWeddingId();
+        setCurrentWeddingId(weddingId);
+      }
+      
+      if (!weddingId) {
+        throw new Error('No wedding found for this user');
+      }
+      
+      const fetchedGuests = await GuestsService.guestControllerGetGuestsByWedding(weddingId);
       setGuests(fetchedGuests);
     } catch (err) {
       setError('Failed to fetch guests. Please try again.');
@@ -60,12 +102,13 @@ export function useGuestManager() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentWeddingId, fetchUserWeddingId, setupAuth]);
 
   const addGuest = async (
     primaryGuestData: CreateGuestDto,
     accompanyingGuestsData: CreateGuestDto[]
   ) => {
+    setupAuth();
     const createdPrimaryGuest = await GuestsService.guestControllerCreate(primaryGuestData);
 
     if (accompanyingGuestsData.length > 0) {
@@ -86,6 +129,7 @@ export function useGuestManager() {
     updateData: UpdateGuestDto,
     accompanyingGuestsData: CreateGuestDto[]
   ) => {
+    setupAuth();
     await GuestsService.guestControllerUpdate(guestId, updateData);
 
     // Delete existing accompanying guests
@@ -108,6 +152,7 @@ export function useGuestManager() {
   };
 
   const deleteGuest = async (id: number) => {
+    setupAuth();
     // First delete any accompanying guests before deleting the primary guest
     const accompanyingGuests = guests.filter(g => g.primaryGuestId === id);
     for (const guest of accompanyingGuests) {
@@ -208,8 +253,8 @@ export function useGuestManager() {
         email: newGuest.email!,
         allergies: newGuest.allergies || undefined,
         group: newGuest.group!,
-        confirmationStatus: CreateGuestDto.confirmationStatus.PENDING,
-        weddingId: newGuest.weddingId || 1,
+        confirmationStatus: ConfirmationStatus.PENDING,
+        weddingId: currentWeddingId || 1,
         primaryGuestId: undefined,
       };
 
@@ -221,15 +266,15 @@ export function useGuestManager() {
           email: "",
           allergies: newGuest.allergies || undefined,
           group: newGuest.group,
-          confirmationStatus: CreateGuestDto.confirmationStatus.PENDING,
-          weddingId: newGuest.weddingId || 1,
+          confirmationStatus: ConfirmationStatus.PENDING,
+          weddingId: currentWeddingId || 1,
           primaryGuestId: undefined,
         })));
       }
 
       await addGuest(primaryGuestData, accompanyingGuestsData);
 
-      setNewGuest(defaultNewGuest);
+      setNewGuest(getDefaultNewGuest(currentWeddingId || 1));
       setIsAddingGuest(false);
       
       // Show email modal for the newly added guest
@@ -258,11 +303,25 @@ export function useGuestManager() {
     try {
       setIsSubmitting(true);
 
+      const mapConfirmationStatus = (status: ConfirmationStatus | undefined): UpdateGuestDto.confirmationStatus | undefined => {
+        if (!status) return undefined;
+        switch (status) {
+          case ConfirmationStatus.PENDING:
+            return UpdateGuestDto.confirmationStatus.PENDING;
+          case ConfirmationStatus.CONFIRMED:
+            return UpdateGuestDto.confirmationStatus.CONFIRMED;
+          case ConfirmationStatus.REJECTED:
+            return UpdateGuestDto.confirmationStatus.REJECTED;
+          default:
+            return undefined;
+        }
+      };
+
       const updateData: UpdateGuestDto = {
         name: editingGuest.name,
         allergies: editingGuest.allergies || undefined,
         group: editingGuest.group,
-        confirmationStatus: editingGuest.confirmationStatus,
+        confirmationStatus: mapConfirmationStatus(editingGuest.confirmationStatus),
       };
 
       const accompanyingGuestsData: CreateGuestDto[] = [];
@@ -273,8 +332,8 @@ export function useGuestManager() {
           email: "",
           allergies: editingGuest.allergies,
           group: editingGuest.group,
-          confirmationStatus: editingGuest.confirmationStatus || CreateGuestDto.confirmationStatus.PENDING,
-          weddingId: editingGuest.weddingId || 1,
+          confirmationStatus: editingGuest.confirmationStatus || ConfirmationStatus.PENDING,
+          weddingId: currentWeddingId || 1,
           primaryGuestId: undefined,
         })));
       }
@@ -322,8 +381,23 @@ export function useGuestManager() {
       ? accompanyingGuests.map(g => g.name)
       : [""];
     
+    // Map the confirmation status from GuestResponseDto to ConfirmationStatus
+    const mapResponseConfirmationStatus = (status: GuestResponseDto.confirmationStatus): ConfirmationStatus => {
+      switch (status) {
+        case GuestResponseDto.confirmationStatus.PENDING:
+          return ConfirmationStatus.PENDING;
+        case GuestResponseDto.confirmationStatus.CONFIRMED:
+          return ConfirmationStatus.CONFIRMED;
+        case GuestResponseDto.confirmationStatus.REJECTED:
+          return ConfirmationStatus.REJECTED;
+        default:
+          return ConfirmationStatus.PENDING;
+      }
+    };
+    
     setEditingGuest({
       ...guest,
+      confirmationStatus: mapResponseConfirmationStatus(guest.confirmationStatus),
       accompanyingGuestNames: accompanyingNames
     });
   };
@@ -360,9 +434,25 @@ export function useGuestManager() {
   const primaryGuests = guests.filter(guest => !guest.primaryGuestId);
   const existingGroups = Array.from(new Set(guests.filter(g => g.group?.trim()).map(g => g.group!))).sort();
 
+  // Initialize wedding ID when session is available
   useEffect(() => {
-    fetchGuests();
-  }, []);
+    if (status === 'authenticated' && session && !currentWeddingId) {
+      const initWeddingId = async () => {
+        const weddingId = await fetchUserWeddingId();
+        if (weddingId) {
+          setCurrentWeddingId(weddingId);
+          setNewGuest(getDefaultNewGuest(weddingId));
+        }
+      };
+      initWeddingId();
+    }
+  }, [status, session, currentWeddingId, fetchUserWeddingId]);
+
+  useEffect(() => {
+    if (currentWeddingId) {
+      fetchGuests();
+    }
+  }, [currentWeddingId, fetchGuests]);
 
   return {
     // Core data
