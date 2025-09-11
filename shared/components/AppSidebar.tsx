@@ -1,9 +1,9 @@
 "use client";
 
-import { ChevronUp, CheckSquare, ListTodo, LogOut, Settings, Timer, User, UserCircle } from "lucide-react";
+import { CheckSquare, ChevronUp, ListTodo, LogOut, Settings, Timer, User, UserCircle } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { Separator } from "./ui/separator";
 
 import { Button } from "./ui/button";
@@ -17,13 +17,13 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuItem,
   SidebarMenuButton,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
+  SidebarMenuItem,
 } from "./ui/sidebar";
 
 const tabs = [

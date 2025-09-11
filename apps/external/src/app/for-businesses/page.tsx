@@ -3,9 +3,10 @@
 import { Users, ClipboardList, LayoutGrid } from "lucide-react";
 import ResponsiveMenubar from "@shared/components/responsive-menubar";
 import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
-import Hero from "../components/unauthenticated/hero";
-import FeaturesPanel from "../components/unauthenticated/features-panel";
+import { ClipboardList, LayoutGrid, Users } from "lucide-react";
 import ClosingCTA from "../components/unauthenticated/closing-cta";
+import FeaturesPanel from "../components/unauthenticated/features-panel";
+import Hero from "../components/unauthenticated/hero";
 
 export default function VendorPage() {
   const isMobile = useIsMobileScreen();

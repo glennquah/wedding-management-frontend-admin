@@ -1,7 +1,7 @@
-import { GuestResponseDto } from "@shared/api";
+import { ConfirmationStatus } from "@shared/api";
 import { Card, CardContent } from "@shared/components/ui/card";
 
-export default function GuestSummaryStats({ guests }: { guests: GuestResponseDto[] }) {
+export default function GuestSummaryStats({ guests }: { guests: { confirmationStatus: ConfirmationStatus }[] }) {
   if (guests.length === 0) return null;
 
   const summaryStats = [
@@ -12,17 +12,17 @@ export default function GuestSummaryStats({ guests }: { guests: GuestResponseDto
     },
     {
       label: "Confirmed", 
-      value: guests.filter(g => g.confirmationStatus === GuestResponseDto.confirmationStatus.CONFIRMED).length,
+      value: guests.filter(g => g.confirmationStatus === ConfirmationStatus.CONFIRMED).length,
       color: "text-green-600"
     },
     {
       label: "Pending Confirmation",
-      value: guests.filter(g => g.confirmationStatus === GuestResponseDto.confirmationStatus.PENDING).length, 
+      value: guests.filter(g => g.confirmationStatus === ConfirmationStatus.PENDING).length, 
       color: "text-yellow-600"
     },
     {
       label: "Rejected",
-      value: guests.filter(g => g.confirmationStatus === GuestResponseDto.confirmationStatus.REJECTED).length,
+      value: guests.filter(g => g.confirmationStatus === ConfirmationStatus.REJECTED).length,
       color: "text-red-600"
     }
   ];

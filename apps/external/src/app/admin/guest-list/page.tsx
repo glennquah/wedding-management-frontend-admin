@@ -9,8 +9,8 @@ import { SingleSelectDropdown } from "@shared/components/ui/form/singleSelectDro
 import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
 import { ColumnDef } from "@tanstack/react-table";
 import { ChevronDown, Edit2, Plus, Trash2 } from "lucide-react";
-import { useGuestManager } from "../../hooks/useCRUDGuests";
-import { getConfirmationIcon, getConfirmationLabel, getConfirmationStatusColor } from "../../lib/guest-status-utils";
+import { useGuestManager } from "../../../hooks/useCRUDGuests";
+import { getConfirmationIcon, getConfirmationLabel, getConfirmationStatusColor } from "../../../lib/guest-status-utils";
 import { EmailGuestModal } from "./components/EmailGuestModal";
 import GuestSummaryStats from "./components/GuestSummaryStats";
 
@@ -85,7 +85,7 @@ export default function GuestListPage() {
       accessorKey: "confirmationStatus",
       header: "Confirmed",
       cell: ({ row }) => {
-        const status = row.getValue("confirmationStatus") as GuestResponseDto.confirmationStatus;
+        const status = row.getValue("confirmationStatus") as ConfirmationStatus;
         return (
           <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getConfirmationStatusColor(status)}`}>
             {getConfirmationIcon(status)}
@@ -325,7 +325,12 @@ export default function GuestListPage() {
         )}
 
         {/* Summary Stats */}
-        <GuestSummaryStats guests={guests} />
+        <GuestSummaryStats guests={guests.map(guest => ({
+          ...guest,
+          confirmationStatus: guest.confirmationStatus === 'pending' ? ConfirmationStatus.PENDING :
+                             guest.confirmationStatus === 'confirmed' ? ConfirmationStatus.CONFIRMED :
+                             ConfirmationStatus.REJECTED
+        }))} />
 
         {/* Guest List Table */}
         <DataTable

@@ -15,7 +15,7 @@ export type CreateGuestDto = {
     /**
      * The email of the guest
      */
-    email: string;
+    email?: string;
     /**
      * Allergies or dietary restrictions
      */
