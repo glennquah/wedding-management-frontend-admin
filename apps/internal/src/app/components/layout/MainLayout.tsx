@@ -29,10 +29,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   return (
     <SidebarProvider defaultOpen={true}>
       <SuperAdminSidebar />
-      <main className="relative flex-1 overflow-y-auto">
+      <div className="flex-1 flex flex-col">
         <NavigationBar />
-        <div className="h-full w-full">{children}</div>
-      </main>
+        <main className="flex-1 overflow-y-auto">{children}</main>
+      </div>
       <Toaster />
     </SidebarProvider>
   );

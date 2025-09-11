@@ -15,8 +15,8 @@ const NavigationBar = () => {
   const { data: session } = useSession();
 
   return (
-    <header className="border-b px-4 md:px-6">
-      <div className="flex h-16 items-center justify-between gap-4">
+    <header className="sticky top-0 z-40 w-full bg-sidebar text-sidebar-foreground border-b shadow-sm px-4 md:px-6">
+      <div className="flex h-14 items-center justify-between gap-4">
         {/* Left side */}
         <div className="flex items-center gap-2">
           <SidebarTrigger />

@@ -1,9 +1,9 @@
 'use client';
 
-import { GuestsService, GuestResponseDto } from '@wedding/api-types';
 import { DataTable, PageHeader } from '@shared/components';
 import { Button } from '@shared/components/ui/button';
 import { ColumnDef } from '@tanstack/react-table';
+import { ConfirmationStatus, GuestResponseDto, GuestsService } from '@wedding/api-types';
 import { Edit2, Plus, Trash2 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 export const dynamic = 'force-dynamic';
 
 // Helper functions for confirmation status
-const getConfirmationStatusColor = (status: GuestResponseDto.confirmationStatus) => {
+const getConfirmationStatusColor = (status: ConfirmationStatus) => {
   switch (status) {
     case 'confirmed':
       return 'bg-green-100 text-green-800';
@@ -24,7 +24,7 @@ const getConfirmationStatusColor = (status: GuestResponseDto.confirmationStatus)
   }
 };
 
-const getConfirmationLabel = (status: GuestResponseDto.confirmationStatus) => {
+const getConfirmationLabel = (status: ConfirmationStatus) => {
   switch (status) {
     case 'confirmed':
       return 'Confirmed';
@@ -87,7 +87,7 @@ export default function GuestManagementPage() {
       accessorKey: 'confirmationStatus',
       header: 'Status',
       cell: ({ row }) => {
-        const status = row.getValue('confirmationStatus') as GuestResponseDto.confirmationStatus;
+        const status = row.getValue('confirmationStatus') as ConfirmationStatus;
         return (
           <span
             className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getConfirmationStatusColor(
@@ -161,9 +161,7 @@ export default function GuestManagementPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
-      <div className="mt-[72px] w-full"></div>
-
+    <div className="w-full bg-gradient-to-b from-white to-brand-100 text-foreground">
       <div className="container mx-auto px-4 py-8">
         <PageHeader
           title="Guest Management"
