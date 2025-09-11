@@ -17,7 +17,6 @@ import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import { Input } from '@shared/components/ui/form/input';
 import { SingleSelectDropdown } from '@shared/components/ui/form/singleSelectDropdown';
 import {
-  ConfirmationStatus,
   CreateGuestDto,
   GuestResponseDto,
   GuestsService,
@@ -149,7 +148,11 @@ export default function GuestManagementPage() {
         email: editingGuest.email,
         group: editingGuest.group,
         allergies: editingGuest.allergies || '',
-        confirmationStatus: editingGuest.confirmationStatus as ConfirmationStatus,
+        confirmationStatus: editingGuest.confirmationStatus === 'pending' 
+          ? UpdateGuestDto.confirmationStatus.PENDING 
+          : editingGuest.confirmationStatus === 'confirmed'
+          ? UpdateGuestDto.confirmationStatus.CONFIRMED
+          : UpdateGuestDto.confirmationStatus.REJECTED,
       };
 
       await GuestsService.guestControllerUpdate(editingGuest.id, updateData);
