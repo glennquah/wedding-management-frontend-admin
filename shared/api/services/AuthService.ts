@@ -53,12 +53,12 @@ export class AuthService {
     /**
      * Login user
      * @param requestBody
-     * @returns any The user has been successfully logged in.
+     * @returns AuthResponseDto The user has been successfully logged in.
      * @throws ApiError
      */
     public static authControllerLogin(
         requestBody: LoginDto,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<AuthResponseDto> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/auth/login',
