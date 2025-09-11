@@ -72,6 +72,7 @@ const WEDDING_SERVICES: { value: WeddingService; label: string; description: str
 export default function GetStartedCouplePage() {
   const router = useRouter();
   const { name, email, password } = useSessionStore();
+  const { handleSignUpAdmin } = useHandleSession();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
@@ -88,9 +89,7 @@ export default function GetStartedCouplePage() {
     return null;
   }
 
-  const { handleSignUpAdmin } = useHandleSession();
-
-  const handleSingleSelect = (key: keyof OnboardingData, value: any) => {
+  const handleSingleSelect = (key: keyof OnboardingData, value: WeddingType | BudgetBucket | GuestCountBucket | WeddingStyle | null) => {
     setOnboardingData(prev => ({ ...prev, [key]: value }));
   };
 

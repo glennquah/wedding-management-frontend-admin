@@ -5,7 +5,6 @@ import { toast } from "sonner";
 
 export function useHandleSession() {
   const router = useRouter();
-  const NEXTAUTH_URL = process.env.NEXT_PUBLIC_NEXTAUTH_URL;
 
   const handleSignUpAdmin = async (
         {
