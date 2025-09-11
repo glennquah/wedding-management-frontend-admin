@@ -1,8 +1,6 @@
 'use client';
 
 import { useGuestManager } from '../../../hooks/useCRUDGuests';
-import { EmailGuestModal } from './components/EmailGuestModal';
-import GuestSummaryStats from './components/GuestSummaryStats';
 import { ConfirmationStatus, CreateGuestDto } from '@shared/api';
 import { getGuestColumns } from '@shared/columns/guest-columns';
 import {
@@ -13,6 +11,8 @@ import {
   PageHeader,
 } from '@shared/components';
 import FormField from '@shared/components/FormField';
+import { EmailGuestModal } from '@shared/components/guest-management/EmailGuestModal';
+import GuestSummaryStats from '@shared/components/guest-management/GuestSummaryStats';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import { Input } from '@shared/components/ui/form/input';
 import { SingleSelectDropdown } from '@shared/components/ui/form/singleSelectDropdown';

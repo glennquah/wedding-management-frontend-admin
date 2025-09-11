@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
-import { EmailGuestModal } from './components/EmailGuestModal';
-import GuestSummaryStats from './components/GuestSummaryStats';
+import { EmailGuestModal } from '../../../../../shared/components/guest-management/EmailGuestModal';
+import GuestSummaryStats from '../../../../../shared/components/guest-management/GuestSummaryStats';
 import { getGuestColumns } from '@shared/columns/guest-columns';
 import {
   Button,
@@ -17,6 +17,7 @@ import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import { Input } from '@shared/components/ui/form/input';
 import { SingleSelectDropdown } from '@shared/components/ui/form/singleSelectDropdown';
 import {
+  ConfirmationStatus,
   CreateGuestDto,
   GuestResponseDto,
   GuestsService,
@@ -148,11 +149,12 @@ export default function GuestManagementPage() {
         email: editingGuest.email,
         group: editingGuest.group,
         allergies: editingGuest.allergies || '',
-        confirmationStatus: editingGuest.confirmationStatus === 'pending' 
-          ? UpdateGuestDto.confirmationStatus.PENDING 
-          : editingGuest.confirmationStatus === 'confirmed'
-          ? UpdateGuestDto.confirmationStatus.CONFIRMED
-          : UpdateGuestDto.confirmationStatus.REJECTED,
+        confirmationStatus:
+          editingGuest.confirmationStatus === 'pending'
+            ? UpdateGuestDto.confirmationStatus.PENDING
+            : editingGuest.confirmationStatus === 'confirmed'
+              ? UpdateGuestDto.confirmationStatus.CONFIRMED
+              : UpdateGuestDto.confirmationStatus.REJECTED,
       };
 
       await GuestsService.guestControllerUpdate(editingGuest.id, updateData);
@@ -347,27 +349,7 @@ export default function GuestManagementPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <PageHeader
-        title="Guest Management"
-        description="Manage guests across all weddings"
-        buttonText="Add Guest"
-        onButtonClick={openAddGuestModal}
-        buttonIcon={<Plus className="w-4 h-4" />}
-        isButtonDisabled={isLoading}
-      />
-
-      {/* Add Guest Modal */}
-      <FormDialog
-        open={isAddingGuest}
-        onOpenChange={closeAddGuestModal}
-        title="Add New Guest"
-        isSubmitting={isSubmitting}
-        onSubmit={handleAddGuest}
-        onCancel={closeAddGuestModal}
-        submitButtonText="Add Guest"
-        formFields={guestFormFields(newGuest, setNewGuest)}
-        noOfColumns={2}
-      />
+      <PageHeader title="Guest Management" description="Manage guests across all weddings" />
 
       {/* Edit Guest Modal */}
       {editingGuest && (
@@ -402,16 +384,15 @@ export default function GuestManagementPage() {
         />
       )}
 
-      {/* Summary Stats */}
       <GuestSummaryStats
         guests={guests.map((guest) => ({
           ...guest,
           confirmationStatus:
             guest.confirmationStatus === 'pending'
-              ? CreateGuestDto.confirmationStatus.PENDING
+              ? ConfirmationStatus.PENDING
               : guest.confirmationStatus === 'confirmed'
-                ? CreateGuestDto.confirmationStatus.CONFIRMED
-                : CreateGuestDto.confirmationStatus.REJECTED,
+                ? ConfirmationStatus.CONFIRMED
+                : ConfirmationStatus.REJECTED,
         }))}
       />
 
