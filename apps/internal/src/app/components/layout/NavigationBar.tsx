@@ -15,7 +15,7 @@ const NavigationBar = () => {
   const { data: session } = useSession();
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-sidebar text-sidebar-foreground border-b shadow-sm px-4 md:px-6">
+    <header className="sticky top-0 z-40 w-full bg-sidebar text-sidebar-foreground border-gray-600 shadow-sm px-4 md:px-6">
       <div className="flex h-14 items-center justify-between gap-4">
         {/* Left side */}
         <div className="flex items-center gap-2">

@@ -1,18 +1,23 @@
-"use client";
+'use client';
 
-import { ConfirmationStatus, CreateGuestDto, GuestResponseDto } from "@shared/api";
-import { Button, DataTable, DeleteConfirmationModal, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, GroupSelectDropdown, PageHeader } from "@shared/components";
-import FormField from "@shared/components/FormField";
-import { FormDialog } from "@shared/components/ui/form/form-dialog";
-import { Input } from "@shared/components/ui/form/input";
-import { SingleSelectDropdown } from "@shared/components/ui/form/singleSelectDropdown";
-import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
-import { ColumnDef } from "@tanstack/react-table";
-import { ChevronDown, Edit2, Plus, Trash2 } from "lucide-react";
-import { useGuestManager } from "../../../hooks/useCRUDGuests";
-import { getConfirmationIcon, getConfirmationLabel, getConfirmationStatusColor } from "../../../lib/guest-status-utils";
-import { EmailGuestModal } from "./components/EmailGuestModal";
-import GuestSummaryStats from "./components/GuestSummaryStats";
+import { useGuestManager } from '../../../hooks/useCRUDGuests';
+import { EmailGuestModal } from './components/EmailGuestModal';
+import GuestSummaryStats from './components/GuestSummaryStats';
+import { ConfirmationStatus, CreateGuestDto } from '@shared/api';
+import { getGuestColumns } from '@shared/columns/guest-columns';
+import {
+  Button,
+  DataTable,
+  DeleteConfirmationModal,
+  GroupSelectDropdown,
+  PageHeader,
+} from '@shared/components';
+import FormField from '@shared/components/FormField';
+import { FormDialog } from '@shared/components/ui/form/form-dialog';
+import { Input } from '@shared/components/ui/form/input';
+import { SingleSelectDropdown } from '@shared/components/ui/form/singleSelectDropdown';
+import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
+import { Plus, Trash2 } from 'lucide-react';
 
 export default function GuestListPage() {
   const isMobile = useIsMobileScreen();
@@ -22,32 +27,30 @@ export default function GuestListPage() {
     primaryGuests,
     existingGroups,
     isLoading,
-    
+
     // Modal states
     isAddingGuest,
     editingGuest,
     deleteConfirmGuest,
     isSubmitting,
     emailModalGuest,
-    
-    
+
     // Form data
     newGuest,
     setNewGuest,
     setEditingGuest,
-    
-    
+
     // Form field management
     addAccompanyingGuestField,
     removeAccompanyingGuestField,
     updateAccompanyingGuestName,
-    
+
     // Handlers
     handleAddGuest,
     handleUpdateGuest,
     confirmDeleteGuest,
     handleEditGuest,
-    
+
     // Modal controls
     openAddGuestModal,
     closeAddGuestModal,
@@ -58,125 +61,27 @@ export default function GuestListPage() {
     handleSendEmail,
   } = useGuestManager();
 
-  // Column definitions for DataTable
-  const columns: ColumnDef<GuestResponseDto>[] = [
-    {
-      accessorKey: "name",
-      header: "Name",
-      cell: ({ row }) => (
-        <div className="font-medium text-foreground">{row.getValue("name")}</div>
-      ),
-    },
-    {
-      accessorKey: "group", 
-      header: "Group",
-      cell: ({ row }) => (
-        <div className="text-sm text-foreground">{row.getValue("group") || '-'}</div>
-      ),
-    },
-    {
-      accessorKey: "email",
-      header: "Email",
-      cell: ({ row }) => (
-        <div className="text-sm text-foreground">{row.getValue("email") || '-'}</div>
-      ),
-    },
-    {
-      accessorKey: "confirmationStatus",
-      header: "Confirmed",
-      cell: ({ row }) => {
-        const status = row.getValue("confirmationStatus") as ConfirmationStatus;
-        return (
-          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getConfirmationStatusColor(status)}`}>
-            {getConfirmationIcon(status)}
-            {getConfirmationLabel(status)}
-          </span>
-        );
-      },
-    },
-    {
-      id: "accompanyingGuests",
-      header: "Accompanying Guests", 
-      cell: ({ row }) => {
-        const guest = row.original;
-        const accompanyingGuests = guests.filter(g => g.primaryGuestId === guest.id);
-        
-        if (accompanyingGuests.length === 0) {
-          return (
-            <div className="text-sm text-foreground">0 guests</div>
-          );
-        }
-
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-1 text-sm font-normal justify-start"
-              >
-                +{accompanyingGuests.length} guest{accompanyingGuests.length === 1 ? '' : 's'}
-                <ChevronDown className="ml-1 h-3 w-3" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              {accompanyingGuests.map((accompanyingGuest, index) => (
-                <DropdownMenuItem key={accompanyingGuest.id || index} className="cursor-default">
-                  <span className="font-medium">{accompanyingGuest.name}</span>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      },
-    },
-    {
-      accessorKey: "allergies",
-      header: "Dietary Requirements",
-      cell: ({ row }) => (
-        <div className="text-sm text-foreground">{row.getValue("allergies") || '-'}</div>
-      ),
-    },
-    {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const guest = row.original;
-        return (
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => handleEditGuest(guest)}
-            >
-              <Edit2 className="w-4 h-4" />
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => openDeleteConfirmModal(guest)}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
-        );
-      },
-    },
-  ];
-
+  // Column definitions for DataTable using shared columns
+  const columns = getGuestColumns({
+    guests,
+    onEditGuest: handleEditGuest,
+    onDeleteGuest: openDeleteConfirmModal,
+    includeEmail: true,
+    showConfirmationIcon: true,
+    detailedAccompanyingGuests: true,
+  });
 
   // Add/Edit Guest Form Fields
   const guestFormFields = (
-    guest: Partial<CreateGuestDto & { id?: number; accompanyingGuestNames?: string[] }>,
-    setGuest: React.Dispatch<React.SetStateAction<Partial<CreateGuestDto & { id?: number; accompanyingGuestNames?: string[] }>>>
+    guest: Partial<CreateGuestDto & { id?: number }>,
+    setGuest: React.Dispatch<React.SetStateAction<Partial<CreateGuestDto & { id?: number }>>>,
   ) => [
     <div key="name" className="md:col-span-2">
       <FormField
         label="Name *"
         id="name"
         type="text"
-        value={guest.name || ""}
+        value={guest.name || ''}
         onChange={(e) => setGuest({ ...guest, name: e.target.value })}
         required
         placeholder="Guest Name"
@@ -187,7 +92,7 @@ export default function GuestListPage() {
       <GroupSelectDropdown
         label="Group *"
         existingGroups={existingGroups}
-        selected={guest.group || ""}
+        selected={guest.group || ''}
         setSelected={(group) => setGuest({ ...guest, group })}
         placeholder="Select or add group"
       />
@@ -198,7 +103,7 @@ export default function GuestListPage() {
         label="Email *"
         id="email"
         type="email"
-        value={guest.email || ""}
+        value={guest.email || ''}
         onChange={(e) => setGuest({ ...guest, email: e.target.value })}
         required
         placeholder="Guest email address"
@@ -210,7 +115,7 @@ export default function GuestListPage() {
         label="Dietary Requirements"
         id="allergies"
         type="text"
-        value={guest.allergies || ""}
+        value={guest.allergies || ''}
         onChange={(e) => setGuest({ ...guest, allergies: e.target.value })}
         placeholder="Vegetarian, Gluten-Free, etc."
       />
@@ -219,15 +124,12 @@ export default function GuestListPage() {
     <div key="confirmationStatus" className="md:col-span-2">
       <SingleSelectDropdown
         label="Confirmation Status"
-        options={Object.values(ConfirmationStatus)}
-        selected={
-          guest.confirmationStatus ||
-          ConfirmationStatus.PENDING
-        }
+        options={Object.values(CreateGuestDto.confirmationStatus)}
+        selected={guest.confirmationStatus || CreateGuestDto.confirmationStatus.PENDING}
         setSelected={(selected) =>
           setGuest({
             ...guest,
-            confirmationStatus: selected as ConfirmationStatus,
+            confirmationStatus: selected as CreateGuestDto.confirmationStatus,
           })
         }
         placeholder="Select confirmation status"
@@ -236,9 +138,7 @@ export default function GuestListPage() {
 
     <div key="accompanyingGuests" className="md:col-span-2">
       <div className="flex justify-between items-center mb-2">
-        <label className="block text-sm font-medium text-foreground">
-          Accompanying Guests
-        </label>
+        <label className="block text-sm font-medium text-foreground">Accompanying Guests</label>
         <Button
           type="button"
           variant="ghost"
@@ -251,7 +151,7 @@ export default function GuestListPage() {
         </Button>
       </div>
       <div className="space-y-2">
-        {(guest.accompanyingGuestNames || [""]).map((name: string, index: number) => (
+        {(guest.accompanyingGuestNames || ['']).map((name: string, index: number) => (
           <div key={index} className="flex items-center gap-2">
             <Input
               value={name}
@@ -266,9 +166,7 @@ export default function GuestListPage() {
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() =>
-                  removeAccompanyingGuestField(index, guest, setGuest)
-                }
+                onClick={() => removeAccompanyingGuestField(index, guest, setGuest)}
                 className="text-red-600 hover:text-red-700 px-2"
               >
                 <Trash2 className="w-4 h-4" />
@@ -280,11 +178,10 @@ export default function GuestListPage() {
     </div>,
   ];
 
-
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
       {!isMobile && <div className="mt-[72px] w-full"></div>}
-      
+
       <div className="container mx-auto px-4 py-8">
         <PageHeader
           title="Guest List"
@@ -308,7 +205,6 @@ export default function GuestListPage() {
           noOfColumns={2}
         />
 
-
         {/* Edit Guest Modal */}
         {editingGuest && (
           <FormDialog
@@ -319,29 +215,39 @@ export default function GuestListPage() {
             onSubmit={handleUpdateGuest}
             onCancel={closeEditGuestModal}
             submitButtonText="Update Guest"
-            formFields={guestFormFields(editingGuest!, setEditingGuest as React.Dispatch<React.SetStateAction<Partial<CreateGuestDto & { id?: number; accompanyingGuestNames?: string[] }>>>)}
+            formFields={guestFormFields(
+              editingGuest!,
+              setEditingGuest as React.Dispatch<
+                React.SetStateAction<
+                  Partial<CreateGuestDto & { id?: number; accompanyingGuestNames?: string[] }>
+                >
+              >,
+            )}
             noOfColumns={2}
           />
         )}
 
         {/* Summary Stats */}
-        <GuestSummaryStats guests={guests.map(guest => ({
-          ...guest,
-          confirmationStatus: guest.confirmationStatus === 'pending' ? ConfirmationStatus.PENDING :
-                             guest.confirmationStatus === 'confirmed' ? ConfirmationStatus.CONFIRMED :
-                             ConfirmationStatus.REJECTED
-        }))} />
+        <GuestSummaryStats
+          guests={guests.map((guest) => ({
+            ...guest,
+            confirmationStatus:
+              guest.confirmationStatus === 'pending'
+                ? ConfirmationStatus.PENDING
+                : guest.confirmationStatus === 'confirmed'
+                  ? ConfirmationStatus.CONFIRMED
+                  : ConfirmationStatus.REJECTED,
+          }))}
+        />
 
         {/* Guest List Table */}
         <DataTable
-          data={primaryGuests.map(guest => ({
+          data={primaryGuests.map((guest) => ({
             ...guest,
-            email: guest.email || ''
+            email: guest.email || '',
           }))}
           columns={columns}
-          searchableColumns={[
-            { id: "name", placeholder: "Seacrch by name..." }
-          ]}
+          searchableColumns={[{ id: 'name', placeholder: 'Search by name...' }]}
           enableSelection={false}
           enableColumnVisibility={true}
           enablePagination={true}
@@ -357,17 +263,20 @@ export default function GuestListPage() {
         <DeleteConfirmationModal
           open={!!deleteConfirmGuest}
           onOpenChange={closeDeleteConfirmModal}
-          itemName={deleteConfirmGuest?.name || "this guest"}
+          itemName={deleteConfirmGuest?.name || 'this guest'}
           description={
             deleteConfirmGuest && (
               <>
-                Are you sure you want to delete {deleteConfirmGuest.name}? 
+                Are you sure you want to delete {deleteConfirmGuest.name}?
                 {(() => {
-                  const accompanyingCount = guests.filter(g => g.primaryGuestId === deleteConfirmGuest?.id).length;
-                  return accompanyingCount > 0 
+                  const accompanyingCount = guests.filter(
+                    (g) => g.primaryGuestId === deleteConfirmGuest?.id,
+                  ).length;
+                  return accompanyingCount > 0
                     ? ` This will also delete ${accompanyingCount} accompanying guest${accompanyingCount === 1 ? '' : 's'}.`
                     : '';
-                })()} This action cannot be undone.
+                })()}{' '}
+                This action cannot be undone.
               </>
             )
           }
