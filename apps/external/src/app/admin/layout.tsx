@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import {
+  SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@shared/components/ui/sidebar";
@@ -21,16 +22,13 @@ export default function AdminLayout({
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex h-screen">
-        <AdminSidebar/>
-
-        <main className="relative flex-1 overflow-auto">
-          <div className="absolute left-2 top-4 z-50">
-            <SidebarTrigger />
-          </div>
-          {children}
-        </main>
-      </div>
+      <AdminSidebar />
+      <SidebarInset>
+        <div className="absolute left-2 top-4 z-50">
+          <SidebarTrigger />
+        </div>
+        {children}
+      </SidebarInset>
     </SidebarProvider>
   );
 }
