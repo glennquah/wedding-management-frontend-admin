@@ -14,7 +14,6 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState<'couple' | 'vendor' | null>(null);
   const { data: session } = useSession();
 
   const handleSignIn = async (e: React.FormEvent) => {
