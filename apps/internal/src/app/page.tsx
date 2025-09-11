@@ -4,6 +4,7 @@
 
 export const dynamic = 'force-dynamic'
 
+import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -11,8 +12,13 @@ export default function Login() {
   const router = useRouter();
   const { data: session } = useSession();
 
+  useEffect(() => {
+    if (!session?.user) {
+      router.push('/login');
+    }
+  }, [session?.user, router]);
+
   if (!session?.user) {
-    router.push('/login');
     return null;
   }
 

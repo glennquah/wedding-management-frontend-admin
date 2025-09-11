@@ -1,38 +1,39 @@
-"use client";
+'use client';
 
-import { Button } from "@shared/components/ui/button";
-import { Input } from "@shared/components/ui/form/input";
-import { Label } from "@shared/components/ui/form/label";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
+import { useState } from 'react';
+
+import { Button } from '@shared/components/ui/button';
+import { Input } from '@shared/components/ui/form/input';
+import { Label } from '@shared/components/ui/form/label';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    try {      
-      const res = await signIn("credentials", {
+    try {
+      const res = await signIn('credentials', {
         redirect: false,
         username,
         password,
       });
       if (res?.error) {
-        toast.error("Invalid username or password");
+        toast.error('Invalid username or password');
         return;
       }
-      toast("Successfully Login.")
-      router.push("/");
+      toast('Successfully Login.');
+      router.push('/main-dashboard');
     } catch (err) {
-      console.error("Unexpected error:", err);
-      toast.error("Something went wrong. Please try again.");     
+      console.error('Unexpected error:', err);
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -66,7 +67,7 @@ export default function LoginPage() {
             />
           </div>
           <Button type="submit" className="w-full mt-4" disabled={loading}>
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? 'Signing in...' : 'Sign In'}
           </Button>
         </form>
       </div>
