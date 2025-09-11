@@ -1,58 +1,51 @@
-import { NextAuthOptions } from "next-auth";
-import { JWT } from "next-auth/jwt";
-import CredentialsProvider from "next-auth/providers/credentials";
-
-const NEXTAUTH_URL = process.env.NEXT_PUBLIC_NEXTAUTH_URL;
+import { AuthService } from '@wedding/api-types';
+import { NextAuthOptions } from 'next-auth';
+import { JWT } from 'next-auth/jwt';
+import CredentialsProvider from 'next-auth/providers/credentials';
 
 async function refreshToken(token: JWT): Promise<JWT> {
+  try {
+    const response = await AuthService.authControllerRefreshToken();
 
-  const res = await fetch(NEXTAUTH_URL + "/auth/refresh", {
-    method: "POST",
-    headers: {
-      authorization: `Refresh ${token.backendTokens.refreshToken}`,
-    },
-  });
-
-  const response = await res.json();
-
-  return {
-    ...token,
-    backendTokens: response,
-  };
+    return {
+      ...token,
+      backendTokens: response.backendTokens,
+    };
+  } catch {
+    // If refresh fails, return the original token to trigger re-login
+    return token;
+  }
 }
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      name: "Credentials",
+      name: 'Credentials',
       credentials: {
         username: {
-          label: "Username",
-          type: "text",
-          placeholder: "username",
+          label: 'Username',
+          type: 'text',
+          placeholder: 'username',
         },
-        password: { label: "Password", type: "password" },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) return null;
         const { username, password } = credentials;
-        const res = await fetch(NEXTAUTH_URL + "/auth/login", {
-          method: "POST",
-          body: JSON.stringify({
+
+        try {
+          const user = await AuthService.authControllerLogin({
             username,
             password,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        if (res.status == 401) {
-          console.log(res.statusText);          
-
-          return null;
+          });
+          return user;
+        } catch (error: unknown) {
+          if (error && typeof error === 'object' && 'status' in error && error.status === 401) {
+            console.log('Unauthorized login attempt');
+            return null;
+          }
+          throw error;
         }
-        const user = await res.json();
-        return user;
       },
     }),
   ],
@@ -61,8 +54,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) return { ...token, ...user };
 
-      if (new Date().getTime() < token.backendTokens.expiresIn) 
-        return token;
+      if (new Date().getTime() < token.backendTokens.expiresIn) return token;
 
       return await refreshToken(token);
     },
@@ -76,6 +68,6 @@ export const authOptions: NextAuthOptions = {
   },
 
   pages: {
-    signIn: "/", 
+    signIn: '/',
   },
 };
