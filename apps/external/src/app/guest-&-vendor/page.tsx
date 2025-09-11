@@ -7,18 +7,13 @@ import {
   UtensilsCrossed,
   LayoutGrid,
 } from "lucide-react";
-import ResponsiveMenubar from "@shared/components/responsive-menubar";
-import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
 import Hero from "../components/unauthenticated/hero";
 import FeaturesPanel from "../components/unauthenticated/features-panel";
 import ClosingCTA from "../components/unauthenticated/closing-cta";
 
 export default function GuestVendorPage() {
-  const isMobile = useIsMobileScreen();
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-brand-100 to-white text-gray-800 font-sans">
-      <ResponsiveMenubar />
-      {!isMobile && <div className="mt-[72px] w-full"></div>}
+    <div className="text-gray-800 font-sans">
       {/* Hero Section */}
       <Hero img_src="/images/guests-vendors.jpg" header="Guests & Vendors, Simplified." subheader="Manage RSVPs, vendors, gifts, and seating in one seamless platform.
             From AI-generated couple stories to intelligent vendor recommendations,
