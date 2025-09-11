@@ -262,11 +262,22 @@ export default function VendorListPage() {
           />
         )} */}
 
-            <Tabs defaultValue="vendor">
-                <TabsList>
-                    <TabsTrigger value="live">Live vendors</TabsTrigger>
-                    <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
+            <Tabs defaultValue="live">
+                <TabsList className="bg-muted/50 rounded-lg p-1 flex space-x-2">
+                    <TabsTrigger
+                        value="live"
+                        className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+                    >
+                        Live vendors
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="onboarding"
+                        className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+                    >
+                        Onboarding
+                    </TabsTrigger>
                 </TabsList>
+
                 <TabsContent value="live">
                     {/* Guest List Table */}
                     <DataTable
