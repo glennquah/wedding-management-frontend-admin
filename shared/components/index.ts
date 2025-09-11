@@ -1,6 +1,11 @@
 // UI Components
 export { Button } from './ui/button'
 export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
+export {
+    Carousel,
+    CarouselContent,
+    CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi
+} from './ui/carousel'
 export { Checkbox } from './ui/checkbox'
 export { DeleteConfirmationModal } from './ui/delete-confirmation-modal'
 export { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
@@ -16,7 +21,9 @@ export { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetT
 export { Toaster } from './ui/sonner'
 export { DataTable, Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 export type { DataTableProps } from './ui/table'
+export { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 
 // Utilities
 export { cn } from './lib/utils'
+
 
