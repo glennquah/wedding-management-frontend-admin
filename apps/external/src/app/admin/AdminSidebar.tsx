@@ -1,7 +1,7 @@
 "use client";
 
-import { LayoutDashboard, CheckSquare, Users, Calendar, ListTodo, Clock } from "lucide-react";
 import AppSidebar from "@shared/components/AppSidebar";
+import { Calendar, CheckSquare, Clock, LayoutDashboard, ListTodo, Users } from "lucide-react";
 
 const tabs = [
     {

@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { UserRole } from './UserRole';
 export type CreateSuperAdminDto = {
     /**
      * The name of the user
@@ -15,19 +16,6 @@ export type CreateSuperAdminDto = {
      * Password for the user account
      */
     password: string;
-    /**
-     * Role of the user
-     */
-    role: CreateSuperAdminDto.role;
+    role: UserRole;
 };
-export namespace CreateSuperAdminDto {
-    /**
-     * Role of the user
-     */
-    export enum role {
-        ADMIN = 'admin',
-        SUPER_ADMIN = 'superAdmin',
-        VENDOR = 'vendor',
-    }
-}
 

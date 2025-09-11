@@ -11,7 +11,9 @@ export function AuthRedirect() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (session?.user) return router.push(`/${session.user.role}`);
+    if (session?.user && pathname && !pathname.startsWith(`/${session.user.role}`)) {
+      return router.push(`/${session.user.role}`);
+    }
   }, [session, status, pathname, router]);
 
   return null;
