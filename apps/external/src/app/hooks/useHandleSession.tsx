@@ -117,7 +117,7 @@ export function useHandleSession() {
         setLoading(true);
         try {
             if (!role || !serviceOffered || !styleOffered || !weddingTypes) {
-                throw new Error(`Missing field.`);
+                throw new Error('Missing field.');
             }
             await AuthService.authControllerRegisterVendor({
                 email,
