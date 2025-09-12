@@ -6,13 +6,8 @@ import { useHandleSession } from "../../hooks/useHandleSession";
 import { useSessionStore } from "../../store/sessionStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@shared/components/ui/card";
 import { Button } from "@shared/components/ui/button";
-import { WeddingType as APIWeddingType, BudgetBucket as APIBudgetBucket, GuestCountBucket as APIGuestCountBucket, WeddingStyle as APIWeddingStyle, WeddingService as APIWeddingService } from "@shared/api";
+import { WeddingType, BudgetBucket, GuestCountBucket, WeddingStyle, WeddingService } from "@shared/api";
 
-type WeddingType = "chinese" | "malay" | "indian" | "western" | "others";
-type BudgetBucket = "low" | "medium" | "high" | "luxury";
-type GuestCountBucket = "small" | "medium" | "large";
-type WeddingStyle = "luxury" | "modern" | "traditional" | "rustic";
-type WeddingService = "venue" | "catering" | "photography" | "decoration" | "music" | "attire" | "makeup" | "transportation";
 
 interface OnboardingData {
   weddingType: WeddingType | null;
@@ -31,42 +26,42 @@ const STEPS = [
 ];
 
 const WEDDING_TYPES: { value: WeddingType; label: string; description: string }[] = [
-  { value: 'chinese', label: 'Chinese', description: 'Traditional Chinese wedding ceremony' },
-  { value: 'malay', label: 'Malay', description: 'Traditional Malay wedding ceremony' },
-  { value: 'indian', label: 'Indian', description: 'Traditional Indian wedding ceremony' },
-  { value: 'western', label: 'Western', description: 'Western-style wedding ceremony' },
-  { value: 'others', label: 'Others', description: 'Other cultural or mixed ceremonies' }
+  { value: WeddingType.CHINESE, label: 'Chinese', description: 'Traditional Chinese wedding ceremony' },
+  { value: WeddingType.MALAY, label: 'Malay', description: 'Traditional Malay wedding ceremony' },
+  { value: WeddingType.INDIAN, label: 'Indian', description: 'Traditional Indian wedding ceremony' },
+  { value: WeddingType.WESTERN, label: 'Western', description: 'Western-style wedding ceremony' },
+  { value: WeddingType.OTHERS, label: 'Others', description: 'Other cultural or mixed ceremonies' }
 ];
 
 const BUDGET_BUCKETS: { value: BudgetBucket; label: string; description: string }[] = [
-  { value: 'low', label: 'Up to $10,000', description: 'Budget-friendly options' },
-  { value: 'medium', label: '$10,000 - $30,000', description: 'Mid-range celebration' },
-  { value: 'high', label: '$30,000 - $50,000', description: 'Premium experience' },
-  { value: 'luxury', label: 'Above $50,000', description: 'Luxury wedding experience' }
+  { value: BudgetBucket.LOW, label: 'Up to $10,000', description: 'Budget-friendly options' },
+  { value: BudgetBucket.MEDIUM, label: '$10,000 - $30,000', description: 'Mid-range celebration' },
+  { value: BudgetBucket.HIGH, label: '$30,000 - $50,000', description: 'Premium experience' },
+  { value: BudgetBucket.LUXURY, label: 'Above $50,000', description: 'Luxury wedding experience' }
 ];
 
 const GUEST_COUNT_BUCKETS: { value: GuestCountBucket; label: string; description: string }[] = [
-  { value: 'small', label: 'Up to 50 guests', description: 'Intimate celebration' },
-  { value: 'medium', label: '50 - 150 guests', description: 'Medium-sized gathering' },
-  { value: 'large', label: 'Above 150 guests', description: 'Large celebration' }
+  { value: GuestCountBucket.SMALL, label: 'Up to 50 guests', description: 'Intimate celebration' },
+  { value: GuestCountBucket.MEDIUM, label: '50 - 150 guests', description: 'Medium-sized gathering' },
+  { value: GuestCountBucket.LARGE, label: 'Above 150 guests', description: 'Large celebration' }
 ];
 
 const WEDDING_STYLES: { value: WeddingStyle; label: string; description: string }[] = [
-  { value: 'luxury', label: 'Luxury', description: 'Opulent and extravagant' },
-  { value: 'modern', label: 'Modern', description: 'Contemporary and sleek' },
-  { value: 'traditional', label: 'Traditional', description: 'Classic and timeless' },
-  { value: 'rustic', label: 'Rustic', description: 'Natural and countryside' }
+  { value: WeddingStyle.LUXURY, label: 'Luxury', description: 'Opulent and extravagant' },
+  { value: WeddingStyle.MODERN, label: 'Modern', description: 'Contemporary and sleek' },
+  { value: WeddingStyle.TRADITIONAL, label: 'Traditional', description: 'Classic and timeless' },
+  { value: WeddingStyle.RUSTIC, label: 'Rustic', description: 'Natural and countryside' }
 ];
 
 const WEDDING_SERVICES: { value: WeddingService; label: string; description: string }[] = [
-  { value: 'venue', label: 'Venue', description: 'Wedding ceremony and reception location' },
-  { value: 'catering', label: 'Catering', description: 'Food and beverage services' },
-  { value: 'photography', label: 'Photography', description: 'Wedding photography and videography' },
-  { value: 'decoration', label: 'Decoration', description: 'Floral arrangements and decorations' },
-  { value: 'music', label: 'Music', description: 'DJ, band, or music services' },
-  { value: 'attire', label: 'Attire', description: 'Wedding dress and formal wear' },
-  { value: 'makeup', label: 'Makeup', description: 'Bridal makeup and styling' },
-  { value: 'transportation', label: 'Transportation', description: 'Wedding day transportation' }
+  { value: WeddingService.VENUE, label: 'Venue', description: 'Wedding ceremony and reception location' },
+  { value: WeddingService.CATERING, label: 'Catering', description: 'Food and beverage services' },
+  { value: WeddingService.PHOTOGRAPHY, label: 'Photography', description: 'Wedding photography and videography' },
+  { value: WeddingService.DECORATION, label: 'Decoration', description: 'Floral arrangements and decorations' },
+  { value: WeddingService.MUSIC, label: 'Music', description: 'DJ, band, or music services' },
+  { value: WeddingService.ATTIRE, label: 'Attire', description: 'Wedding dress and formal wear' },
+  { value: WeddingService.MAKEUP, label: 'Makeup', description: 'Bridal makeup and styling' },
+  { value: WeddingService.TRANSPORTATION, label: 'Transportation', description: 'Wedding day transportation' }
 ];
 
 export default function GetStartedCouplePage() {
@@ -113,22 +108,15 @@ export default function GetStartedCouplePage() {
         return;
       }
 
-      // Convert frontend types to API types
-      const apiWeddingType = onboardingData.weddingType.toLowerCase() as APIWeddingType;
-      const apiBudgetBucket = onboardingData.budgetBucket.toLowerCase() as APIBudgetBucket;
-      const apiGuestCountBucket = onboardingData.guestCountBucket.toLowerCase() as APIGuestCountBucket;
-      const apiPreferredStyle = onboardingData.preferredStyle.toLowerCase() as APIWeddingStyle;
-      const apiPreferredServices = onboardingData.preferredServices.map(s => s.toLowerCase()) as APIWeddingService[];
-
       await handleSignUpAdmin({
         email: email!,
         password: password!,
         name: name!,
-        weddingType: apiWeddingType,
-        budgetBucket: apiBudgetBucket,
-        guestCountBucket: apiGuestCountBucket,
-        preferredStyle: apiPreferredStyle,
-        preferredServices: apiPreferredServices,
+        weddingType: onboardingData.weddingType,
+        budgetBucket: onboardingData.budgetBucket,
+        guestCountBucket: onboardingData.guestCountBucket,
+        preferredStyle: onboardingData.preferredStyle,
+        preferredServices: onboardingData.preferredServices,
       }, setLoading);
     }
   };
@@ -213,7 +201,7 @@ export default function GetStartedCouplePage() {
 
       case 'guestCountBucket':
         return (
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {GUEST_COUNT_BUCKETS.map((count) => (
               <Card
                 key={count.value}
@@ -243,7 +231,7 @@ export default function GetStartedCouplePage() {
 
       case 'preferredStyle':
         return (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {WEDDING_STYLES.map((style) => (
               <Card
                 key={style.value}
@@ -273,7 +261,7 @@ export default function GetStartedCouplePage() {
 
       case 'preferredServices':
         return (
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
             {WEDDING_SERVICES.map((service) => (
               <Card
                 key={service.value}

@@ -27,6 +27,8 @@ export default function LoginPage() {
         username,
         password,
       });
+      console.log(session)
+      // console.log(res)
       if (!res?.ok) throw new Error('Signin failed');
       if (session?.user.role == 'superAdmin')
         throw new Error('Super Admins must use the Super Admin login page.');

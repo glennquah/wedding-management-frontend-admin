@@ -56,7 +56,7 @@ export function useHandleSession() {
         if (signin_res?.error) {
             toast.error("Login failed after signup: " + signin_res.error);
         } else {
-            router.push("/user"); // why is this routing to /user not /admin?
+            router.push("/admin"); 
         }
         } catch (err) {
             console.log(err);
@@ -142,7 +142,7 @@ export function useHandleSession() {
             if (signin_res?.error) {
                 toast.error("Login failed after signup: " + signin_res.error);
             } else {
-                router.push("/user"); // same for this - why is this routing to /user not /vendor?
+                router.push("/vendor"); 
             }
         } catch (err) {
             console.log(err);

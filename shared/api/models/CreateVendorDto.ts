@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { UserRole } from './UserRole';
 import type { WeddingService } from './WeddingService';
 import type { WeddingStyle } from './WeddingStyle';
 import type { WeddingType } from './WeddingType';
@@ -18,10 +19,7 @@ export type CreateVendorDto = {
      * Password for the user account
      */
     password: string;
-    /**
-     * Role of the user
-     */
-    role: CreateVendorDto.role;
+    role: UserRole;
     /**
      * Vendor website URL
      */
@@ -50,14 +48,4 @@ export type CreateVendorDto = {
      */
     capacity?: number;
 };
-export namespace CreateVendorDto {
-    /**
-     * Role of the user
-     */
-    export enum role {
-        ADMIN = 'admin',
-        SUPER_ADMIN = 'superAdmin',
-        VENDOR = 'vendor',
-    }
-}
 
