@@ -29,6 +29,20 @@ export class GuestsService {
         });
     }
     /**
+     * Get all guests for all weddings
+     * @returns GuestResponseDto List of guests for all weddings
+     * @throws ApiError
+     */
+    public static guestControllerGetAllGuests(): CancelablePromise<Array<GuestResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/guests',
+            errors: {
+                404: `Wedding not found.`,
+            },
+        });
+    }
+    /**
      * Create multiple guests
      * @param requestBody
      * @returns GuestResponseDto The guests have been successfully created.
