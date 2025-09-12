@@ -1,21 +1,21 @@
-import { ConfirmationStatus, CreateGuestDto, GuestResponseDto, GuestsService, OpenAPI, UpdateGuestDto, WeddingsService } from "@shared/api";
-import { useSession } from "next-auth/react";
-import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
+import { ConfirmationStatus, CreateGuestDto, GuestResponseDto, GuestsService, OpenAPI, UpdateGuestDto, WeddingsService } from '@shared/api';
+import { useSession } from 'next-auth/react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 type GuestFormData = Partial<CreateGuestDto & { accompanyingGuestNames: string[] }>;
 
 type GuestFormSetter = (guest: GuestFormData) => void;
 
 const getDefaultNewGuest = (weddingId: number): GuestFormData => ({
-  name: "",
-  email: "",
-  allergies: "",
-  group: "",
+  name: '',
+  email: '',
+  allergies: '',
+  group: '',
   confirmationStatus: ConfirmationStatus.PENDING,
   weddingId,
   primaryGuestId: undefined,
-  accompanyingGuestNames: [""],
+  accompanyingGuestNames: [''],
 });
 
 const confirmationStatusOptions = [
@@ -204,7 +204,7 @@ export function useGuestManager() {
     const currentNames = guest.accompanyingGuestNames || [];
     setGuest({
       ...guest,
-      accompanyingGuestNames: [...currentNames, ""]
+      accompanyingGuestNames: [...currentNames, '']
     });
   };
 
@@ -263,7 +263,7 @@ export function useGuestManager() {
         const validAccompanyingNames = newGuest.accompanyingGuestNames.filter(name => name.trim());
         accompanyingGuestsData.push(...validAccompanyingNames.map(name => ({
           name: name.trim(),
-          email: "",
+          email: '',
           allergies: newGuest.allergies || undefined,
           group: newGuest.group,
           confirmationStatus: ConfirmationStatus.PENDING,
@@ -329,7 +329,7 @@ export function useGuestManager() {
         const validAccompanyingNames = editingGuest.accompanyingGuestNames.filter(name => name.trim());
         accompanyingGuestsData.push(...validAccompanyingNames.map(name => ({
           name: name.trim(),
-          email: "",
+          email: '',
           allergies: editingGuest.allergies,
           group: editingGuest.group,
           confirmationStatus: editingGuest.confirmationStatus || ConfirmationStatus.PENDING,
@@ -379,7 +379,7 @@ export function useGuestManager() {
     const accompanyingGuests = guests.filter(g => g.primaryGuestId === guest.id);
     const accompanyingNames = accompanyingGuests.length > 0 
       ? accompanyingGuests.map(g => g.name)
-      : [""];
+      : [''];
     
     // Map the confirmation status from GuestResponseDto to ConfirmationStatus
     const mapResponseConfirmationStatus = (status: ConfirmationStatus): ConfirmationStatus => {

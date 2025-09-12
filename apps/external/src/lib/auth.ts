@@ -1,4 +1,4 @@
-import { AuthService, TokensDto, UserResponseDto, UserRole } from '@shared/api';
+import { AuthService, TokensDto, UserRole } from '@shared/api';
 import { NextAuthOptions } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
@@ -8,8 +8,6 @@ interface ExtendedUser {
   name: string;
   email: string;
   role: UserRole;
-  createdAt: string;
-  updatedAt: string;
   backendTokens: TokensDto;
 }
 
@@ -54,8 +52,6 @@ export const authOptions: NextAuthOptions = {
             name: authResponse.user.name,
             email: authResponse.user.email,
             role: authResponse.user.role as unknown as UserRole,
-            createdAt: authResponse.user.createdAt,
-            updatedAt: authResponse.user.updatedAt,
             backendTokens: authResponse.backendTokens,
           } as ExtendedUser;
         } catch (error: unknown) {
@@ -83,8 +79,6 @@ export const authOptions: NextAuthOptions = {
       session.user.name = token.name as string;
       session.user.email = token.email as string;
       session.user.role = token.role as UserRole;
-      session.user.createdAt = token.createdAt as string;
-      session.user.updatedAt = token.updatedAt as string;
       session.backendTokens = token.backendTokens as TokensDto;
 
       return session;

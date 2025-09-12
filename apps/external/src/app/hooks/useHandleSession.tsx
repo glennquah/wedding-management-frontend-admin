@@ -1,7 +1,7 @@
-import { AuthService, CreateVendorDto, CreateAdminDto, UserRole, WeddingService, WeddingStyle, WeddingType, BudgetBucket, GuestCountBucket } from "@shared/api";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { AuthService, CreateVendorDto, CreateAdminDto, UserRole, WeddingService, WeddingStyle, WeddingType, BudgetBucket, GuestCountBucket } from '@shared/api';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export function useHandleSession() {
   const router = useRouter();
@@ -47,24 +47,24 @@ export function useHandleSession() {
                 preferredServices,
             } satisfies CreateAdminDto);
 
-            toast.success("Signup Successful.");
-            const signin_res = await signIn("credentials", {
+            toast.success('Signup Successful.');
+            const signin_res = await signIn('credentials', {
                 username: email,
                 password,
                 redirect: false,
         });
         if (signin_res?.error) {
-            toast.error("Login failed after signup: " + signin_res.error);
+            toast.error('Login failed after signup: ' + signin_res.error);
         } else {
-            router.push("/admin"); 
+            router.push('/admin'); 
         }
         } catch (err) {
             console.log(err);
-            let errorMessage = "An unknown error occurred";
+            let errorMessage = 'An unknown error occurred';
 
             try {
                 if (err instanceof Error) {
-                    const bodyStart = err.message.indexOf("{");
+                    const bodyStart = err.message.indexOf('{');
                     if (bodyStart !== -1) {
                         const bodyString = err.message.slice(bodyStart);
                         const body = JSON.parse(bodyString);
@@ -72,7 +72,7 @@ export function useHandleSession() {
                         errorMessage = body.message;
                         }
                     }
-                } else if (typeof err == "string") {
+                } else if (typeof err == 'string') {
                     errorMessage = err;
                 }
             } catch {
@@ -133,24 +133,24 @@ export function useHandleSession() {
                 onboardedDate: new Date().toISOString(),
             } satisfies CreateVendorDto)
 
-            toast.success("Signup Successful.");
-            const signin_res = await signIn("credentials", {
+            toast.success('Signup Successful.');
+            const signin_res = await signIn('credentials', {
                 username: email,
                 password,
                 redirect: false,
             });
             if (signin_res?.error) {
-                toast.error("Login failed after signup: " + signin_res.error);
+                toast.error('Login failed after signup: ' + signin_res.error);
             } else {
-                router.push("/vendor"); 
+                router.push('/vendor'); 
             }
         } catch (err) {
             console.log(err);
-            let errorMessage = "An unknown error occurred";
+            let errorMessage = 'An unknown error occurred';
 
             try {
                 if (err instanceof Error) {
-                    const bodyStart = err.message.indexOf("{");
+                    const bodyStart = err.message.indexOf('{');
                     if (bodyStart !== -1) {
                         const bodyString = err.message.slice(bodyStart);
                         const body = JSON.parse(bodyString);
@@ -158,7 +158,7 @@ export function useHandleSession() {
                         errorMessage = body.message;
                         }
                     }
-                } else if (typeof err == "string") {
+                } else if (typeof err == 'string') {
                     errorMessage = err;
                 }
             } catch {
@@ -177,14 +177,14 @@ export function useHandleSession() {
         setLoading(true);
 
         try {      
-        const res = await signIn("credentials", {
+        const res = await signIn('credentials', {
             redirect: false,
             username,
             password,
         });
-        if (!res?.ok) throw new Error("Signin failed");
-        toast("Successfully Login.")
-        router.push("/user"); 
+        if (!res?.ok) throw new Error('Signin failed');
+        toast('Successfully Login.')
+        router.push('/user'); 
         } catch (err) {
         console.log(err)
         } finally {

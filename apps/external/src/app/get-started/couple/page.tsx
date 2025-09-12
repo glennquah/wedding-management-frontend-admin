@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useHandleSession } from "../../hooks/useHandleSession";
-import { useSessionStore } from "../../store/sessionStore";
-import { Card, CardContent, CardHeader, CardTitle } from "@shared/components/ui/card";
-import { Button } from "@shared/components/ui/button";
-import { WeddingType, BudgetBucket, GuestCountBucket, WeddingStyle, WeddingService } from "@shared/api";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useHandleSession } from '../../hooks/useHandleSession';
+import { useSessionStore } from '../../store/sessionStore';
+import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/ui/card';
+import { Button } from '@shared/components/ui/button';
+import { WeddingType, BudgetBucket, GuestCountBucket, WeddingStyle, WeddingService } from '@shared/api';
 
 
 interface OnboardingData {
@@ -80,7 +80,7 @@ export default function GetStartedCouplePage() {
 
   // Redirect if onboarding data is missing
   if (!name || !email || !password) {
-    router.replace("/get-started");
+    router.replace('/get-started');
     return null;
   }
 
@@ -141,7 +141,7 @@ export default function GetStartedCouplePage() {
     switch (step.key) {
       case 'weddingType':
         return (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className='grid grid-cols-2 lg:grid-cols-4 gap-4'>
             {WEDDING_TYPES.map((type) => (
               <Card
                 key={type.value}
@@ -159,10 +159,10 @@ export default function GetStartedCouplePage() {
                   }}
               >
                 <CardHeader>
-                  <CardTitle className="text-lg">{type.label}</CardTitle>
+                  <CardTitle className='text-lg'>{type.label}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="!text-base text-gray-900 font-medium">{type.description}</p>
+                  <p className='!text-base text-gray-900 font-medium'>{type.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -171,7 +171,7 @@ export default function GetStartedCouplePage() {
 
       case 'budgetBucket':
         return (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className='grid grid-cols-2 lg:grid-cols-4 gap-4'>
             {BUDGET_BUCKETS.map((budget) => (
               <Card
                 key={budget.value}
@@ -189,10 +189,10 @@ export default function GetStartedCouplePage() {
                   }}
               >
                 <CardHeader>
-                  <CardTitle className="text-lg">{budget.label}</CardTitle>
+                  <CardTitle className='text-lg'>{budget.label}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="!text-base text-gray-900 font-medium">{budget.description}</p>
+                  <p className='!text-base text-gray-900 font-medium'>{budget.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -201,7 +201,7 @@ export default function GetStartedCouplePage() {
 
       case 'guestCountBucket':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
             {GUEST_COUNT_BUCKETS.map((count) => (
               <Card
                 key={count.value}
@@ -219,10 +219,10 @@ export default function GetStartedCouplePage() {
                   }}
               >
                 <CardHeader>
-                  <CardTitle className="text-lg">{count.label}</CardTitle>
+                  <CardTitle className='text-lg'>{count.label}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="!text-base text-gray-900 font-medium">{count.description}</p>
+                  <p className='!text-base text-gray-900 font-medium'>{count.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -231,7 +231,7 @@ export default function GetStartedCouplePage() {
 
       case 'preferredStyle':
         return (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
             {WEDDING_STYLES.map((style) => (
               <Card
                 key={style.value}
@@ -249,10 +249,10 @@ export default function GetStartedCouplePage() {
                   }}
               >
                 <CardHeader>
-                  <CardTitle className="text-lg">{style.label}</CardTitle>
+                  <CardTitle className='text-lg'>{style.label}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="!text-base text-gray-900 font-medium">{style.description}</p>
+                  <p className='!text-base text-gray-900 font-medium'>{style.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -261,7 +261,7 @@ export default function GetStartedCouplePage() {
 
       case 'preferredServices':
         return (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+          <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4'>
             {WEDDING_SERVICES.map((service) => (
               <Card
                 key={service.value}
@@ -274,17 +274,17 @@ export default function GetStartedCouplePage() {
               >
                 {/* Floating badge outside of content flow */}
                 {onboardingData.preferredServices.includes(service.value) && (
-                  <span className="absolute top-2 right-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-brand-100 text-brand-800 shadow">
+                  <span className='absolute top-2 right-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-brand-100 text-brand-800 shadow'>
                     ✓ Selected
                   </span>
                 )}
 
                 <CardHeader>
-                  <CardTitle className="text-lg">{service.label}</CardTitle>
+                  <CardTitle className='text-lg'>{service.label}</CardTitle>
                 </CardHeader>
 
                 <CardContent>
-                  <p className="!text-base text-gray-900 font-medium">
+                  <p className='!text-base text-gray-900 font-medium'>
                     {service.description}
                   </p>
                 </CardContent>
@@ -302,40 +302,40 @@ export default function GetStartedCouplePage() {
   const currentStepData = STEPS[currentStep];
 
   return (
-    <div className="min-h-screen bg-gradient-to-t from-brand-200 to-brand-25 px-6 py-8">
-      <div className="max-w-4xl mx-auto">
+    <div className='min-h-screen bg-gradient-to-t from-brand-200 to-brand-25 px-6 py-8'>
+      <div className='max-w-4xl mx-auto'>
         {/* Progress indicator */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-2xl font-bold text-gray-900">
+        <div className='mb-8'>
+          <div className='flex items-center justify-between mb-2'>
+            <h1 className='text-2xl font-bold text-gray-900'>
               Welcome, {name}!
             </h1>
-            <span className="text-sm text-gray-600">
+            <span className='text-sm text-gray-600'>
               Step {currentStep + 1} of {STEPS.length}
             </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className='w-full bg-gray-200 rounded-full h-2'>
             <div
-              className="bg-brand-500 h-2 rounded-full transition-all duration-300"
+              className='bg-brand-500 h-2 rounded-full transition-all duration-300'
               style={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
             />
           </div>
         </div>
 
         {/* Step content */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+        <div className='mb-8'>
+          <h2 className='text-xl font-semibold text-gray-900 mb-2'>
             {currentStepData.title}
           </h2>
-          <p className="text-gray-600 mb-6">{currentStepData.subtitle}</p>
+          <p className='text-gray-600 mb-6'>{currentStepData.subtitle}</p>
           {renderStep()}
         </div>
 
         {/* Navigation */}
-        <div className={"flex items-center justify-between"}
+        <div className={'flex items-center justify-between'}
         >
           <Button
-            variant="darkOutline"
+            variant='darkOutline'
             onClick={() => {
               if (currentStep === 0) {
                 router.back(); // go to previous page

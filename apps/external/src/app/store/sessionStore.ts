@@ -14,9 +14,9 @@ interface SessionState {
 }
 
 export const useSessionStore = create<SessionState>((set) => ({
-  name: "",
-  email: "",
-  password: "",
+  name: '',
+  email: '',
+  password: '',
   token: null,
   setName: (name: string) => set({ name }),
   setEmail: (email: string) => set({ email }),
