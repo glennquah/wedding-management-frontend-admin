@@ -8,23 +8,59 @@ const openApiPath = path.join(configPath, 'core/OpenAPI.ts');
 if (fs.existsSync(indexPath)) {
   console.log('OpenAPI types generated successfully!');
   console.log('Types available in: shared/api/');
-  
+
   const stats = fs.readdirSync(configPath);
   console.log('Generated files:', stats.join(', '));
 
-  // Update the base URL in OpenAPI.ts
+  // Update the OpenAPI.ts configuration
   if (fs.existsSync(openApiPath)) {
-    let openApiContent = fs.readFileSync(openApiPath, 'utf8');
-    
-    openApiContent = openApiContent.replace(
-      "BASE: '',",
-      "BASE: 'http://localhost:8080',"
+    const customOpenAPIConfig = `/* generated using openapi-typescript-codegen -- do not edit */
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+import type { ApiRequestOptions } from './ApiRequestOptions';
+
+type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
+type Headers = Record<string, string>;
+
+export type OpenAPIConfig = {
+    BASE: string;
+    VERSION: string;
+    WITH_CREDENTIALS: boolean;
+    CREDENTIALS: 'include' | 'omit' | 'same-origin';
+    TOKEN?: string | Resolver<string> | undefined;
+    USERNAME?: string | Resolver<string> | undefined;
+    PASSWORD?: string | Resolver<string> | undefined;
+    HEADERS?: Headers | Resolver<Headers> | undefined;
+    ENCODE_PATH?: ((path: string) => string) | undefined;
+};
+
+export const OpenAPI: OpenAPIConfig = {
+    BASE: 'http://localhost:8080',
+    VERSION: '1.0',
+    WITH_CREDENTIALS: true,
+    CREDENTIALS: 'include',
+    TOKEN: async () => {
+        if (typeof window !== 'undefined') {
+            const { getSession } = await import('next-auth/react');
+            const session = await getSession();
+            return session?.backendTokens?.accessToken || '';
+        }
+        return '';
+    },
+    USERNAME: undefined,
+    PASSWORD: undefined,
+    HEADERS: undefined,
+    ENCODE_PATH: undefined,
+};
+`;
+
+    fs.writeFileSync(openApiPath, customOpenAPIConfig);
+    console.log(
+      'Updated OpenAPI.ts with custom configuration including NextAuth token integration',
     );
-    
-    fs.writeFileSync(openApiPath, openApiContent);
-    console.log('Updated OpenAPI base URL to http://localhost:8080');
   } else {
-    console.log('Warning: OpenAPI.ts not found, base URL not updated');
+    console.log('Warning: OpenAPI.ts not found, configuration not updated');
   }
 } else {
   console.log('OpenAPI generation failed - no output files found');

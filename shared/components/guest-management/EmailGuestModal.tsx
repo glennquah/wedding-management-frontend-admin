@@ -1,8 +1,14 @@
-"use client";
+'use client';
 
-import { Button } from "@shared/components";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@shared/components/ui/dialog";
-import { Mail } from "lucide-react";
+import { Button } from '@shared/components';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@shared/components/ui/dialog';
+import { Mail } from 'lucide-react';
 
 interface EmailGuestModalProps {
   open: boolean;
@@ -17,7 +23,7 @@ export function EmailGuestModal({
   onOpenChange,
   guestName,
   guestEmail,
-  onSendEmail
+  onSendEmail,
 }: EmailGuestModalProps) {
   const handleSendEmail = () => {
     onSendEmail();
@@ -25,7 +31,7 @@ export function EmailGuestModal({
   };
 
   // Example email template
-  const exampleEmailSubject = "Wedding Invitation - [Your Names] Wedding";
+  const exampleEmailSubject = 'Wedding Invitation - [Your Names] Wedding';
   const exampleEmailBody = `Dear ${guestName},
 
 We hope this message finds you well! We are thrilled to invite you to celebrate our special day with us.
@@ -55,13 +61,15 @@ Please visit our wedding website for more details and to RSVP: [Website Link]`;
             Send Email to Guest
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <div className="bg-muted/50 p-4 rounded-lg">
             <p className="text-sm font-medium text-foreground mb-1">Recipient:</p>
-            <p className="text-sm text-muted-foreground">{guestName} ({guestEmail})</p>
+            <p className="text-sm text-muted-foreground">
+              {guestName} ({guestEmail})
+            </p>
           </div>
-          
+
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium text-foreground">Subject:</label>
@@ -69,7 +77,7 @@ Please visit our wedding website for more details and to RSVP: [Website Link]`;
                 {exampleEmailSubject}
               </div>
             </div>
-            
+
             <div>
               <label className="text-sm font-medium text-foreground">Message:</label>
               <div className="mt-1 p-3 bg-muted/30 rounded-md text-sm text-foreground whitespace-pre-wrap max-h-64 overflow-y-auto">
@@ -80,11 +88,7 @@ Please visit our wedding website for more details and to RSVP: [Website Link]`;
         </div>
 
         <DialogFooter className="sm:justify-center">
-          <Button 
-            onClick={handleSendEmail}
-            className="w-full sm:w-auto"
-            size="lg"
-          >
+          <Button onClick={handleSendEmail} className="w-full sm:w-auto" size="lg">
             <Mail className="w-4 h-4 mr-2" />
             Send Email
           </Button>

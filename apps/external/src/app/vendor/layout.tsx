@@ -1,19 +1,10 @@
-"use client";
+'use client';
 
-import VendorSidebar from "./VendorSidebar"
-import { useSession } from "next-auth/react";
+import VendorSidebar from './VendorSidebar';
+import { SidebarProvider, SidebarTrigger } from '@shared/components/ui/sidebar';
+import { useSession } from 'next-auth/react';
 
-import {
-  SidebarProvider,
-  SidebarTrigger,
-} from "@shared/components/ui/sidebar";
-
-export default function VendorLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-
+export default function VendorLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
 
   if (!session || session.user.role !== 'vendor') {
@@ -27,7 +18,7 @@ export default function VendorLayout({
         <main className="relative flex-1 overflow-auto">
           <div className="absolute left-2 top-4 z-50">
             <SidebarTrigger />
-          </div> 
+          </div>
           {children}
         </main>
       </div>

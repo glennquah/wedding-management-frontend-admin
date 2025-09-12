@@ -1,13 +1,13 @@
-import { Input } from "@shared/components/Input";
-import ResponsiveMenubar from "@shared/components/responsive-menubar";
-import { Button } from "@shared/components/ui/button";
+import { Input } from '@shared/components/Input';
+import ResponsiveMenubar from '@shared/components/responsive-menubar';
+import { Button } from '@shared/components/ui/button';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@shared/components/ui/card";
-import Image from "next/image";
+} from '@shared/components/ui/card';
+import Image from 'next/image';
 
 export default function Home() {
   return (

@@ -25,6 +25,12 @@
       "@shared/*": ["../../shared/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "../internal/src/lib/guest-status-utils.tsx"
+  ],
   "exclude": ["node_modules"]
 }

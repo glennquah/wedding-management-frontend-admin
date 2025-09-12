@@ -1,24 +1,25 @@
-"use client";
+'use client';
 
-export const dynamic = 'force-dynamic'
+import { useEffect, useRef, useState } from 'react';
 
-import Footer from "@shared/components/footer";
-import ResponsiveMenubar from "@shared/components/responsive-menubar";
-import { Button } from "@shared/components/ui/button";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import Footer from '@shared/components/footer';
+import ResponsiveMenubar from '@shared/components/responsive-menubar';
+import { Button } from '@shared/components/ui/button';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+
+export const dynamic = 'force-dynamic';
 
 const heroImages = [
-  "/images/landing-pg (1).jpg",
-  "/images/landing-pg (2).jpg",
-  "/images/landing-pg (3).jpg",
-  "/images/landing-pg (4).jpg",
+  '/images/landing-pg (1).jpg',
+  '/images/landing-pg (2).jpg',
+  '/images/landing-pg (3).jpg',
+  '/images/landing-pg (4).jpg',
 ];
 
 export default function LandingPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [apiMessage, setApiMessage] = useState<string>("");
+  const [apiMessage, setApiMessage] = useState<string>('');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(true);
   const [current, setCurrent] = useState(0);
@@ -41,7 +42,7 @@ export default function LandingPage() {
       {/* Menubar */}
       <ResponsiveMenubar />
       {/* API Message Display */}
-        {/* <div className="mb-4 p-4 bg-white rounded-lg shadow-md">
+      {/* <div className="mb-4 p-4 bg-white rounded-lg shadow-md">
           <h2 className="text-lg font-semibold text-primary mb-2">API Response:</h2>
           {isLoading ? (
             <p className="text-gray-600">Loading...</p>
@@ -61,9 +62,9 @@ export default function LandingPage() {
               fill
               priority={idx === 0}
               className={`object-cover w-full h-full absolute inset-0 transition-opacity duration-500 ${
-                idx === current && fade ? "opacity-70" : "opacity-0"
+                idx === current && fade ? 'opacity-70' : 'opacity-0'
               }`}
-              style={{ transitionProperty: "opacity" }}
+              style={{ transitionProperty: 'opacity' }}
             />
           ))}
         </div>
@@ -75,20 +76,17 @@ export default function LandingPage() {
             Your Dream Wedding, Seamlessly Planned
           </h1>
           <h5 className="max-w-xl text-xl text-base-white drop-shadow font-nunito font-semibold">
-            Organize every detail, track every task, and coordinate your big day
-            effortlessly — all in one intuitive platform.
+            Organize every detail, track every task, and coordinate your big day effortlessly — all
+            in one intuitive platform.
           </h5>
           <div className="flex sm:flex-row gap-4 mt-4">
-            <Button
-              variant={"default"}
-              onClick={() => router.push(`/get-started`)}
-            >
+            <Button variant={'default'} onClick={() => router.push('/get-started')}>
               Get Started
             </Button>
             <Button
-              variant={"outline"}
+              variant={'outline'}
               onClick={() => {
-                featuresRef.current?.scrollIntoView({ behavior: "smooth" });
+                featuresRef.current?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
               Explore Features
@@ -97,39 +95,45 @@ export default function LandingPage() {
         </div>
       </section>
 
-
       {/* Features Section */}
       <section ref={featuresRef} className="py-20 px-6 sm:px-20 bg-background flex flex-col gap-16">
-        <h2 className="text-3xl font-header font-bold text-center text-foreground">
-          Our Services
-        </h2>
+        <h2 className="text-3xl font-header font-bold text-center text-foreground">Our Services</h2>
         {(() => {
           const services = [
             {
-              image: "/images/checklist.png",
-              alt: "Checklist",
-              header: "Essentials",
+              image: '/images/checklist.png',
+              alt: 'Checklist',
+              header: 'Essentials',
               description:
-                "Set your vision, lock your date, track your budget, and cover every blindspot—your wedding starts here.",
+                'Set your vision, lock your date, track your budget, and cover every blindspot—your wedding starts here.',
             },
             {
-              image: "/images/group.png",
-              alt: "Group of people",
-              header: "Guests & Vendors",
+              image: '/images/group.png',
+              alt: 'Group of people',
+              header: 'Guests & Vendors',
               description:
-                "Manage your guest list, secure the perfect vendors, and style your big day—all in one place.",
+                'Manage your guest list, secure the perfect vendors, and style your big day—all in one place.',
             },
             {
-              image: "/images/wedding-invitation.png",
-              alt: "Wedding Cake",
-              header: "The Big Day",
+              image: '/images/wedding-invitation.png',
+              alt: 'Wedding Cake',
+              header: 'The Big Day',
               description:
-                "Stay stress-free with last-minute checklists, day-of coordination, and effortless photo collation to relive every moment.",
+                'Stay stress-free with last-minute checklists, day-of coordination, and effortless photo collation to relive every moment.',
             },
           ];
 
-          
-          function ServiceCard({ image, alt, header, description }: { image: string; alt: string; header: string; description: string }) {
+          function ServiceCard({
+            image,
+            alt,
+            header,
+            description,
+          }: {
+            image: string;
+            alt: string;
+            header: string;
+            description: string;
+          }) {
             return (
               <div
                 className="flex flex-col items-center gap-4 text-center hover:scale-110 cursor-pointer transition-transform"
@@ -158,21 +162,25 @@ export default function LandingPage() {
           Are You a Vendor?
         </h2>
         <div className="flex flex-col items-center max-w-3xl w-full">
-          <Image src="/images/vendor-illustration.png" alt="Vendor too illustration" width={320} height={220} className="bg-transparent" />
+          <Image
+            src="/images/vendor-illustration.png"
+            alt="Vendor too illustration"
+            width={320}
+            height={220}
+            className="bg-transparent"
+          />
           <p className="text-lg text-center text-foreground font-nunito">
-            Join our platform to easily list your goods and services, track your sales and bookings, and connect with couples looking for the best wedding experiences. Our simple yet effective B2B tools empower you to grow your business and manage everything in one place.
+            Join our platform to easily list your goods and services, track your sales and bookings,
+            and connect with couples looking for the best wedding experiences. Our simple yet
+            effective B2B tools empower you to grow your business and manage everything in one
+            place.
           </p>
-          <Button
-              variant={"secondary"}
-              className="mt-6"
-              onClick={() => router.push(`/vendor`)}
-          >
-              Learn More
+          <Button variant={'secondary'} className="mt-6" onClick={() => router.push('/vendor')}>
+            Learn More
           </Button>
         </div>
       </section>
 
-      
       {/* Footer */}
       <Footer />
     </div>

@@ -1,4 +1,6 @@
-"use client";
+'use client';
+
+import { useState } from 'react';
 
 import { UserRole, WeddingService, WeddingStyle, WeddingType } from "@shared/api";
 import FormField from "@shared/components/FormField";
@@ -185,7 +187,7 @@ export default function GetStartedPage() {
           )}
         </form>
         <p className="text-center text-sm text-gray-500 mt-4">
-          Already have an account?{" "}
+          Already have an account?{' '}
           <a href="/login" className="text-brand-600 font-medium">
             Sign In
           </a>

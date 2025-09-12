@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useSession } from "next-auth/react";
-import { useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
+import { useSession } from 'next-auth/react';
+import { usePathname, useRouter } from 'next/navigation';
 
 export function AuthRedirect() {
   const { data: session, status } = useSession();
