@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ConfirmationStatus } from './ConfirmationStatus';
 export type UpdateGuestDto = {
     /**
      * The name of the guest
@@ -23,19 +24,6 @@ export type UpdateGuestDto = {
      * Primary guest ID if this is an accompanying guest
      */
     primaryGuestId?: number;
-    /**
-     * Confirmation status of the guest
-     */
-    confirmationStatus?: UpdateGuestDto.confirmationStatus;
+    confirmationStatus?: ConfirmationStatus;
 };
-export namespace UpdateGuestDto {
-    /**
-     * Confirmation status of the guest
-     */
-    export enum confirmationStatus {
-        PENDING = 'pending',
-        CONFIRMED = 'confirmed',
-        REJECTED = 'rejected',
-    }
-}
 
