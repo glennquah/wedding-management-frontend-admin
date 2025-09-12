@@ -1,15 +1,15 @@
-import { ConfirmationStatus } from "@shared/api";
-import { Clock, UserCheck, UserX } from "lucide-react";
+import { ConfirmationStatus } from '@shared/api';
+import { Clock, UserCheck, UserX } from 'lucide-react';
 
 export const getConfirmationStatusColor = (status: ConfirmationStatus) => {
   switch (status) {
     case ConfirmationStatus.CONFIRMED:
-      return "text-green-600 bg-green-100";
+      return 'text-green-600 bg-green-100';
     case ConfirmationStatus.REJECTED:
-      return "text-red-600 bg-red-100";
+      return 'text-red-600 bg-red-100';
     case ConfirmationStatus.PENDING:
     default:
-      return "text-yellow-600 bg-yellow-100";
+      return 'text-yellow-600 bg-yellow-100';
   }
 };
 
