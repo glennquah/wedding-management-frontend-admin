@@ -115,7 +115,7 @@ export default function GuestManagementPage() {
         weddingId: 1, // Default wedding ID for internal admin
         allergies: newGuest.allergies || '',
         confirmationStatus:
-          newGuest.confirmationStatus || CreateGuestDto.confirmationStatus.PENDING,
+          newGuest.confirmationStatus || ConfirmationStatus.PENDING,
         accompanyingGuestNames:
           newGuest.accompanyingGuestNames?.filter((name) => name.trim() !== '') || [],
       };
@@ -151,10 +151,10 @@ export default function GuestManagementPage() {
         allergies: editingGuest.allergies || '',
         confirmationStatus:
           editingGuest.confirmationStatus === 'pending'
-            ? UpdateGuestDto.confirmationStatus.PENDING
+            ? ConfirmationStatus.PENDING
             : editingGuest.confirmationStatus === 'confirmed'
-              ? UpdateGuestDto.confirmationStatus.CONFIRMED
-              : UpdateGuestDto.confirmationStatus.REJECTED,
+              ? ConfirmationStatus.CONFIRMED
+              : ConfirmationStatus.REJECTED,
       };
 
       await GuestsService.guestControllerUpdate(editingGuest.id, updateData);
@@ -293,12 +293,12 @@ export default function GuestManagementPage() {
     <div key="confirmationStatus" className="md:col-span-2">
       <SingleSelectDropdown
         label="Confirmation Status"
-        options={Object.values(CreateGuestDto.confirmationStatus)}
-        selected={guest.confirmationStatus || CreateGuestDto.confirmationStatus.PENDING}
+        options={Object.values(ConfirmationStatus)}
+        selected={guest.confirmationStatus || ConfirmationStatus.PENDING}
         setSelected={(selected) =>
           setGuest({
             ...guest,
-            confirmationStatus: selected as CreateGuestDto.confirmationStatus,
+            confirmationStatus: selected as ConfirmationStatus,
           })
         }
         placeholder="Select confirmation status"
@@ -366,10 +366,10 @@ export default function GuestManagementPage() {
               ...editingGuest!,
               confirmationStatus:
                 editingGuest!.confirmationStatus === 'pending'
-                  ? CreateGuestDto.confirmationStatus.PENDING
+                  ? ConfirmationStatus.PENDING
                   : editingGuest!.confirmationStatus === 'confirmed'
-                    ? CreateGuestDto.confirmationStatus.CONFIRMED
-                    : CreateGuestDto.confirmationStatus.REJECTED,
+                    ? ConfirmationStatus.CONFIRMED
+                    : ConfirmationStatus.REJECTED,
               accompanyingGuestNames: editingGuest!.accompanyingGuests?.map((ag) => ag.name) || [
                 '',
               ],
