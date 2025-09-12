@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { UserRole } from './UserRole';
 export type UserResponseDto = {
     /**
      * User ID
@@ -15,10 +16,7 @@ export type UserResponseDto = {
      * Email address of the user
      */
     email: string;
-    /**
-     * Role of the user
-     */
-    role: UserResponseDto.role;
+    role: UserRole;
     /**
      * Creation timestamp
      */
@@ -28,14 +26,4 @@ export type UserResponseDto = {
      */
     updatedAt: string;
 };
-export namespace UserResponseDto {
-    /**
-     * Role of the user
-     */
-    export enum role {
-        ADMIN = 'admin',
-        SUPER_ADMIN = 'superAdmin',
-        VENDOR = 'vendor',
-    }
-}
 

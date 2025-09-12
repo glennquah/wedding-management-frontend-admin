@@ -1,7 +1,7 @@
 'use client';
 
-import { useGuestManager } from '../../../hooks/useCRUDGuests';
-import { ConfirmationStatus, CreateGuestDto } from '@shared/api';
+import { useGuestManager } from '../../hooks/useCRUDGuests';
+import { CreateGuestDto, ConfirmationStatus } from '@shared/api';
 import { getGuestColumns } from '@shared/columns/guest-columns';
 import {
   Button,
@@ -124,12 +124,15 @@ export default function GuestListPage() {
     <div key="confirmationStatus" className="md:col-span-2">
       <SingleSelectDropdown
         label="Confirmation Status"
-        options={Object.values(CreateGuestDto.confirmationStatus)}
-        selected={guest.confirmationStatus || CreateGuestDto.confirmationStatus.PENDING}
+        options={Object.values(ConfirmationStatus)}
+        selected={
+          guest.confirmationStatus ||
+          ConfirmationStatus.PENDING
+        }
         setSelected={(selected) =>
           setGuest({
             ...guest,
-            confirmationStatus: selected as CreateGuestDto.confirmationStatus,
+            confirmationStatus: selected as ConfirmationStatus,
           })
         }
         placeholder="Select confirmation status"

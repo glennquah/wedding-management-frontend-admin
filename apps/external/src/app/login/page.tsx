@@ -15,7 +15,6 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState<'couple' | 'vendor' | null>(null);
   const { data: session } = useSession();
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -28,6 +27,8 @@ export default function LoginPage() {
         username,
         password,
       });
+      console.log(session)
+      // console.log(res)
       if (!res?.ok) throw new Error('Signin failed');
       if (session?.user.role == 'superAdmin')
         throw new Error('Super Admins must use the Super Admin login page.');
@@ -41,70 +42,40 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-t from-brand-200 to-brand-25 px-6">
+    <div className='flex items-center justify-center min-h-screen bg-gradient-to-t from-brand-200 to-brand-25 px-6'>
       <ResponsiveMenubar />
-      <div className="w-full max-w-lg bg-white p-8 mt-[72px] rounded-2xl shadow-md">
-        <h2 className="text-3xl font-bold text-center mb-8">Login to your account</h2>
-        <form onSubmit={handleSignIn} className="space-y-4">
-          <div className="mt-4 gap-2 flex flex-col">
-            <Label htmlFor="username">Username</Label>
+      <div className='w-full max-w-lg bg-white p-8 mt-[72px] rounded-2xl shadow-md'>
+        <h2 className='text-3xl font-bold text-center mb-8'>Login to your account</h2>
+        <form onSubmit={handleSignIn} className='space-y-4'>
+          <div className='mt-4 gap-2 flex flex-col'>
+            <Label htmlFor='username'>Username</Label>
             <Input
-              type="username"
-              id="username"
+              type='username'
+              id='username'
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="your username"
+              placeholder='your username'
             />
           </div>
-          <div className="mt-4 gap-2 flex flex-col">
-            <Label htmlFor="password">Password</Label>
+          <div className='mt-4 gap-2 flex flex-col'>
+            <Label htmlFor='password'>Password</Label>
             <Input
-              type="password"
-              id="password"
+              type='password'
+              id='password'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="Enter your password"
+              placeholder='Enter your password'
             />
           </div>
-          {/* Role selection */}
-          <div className="flex flex-col gap-2 mt-4">
-            <Label>Role</Label>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant={role === 'couple' ? 'default' : 'secondary'}
-                onClick={() => setRole('couple')}
-                className={
-                  role === 'couple'
-                    ? 'flex-1 bg-secondary hover:bg-secondary-hover'
-                    : 'flex-1 border-secondary text-secondary hover:bg-secondary/10'
-                }
-              >
-                Couple
-              </Button>
-              <Button
-                type="button"
-                variant={role === 'vendor' ? 'default' : 'secondary'}
-                onClick={() => setRole('vendor')}
-                className={
-                  role === 'vendor'
-                    ? 'flex-1 bg-secondary hover:bg-secondary-hover'
-                    : 'flex-1 border-secondary text-secondary hover:bg-secondary/10'
-                }
-              >
-                Vendor
-              </Button>
-            </div>
-          </div>
-          <Button type="submit" className="w-full mt-4" disabled={loading}>
+          <Button type='submit' className='w-full mt-4' disabled={loading}>
             {loading ? 'Signing in...' : 'Sign In'}
           </Button>
         </form>
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className='text-center text-sm text-gray-500 mt-4'>
           Don’t have an account?{' '}
-          <a href="/get-started" className="text-brand-600 font-medium">
+          <a href='/get-started' className='text-brand-600 font-medium'>
             Sign Up
           </a>
         </p>

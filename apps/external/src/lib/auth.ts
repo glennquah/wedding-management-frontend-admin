@@ -1,10 +1,13 @@
-import { AuthService, TokensDto } from '@wedding/api-types';
-import { NextAuthOptions, User } from 'next-auth';
+import { AuthService, TokensDto, UserRole } from '@shared/api';
+import { NextAuthOptions } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
-interface ExtendedUser extends User {
-  role: string;
+interface ExtendedUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
   backendTokens: TokensDto;
 }
 
@@ -48,7 +51,7 @@ export const authOptions: NextAuthOptions = {
             id: authResponse.user.id.toString(),
             name: authResponse.user.name,
             email: authResponse.user.email,
-            role: authResponse.user.role,
+            role: authResponse.user.role as unknown as UserRole,
             backendTokens: authResponse.backendTokens,
           } as ExtendedUser;
         } catch (error: unknown) {
@@ -72,7 +75,10 @@ export const authOptions: NextAuthOptions = {
     },
 
     async session({ token, session }) {
-      session.user = token.user;
+      session.user.id = parseInt(token.id as string);
+      session.user.name = token.name as string;
+      session.user.email = token.email as string;
+      session.user.role = token.role as UserRole;
       session.backendTokens = token.backendTokens as TokensDto;
 
       return session;

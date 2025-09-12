@@ -23,7 +23,7 @@ export const SingleSelectDropdown: React.FC<SingleSelectDropdownProps> = ({
   <div className={`gap-2 flex flex-col ${className}`}>
     {label && <Label>{label}</Label>}
     <DropdownMenu>
-      <DropdownMenuTrigger className="relative border-gray-300 border rounded-lg p-3 w-full text-left bg-white shadow flex items-center justify-between">
+      <DropdownMenuTrigger className="relative border-gray-300 border rounded-lg p-3 w-full text-left bg-white shadow flex items-center justify-between outline-none focus-visible:border-0 focus-visible:ring-ring/50 focus-visible:ring-[2px] data-[state=open]:border-0 data-[state=open]:ring-ring/50 data-[state=open]:ring-[2px]">
         {selected ? selected.charAt(0).toUpperCase() + selected.slice(1) : placeholder}
         <ChevronDown className="ml-2 w-4 h-4 text-gray-400" />
       </DropdownMenuTrigger>

@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { UserRole } from './UserRole';
 export type VendorResponseDto = {
     /**
      * User ID
@@ -15,10 +16,7 @@ export type VendorResponseDto = {
      * Email address of the user
      */
     email: string;
-    /**
-     * Role of the user
-     */
-    role: VendorResponseDto.role;
+    role: UserRole;
     /**
      * Creation timestamp
      */
@@ -65,14 +63,6 @@ export type VendorResponseDto = {
     capacity?: number;
 };
 export namespace VendorResponseDto {
-    /**
-     * Role of the user
-     */
-    export enum role {
-        ADMIN = 'admin',
-        SUPER_ADMIN = 'superAdmin',
-        VENDOR = 'vendor',
-    }
     /**
      * Service offered by the vendor
      */

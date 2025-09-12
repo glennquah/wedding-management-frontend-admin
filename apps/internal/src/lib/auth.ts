@@ -1,13 +1,15 @@
-import { AuthService, TokensDto } from '@wedding/api-types';
+import { AuthService, TokensDto, UserRole } from '@wedding/api-types';
 import { NextAuthOptions, User } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
-interface ExtendedUser extends User {
-  role: string;
+interface ExtendedUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
   backendTokens: TokensDto;
 }
-
 async function refreshToken(token: JWT): Promise<JWT> {
   try {
     const response = await AuthService.authControllerRefreshToken();
@@ -48,7 +50,7 @@ export const authOptions: NextAuthOptions = {
             id: authResponse.user.id.toString(),
             name: authResponse.user.name,
             email: authResponse.user.email,
-            role: authResponse.user.role,
+            role: authResponse.user.role as unknown as UserRole,
             backendTokens: authResponse.backendTokens,
           } as ExtendedUser;
         } catch (error: unknown) {
@@ -76,6 +78,7 @@ export const authOptions: NextAuthOptions = {
         id: Number(token.id),
         name: token.name as string,
         email: token.email as string,
+        role: token.role as UserRole,
       };
       session.backendTokens = token.backendTokens as TokensDto;
 

@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { UserRole } from './UserRole';
 export type AdminResponseDto = {
     /**
      * User ID
@@ -15,10 +16,7 @@ export type AdminResponseDto = {
      * Email address of the user
      */
     email: string;
-    /**
-     * Role of the user
-     */
-    role: AdminResponseDto.role;
+    role: UserRole;
     /**
      * Creation timestamp
      */
@@ -57,14 +55,6 @@ export type AdminResponseDto = {
     preferredServices: Array<'venue' | 'catering' | 'photography' | 'decoration' | 'music' | 'attire' | 'makeup' | 'transportation'>;
 };
 export namespace AdminResponseDto {
-    /**
-     * Role of the user
-     */
-    export enum role {
-        ADMIN = 'admin',
-        SUPER_ADMIN = 'superAdmin',
-        VENDOR = 'vendor',
-    }
     /**
      * Wedding type
      */
