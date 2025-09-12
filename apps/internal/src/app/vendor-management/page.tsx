@@ -1,21 +1,23 @@
 "use client";
-import { UpdateVendorDto, VendorResponseDto } from "@shared/api";
+import { UpdateVendorDto, VendorResponseDto, WeddingService, WeddingStyle, WeddingType } from "@shared/api";
 import { Button, DataTable, DeleteConfirmationModal, PageHeader } from "@shared/components";
 import FormField from "@shared/components/FormField";
 import { FormDialog } from "@shared/components/ui/form/form-dialog";
 import useIsMobileScreen from "@shared/hooks/useIsMobileScreen";
 import { ColumnDef } from "@tanstack/react-table";
-import { useState } from "react";
 import { useVendorManager } from "../../hooks/useCRUDVendor";
 import { VendorDetailsModal } from "./components/vendorDetailsModal";
 // import { EmailGuestModal } from "./components/EmailGuestModal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@shared/components";
+import { MultiSelectDropdown } from '@shared/components/ui/form/multiSelectDropdown';
+import { SingleSelectDropdown } from "@shared/components/ui/form/singleSelectDropdown";
 
 export default function VendorListPage() {
   const isMobile = useIsMobileScreen();
   const {
     // Core data
     vendors,
+    selectedVendor,
     isLoading,
     error,
     setError,
@@ -35,6 +37,7 @@ export default function VendorListPage() {
     // Form data
     // newGuest,
     // setNewGuest,
+    setSelectedVendor,
     setEditingVendor,
     
     // Constants
@@ -64,7 +67,6 @@ export default function VendorListPage() {
     closeEmailModal,
     handleSendEmail,
   } = useVendorManager();
-  const [selectedVendor, setSelectedVendor] = useState<VendorResponseDto | null>(null);
 
   // Column definitions for DataTable
   const columns: ColumnDef<VendorResponseDto>[] = [
@@ -124,32 +126,6 @@ export default function VendorListPage() {
           );
         },
       }
-    // {
-    //   id: "actions",
-    //   header: "Actions",
-    //   cell: ({ row }) => {
-    //     const guest = row.original;
-    //     return (
-    //       <div className="flex items-center gap-2">
-    //         <Button
-    //           size="sm"
-    //           variant="ghost"
-    //           onClick={() => handleEditVendor(guest)}
-    //         >
-    //           <Edit2 className="w-4 h-4" />
-    //         </Button>
-    //         <Button
-    //           size="sm"
-    //           variant="ghost"
-    //           onClick={() => openDeleteConfirmModal(guest)}
-    //           className="text-red-600 hover:text-red-700 hover:bg-red-50"
-    //         >
-    //           <Trash2 className="w-4 h-4" />
-    //         </Button>
-    //       </div>
-    //     );
-    //   },
-    // },
   ];
 
   // Edit Vendor Form Fields
@@ -180,6 +156,97 @@ export default function VendorListPage() {
         placeholder="Vendor email address"
       />
     </div>,
+
+    <div key="uenNumber" className="md:col-span-2">
+      <FormField
+        label="UEN Number *"
+        id="uenNumber"
+        type="text"
+        value={vendor.uenNumber || ""}
+        onChange={(e) => setVendor({ ...vendor, uenNumber: e.target.value })}
+        required
+        placeholder="Vendor UEN Number"
+      />
+    </div>,
+
+    <div key="vendorWebsite" className="md:col-span-2">
+      <FormField
+        label="Website *"
+        id="vendorWebsite"
+        type="text"
+        value={vendor.vendorWebsite || ""}
+        onChange={(e) => setVendor({ ...vendor, vendorWebsite: e.target.value })}
+        required
+        placeholder="Vendor Website"
+      />
+    </div>,
+
+    <div key="serviceOffered" className="md:col-span-2">
+      <SingleSelectDropdown
+        label="Service Offered"
+        options={Object.values(WeddingService)}
+        selected={
+          vendor.serviceOffered
+        }
+        setSelected={(selected) =>
+          setVendor({
+            ...vendor,
+            serviceOffered: selected as WeddingService,
+          })
+        }
+        placeholder="Select Wedding Service"
+      />
+    </div>,
+
+    <div key="styleOffered" className="md:col-span-2">
+      <SingleSelectDropdown
+        label="Style Offered"
+        options={Object.values(WeddingStyle)}
+        selected={
+          vendor.styleOffered
+        }
+        setSelected={(selected) =>
+          setVendor({
+            ...vendor,
+            styleOffered: selected as WeddingStyle,
+          })
+        }
+        placeholder="Select Wedding Style"
+      />
+    </div>,
+
+    <div key="weddingTypes" className="md:col-span-2">
+      <MultiSelectDropdown
+        label="Wedding Type"
+        options={Object.values(WeddingType)}
+        selected={
+          vendor.weddingTypes ?? []
+        }
+        setSelected={(selected) =>
+          setVendor({
+            ...vendor,
+            weddingTypes: selected as WeddingType[],
+          })
+        }
+        placeholder="Select Wedding Types"
+      />
+    </div>,
+
+    vendor.capacity !== undefined ? (
+      <div key="capacity" className="md:col-span-2">
+        <FormField
+          label="Capacity *"
+          id="capacity"
+          type="number"
+          value={vendor.capacity.toString()} 
+          onChange={(e) =>
+            setVendor({ ...vendor, capacity: Number(e.target.value) }) 
+          }
+          required
+          placeholder="Capacity"
+        />
+      </div>
+    ) : null,
   ];
 
 
@@ -215,6 +282,8 @@ export default function VendorListPage() {
         <VendorDetailsModal
             open={!!selectedVendor}
             onOpenChange={(open) => !open && setSelectedVendor(null)}
+            onEditVendor={handleEditVendor}
+            onDeleteVendor={openDeleteConfirmModal}
             vendor={selectedVendor}
         />
         )}

@@ -3,30 +3,56 @@
 import { VendorResponseDto } from "@shared/api";
 import { Button, Card, CardContent, CardHeader, CardTitle, Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@shared/components";
 import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader
 } from "@shared/components/ui/dialog";
-import { ExternalLink, Image as ImageIcon } from "lucide-react";
+import { Edit2, ExternalLink, Image as ImageIcon, Trash2 } from "lucide-react";
 
 interface VendorDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onEditVendor: (vendor: VendorResponseDto) => void;
+  onDeleteVendor: (vVendor: VendorResponseDto) => void;
   vendor: VendorResponseDto;
 }
 
 export function VendorDetailsModal({
   open,
   onOpenChange,
+  onEditVendor,
+  onDeleteVendor,
   vendor,
 }: VendorDetailsModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          {/* Centered Vendor Name */}
-          <h2 className="text-2xl font-semibold text-center">{vendor.name}</h2>
+          {/* Vendor Name */}
+          <h2 className="text-2xl font-semibold text-center flex-1">
+            {vendor.name}
+          </h2>
+
+          {/* Action Buttons Row */}
+          <div className="flex justify-end gap-2 mt-4">
+            <Button 
+              size="sm" 
+              variant="ghost"
+              onClick={() => onEditVendor(vendor)}
+            >
+              <Edit2 className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => onDeleteVendor(vendor)}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+          
           <hr className="my-4 border border-muted-foreground" />
         </DialogHeader>
 

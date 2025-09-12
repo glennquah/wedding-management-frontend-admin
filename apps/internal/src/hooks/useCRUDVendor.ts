@@ -1,4 +1,4 @@
-import { CreateVendorDto, UpdateVendorDto, VendorResponseDto, VendorsService } from "@shared/api";
+import { CreateVendorDto, UpdateVendorDto, UserRole, VendorResponseDto, VendorsService } from "@shared/api";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -31,7 +31,8 @@ export function useVendorManager() {
 
   // Modal states
   const [isAddingVendor, setIsAddingVendor] = useState(false);
-  const [editingVendor, setEditingVendor] = useState<UpdateVendorDto | null>(null);
+  const [editingVendor, setEditingVendor] = useState<Partial<UpdateVendorDto & { id?: number }> | null>(null);
+  const [selectedVendor, setSelectedVendor] = useState<VendorResponseDto | null>(null);
   const [deleteConfirmVendor, setDeleteConfirmVendor] = useState<VendorResponseDto | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailModalVendor, setEmailModalVendor] = useState<{ name: string; email: string } | null>(null);
@@ -77,9 +78,10 @@ export function useVendorManager() {
     vendorId: number,
     updateData: UpdateVendorDto,
   ) => {
-    await VendorsService.vendorControllerUpdate(vendorId, updateData)
+    const updatedVendor = await VendorsService.vendorControllerUpdate(vendorId, updateData)
 
     await fetchVendors();
+    return updatedVendor;
   };
 
   const deleteVendor = async (id: number) => {
@@ -204,15 +206,19 @@ export function useVendorManager() {
         vendorWebsite: editingVendor.vendorWebsite,
         uenNumber: editingVendor.uenNumber,
         bio: editingVendor.bio,
-        role: editingVendor.role // might be potential bug
+        role: UserRole.VENDOR,
+        serviceOffered: editingVendor.serviceOffered,
+        styleOffered: editingVendor.styleOffered,
+        weddingTypes: editingVendor.weddingTypes,
+        capacity: editingVendor.capacity
       };
 
-      // TODO: uncomment once DTO aligned and updated
-      // if (!editingVendor.id) {
-      //   toast.error('Cannot update vendor without ID');
-      //   return;
-      // }
-      // await updateVendor(editingVendor.id, updateData);
+      if (!editingVendor.id) {
+        toast.error('Cannot update vendor without ID');
+        return;
+      }
+      const updatedVendor = await updateVendor(editingVendor.id, updateData);
+      setSelectedVendor(updatedVendor);
       setEditingVendor(null);
       toast.success('Vendor updated successfully!');
     } catch (err) {
@@ -279,6 +285,7 @@ export function useVendorManager() {
   return {
     // Core data
     vendors,
+    selectedVendor,
     isLoading,
     error,
     setError,
@@ -298,6 +305,7 @@ export function useVendorManager() {
     // Form data
     // newGuest,
     // setNewGuest,
+    setSelectedVendor,
     setEditingVendor,
     
     // Constants
