@@ -31,7 +31,7 @@ export function useHandleSession() {
         setLoading(true);
         try {
             if (!weddingType || !budgetBucket || !guestCountBucket || !preferredStyle || !preferredServices) {
-                throw new Error(`Missing field.`);
+                throw new Error('Missing field.');
             }
             await AuthService.authControllerRegisterAdmin({
                 email,
@@ -80,7 +80,7 @@ export function useHandleSession() {
                 errorMessage = errorMessage;
             }
 
-            toast.error(`Signup Failed. ${errorMessage}`);
+            toast.error('Signup Failed. ${errorMessage}');
         } finally {
             setLoading(false);
         }
