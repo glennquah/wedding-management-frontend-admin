@@ -1,15 +1,19 @@
-"use client";
+'use client';
 
-import { Calendar, CheckSquare, DollarSign, Sparkles } from "lucide-react";
-import Hero from "../components/unauthenticated/hero";
-import FeaturesPanel from "../components/unauthenticated/features-panel";
-import ClosingCTA from "../components/unauthenticated/closing-cta";
+import ClosingCTA from '../components/unauthenticated/closing-cta';
+import FeaturesPanel from '../components/unauthenticated/features-panel';
+import Hero from '../components/unauthenticated/hero';
+import { Calendar, CheckSquare, DollarSign, Sparkles } from 'lucide-react';
 
 export default function EssentialsPage() {
   return (
     <div className="text-gray-800 font-sans">
       {/* Hero Section */}
-      <Hero img_src="/images/essentials.jpg" header="Never miss a detail." subheader="We break down the major stages of wedding planning in the ultimate wedding checklist, with AI-powered tools that helps you cover every essential from picking your wedding date to tracking your budget." />
+      <Hero
+        img_src="/images/essentials.jpg"
+        header="Never miss a detail."
+        subheader="We break down the major stages of wedding planning in the ultimate wedding checklist, with AI-powered tools that helps you cover every essential from picking your wedding date to tracking your budget."
+      />
       {/* Features Section */}
       <FeaturesPanel features={features} />
       {/* Closing CTA */}
@@ -20,23 +24,23 @@ export default function EssentialsPage() {
 
 const features = [
   {
-    title: "AI Prediction of Best Dates",
-    desc: "Let our AI recommend guest-friendly dates for your big day.",
+    title: 'AI Prediction of Best Dates',
+    desc: 'Let our AI recommend guest-friendly dates for your big day.',
     icon: <Sparkles className="w-8 h-8 text-brand-600" />,
   },
   {
-    title: "Big Day Preparation Checklist",
-    desc: "Stay organized with a smart checklist and track your progress with ease.",
+    title: 'Big Day Preparation Checklist',
+    desc: 'Stay organized with a smart checklist and track your progress with ease.',
     icon: <CheckSquare className="w-8 h-8 text-brand-600" />,
   },
   {
-    title: "Google Calendar Integration",
-    desc: "Sync schedules seamlessly so you never miss an important wedding task.",
+    title: 'Google Calendar Integration',
+    desc: 'Sync schedules seamlessly so you never miss an important wedding task.',
     icon: <Calendar className="w-8 h-8 text-brand-600" />,
   },
   {
-    title: "Budget Tracking",
-    desc: "Keep your spending on track and stress-free with our budget manager.",
+    title: 'Budget Tracking',
+    desc: 'Keep your spending on track and stress-free with our budget manager.',
     icon: <DollarSign className="w-8 h-8 text-brand-600" />,
   },
 ];

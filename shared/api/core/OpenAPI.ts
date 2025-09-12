@@ -22,9 +22,16 @@ export type OpenAPIConfig = {
 export const OpenAPI: OpenAPIConfig = {
     BASE: 'http://localhost:8080',
     VERSION: '1.0',
-    WITH_CREDENTIALS: false,
+    WITH_CREDENTIALS: true,
     CREDENTIALS: 'include',
-    TOKEN: undefined,
+    TOKEN: async () => {
+        if (typeof window !== 'undefined') {
+            const { getSession } = await import('next-auth/react');
+            const session = await getSession();
+            return session?.backendTokens?.accessToken || '';
+        }
+        return '';
+    },
     USERNAME: undefined,
     PASSWORD: undefined,
     HEADERS: undefined,

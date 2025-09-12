@@ -4,7 +4,6 @@
 /* eslint-disable */
 import type { BudgetBucket } from './BudgetBucket';
 import type { GuestCountBucket } from './GuestCountBucket';
-import type { UserRole } from './UserRole';
 import type { WeddingService } from './WeddingService';
 import type { WeddingStyle } from './WeddingStyle';
 import type { WeddingType } from './WeddingType';
@@ -21,7 +20,10 @@ export type CreateAdminDto = {
      * Password for the user account
      */
     password: string;
-    role: UserRole;
+    /**
+     * Role of the user
+     */
+    role: CreateAdminDto.role;
     /**
      * Is the admin a couple?
      */
@@ -36,4 +38,14 @@ export type CreateAdminDto = {
     preferredStyle: WeddingStyle;
     preferredServices: Array<WeddingService>;
 };
+export namespace CreateAdminDto {
+    /**
+     * Role of the user
+     */
+    export enum role {
+        ADMIN = 'admin',
+        SUPER_ADMIN = 'superAdmin',
+        VENDOR = 'vendor',
+    }
+}
 
