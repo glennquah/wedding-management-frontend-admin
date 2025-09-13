@@ -262,7 +262,7 @@ export default function VendorListPage() {
           label="Capacity *"
           id="capacity"
           type="number"
-          value={vendor.capacity.toString()}
+          value={vendor.capacity?.toString() || '0'}
           onChange={(e) => setVendor({ ...vendor, capacity: Number(e.target.value) })}
           required
           placeholder="Capacity"
