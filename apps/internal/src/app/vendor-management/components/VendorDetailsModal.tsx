@@ -1,6 +1,6 @@
 'use client';
 
-import { VendorOnboardingStatus, VendorResponseDto } from '@shared/api';
+import { VendorOnboardingStatus, VendorResponseDto, WeddingService } from '@shared/api';
 import {
   Badge,
   Button,
@@ -169,7 +169,7 @@ export function VendorDetailsModal({
                 <p className="text-sm text-muted-foreground">{vendor.bio || '-'}</p>
               </div>
 
-              {vendor.capacity !== undefined && (
+              {vendor.serviceOffered === WeddingService.VENUE && (
                 <div>
                   <p className="text-sm font-medium text-foreground mb-1">Capacity:</p>
                   <p className="text-sm text-muted-foreground">{vendor.capacity}</p>

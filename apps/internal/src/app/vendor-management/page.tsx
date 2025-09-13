@@ -256,7 +256,7 @@ export default function VendorListPage() {
       />
     </div>,
 
-    vendor.capacity !== undefined ? (
+    vendor.serviceOffered === WeddingService.VENUE ? (
       <div key="capacity" className="md:col-span-2">
         <FormField
           label="Capacity *"
