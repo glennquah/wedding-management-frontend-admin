@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { UserRole } from './UserRole';
 export type UpdateVendorDto = {
     /**
      * The name of the user
@@ -15,10 +16,7 @@ export type UpdateVendorDto = {
      * Password for the user account
      */
     password?: string;
-    /**
-     * Role of the user
-     */
-    role: UpdateVendorDto.role;
+    role: UserRole;
     /**
      * Vendor website URL
      */
@@ -57,14 +55,6 @@ export type UpdateVendorDto = {
     capacity?: number;
 };
 export namespace UpdateVendorDto {
-    /**
-     * Role of the user
-     */
-    export enum role {
-        ADMIN = 'admin',
-        SUPER_ADMIN = 'superAdmin',
-        VENDOR = 'vendor',
-    }
     /**
      * Service offered by the vendor
      */

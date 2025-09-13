@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { UserRole } from './UserRole';
 export type UpdateSuperAdminDto = {
     /**
      * The name of the user
@@ -15,19 +16,6 @@ export type UpdateSuperAdminDto = {
      * Password for the user account
      */
     password?: string;
-    /**
-     * Role of the user
-     */
-    role: UpdateSuperAdminDto.role;
+    role: UserRole;
 };
-export namespace UpdateSuperAdminDto {
-    /**
-     * Role of the user
-     */
-    export enum role {
-        ADMIN = 'admin',
-        SUPER_ADMIN = 'superAdmin',
-        VENDOR = 'vendor',
-    }
-}
 
