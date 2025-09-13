@@ -30,6 +30,7 @@ export type { UpdateVendorDto } from './models/UpdateVendorDto';
 export type { UpdateWeddingDto } from './models/UpdateWeddingDto';
 export type { UserResponseDto } from './models/UserResponseDto';
 export { UserRole } from './models/UserRole';
+export { VendorOnboardingStatus } from './models/VendorOnboardingStatus';
 export type { VendorResponseDto } from './models/VendorResponseDto';
 export type { WeddingResponseDto } from './models/WeddingResponseDto';
 export { WeddingService } from './models/WeddingService';

@@ -1,27 +1,8 @@
-import { CreateVendorDto, UpdateVendorDto, UserRole, VendorResponseDto, VendorsService } from "@shared/api";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { CreateVendorDto, UpdateVendorDto, UserRole, VendorResponseDto, VendorsService } from '@shared/api';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 type VendorFormData = Partial<UpdateVendorDto>;
-
-type VendorFormSetter = (vendor: VendorFormData) => void;
-
-// const defaultNewGuest: GuestFormData = {
-//   name: "",
-//   email: "",
-//   allergies: "",
-//   group: "",
-//   confirmationStatus: CreateGuestDto.confirmationStatus.PENDING,
-//   weddingId: 1,
-//   primaryGuestId: undefined,
-//   accompanyingGuestNames: [""],
-// };
-
-// const confirmationStatusOptions = [
-//   { value: CreateGuestDto.confirmationStatus.PENDING, label: 'Pending' },
-//   { value: CreateGuestDto.confirmationStatus.CONFIRMED, label: 'Confirmed' },
-//   { value: CreateGuestDto.confirmationStatus.REJECTED, label: 'Rejected' }
-// ];
 
 export function useVendorManager() {
   // Core vendor data
@@ -30,7 +11,6 @@ export function useVendorManager() {
   const [error, setError] = useState<string | null>(null);
 
   // Modal states
-  const [isAddingVendor, setIsAddingVendor] = useState(false);
   const [editingVendor, setEditingVendor] = useState<Partial<UpdateVendorDto & { id?: number }> | null>(null);
   const [selectedVendor, setSelectedVendor] = useState<VendorResponseDto | null>(null);
   const [deleteConfirmVendor, setDeleteConfirmVendor] = useState<VendorResponseDto | null>(null);
@@ -41,14 +21,7 @@ export function useVendorManager() {
   const [validationErrors, setValidationErrors] = useState<{
     name?: string;
     email?: string;
-    // vendorWebsite?: string;
-    // uenNumber?: string;
-    // bio?: string;
   }>({});
-  
-
-  // Form data
-  // const [newGuest, setNewGuest] = useState<GuestFormData>(defaultNewGuest);
 
   // Core CRUD operations
   const fetchVendors = async () => {
@@ -89,11 +62,19 @@ export function useVendorManager() {
     await fetchVendors();
   };
 
+  const rejectOnboarding = async (id: number) => {
+    await VendorsService.vendorControllerRejectVendor(id);
+    await fetchVendors();
+  }
+
+  const approveOnboarding = async (id: number) => {
+    await VendorsService.vendorControllerOnboardVendor(id);
+    await fetchVendors();
+  }
+
   // Validation
   const validateVendorData = (vendorData: VendorFormData) => {
-    const errors: { name?: string, email?: string, 
-      // vendorWebsite?: string, uenNumber?: string, bio?: string; 
-    } = {};
+    const errors: { name?: string, email?: string } = {};
     
     // Debug logging
     console.log('Validating vendor data:', {
@@ -119,77 +100,12 @@ export function useVendorManager() {
       errors.email = 'Please enter a valid email address';
     }
     
-    // if (!vendorData.vendorWebsite?.trim()) {
-    //   errors.vendorWebsite = 'Website is required';
-    // }
-
-    // if (!vendorData.uenNumber?.trim()) {
-    //   errors.uenNumber = 'UEN number is required';
-    // }
-
-    // if (!vendorData.bio?.trim()) {
-    //   errors.bio = 'Bio is required';
-    // }
-    
     console.log('Validation errors:', errors);
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   // Handler functions
-  // const handleAddGuest = async () => {
-  //   if (!validateGuestData(newGuest)) {
-  //     toast.error('Please fill in all required fields');
-  //     return;
-  //   }
-
-  //   try {
-  //     setIsSubmitting(true);
-
-  //     const primaryGuestData: CreateGuestDto = {
-  //       name: newGuest.name!,
-  //       email: newGuest.email!,
-  //       allergies: newGuest.allergies || undefined,
-  //       group: newGuest.group!,
-  //       confirmationStatus: CreateGuestDto.confirmationStatus.PENDING,
-  //       weddingId: newGuest.weddingId || 1,
-  //       primaryGuestId: undefined,
-  //     };
-
-  //     const accompanyingGuestsData: CreateGuestDto[] = [];
-  //     if (newGuest.accompanyingGuestNames) {
-  //       const validAccompanyingNames = newGuest.accompanyingGuestNames.filter(name => name.trim());
-  //       accompanyingGuestsData.push(...validAccompanyingNames.map(name => ({
-  //         name: name.trim(),
-  //         email: "",
-  //         allergies: newGuest.allergies || undefined,
-  //         group: newGuest.group,
-  //         confirmationStatus: CreateGuestDto.confirmationStatus.PENDING,
-  //         weddingId: newGuest.weddingId || 1,
-  //         primaryGuestId: undefined,
-  //       })));
-  //     }
-
-  //     await addGuest(primaryGuestData, accompanyingGuestsData);
-
-  //     setNewGuest(defaultNewGuest);
-  //     setIsAddingGuest(false);
-      
-  //     // Show email modal for the newly added guest
-  //     setEmailModalGuest({
-  //       name: primaryGuestData.name!,
-  //       email: primaryGuestData.email!
-  //     });
-      
-  //     toast.success('Guest added successfully!');
-  //   } catch (err) {
-  //     toast.error('Failed to add guest. Please try again.');
-  //     console.error('Error adding guest:', err);
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
   const handleUpdateVendor = async () => {
     if (!editingVendor) return;
     
@@ -233,10 +149,48 @@ export function useVendorManager() {
     try {
       await deleteVendor(id);
       setDeleteConfirmVendor(null);
+      setSelectedVendor(null)
       toast.success('Vendor deleted successfully!');
     } catch (err) {
       toast.error('Failed to delete vendor. Please try again.');
       console.error('Error deleting vendor:', err);
+    }
+  };
+
+  const handleRejectOnboarding = async (vendor: VendorResponseDto) => {
+    try {
+      await rejectOnboarding(vendor.id);
+
+      
+      setEmailModalVendor({
+        name: vendor.name!,
+        email: vendor.email!
+      });
+
+      setSelectedVendor(null)
+
+      toast.success('Vendor onboarding rejected');
+    } catch (err) {
+      toast.error('Failed to reject vendor onboarding. Please try again.');
+      console.error('Error rejecting vendor onboarding:', err);
+    }
+  };
+
+  const handleApproveOnboarding = async (vendor: VendorResponseDto) => {
+    try {
+      await approveOnboarding(vendor.id);
+
+      setEmailModalVendor({
+        name: vendor.name!,
+        email: vendor.email!
+      });
+
+      setSelectedVendor(null)
+
+      toast.success('Vendor onboarding approved');
+    } catch (err) {
+      toast.error('Failed to approve vendor onboarding. Please try again.');
+      console.error('Error approving vendor onboarding:', err);
     }
   };
 
@@ -255,20 +209,6 @@ export function useVendorManager() {
     setEditingVendor(vendor);
   };
 
-  const clearValidationErrors = () => setValidationErrors({});
-
-  // const openAddGuestModal = () => {
-  //   setIsAddingGuest(true);
-  //   clearValidationErrors();
-  // };
-  const closeEditVendorModal = () => {
-    setEditingVendor(null);
-    clearValidationErrors();
-  };
-  const openDeleteConfirmModal = (vendor: VendorResponseDto) => setDeleteConfirmVendor(vendor);
-  const closeDeleteConfirmModal = () => setDeleteConfirmVendor(null);
-  const openEmailModal = (vendor: { name: string; email: string }) => setEmailModalVendor(vendor);
-  const closeEmailModal = () => setEmailModalVendor(null);
 
   const handleSendEmail = () => {
     if (emailModalVendor) {
@@ -277,6 +217,18 @@ export function useVendorManager() {
       closeEmailModal();
     }
   };
+  const clearValidationErrors = () => setValidationErrors({});
+
+  const closeEditVendorModal = () => {
+    setEditingVendor(null);
+    clearValidationErrors();
+  };
+  
+  const openDeleteConfirmModal = (vendor: VendorResponseDto) => setDeleteConfirmVendor(vendor);
+  const closeDeleteConfirmModal = () => setDeleteConfirmVendor(null);
+  const openEmailModal = (vendor: { name: string; email: string }) => setEmailModalVendor(vendor);
+  const closeEmailModal = () => setEmailModalVendor(null);
+
 
   useEffect(() => {
     fetchVendors();
@@ -291,7 +243,6 @@ export function useVendorManager() {
     setError,
     
     // Modal states
-    isAddingVendor,
     editingVendor,
     deleteConfirmVendor,
     isSubmitting,
@@ -303,13 +254,9 @@ export function useVendorManager() {
     
     
     // Form data
-    // newGuest,
-    // setNewGuest,
     setSelectedVendor,
     setEditingVendor,
     
-    // Constants
-    // confirmationStatusOptions,
     
     // CRUD operations
     fetchVendors,
@@ -318,16 +265,14 @@ export function useVendorManager() {
     deleteVendor,
     
     // Handlers
-    // handleAddVendor,
     handleUpdateVendor,
     handleDeleteVendor,
     confirmDeleteVendor,
     handleEditVendor,
-    
+    handleRejectOnboarding,
+    handleApproveOnboarding,
     
     // Modal controls
-    // openAddGuestModal,
-    // closeAddGuestModal,
     closeEditVendorModal,
     openDeleteConfirmModal,
     closeDeleteConfirmModal,

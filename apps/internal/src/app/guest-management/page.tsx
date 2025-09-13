@@ -2,15 +2,13 @@
 
 import { useEffect, useState } from 'react';
 
-import { EmailGuestModal } from '../../../../../shared/components/guest-management/EmailGuestModal';
-import GuestSummaryStats from '../../../../../shared/components/guest-management/GuestSummaryStats';
 import { getGuestColumns } from '@shared/columns/guest-columns';
 import {
   Button,
   DataTable,
   DeleteConfirmationModal,
   GroupSelectDropdown,
-  PageHeader,
+  PageHeader
 } from '@shared/components';
 import FormField from '@shared/components/FormField';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
@@ -21,12 +19,14 @@ import {
   CreateGuestDto,
   GuestResponseDto,
   GuestsService,
-  UpdateGuestDto,
+  UpdateGuestDto
 } from '@wedding/api-types';
 import { Plus, Trash2 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { EmailModal } from '../../../../../shared/components/EmailModal';
+import GuestSummaryStats from '../../../../../shared/components/guest-management/GuestSummaryStats';
 
 export const dynamic = 'force-dynamic';
 
@@ -442,11 +442,11 @@ export default function GuestManagementPage() {
 
       {/* Email Guest Modal */}
       {emailModalGuest && (
-        <EmailGuestModal
+        <EmailModal
           open={!!emailModalGuest}
           onOpenChange={closeEmailModal}
-          guestName={emailModalGuest.name}
-          guestEmail={emailModalGuest.email}
+          name={emailModalGuest.name}
+          email={emailModalGuest.email}
           onSendEmail={handleSendEmail}
         />
       )}

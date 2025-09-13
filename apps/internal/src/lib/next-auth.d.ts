@@ -1,5 +1,5 @@
-import { UserResponseDto } from "@shared/api";
-import "next-auth";
+import { UserResponseDto } from '@shared/api';
+import 'next-auth';
 
 declare module 'next-auth' {
   interface Session {
