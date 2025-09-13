@@ -18,7 +18,6 @@ export default function AdminManagementPage() {
   const [users, setUsers] = useState<UserResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch users data
   useEffect(() => {
     const fetchusers = async () => {
       try {
