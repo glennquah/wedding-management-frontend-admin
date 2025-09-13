@@ -4,7 +4,7 @@ import AdminSidebar from './AdminSidebar';
 import { UserRole } from '@shared/api';
 import NavigationBar from '@shared/components/NavigationBar';
 import { SidebarProvider } from '@shared/components/ui/sidebar';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { Toaster } from 'sonner';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -24,7 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <SidebarProvider defaultOpen={true}>
       <AdminSidebar />
       <div className="flex-1 flex flex-col">
-        <NavigationBar session={session} />
+        <NavigationBar session={session} signOut={() => signOut()} />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
       <Toaster />
