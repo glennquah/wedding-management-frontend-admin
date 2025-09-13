@@ -1,7 +1,9 @@
 'use client';
 
 import VendorSidebar from './VendorSidebar';
-import { SidebarProvider, SidebarTrigger } from '@shared/components/ui/sidebar';
+import NavigationBar from '@shared/components/NavigationBar';
+import { SidebarProvider } from '@shared/components/ui/sidebar';
+import { Toaster } from '@shared/components/ui/sonner';
 import { useSession } from 'next-auth/react';
 
 export default function VendorLayout({ children }: { children: React.ReactNode }) {
@@ -13,15 +15,12 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex h-screen">
-        <VendorSidebar />
-        <main className="relative flex-1 overflow-auto">
-          <div className="absolute left-2 top-4 z-50">
-            <SidebarTrigger />
-          </div>
-          {children}
-        </main>
+      <VendorSidebar />
+      <div className="flex-1 flex flex-col">
+        <NavigationBar session={session} />
+        <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
+      <Toaster />
     </SidebarProvider>
   );
 }

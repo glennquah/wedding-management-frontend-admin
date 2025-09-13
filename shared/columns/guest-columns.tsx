@@ -13,7 +13,7 @@ import { ChevronDown, Edit2, Trash2 } from 'lucide-react';
 const getConfirmationStatusColor = (status: ConfirmationStatus) => {
   switch (status) {
     case 'confirmed':
-      return 'bg-green-100 text-green-800';
+      return 'bg-[#17b26a] text-white';
     case 'rejected':
       return 'bg-red-100 text-red-800';
     default:
@@ -127,7 +127,8 @@ export const getGuestColumns = ({
                 size="sm"
                 className="h-auto p-1 text-sm font-normal justify-start"
               >
-                +{accompanyingGuestsList.length} guest{accompanyingGuestsList.length === 1 ? '' : 's'}
+                +{accompanyingGuestsList.length} guest
+                {accompanyingGuestsList.length === 1 ? '' : 's'}
                 <ChevronDown className="ml-1 h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>

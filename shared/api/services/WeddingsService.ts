@@ -40,6 +40,17 @@ export class WeddingsService {
         });
     }
     /**
+     * Get weddings associated with the logged-in admin
+     * @returns WeddingResponseDto List of weddings associated with the admin
+     * @throws ApiError
+     */
+    public static weddingControllerGetAdminWeddings(): CancelablePromise<Array<WeddingResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/weddings/admin/my-weddings',
+        });
+    }
+    /**
      * Get a wedding by ID
      * @param id
      * @returns WeddingResponseDto The wedding details

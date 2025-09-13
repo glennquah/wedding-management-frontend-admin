@@ -29,7 +29,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "../../shared/components/guest-management/EmailGuestModal.tsx",
-    "../../shared/components/guest-management/GuestSummaryStats.tsx"
+    "../../shared/components/guest-management/GuestSummaryStats.tsx",
+    "../../shared/components/NavigationBar.tsx"
   ],
   "exclude": ["node_modules"]
 }
