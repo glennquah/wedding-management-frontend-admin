@@ -1,7 +1,7 @@
 'use client';
 
 import AppSidebar from '@shared/components/AppSidebar';
-import { CheckSquare, LayoutDashboard, ListTodo, PersonStanding, Timer } from 'lucide-react';
+import { CheckSquare, LayoutDashboard, ListTodo, PersonStanding, Timer, UserStar } from 'lucide-react';
 
 const tabs = [
   {
@@ -11,6 +11,11 @@ const tabs = [
         title: 'Main Dashboard',
         href: '/admin-dashboard',
         icon: LayoutDashboard,
+      },
+      {
+        title: 'Super Admin Management',
+        href: '/superadmin-management',
+        icon: UserStar,
       },
       {
         title: 'Admin Management',
