@@ -45,14 +45,14 @@ export default function LoginPage() {
         <h2 className="text-3xl font-bold text-center mb-8">Super Admin Login</h2>
         <form onSubmit={handleSignIn} className="space-y-4">
           <div className="mt-4 gap-2 flex flex-col">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
               type="email"
-              id="username"
+              id="email"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="your username"
+              placeholder="your email"
             />
           </div>
           <div className="mt-4 gap-2 flex flex-col">
