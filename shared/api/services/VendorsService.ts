@@ -145,4 +145,44 @@ export class VendorsService {
             },
         });
     }
+    /**
+     * Accept vendor onboarding
+     * @param id
+     * @returns VendorResponseDto The vendor has been marked as onboarded.
+     * @throws ApiError
+     */
+    public static vendorControllerOnboardVendor(
+        id: number,
+    ): CancelablePromise<VendorResponseDto> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/vendors/{id}/accept',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Vendor not found.`,
+            },
+        });
+    }
+    /**
+     * Reject vendor onboarding
+     * @param id
+     * @returns VendorResponseDto The vendor has been marked as rejected.
+     * @throws ApiError
+     */
+    public static vendorControllerRejectVendor(
+        id: number,
+    ): CancelablePromise<VendorResponseDto> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/vendors/{id}/reject',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Vendor not found.`,
+            },
+        });
+    }
 }

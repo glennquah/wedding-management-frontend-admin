@@ -3,6 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { UserRole } from './UserRole';
+import type { VendorOnboardingStatus } from './VendorOnboardingStatus';
+import type { WeddingService } from './WeddingService';
+import type { WeddingStyle } from './WeddingStyle';
+import type { WeddingType } from './WeddingType';
 export type UpdateVendorDto = {
     /**
      * The name of the user
@@ -37,45 +41,13 @@ export type UpdateVendorDto = {
      * Rating of the vendor
      */
     rating?: number;
-    /**
-     * Service offered by the vendor
-     */
-    serviceOffered?: UpdateVendorDto.serviceOffered;
-    /**
-     * Wedding style specialization of the vendor
-     */
-    styleOffered?: UpdateVendorDto.styleOffered;
-    /**
-     * Wedding type specialization of the vendor
-     */
-    weddingTypes?: Array<'chinese' | 'malay' | 'indian' | 'western' | 'others'>;
+    serviceOffered?: WeddingService;
+    styleOffered?: WeddingStyle;
+    weddingTypes?: Array<WeddingType>;
     /**
      * Capacity the vendor can handle for venue
      */
     capacity?: number;
+    onboardingStatus?: VendorOnboardingStatus;
 };
-export namespace UpdateVendorDto {
-    /**
-     * Service offered by the vendor
-     */
-    export enum serviceOffered {
-        VENUE = 'venue',
-        CATERING = 'catering',
-        PHOTOGRAPHY = 'photography',
-        DECORATION = 'decoration',
-        MUSIC = 'music',
-        ATTIRE = 'attire',
-        MAKEUP = 'makeup',
-        TRANSPORTATION = 'transportation',
-    }
-    /**
-     * Wedding style specialization of the vendor
-     */
-    export enum styleOffered {
-        LUXURY = 'luxury',
-        MODERN = 'modern',
-        TRADITIONAL = 'traditional',
-        RUSTIC = 'rustic',
-    }
-}
 

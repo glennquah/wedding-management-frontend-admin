@@ -28,7 +28,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "../../shared/components/guest-management/EmailGuestModal.tsx",
+    "../../shared/components/EmailModal.tsx",
     "../../shared/components/guest-management/GuestSummaryStats.tsx"
   ],
   "exclude": ["node_modules"]

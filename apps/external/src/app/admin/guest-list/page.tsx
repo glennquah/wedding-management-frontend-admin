@@ -1,23 +1,23 @@
 'use client';
 
-import { useGuestManager } from '../../hooks/useCRUDGuests';
-import { CreateGuestDto, ConfirmationStatus } from '@shared/api';
+import { ConfirmationStatus, CreateGuestDto } from '@shared/api';
 import { getGuestColumns } from '@shared/columns/guest-columns';
 import {
   Button,
   DataTable,
   DeleteConfirmationModal,
   GroupSelectDropdown,
-  PageHeader,
+  PageHeader
 } from '@shared/components';
+import { EmailModal } from '@shared/components/EmailModal';
 import FormField from '@shared/components/FormField';
-import { EmailGuestModal } from '@shared/components/guest-management/EmailGuestModal';
 import GuestSummaryStats from '@shared/components/guest-management/GuestSummaryStats';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import { Input } from '@shared/components/ui/form/input';
 import { SingleSelectDropdown } from '@shared/components/ui/form/singleSelectDropdown';
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
 import { Plus, Trash2 } from 'lucide-react';
+import { useGuestManager } from '../../hooks/useCRUDGuests';
 
 export default function GuestListPage() {
   const isMobile = useIsMobileScreen();
@@ -289,11 +289,11 @@ export default function GuestListPage() {
 
         {/* Email Guest Modal */}
         {emailModalGuest && (
-          <EmailGuestModal
+          <EmailModal
             open={!!emailModalGuest}
             onOpenChange={closeEmailModal}
-            guestName={emailModalGuest.name}
-            guestEmail={emailModalGuest.email}
+            name={emailModalGuest.name}
+            email={emailModalGuest.email}
             onSendEmail={handleSendEmail}
           />
         )}
