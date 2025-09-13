@@ -1,5 +1,6 @@
 // UI Components
 export { Button } from './ui/button'
+export { Badge, badgeVariants } from './ui/badge'
 export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
 export {
     Carousel,
@@ -22,6 +23,7 @@ export { Toaster } from './ui/sonner'
 export { DataTable, Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 export type { DataTableProps } from './ui/table'
 export { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
+export { Rating, RatingButton } from './ui/rating'
 
 // Utilities
 export { cn } from './lib/utils'

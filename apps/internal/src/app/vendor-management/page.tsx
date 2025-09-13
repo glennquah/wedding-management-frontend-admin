@@ -254,30 +254,13 @@ export default function VendorListPage() {
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
       {!isMobile && <div className="mt-[72px] w-full"></div>}
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4">
         <PageHeader
           title="Vendor List"
           description="Manage vendors"
-        //   buttonText="Add Guest"
-        //   onButtonClick={openAddGuestModal}
-        //   buttonIcon={<Plus className="w-4 h-4" />}
-        //   isButtonDisabled={isLoading}
         />
 
-        {/* Add Vendor Modal */}
-        {/* <FormDialog
-          open={isAddingGuest}
-          onOpenChange={closeAddGuestModal}
-          title="Add New Guest"
-          isSubmitting={isSubmitting}
-          onSubmit={handleAddGuest}
-          onCancel={closeAddGuestModal}
-          submitButtonText="Add Guest"
-          formFields={guestFormFields(newGuest, setNewGuest)}
-          noOfColumns={2}
-        /> */}
-
-        {/* Edit Vendor Modal */}
+        {/* View Selected Vendor Modal */}
         {selectedVendor && (
         <VendorDetailsModal
             open={!!selectedVendor}
@@ -331,48 +314,47 @@ export default function VendorListPage() {
           />
         )} */}
 
-            <Tabs defaultValue="live">
-                <TabsList className="bg-muted/50 rounded-lg p-1 flex space-x-2">
-                    <TabsTrigger
-                        value="live"
-                        className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
-                    >
-                        Live vendors
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value="onboarding"
-                        className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
-                    >
-                        Onboarding
-                    </TabsTrigger>
-                </TabsList>
+        <Tabs defaultValue="live">
+            <TabsList className="bg-muted/50 rounded-lg p-1 flex space-x-2">
+                <TabsTrigger
+                    value="live"
+                    className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+                >
+                    Live vendors
+                </TabsTrigger>
+                <TabsTrigger
+                    value="onboarding"
+                    className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+                >
+                    Onboarding
+                </TabsTrigger>
+            </TabsList>
 
-                <TabsContent value="live">
-                    {/* Guest List Table */}
-                    <DataTable
-                    data={vendors.map(vendor => ({
-                        ...vendor,
-                        email: vendor.email || '' //revisit
-                    }))}
-                    columns={columns}
-                    searchableColumns={[
-                        { id: "name", placeholder: "Seacrch by name..." }
-                    ]}
-                    enableSelection={false}
-                    enableColumnVisibility={true}
-                    enablePagination={true}
-                    defaultPageSize={10}
-                    title={`Vendors (${vendors.length})`}
-                    isLoading={isLoading}
-                    loadingMessage="Loading vendors..."
-                    emptyMessage="No vendors onboarded yet."
-                    />
-                </TabsContent>
-                <TabsContent value="onboarding">
-                    <p>onboarding placeholder</p>
-                </TabsContent>
-            </Tabs>
-        </div>
+            <TabsContent value="live">
+                {/* Guest List Table */}
+              <DataTable
+                data={vendors.map(vendor => ({
+                  ...vendor
+                }))}
+                columns={columns}
+                searchableColumns={[
+                  { id: "name", placeholder: "Seacrch by name..." }
+                ]}
+                enableSelection={false}
+                enableColumnVisibility={true}
+                enablePagination={true}
+                defaultPageSize={10}
+                title={`Vendors (${vendors.length})`}
+                isLoading={isLoading}
+                loadingMessage="Loading vendors..."
+                emptyMessage="No vendors onboarded yet."
+              />
+            </TabsContent>
+            <TabsContent value="onboarding">
+                <p>onboarding placeholder</p>
+            </TabsContent>
+        </Tabs>
       </div>
+    </div>
   );
 }
