@@ -228,6 +228,7 @@ function DataTable<TData>({
     getFilteredRowModel: getFilteredRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     onRowSelectionChange: setRowSelection,
+    columnResizeMode: 'onChange',
     state: {
       sorting,
       pagination,
@@ -333,12 +334,19 @@ function DataTable<TData>({
         /* Table */
         <>
           <div className="overflow-x-auto rounded-md border">
-            <Table>
+            <Table style={{ tableLayout: 'fixed' }}>
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-transparent">
                     {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id} className="h-11">
+                      <TableHead 
+                        key={header.id} 
+                        className="h-11"
+                        style={{
+                          width: header.getSize(),
+                          minWidth: header.getSize(),
+                        }}
+                      >
                         {header.isPlaceholder ? null : header.column.getCanSort() ? (
                           <div
                             className="flex cursor-pointer items-center justify-between gap-2 select-none"
@@ -382,7 +390,13 @@ function DataTable<TData>({
                   table.getRowModel().rows.map((row) => (
                     <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
+                        <TableCell 
+                          key={cell.id}
+                          style={{
+                            width: cell.column.getSize(),
+                            minWidth: cell.column.getSize(),
+                          }}
+                        >
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}

@@ -69,6 +69,7 @@ export const getAdminColumns = ({
     {
       accessorKey: 'email',
       header: 'Email',
+      size: 200,
       cell: ({ row }) => (
         <div className="text-sm text-foreground whitespace-nowrap">{row.getValue('email')}</div>
       ),
@@ -95,7 +96,7 @@ export const getAdminColumns = ({
       accessorKey: 'weddingType',
       header: 'Wedding Type',
       cell: ({ row }) => (
-        <Badge variant="secondary">{capitalizeFirst(row.getValue('weddingType'))}</Badge>
+        <Badge variant="outline">{capitalizeFirst(row.getValue('weddingType'))}</Badge>
       ),
     },
     {
@@ -122,20 +123,16 @@ export const getAdminColumns = ({
     {
       accessorKey: 'preferredServices',
       header: 'Services',
+      size: 250,
       cell: ({ row }) => {
         const services = row.getValue('preferredServices') as string[];
         return (
-          <div className="flex flex-wrap gap-1 max-w-[200px]">
-            {services?.slice(0, 3).map((service, index) => (
+          <div className="flex flex-wrap gap-1">
+            {services?.map((service, index) => (
               <Badge key={index} variant="outline" className="text-xs">
                 {capitalizeFirst(service)}
               </Badge>
             ))}
-            {services?.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                +{services.length - 3}
-              </Badge>
-            )}
           </div>
         );
       },
@@ -143,6 +140,7 @@ export const getAdminColumns = ({
     {
       accessorKey: 'weddings',
       header: 'Weddings',
+      size: 200,
       cell: ({ row }) => {
         const weddings = row.getValue('weddings') as Array<{ id: number; name: string }>;
         if (!weddings || weddings.length === 0) {
@@ -157,7 +155,7 @@ export const getAdminColumns = ({
 
         return (
           <div
-            className="text-xs max-w-[200px] truncate"
+            className="text-xs truncate text-foreground"
             title={weddings.map((w) => w.name).join(', ')}
           >
             {weddingNames}
@@ -165,15 +163,6 @@ export const getAdminColumns = ({
           </div>
         );
       },
-    },
-    {
-      accessorKey: 'createdAt',
-      header: 'Created',
-      cell: ({ row }) => (
-        <div className="text-sm text-foreground whitespace-nowrap">
-          {formatDateTime(row.getValue('createdAt'))}
-        </div>
-      ),
     },
   );
 
