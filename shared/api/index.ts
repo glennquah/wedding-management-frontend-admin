@@ -6,6 +6,7 @@ export { ApiError } from './core/ApiError';
 export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
+
 export { AdminResponseDto } from './models/AdminResponseDto';
 export type { AuthResponseDto } from './models/AuthResponseDto';
 export { BudgetBucket } from './models/BudgetBucket';
@@ -31,17 +32,17 @@ export type { UserResponseDto } from './models/UserResponseDto';
 export { UserRole } from './models/UserRole';
 export { VendorOnboardingStatus } from './models/VendorOnboardingStatus';
 export type { VendorResponseDto } from './models/VendorResponseDto';
+export type { WeddingDetailsDto } from './models/WeddingDetailsDto';
 export type { WeddingResponseDto } from './models/WeddingResponseDto';
 export { WeddingService } from './models/WeddingService';
 export { WeddingStyle } from './models/WeddingStyle';
 export { WeddingType } from './models/WeddingType';
+
 export { AdminsService } from './services/AdminsService';
 export { AuthService } from './services/AuthService';
 export { GuestsService } from './services/GuestsService';
 export { ListingsService } from './services/ListingsService';
 export { SuperAdminsService } from './services/SuperAdminsService';
+export { UsersService } from './services/UsersService';
 export { VendorsService } from './services/VendorsService';
 export { WeddingsService } from './services/WeddingsService';
-
-
-

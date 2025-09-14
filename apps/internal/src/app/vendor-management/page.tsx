@@ -52,6 +52,8 @@ export default function VendorListPage() {
     handleEditVendor,
     handleRejectOnboarding,
     handleApproveOnboarding,
+    handleSuspendVendor,
+    handleUnsuspendVendor,
 
     // Modal controls
     closeEditVendorModal,
@@ -287,6 +289,8 @@ export default function VendorListPage() {
             onDeleteVendor={openDeleteConfirmModal}
             onRejectOnboarding={handleRejectOnboarding}
             onApproveOnboarding={handleApproveOnboarding}
+            onSuspendVendor={handleSuspendVendor}
+            onUnsuspendVendor={handleUnsuspendVendor}
             vendor={selectedVendor}
           />
         )}
@@ -348,10 +352,16 @@ export default function VendorListPage() {
               Live vendors
             </TabsTrigger>
             <TabsTrigger
+              value="suspended"
+              className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+            >
+              Suspended vendors
+            </TabsTrigger>
+            <TabsTrigger
               value="onboarding"
               className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
             >
-              Onboarding
+              Onboarding vendors
             </TabsTrigger>
           </TabsList>
 
@@ -359,7 +369,11 @@ export default function VendorListPage() {
           <TabsContent value="live">
             <DataTable
               data={vendors
-                .filter((vendor) => vendor.onboardingStatus == VendorOnboardingStatus.ONBOARDED)
+                .filter(
+                  (vendor) =>
+                    vendor.onboardingStatus == VendorOnboardingStatus.ONBOARDED &&
+                    vendor.isSuspended == false,
+                )
                 .map((vendor) => ({
                   ...vendor,
                 }))}
@@ -369,10 +383,31 @@ export default function VendorListPage() {
               enableColumnVisibility={true}
               enablePagination={true}
               defaultPageSize={10}
-              title={`Vendors (${vendors.filter((vendor) => vendor.onboardingStatus == VendorOnboardingStatus.ONBOARDED).length})`}
+              title={`Vendors (${vendors.filter((vendor) => vendor.onboardingStatus == VendorOnboardingStatus.ONBOARDED && vendor.isSuspended == false).length})`}
               isLoading={isLoading}
-              loadingMessage="Loading vendors..."
-              emptyMessage="No vendors onboarded yet."
+              loadingMessage="Loading live vendors..."
+              emptyMessage="No live vendors."
+            />
+          </TabsContent>
+
+          {/* Suspended Vendors */}
+          <TabsContent value="suspended">
+            <DataTable
+              data={vendors
+                .filter((vendor) => vendor.isSuspended === true)
+                .map((vendor) => ({
+                  ...vendor,
+                }))}
+              columns={columns}
+              searchableColumns={[{ id: 'name', placeholder: 'Seacrch by name...' }]}
+              enableSelection={false}
+              enableColumnVisibility={true}
+              enablePagination={true}
+              defaultPageSize={10}
+              title={`Suspended Vendors (${vendors.filter((vendor) => vendor.isSuspended === true).length})`}
+              isLoading={isLoading}
+              loadingMessage="Loading suspended vendors..."
+              emptyMessage="No suspended vendors."
             />
           </TabsContent>
 

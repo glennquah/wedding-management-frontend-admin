@@ -185,4 +185,44 @@ export class VendorsService {
             },
         });
     }
+    /**
+     * Suspend vendor
+     * @param id
+     * @returns VendorResponseDto The vendor has been marked as suspended.
+     * @throws ApiError
+     */
+    public static vendorControllerSuspendVendor(
+        id: number,
+    ): CancelablePromise<VendorResponseDto> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/vendors/{id}/suspend',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Vendor not found.`,
+            },
+        });
+    }
+    /**
+     * Unsuspend vendor
+     * @param id
+     * @returns VendorResponseDto The vendor has been marked as unsuspended.
+     * @throws ApiError
+     */
+    public static vendorControllerUnsuspendVendor(
+        id: number,
+    ): CancelablePromise<VendorResponseDto> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/vendors/{id}/unsuspend',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Vendor not found.`,
+            },
+        });
+    }
 }

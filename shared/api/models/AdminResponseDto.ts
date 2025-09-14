@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { UserRole } from './UserRole';
+import type { WeddingDetailsDto } from './WeddingDetailsDto';
 export type AdminResponseDto = {
     /**
      * User ID
@@ -30,6 +31,10 @@ export type AdminResponseDto = {
      */
     isCouple?: boolean;
     /**
+     * Is the admin suspended?
+     */
+    isSuspended?: boolean;
+    /**
      * Date when the admin was onboarded
      */
     onboardedDate: string;
@@ -53,6 +58,10 @@ export type AdminResponseDto = {
      * Preferred wedding services
      */
     preferredServices: Array<'venue' | 'catering' | 'photography' | 'decoration' | 'music' | 'attire' | 'makeup' | 'transportation'>;
+    /**
+     * List of weddings associated with the admin
+     */
+    weddings?: Array<WeddingDetailsDto>;
 };
 export namespace AdminResponseDto {
     /**

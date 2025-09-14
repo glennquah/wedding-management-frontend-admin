@@ -22,6 +22,10 @@ export type UpdateAdminDto = {
      */
     isCouple?: boolean;
     /**
+     * Is the admin suspended?
+     */
+    isSuspended?: boolean;
+    /**
      * Date when the admin was onboarded
      */
     onboardedDate?: string;
