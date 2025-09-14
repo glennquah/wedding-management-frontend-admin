@@ -25,6 +25,9 @@ export type { DataTableProps } from './ui/table'
 export { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 export { Rating, RatingButton } from './ui/rating'
 
+// Form Fields
+export { getAdminFormFields, getEditAdminFormFields } from './AdminManagement'
+
 // Utilities
 export { cn } from './lib/utils'
 

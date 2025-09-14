@@ -31,6 +31,7 @@ export type { UpdateWeddingDto } from './models/UpdateWeddingDto';
 export type { UserResponseDto } from './models/UserResponseDto';
 export { UserRole } from './models/UserRole';
 export { VendorResponseDto } from './models/VendorResponseDto';
+export type { WeddingDetailsDto } from './models/WeddingDetailsDto';
 export type { WeddingResponseDto } from './models/WeddingResponseDto';
 export { WeddingService } from './models/WeddingService';
 export { WeddingStyle } from './models/WeddingStyle';
