@@ -2,15 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { getAdminColumns } from '@shared/columns/admin-columns';
-import {
-  Button,
-  DataTable,
-  DeleteConfirmationModal,
-  PageHeader,
-  getAdminFormFields,
-  getEditAdminFormFields,
-} from '@shared/components';
+import { AdminTable, Button, PageHeader, getAdminFormFields } from '@shared/components';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import {
   AdminResponseDto,
@@ -263,18 +255,12 @@ export default function AdminManagementPage() {
   const handleCreatePasswordGenerate = () => handleGeneratePassword(false);
   const handleEditPasswordGenerate = () => handleGeneratePassword(true);
 
-  // Column definitions for DataTable using user columns
-  const columns = getAdminColumns({
-    onEditAdmin: (admin: AdminResponseDto) => openEditAdminModal(admin),
-    onDeleteAdmin: (admin: AdminResponseDto) => openDeleteConfirmModal(admin),
-  });
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between">
         <PageHeader
           title="Admin Management"
-          description="Manage admins and their wedding preferences"
+          description="Manage admins and their wedding preferences "
         />
         <Button onClick={openAddAdminModal}>
           <Plus className="w-4 h-4 mr-2" />
@@ -300,57 +286,26 @@ export default function AdminManagementPage() {
         noOfColumns={2}
       />
 
-      {/* Edit Admin Modal */}
-      <FormDialog
-        open={isEditingAdmin}
-        onOpenChange={closeEditAdminModal}
-        title="Edit Admin"
-        isSubmitting={isSubmitting}
-        onSubmit={handleEditAdmin}
-        onCancel={closeEditAdminModal}
-        submitButtonText="Update Admin"
-        formFields={getEditAdminFormFields({
-          admin: editAdmin,
-          setAdmin: setEditAdmin,
-          handleGeneratePassword: handleEditPasswordGenerate,
-          handleServiceToggle: handleEditServiceToggle,
-        })}
-        noOfColumns={2}
-      />
-
-      <DataTable
-        data={admins}
-        columns={columns}
-        searchableColumns={[
-          { id: 'name', placeholder: 'Search by name...' },
-          { id: 'email', placeholder: 'Search by email...' },
-        ]}
-        enableSelection={false}
-        enableColumnVisibility={true}
-        enablePagination={true}
-        defaultPageSize={10}
-        title={`Admins (${admins.length})`}
-        isLoading={isLoading}
-        loadingMessage="Loading admins..."
-        emptyMessage="No admins added yet."
-        emptyDescription='Add an admin using the "Add Admin" button.'
-      />
-
-      <DeleteConfirmationModal
-        open={!!deleteConfirmAdmin}
-        onOpenChange={closeDeleteConfirmModal}
-        itemName={deleteConfirmAdmin?.name || 'this admin'}
-        description={
-          deleteConfirmAdmin && (
-            <>
-              Are you sure you want to delete {deleteConfirmAdmin.name}? This action cannot be
-              undone and will permanently remove their access to the system.
-            </>
-          )
-        }
-        onConfirm={confirmDeleteAdmin}
-        onCancel={closeDeleteConfirmModal}
-      />
+      {/* Admin Table with Edit/Delete Modals */}
+      <div className="w-full">
+        <AdminTable
+          admins={admins}
+          isLoading={isLoading}
+          isEditingAdmin={isEditingAdmin}
+          editAdmin={editAdmin}
+          setEditAdmin={setEditAdmin}
+          isSubmitting={isSubmitting}
+          deleteConfirmAdmin={deleteConfirmAdmin}
+          onEditAdmin={openEditAdminModal}
+          onDeleteAdmin={openDeleteConfirmModal}
+          handleEditAdmin={handleEditAdmin}
+          handleEditPasswordGenerate={handleEditPasswordGenerate}
+          handleEditServiceToggle={handleEditServiceToggle}
+          closeEditAdminModal={closeEditAdminModal}
+          confirmDeleteAdmin={confirmDeleteAdmin}
+          closeDeleteConfirmModal={closeDeleteConfirmModal}
+        />
+      </div>
     </div>
   );
 }

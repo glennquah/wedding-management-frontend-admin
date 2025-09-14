@@ -28,6 +28,9 @@ export { Rating, RatingButton } from './ui/rating'
 // Form Fields
 export { getAdminFormFields, getEditAdminFormFields } from './AdminManagement'
 
+// Tables
+export { AdminTable } from './AdminTable'
+
 // Utilities
 export { cn } from './lib/utils'
 

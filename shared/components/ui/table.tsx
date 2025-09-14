@@ -54,13 +54,11 @@ import {
 // Basic table components
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
-    <div className="relative w-full overflow-auto">
-      <table
-        data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
-        {...props}
-      />
-    </div>
+    <table
+      data-slot="table"
+      className={cn("w-full caption-bottom text-sm", className)}
+      {...props}
+    />
   )
 }
 
@@ -356,8 +354,9 @@ function DataTable<TData>({
       ) : (
         /* Table */
         <>
-          <div className="overflow-hidden rounded-md border">
-            <Table>
+          <div className="overflow-x-auto rounded-md border">
+            <div className="min-w-max">
+              <Table>
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-transparent">
@@ -435,7 +434,8 @@ function DataTable<TData>({
                   </TableRow>
                 )}
               </TableBody>
-            </Table>
+              </Table>
+            </div>
           </div>
 
           {/* Pagination */}

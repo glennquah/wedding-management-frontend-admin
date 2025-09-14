@@ -74,14 +74,6 @@ export const getAdminColumns = ({
       ),
     },
     {
-      accessorKey: 'role',
-      header: 'Role',
-      cell: ({ row }) => {
-        const role = row.getValue('role') as UserRole;
-        return <Badge variant={getRoleVariant(role)}>{role}</Badge>;
-      },
-    },
-    {
       accessorKey: 'isCouple',
       header: 'Couple',
       cell: ({ row }) => (
