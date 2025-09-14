@@ -14,7 +14,7 @@ function MainContent({ children }: { children: React.ReactNode }) {
     <main
       className={cn(
         'flex-1 overflow-y-auto transition-all duration-300',
-        sidebar.open ? 'max-w-[calc(100vw-18rem)]' : 'max-w-[calc(100vw-3rem)]',
+        sidebar.open ? 'max-w-[calc(100vw-16rem-16px)]' : 'max-w-[calc(100vw-2rem)]',
       )}
     >
       {children}
