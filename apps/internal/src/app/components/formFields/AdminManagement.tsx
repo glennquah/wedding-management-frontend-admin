@@ -77,8 +77,7 @@ export const getAdminFormFields = ({
           value={admin.password || ''}
           onChange={(e) => setAdmin({ ...admin, password: e.target.value })}
           required
-          placeholder="Generated password will appear here"
-          readOnly
+          placeholder="Enter password or use generate button"
           className="w-full pr-10"
         />
         <Button

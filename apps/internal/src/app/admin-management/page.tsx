@@ -68,10 +68,9 @@ export default function AdminManagementPage() {
 
   // Modal controls
   const openAddAdminModal = () => {
-    const generatedPassword = generateRandomPassword();
     setNewAdmin({
       role: UserRole.ADMIN,
-      password: generatedPassword,
+      password: '',
       isCouple: false,
       onboardedDate: new Date().toISOString(),
       preferredServices: [],
