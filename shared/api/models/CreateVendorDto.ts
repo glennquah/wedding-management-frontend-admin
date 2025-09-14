@@ -3,7 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { UserRole } from './UserRole';
-import type { VendorOnboardingStatus } from './VendorOnboardingStatus';
 import type { WeddingService } from './WeddingService';
 import type { WeddingStyle } from './WeddingStyle';
 import type { WeddingType } from './WeddingType';
@@ -48,6 +47,5 @@ export type CreateVendorDto = {
      * Capacity the vendor can handle for venue
      */
     capacity?: number;
-    onboardingStatus?: VendorOnboardingStatus;
 };
 

@@ -6,6 +6,7 @@ export { ApiError } from './core/ApiError';
 export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
+
 export { AdminResponseDto } from './models/AdminResponseDto';
 export type { AuthResponseDto } from './models/AuthResponseDto';
 export { BudgetBucket } from './models/BudgetBucket';
@@ -24,16 +25,17 @@ export type { TokensDto } from './models/TokensDto';
 export { UpdateAdminDto } from './models/UpdateAdminDto';
 export type { UpdateGuestDto } from './models/UpdateGuestDto';
 export type { UpdateListingDto } from './models/UpdateListingDto';
-export type { UpdateVendorDto } from './models/UpdateVendorDto';
+export { UpdateSuperAdminDto } from './models/UpdateSuperAdminDto';
+export { UpdateVendorDto } from './models/UpdateVendorDto';
 export type { UpdateWeddingDto } from './models/UpdateWeddingDto';
 export type { UserResponseDto } from './models/UserResponseDto';
 export { UserRole } from './models/UserRole';
-export { VendorOnboardingStatus } from './models/VendorOnboardingStatus';
-export type { VendorResponseDto } from './models/VendorResponseDto';
+export { VendorResponseDto } from './models/VendorResponseDto';
 export type { WeddingResponseDto } from './models/WeddingResponseDto';
 export { WeddingService } from './models/WeddingService';
 export { WeddingStyle } from './models/WeddingStyle';
 export { WeddingType } from './models/WeddingType';
+
 export { AdminsService } from './services/AdminsService';
 export { AuthService } from './services/AuthService';
 export { GuestsService } from './services/GuestsService';
