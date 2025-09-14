@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { UserRole } from './UserRole';
 export type UpdateAdminDto = {
     /**
      * The name of the user
@@ -15,10 +16,7 @@ export type UpdateAdminDto = {
      * Password for the user account
      */
     password?: string;
-    /**
-     * Role of the user
-     */
-    role: UpdateAdminDto.role;
+    role: UserRole;
     /**
      * Is the admin a couple?
      */
@@ -49,14 +47,6 @@ export type UpdateAdminDto = {
     preferredServices?: Array<'venue' | 'catering' | 'photography' | 'decoration' | 'music' | 'attire' | 'makeup' | 'transportation'>;
 };
 export namespace UpdateAdminDto {
-    /**
-     * Role of the user
-     */
-    export enum role {
-        ADMIN = 'admin',
-        SUPER_ADMIN = 'superAdmin',
-        VENDOR = 'vendor',
-    }
     /**
      * Wedding type
      */

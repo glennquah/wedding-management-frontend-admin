@@ -6,25 +6,25 @@ import {
   DialogContent,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from '@shared/components/ui/dialog';
 import { Mail } from 'lucide-react';
 
-interface EmailGuestModalProps {
+interface EmailModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  guestName: string;
-  guestEmail: string;
+  name: string;
+  email: string;
   onSendEmail: () => void;
 }
 
-export function EmailGuestModal({
+export function EmailModal({
   open,
   onOpenChange,
-  guestName,
-  guestEmail,
+  name,
+  email,
   onSendEmail,
-}: EmailGuestModalProps) {
+}: EmailModalProps) {
   const handleSendEmail = () => {
     onSendEmail();
     onOpenChange(false);
@@ -32,7 +32,7 @@ export function EmailGuestModal({
 
   // Example email template
   const exampleEmailSubject = 'Wedding Invitation - [Your Names] Wedding';
-  const exampleEmailBody = `Dear ${guestName},
+  const exampleEmailBody = `Dear ${name},
 
 We hope this message finds you well! We are thrilled to invite you to celebrate our special day with us.
 
@@ -58,7 +58,7 @@ Please visit our wedding website for more details and to RSVP: [Website Link]`;
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Mail className="h-5 w-5" />
-            Send Email to Guest
+            Send Email to 
           </DialogTitle>
         </DialogHeader>
 
@@ -66,7 +66,7 @@ Please visit our wedding website for more details and to RSVP: [Website Link]`;
           <div className="bg-muted/50 p-4 rounded-lg">
             <p className="text-sm font-medium text-foreground mb-1">Recipient:</p>
             <p className="text-sm text-muted-foreground">
-              {guestName} ({guestEmail})
+              {name} ({email})
             </p>
           </div>
 

@@ -1,5 +1,5 @@
 import { AuthService, TokensDto, UserRole } from '@wedding/api-types';
-import { NextAuthOptions, User } from 'next-auth';
+import { NextAuthOptions } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
@@ -74,12 +74,10 @@ export const authOptions: NextAuthOptions = {
     },
 
     async session({ token, session }) {
-      session.user = {
-        id: Number(token.id),
-        name: token.name as string,
-        email: token.email as string,
-        role: token.role as UserRole,
-      };
+      session.user.id = parseInt(token.id as string);
+      session.user.name = token.name as string;
+      session.user.email = token.email as string;
+      session.user.role = token.role as UserRole;
       session.backendTokens = token.backendTokens as TokensDto;
 
       return session;
