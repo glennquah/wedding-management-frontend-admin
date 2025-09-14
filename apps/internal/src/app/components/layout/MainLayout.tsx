@@ -2,9 +2,25 @@
 
 import NavigationBar from '../../../../../../shared/components/NavigationBar';
 import SuperAdminSidebar from './SuperAdminSidebar';
-import { SidebarProvider } from '@shared/components/ui/sidebar';
+import { cn } from '@shared/components/lib/utils';
+import { SidebarProvider, useSidebar } from '@shared/components/ui/sidebar';
 import { Toaster } from '@shared/components/ui/sonner';
 import { signOut, useSession } from 'next-auth/react';
+
+function MainContent({ children }: { children: React.ReactNode }) {
+  const sidebar = useSidebar();
+
+  return (
+    <main
+      className={cn(
+        'flex-1 overflow-y-auto transition-all duration-300',
+        sidebar.open ? 'max-w-[calc(100vw-18rem)]' : 'max-w-[calc(100vw-3rem)]',
+      )}
+    >
+      {children}
+    </main>
+  );
+}
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
@@ -31,7 +47,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <SuperAdminSidebar />
       <div className="flex-1 flex flex-col">
         <NavigationBar session={session} signOut={() => signOut()} />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <MainContent>{children}</MainContent>
       </div>
       <Toaster />
     </SidebarProvider>

@@ -1,25 +1,25 @@
 import React from 'react';
 
-import FormField from './FormField';
-import { Checkbox } from './ui/checkbox';
-import { Input } from './ui/form/input';
-import { Label } from './ui/form/label';
-import { Button } from './ui/button';
+import FormField from '@shared/components/FormField';
+import { Button } from '@shared/components/ui/button';
+import { Checkbox } from '@shared/components/ui/checkbox';
+import { Input } from '@shared/components/ui/form/input';
+import { Label } from '@shared/components/ui/form/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from './ui/select';
+} from '@shared/components/ui/select';
 import {
-  CreateAdminDto,
-  UpdateAdminDto,
   BudgetBucket,
+  CreateAdminDto,
   GuestCountBucket,
+  UpdateAdminDto,
+  WeddingService,
   WeddingStyle,
   WeddingType,
-  WeddingService,
 } from '@wedding/api-types';
 import { Cog } from 'lucide-react';
 
@@ -166,7 +166,9 @@ export const getAdminFormFields = ({
     <Label htmlFor="preferredStyle">Preferred Style *</Label>
     <Select
       value={admin.preferredStyle || ''}
-      onValueChange={(value: string) => setAdmin({ ...admin, preferredStyle: value as WeddingStyle })}
+      onValueChange={(value: string) =>
+        setAdmin({ ...admin, preferredStyle: value as WeddingStyle })
+      }
     >
       <SelectTrigger>
         <SelectValue placeholder="Select preferred style" />
@@ -351,7 +353,19 @@ export const getEditAdminFormFields = ({
         <div key={service} className="flex items-center space-x-2">
           <Checkbox
             id={`edit-service-${service}`}
-            checked={admin.preferredServices?.includes(service as 'venue' | 'catering' | 'photography' | 'decoration' | 'music' | 'attire' | 'makeup' | 'transportation') || false}
+            checked={
+              admin.preferredServices?.includes(
+                service as
+                  | 'venue'
+                  | 'catering'
+                  | 'photography'
+                  | 'decoration'
+                  | 'music'
+                  | 'attire'
+                  | 'makeup'
+                  | 'transportation',
+              ) || false
+            }
             onCheckedChange={() => handleServiceToggle(service)}
           />
           <Label htmlFor={`edit-service-${service}`} className="capitalize">

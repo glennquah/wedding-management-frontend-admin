@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { getEditAdminFormFields } from './AdminManagement';
+import { getEditAdminFormFields } from '../../apps/internal/src/app/components/formFields/AdminManagement';
 import { DataTable, DeleteConfirmationModal } from './index';
 import { FormDialog } from './ui/form/form-dialog';
 import { getAdminColumns } from '@shared/columns/admin-columns';
@@ -54,28 +54,26 @@ export const AdminTable: React.FC<AdminTableProps> = ({
   });
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       {/* Admin List Table */}
-      <div className="flex-1 overflow-hidden rounded-lg">
-        <div className="h-full overflow-auto">
-          <DataTable
-            data={admins}
-            columns={columns}
-            searchableColumns={[
-              { id: 'name', placeholder: 'Search by name...' },
-              { id: 'email', placeholder: 'Search by email...' },
-            ]}
-            enableSelection={false}
-            enableColumnVisibility={true}
-            enablePagination={true}
-            defaultPageSize={10}
-            title={`Admins (${admins.length})`}
-            isLoading={isLoading}
-            loadingMessage="Loading admins..."
-            emptyMessage="No admins added yet."
-            emptyDescription='Add an admin using the "Add Admin" button.'
-          />
-        </div>
+      <div className="w-full">
+        <DataTable
+          data={admins}
+          columns={columns}
+          searchableColumns={[
+            { id: 'name', placeholder: 'Search by name...' },
+            { id: 'email', placeholder: 'Search by email...' },
+          ]}
+          enableSelection={false}
+          enableColumnVisibility={true}
+          enablePagination={true}
+          defaultPageSize={10}
+          title={`Admins (${admins.length})`}
+          isLoading={isLoading}
+          loadingMessage="Loading admins..."
+          emptyMessage="No admins added yet."
+          emptyDescription='Add an admin using the "Add Admin" button.'
+        />
       </div>
 
       {/* Edit Admin Modal */}
