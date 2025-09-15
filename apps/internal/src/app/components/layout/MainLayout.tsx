@@ -6,6 +6,7 @@ import { cn } from '@shared/components/lib/utils';
 import { SidebarProvider, useSidebar } from '@shared/components/ui/sidebar';
 import { Toaster } from '@shared/components/ui/sonner';
 import { signOut, useSession } from 'next-auth/react';
+import { UserRole } from '@wedding/api-types';
 
 function MainContent({ children }: { children: React.ReactNode }) {
   const sidebar = useSidebar();
@@ -33,7 +34,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     );
   }
 
-  if (!session?.user) {
+  if (!session?.user || session.user.role !== UserRole.SUPER_ADMIN) {
     return (
       <main className="flex flex-1 flex-col overflow-y-auto">
         {children}
