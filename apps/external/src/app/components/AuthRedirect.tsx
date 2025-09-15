@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 
+import { UserRole } from '@shared/api';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -11,8 +12,18 @@ export function AuthRedirect() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (session?.user && pathname && !pathname.startsWith(`/${session.user.role}`)) {
-      return router.push(`/${session.user.role}`);
+    if (session?.user) {
+      if (pathname === '/login') {
+        return;
+      }
+
+      if (session.user.role !== UserRole.ADMIN && session.user.role !== UserRole.VENDOR) {
+        return router.push('/login');
+      }
+
+      if (pathname && !pathname.startsWith(`/${session.user.role}`)) {
+        return router.push(`/${session.user.role}`);
+      }
     }
   }, [session, status, pathname, router]);
 

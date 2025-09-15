@@ -2,7 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { BudgetBucket } from './BudgetBucket';
+import type { GuestCountBucket } from './GuestCountBucket';
 import type { GuestResponseDto } from './GuestResponseDto';
+import type { WeddingService } from './WeddingService';
+import type { WeddingStyle } from './WeddingStyle';
+import type { WeddingType } from './WeddingType';
 export type WeddingResponseDto = {
     /**
      * Wedding ID
@@ -24,6 +29,11 @@ export type WeddingResponseDto = {
      * List of guests for this wedding
      */
     guests?: Array<GuestResponseDto>;
+    weddingType: WeddingType;
+    budgetBucket: BudgetBucket;
+    guestCountBucket: GuestCountBucket;
+    preferredStyle: WeddingStyle;
+    preferredServices: Array<WeddingService>;
     /**
      * Creation timestamp
      */

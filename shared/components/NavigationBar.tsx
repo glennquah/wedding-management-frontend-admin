@@ -8,11 +8,17 @@ import {
   DropdownMenuTrigger,
 } from '@shared/components/ui/form/dropdown-menu';
 import { SidebarTrigger } from '@shared/components/ui/sidebar';
-import { Bell, ChevronsUpDown, User } from 'lucide-react';
-import { useSession } from 'next-auth/react';
+import { Bell, ChevronsUpDown, LogOut, Settings, User } from 'lucide-react';
+import { Session } from 'next-auth';
+import { useRouter } from 'next/navigation';
 
-const NavigationBar = () => {
-  const { data: session } = useSession();
+interface NavigationBarProps {
+  session: Session | null;
+  signOut: () => void;
+}
+
+const NavigationBar = ({ session, signOut }: NavigationBarProps) => {
+  const router = useRouter();
 
   return (
     <header className="sticky top-0 z-40 w-full bg-sidebar text-sidebar-foreground border-gray-600 shadow-sm px-4 md:px-6">
@@ -25,7 +31,12 @@ const NavigationBar = () => {
         {/* Right side */}
         <div className="flex items-center gap-4">
           {/* Notification */}
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onClick={() => router.push('/notifications')}
+          >
             <Bell size={16} />
             <span className="sr-only">Notifications</span>
           </Button>
@@ -43,12 +54,19 @@ const NavigationBar = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem>
+                <DropdownMenuItem disabled>Role: {session.user.role}</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/profile')}>
                   <User size={16} className="mr-2" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem className="text-red-600">Sign Out</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/settings')}>
+                  <Settings size={16} className="mr-2" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem className="text-red-600" onClick={() => signOut()}>
+                  <LogOut size={16} className="mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}

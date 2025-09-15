@@ -1,3 +1,4 @@
+import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import {
   DropdownMenu,
@@ -10,14 +11,16 @@ import { ConfirmationStatus, GuestResponseDto } from '@wedding/api-types';
 import { ChevronDown, Edit2, Trash2 } from 'lucide-react';
 
 // Helper functions for confirmation status
-const getConfirmationStatusColor = (status: ConfirmationStatus) => {
+const getConfirmationStatusVariant = (
+  status: ConfirmationStatus,
+): 'default' | 'secondary' | 'destructive' | 'outline' => {
   switch (status) {
     case 'confirmed':
-      return 'bg-green-100 text-green-800';
+      return 'default';
     case 'rejected':
-      return 'bg-red-100 text-red-800';
+      return 'destructive';
     default:
-      return 'bg-yellow-100 text-yellow-800';
+      return 'outline';
   }
 };
 
@@ -93,14 +96,10 @@ export const getGuestColumns = ({
     cell: ({ row }) => {
       const status = row.getValue('confirmationStatus') as ConfirmationStatus;
       return (
-        <span
-          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getConfirmationStatusColor(
-            status,
-          )}`}
-        >
-          {showConfirmationIcon && getConfirmationIcon(status)}
+        <Badge variant={getConfirmationStatusVariant(status)} className="gap-1">
           {getConfirmationLabel(status)}
-        </span>
+          {showConfirmationIcon && <span className="ml-1">{getConfirmationIcon(status)}</span>}
+        </Badge>
       );
     },
   });
@@ -127,7 +126,8 @@ export const getGuestColumns = ({
                 size="sm"
                 className="h-auto p-1 text-sm font-normal justify-start"
               >
-                +{accompanyingGuestsList.length} guest{accompanyingGuestsList.length === 1 ? '' : 's'}
+                +{accompanyingGuestsList.length} guest
+                {accompanyingGuestsList.length === 1 ? '' : 's'}
                 <ChevronDown className="ml-1 h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
