@@ -7,16 +7,11 @@ import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import {
   AdminResponseDto,
   AdminsService,
-  BudgetBucket,
   CreateAdminDto,
-  GuestCountBucket,
   UpdateAdminDto,
   UserRole,
   WeddingResponseDto,
-  WeddingService,
   WeddingsService,
-  WeddingStyle,
-  WeddingType,
 } from '@wedding/api-types';
 import { Plus } from 'lucide-react';
 import { useSession } from 'next-auth/react';
@@ -41,8 +36,8 @@ export default function AdminManagementPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form data
-  const [newAdmin, setNewAdmin] = useState<Partial<CreateAdminDto & { id?: number; weddingId?: number }>>({});
-  const [editAdmin, setEditAdmin] = useState<Partial<UpdateAdminDto & { id?: number; weddingId?: number }>>({});
+  const [newAdmin, setNewAdmin] = useState<Partial<CreateAdminDto>>({});
+  const [editAdmin, setEditAdmin] = useState<Partial<UpdateAdminDto & { id?: number }>>({});
 
   // Fetch admins and weddings data
   useEffect(() => {
@@ -83,8 +78,7 @@ export default function AdminManagementPage() {
       role: UserRole.ADMIN,
       password: '',
       isCouple: false,
-      onboardedDate: new Date().toISOString(),
-      preferredServices: [],
+      weddingId: 0,
     });
     setIsAddingAdmin(true);
   };
@@ -100,14 +94,6 @@ export default function AdminManagementPage() {
       name: admin.name,
       email: admin.email,
       role: UserRole.ADMIN,
-      isCouple: admin.isCouple,
-      onboardedDate: admin.onboardedDate,
-      weddingType: admin.weddingType as UpdateAdminDto.weddingType,
-      budgetBucket: admin.budgetBucket as UpdateAdminDto.budgetBucket,
-      guestCountBucket: admin.guestCountBucket as UpdateAdminDto.guestCountBucket,
-      preferredStyle: admin.preferredStyle as UpdateAdminDto.preferredStyle,
-      preferredServices: admin.preferredServices as UpdateAdminDto['preferredServices'],
-      weddingId: admin.weddings && admin.weddings.length > 0 ? admin.weddings[0].id : undefined,
     });
     setIsEditingAdmin(true);
   };
@@ -130,28 +116,9 @@ export default function AdminManagementPage() {
     setIsSubmitting(true);
     try {
       // Basic required fields
-      if (!newAdmin.name || !newAdmin.email || !newAdmin.password || !newAdmin.onboardedDate) {
+      if (!newAdmin.name || !newAdmin.email || !newAdmin.password || !newAdmin.weddingId) {
         toast.error('Please fill in all required fields');
         return;
-      }
-
-      // Conditional validation based on isCouple
-      if (newAdmin.isCouple) {
-        if (
-          !newAdmin.weddingType ||
-          !newAdmin.budgetBucket ||
-          !newAdmin.guestCountBucket ||
-          !newAdmin.preferredStyle ||
-          !newAdmin.preferredServices
-        ) {
-          toast.error('Please fill in all wedding preference fields for couples');
-          return;
-        }
-      } else {
-        if (!newAdmin.weddingId) {
-          toast.error('Please select a wedding for non-couple admins');
-          return;
-        }
       }
 
       const adminData: CreateAdminDto = {
@@ -160,21 +127,7 @@ export default function AdminManagementPage() {
         password: newAdmin.password!,
         role: UserRole.ADMIN,
         isCouple: newAdmin.isCouple || false,
-        onboardedDate: newAdmin.onboardedDate!,
-        ...(newAdmin.isCouple ? {
-          weddingType: newAdmin.weddingType!,
-          budgetBucket: newAdmin.budgetBucket!,
-          guestCountBucket: newAdmin.guestCountBucket!,
-          preferredStyle: newAdmin.preferredStyle!,
-          preferredServices: newAdmin.preferredServices!,
-        } : {
-          // For non-couples, we send default values since API still requires them
-          weddingType: WeddingType.WESTERN,
-          budgetBucket: BudgetBucket.MEDIUM,
-          guestCountBucket: GuestCountBucket.MEDIUM,
-          preferredStyle: WeddingStyle.MODERN,
-          preferredServices: [],
-        }),
+        weddingId: newAdmin.weddingId!,
       };
 
       await AdminsService.adminControllerCreate(adminData);
@@ -201,13 +154,6 @@ export default function AdminManagementPage() {
         email: editAdmin.email,
         password: editAdmin.password,
         role: editAdmin.role || UserRole.ADMIN,
-        isCouple: editAdmin.isCouple,
-        onboardedDate: editAdmin.onboardedDate,
-        weddingType: editAdmin.weddingType,
-        budgetBucket: editAdmin.budgetBucket,
-        guestCountBucket: editAdmin.guestCountBucket,
-        preferredStyle: editAdmin.preferredStyle,
-        preferredServices: editAdmin.preferredServices,
       };
 
       await AdminsService.adminControllerUpdate(editAdmin.id, updateData);
@@ -253,35 +199,7 @@ export default function AdminManagementPage() {
     toast.success('Password generated successfully!');
   };
 
-  const handleServiceToggle = (service: WeddingService, isEdit = false) => {
-    if (isEdit) {
-      const currentServices = editAdmin.preferredServices || [];
-      const serviceString = service as
-        | 'venue'
-        | 'catering'
-        | 'photography'
-        | 'decoration'
-        | 'music'
-        | 'attire'
-        | 'makeup'
-        | 'transportation';
-      const updatedServices = currentServices.includes(serviceString)
-        ? currentServices.filter((s) => s !== serviceString)
-        : [...currentServices, serviceString];
-      setEditAdmin({ ...editAdmin, preferredServices: updatedServices });
-    } else {
-      const currentServices = newAdmin.preferredServices || [];
-      const updatedServices = currentServices.includes(service)
-        ? currentServices.filter((s) => s !== service)
-        : [...currentServices, service];
-      setNewAdmin({ ...newAdmin, preferredServices: updatedServices });
-    }
-  };
-
   // Helper functions for form fields
-  const handleCreateServiceToggle = (service: WeddingService) =>
-    handleServiceToggle(service, false);
-  const handleEditServiceToggle = (service: WeddingService) => handleServiceToggle(service, true);
   const handleCreatePasswordGenerate = () => handleGeneratePassword(false);
   const handleEditPasswordGenerate = () => handleGeneratePassword(true);
 
@@ -311,7 +229,6 @@ export default function AdminManagementPage() {
           admin: newAdmin,
           setAdmin: setNewAdmin,
           handleGeneratePassword: handleCreatePasswordGenerate,
-          handleServiceToggle: handleCreateServiceToggle,
           weddings,
         })}
         noOfColumns={2}
@@ -332,7 +249,6 @@ export default function AdminManagementPage() {
           onDeleteAdmin={openDeleteConfirmModal}
           handleEditAdmin={handleEditAdmin}
           handleEditPasswordGenerate={handleEditPasswordGenerate}
-          handleEditServiceToggle={handleEditServiceToggle}
           closeEditAdminModal={closeEditAdminModal}
           confirmDeleteAdmin={confirmDeleteAdmin}
           closeDeleteConfirmModal={closeDeleteConfirmModal}

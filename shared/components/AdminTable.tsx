@@ -4,7 +4,7 @@ import { getEditAdminFormFields } from '../../apps/internal/src/app/components/f
 import { DataTable, DeleteConfirmationModal } from './index';
 import { FormDialog } from './ui/form/form-dialog';
 import { getAdminColumns } from '@shared/columns/admin-columns';
-import { AdminResponseDto, UpdateAdminDto, WeddingResponseDto, WeddingService } from '@wedding/api-types';
+import { AdminResponseDto, UpdateAdminDto, WeddingResponseDto } from '@wedding/api-types';
 
 interface AdminTableProps {
   // Data
@@ -26,7 +26,6 @@ interface AdminTableProps {
   onDeleteAdmin: (admin: AdminResponseDto) => void;
   handleEditAdmin: () => Promise<void>;
   handleEditPasswordGenerate: () => void;
-  handleEditServiceToggle: (service: WeddingService) => void;
   closeEditAdminModal: () => void;
   confirmDeleteAdmin: () => Promise<void>;
   closeDeleteConfirmModal: () => void;
@@ -45,7 +44,6 @@ export const AdminTable: React.FC<AdminTableProps> = ({
   onDeleteAdmin,
   handleEditAdmin,
   handleEditPasswordGenerate,
-  handleEditServiceToggle,
   closeEditAdminModal,
   confirmDeleteAdmin,
   closeDeleteConfirmModal,
@@ -91,8 +89,6 @@ export const AdminTable: React.FC<AdminTableProps> = ({
           admin: editAdmin,
           setAdmin: setEditAdmin,
           handleGeneratePassword: handleEditPasswordGenerate,
-          handleServiceToggle: handleEditServiceToggle,
-          weddings,
         })}
         noOfColumns={2}
       />

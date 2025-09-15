@@ -75,11 +75,11 @@ export const getAdminColumns = ({
       ),
     },
     {
-      accessorKey: 'isCouple',
-      header: 'Couple',
+      accessorKey: 'role',
+      header: 'Role',
       cell: ({ row }) => (
-        <Badge variant={row.getValue('isCouple') ? 'default' : 'outline'}>
-          {row.getValue('isCouple') ? 'Yes' : 'No'}
+        <Badge variant={getRoleVariant(row.getValue('role'))}>
+          {row.getValue('role') === UserRole.SUPER_ADMIN ? 'Super Admin' : 'Admin'}
         </Badge>
       ),
     },
@@ -93,49 +93,13 @@ export const getAdminColumns = ({
       ),
     },
     {
-      accessorKey: 'weddingType',
-      header: 'Wedding Type',
+      accessorKey: 'isSuspended',
+      header: 'Status',
       cell: ({ row }) => (
-        <Badge variant="outline">{capitalizeFirst(row.getValue('weddingType'))}</Badge>
+        <Badge variant={row.getValue('isSuspended') ? 'destructive' : 'default'}>
+          {row.getValue('isSuspended') ? 'Suspended' : 'Active'}
+        </Badge>
       ),
-    },
-    {
-      accessorKey: 'budgetBucket',
-      header: 'Budget',
-      cell: ({ row }) => (
-        <Badge variant="outline">{capitalizeFirst(row.getValue('budgetBucket'))}</Badge>
-      ),
-    },
-    {
-      accessorKey: 'guestCountBucket',
-      header: 'Guest Count',
-      cell: ({ row }) => (
-        <Badge variant="outline">{capitalizeFirst(row.getValue('guestCountBucket'))}</Badge>
-      ),
-    },
-    {
-      accessorKey: 'preferredStyle',
-      header: 'Style',
-      cell: ({ row }) => (
-        <Badge variant="outline">{capitalizeFirst(row.getValue('preferredStyle'))}</Badge>
-      ),
-    },
-    {
-      accessorKey: 'preferredServices',
-      header: 'Services',
-      size: 250,
-      cell: ({ row }) => {
-        const services = row.getValue('preferredServices') as string[];
-        return (
-          <div className="flex flex-wrap gap-1">
-            {services?.map((service, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
-                {capitalizeFirst(service)}
-              </Badge>
-            ))}
-          </div>
-        );
-      },
     },
     {
       accessorKey: 'weddings',
