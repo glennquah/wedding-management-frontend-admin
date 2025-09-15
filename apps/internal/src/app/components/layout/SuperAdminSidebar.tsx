@@ -52,5 +52,5 @@ const tabs = [
 ];
 
 export default function SuperAdminSidebar() {
-  return <AppSidebar tabs={tabs} />;
+  return <AppSidebar tabs={tabs} platform="internal" />;
 }
