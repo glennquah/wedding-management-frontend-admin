@@ -8,18 +8,18 @@ export default withAuth(
     const token = req.nextauth.token;
 
     // Allow access to root path
-    if (pathname === '/') {
+    if (pathname === '/login') {
       return NextResponse.next();
     }
 
     // Check if user is authenticated
     if (!token) {
-      return NextResponse.redirect(new URL('/', req.url));
+      return NextResponse.redirect(new URL('/login', req.url));
     }
 
     // Check if user has super admin role
     if (token.role !== UserRole.SUPER_ADMIN) {
-      return NextResponse.redirect(new URL('/', req.url));
+      return NextResponse.redirect(new URL('/login', req.url));
     }
 
     return NextResponse.next();
