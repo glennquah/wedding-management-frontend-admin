@@ -110,7 +110,7 @@ export default function AppSidebar({
           style={{ objectFit: 'contain' }}
         />
         <div className="absolute right-5 bottom-[1px] text-primary italic font-montserrat font-black text-[8px]">
-          Tie the Knot, Stress Not.
+          Stress Not, Tie the Knot.
         </div>
       </SidebarHeader>
 
@@ -161,7 +161,10 @@ export default function AppSidebar({
             ))}
             <Separator className="my-2" />
             <DropdownMenuItem asChild>
-              <button onClick={() => signOut()} className="flex w-full items-center text-bold">
+              <button
+                onClick={() => signOut({ callbackUrl: window.location.origin, redirect: false })}
+                className="flex w-full items-center text-bold"
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign Out
               </button>

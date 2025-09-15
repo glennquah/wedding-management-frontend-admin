@@ -30,7 +30,7 @@ export default function LoginPage() {
         return;
       }
       toast('Successfully Login.');
-      router.push('/main-dashboard');
+      router.push('/');
     } catch (err) {
       console.error('Unexpected error:', err);
       toast.error('Something went wrong. Please try again.');
