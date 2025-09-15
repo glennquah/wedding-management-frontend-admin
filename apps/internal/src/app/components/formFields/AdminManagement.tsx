@@ -17,24 +17,28 @@ import {
   CreateAdminDto,
   GuestCountBucket,
   UpdateAdminDto,
+  WeddingResponseDto,
   WeddingService,
   WeddingStyle,
   WeddingType,
+  WeddingsService,
 } from '@wedding/api-types';
 import { Cog } from 'lucide-react';
 
 interface AdminFormFieldsProps {
-  admin: Partial<CreateAdminDto & { id?: number }>;
-  setAdmin: React.Dispatch<React.SetStateAction<Partial<CreateAdminDto & { id?: number }>>>;
+  admin: Partial<CreateAdminDto & { id?: number; weddingId?: number }>;
+  setAdmin: React.Dispatch<React.SetStateAction<Partial<CreateAdminDto & { id?: number; weddingId?: number }>>>;
   handleGeneratePassword: () => void;
   handleServiceToggle: (service: WeddingService) => void;
+  weddings?: WeddingResponseDto[];
 }
 
 interface EditAdminFormFieldsProps {
-  admin: Partial<UpdateAdminDto & { id?: number }>;
-  setAdmin: React.Dispatch<React.SetStateAction<Partial<UpdateAdminDto & { id?: number }>>>;
+  admin: Partial<UpdateAdminDto & { id?: number; weddingId?: number }>;
+  setAdmin: React.Dispatch<React.SetStateAction<Partial<UpdateAdminDto & { id?: number; weddingId?: number }>>>;
   handleGeneratePassword: () => void;
   handleServiceToggle: (service: WeddingService) => void;
+  weddings?: WeddingResponseDto[];
 }
 
 export const getAdminFormFields = ({
@@ -42,6 +46,7 @@ export const getAdminFormFields = ({
   setAdmin,
   handleGeneratePassword,
   handleServiceToggle,
+  weddings = [],
 }: AdminFormFieldsProps) => [
   <div key="name" className="md:col-span-1">
     <FormField
@@ -105,99 +110,123 @@ export const getAdminFormFields = ({
     </div>
   </div>,
 
-  <div key="weddingType" className="md:col-span-1">
-    <Label htmlFor="weddingType">Wedding Type *</Label>
-    <Select
-      value={admin.weddingType || ''}
-      onValueChange={(value: string) => setAdmin({ ...admin, weddingType: value as WeddingType })}
-    >
-      <SelectTrigger>
-        <SelectValue placeholder="Select wedding type" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={WeddingType.CHINESE}>Chinese</SelectItem>
-        <SelectItem value={WeddingType.MALAY}>Malay</SelectItem>
-        <SelectItem value={WeddingType.INDIAN}>Indian</SelectItem>
-        <SelectItem value={WeddingType.WESTERN}>Western</SelectItem>
-        <SelectItem value={WeddingType.OTHERS}>Others</SelectItem>
-      </SelectContent>
-    </Select>
-  </div>,
+  // Conditional fields based on isCouple
+  ...(admin.isCouple ? [
+    // Show couple-specific fields (wedding preferences)
+    <div key="weddingType" className="md:col-span-1">
+      <Label htmlFor="weddingType">Wedding Type *</Label>
+      <Select
+        value={admin.weddingType || ''}
+        onValueChange={(value: string) => setAdmin({ ...admin, weddingType: value as WeddingType })}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select wedding type" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={WeddingType.CHINESE}>Chinese</SelectItem>
+          <SelectItem value={WeddingType.MALAY}>Malay</SelectItem>
+          <SelectItem value={WeddingType.INDIAN}>Indian</SelectItem>
+          <SelectItem value={WeddingType.WESTERN}>Western</SelectItem>
+          <SelectItem value={WeddingType.OTHERS}>Others</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>,
 
-  <div key="budgetBucket" className="md:col-span-1">
-    <Label htmlFor="budgetBucket">Budget Bucket *</Label>
-    <Select
-      value={admin.budgetBucket || ''}
-      onValueChange={(value: string) => setAdmin({ ...admin, budgetBucket: value as BudgetBucket })}
-    >
-      <SelectTrigger>
-        <SelectValue placeholder="Select budget bucket" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={BudgetBucket.LOW}>Low</SelectItem>
-        <SelectItem value={BudgetBucket.MEDIUM}>Medium</SelectItem>
-        <SelectItem value={BudgetBucket.HIGH}>High</SelectItem>
-        <SelectItem value={BudgetBucket.LUXURY}>Luxury</SelectItem>
-      </SelectContent>
-    </Select>
-  </div>,
+    <div key="budgetBucket" className="md:col-span-1">
+      <Label htmlFor="budgetBucket">Budget Bucket *</Label>
+      <Select
+        value={admin.budgetBucket || ''}
+        onValueChange={(value: string) => setAdmin({ ...admin, budgetBucket: value as BudgetBucket })}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select budget bucket" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={BudgetBucket.LOW}>Low</SelectItem>
+          <SelectItem value={BudgetBucket.MEDIUM}>Medium</SelectItem>
+          <SelectItem value={BudgetBucket.HIGH}>High</SelectItem>
+          <SelectItem value={BudgetBucket.LUXURY}>Luxury</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>,
 
-  <div key="guestCountBucket" className="md:col-span-1">
-    <Label htmlFor="guestCountBucket">Guest Count Bucket *</Label>
-    <Select
-      value={admin.guestCountBucket || ''}
-      onValueChange={(value: string) =>
-        setAdmin({ ...admin, guestCountBucket: value as GuestCountBucket })
-      }
-    >
-      <SelectTrigger>
-        <SelectValue placeholder="Select guest count" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={GuestCountBucket.SMALL}>Small</SelectItem>
-        <SelectItem value={GuestCountBucket.MEDIUM}>Medium</SelectItem>
-        <SelectItem value={GuestCountBucket.LARGE}>Large</SelectItem>
-      </SelectContent>
-    </Select>
-  </div>,
+    <div key="guestCountBucket" className="md:col-span-1">
+      <Label htmlFor="guestCountBucket">Guest Count Bucket *</Label>
+      <Select
+        value={admin.guestCountBucket || ''}
+        onValueChange={(value: string) =>
+          setAdmin({ ...admin, guestCountBucket: value as GuestCountBucket })
+        }
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select guest count" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={GuestCountBucket.SMALL}>Small</SelectItem>
+          <SelectItem value={GuestCountBucket.MEDIUM}>Medium</SelectItem>
+          <SelectItem value={GuestCountBucket.LARGE}>Large</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>,
 
-  <div key="preferredStyle" className="md:col-span-1">
-    <Label htmlFor="preferredStyle">Preferred Style *</Label>
-    <Select
-      value={admin.preferredStyle || ''}
-      onValueChange={(value: string) =>
-        setAdmin({ ...admin, preferredStyle: value as WeddingStyle })
-      }
-    >
-      <SelectTrigger>
-        <SelectValue placeholder="Select preferred style" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={WeddingStyle.LUXURY}>Luxury</SelectItem>
-        <SelectItem value={WeddingStyle.MODERN}>Modern</SelectItem>
-        <SelectItem value={WeddingStyle.TRADITIONAL}>Traditional</SelectItem>
-        <SelectItem value={WeddingStyle.RUSTIC}>Rustic</SelectItem>
-      </SelectContent>
-    </Select>
-  </div>,
+    <div key="preferredStyle" className="md:col-span-1">
+      <Label htmlFor="preferredStyle">Preferred Style *</Label>
+      <Select
+        value={admin.preferredStyle || ''}
+        onValueChange={(value: string) =>
+          setAdmin({ ...admin, preferredStyle: value as WeddingStyle })
+        }
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select preferred style" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={WeddingStyle.LUXURY}>Luxury</SelectItem>
+          <SelectItem value={WeddingStyle.MODERN}>Modern</SelectItem>
+          <SelectItem value={WeddingStyle.TRADITIONAL}>Traditional</SelectItem>
+          <SelectItem value={WeddingStyle.RUSTIC}>Rustic</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>,
 
-  <div key="preferredServices" className="md:col-span-2">
-    <Label>Preferred Services *</Label>
-    <div className="grid grid-cols-2 gap-2 mt-2">
-      {Object.values(WeddingService).map((service) => (
-        <div key={service} className="flex items-center space-x-2">
-          <Checkbox
-            id={`service-${service}`}
-            checked={admin.preferredServices?.includes(service) || false}
-            onCheckedChange={() => handleServiceToggle(service)}
-          />
-          <Label htmlFor={`service-${service}`} className="capitalize">
-            {service.replace('_', ' ')}
-          </Label>
-        </div>
-      ))}
-    </div>
-  </div>,
+    <div key="preferredServices" className="md:col-span-2">
+      <Label>Preferred Services *</Label>
+      <div className="grid grid-cols-2 gap-2 mt-2">
+        {Object.values(WeddingService).map((service) => (
+          <div key={service} className="flex items-center space-x-2">
+            <Checkbox
+              id={`service-${service}`}
+              checked={admin.preferredServices?.includes(service) || false}
+              onCheckedChange={() => handleServiceToggle(service)}
+            />
+            <Label htmlFor={`service-${service}`} className="capitalize">
+              {service.replace('_', ' ')}
+            </Label>
+          </div>
+        ))}
+      </div>
+    </div>,
+  ] : [
+    // Show wedding selection for non-couples
+    <div key="weddingSelection" className="md:col-span-2">
+      <Label htmlFor="weddingSelection">Select Wedding *</Label>
+      <Select
+        value={admin.weddingId?.toString() || ''}
+        onValueChange={(value: string) => setAdmin({ ...admin, weddingId: parseInt(value) })}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select a wedding to tag this admin to" />
+        </SelectTrigger>
+        <SelectContent>
+          {weddings.map((wedding) => (
+            <SelectItem key={wedding.id} value={wedding.id.toString()}>
+              {wedding.name} - {new Date(wedding.date).toLocaleDateString()}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>,
+  ]),
 ];
 
 export const getEditAdminFormFields = ({
@@ -205,6 +234,7 @@ export const getEditAdminFormFields = ({
   setAdmin,
   handleGeneratePassword,
   handleServiceToggle,
+  weddings = [],
 }: EditAdminFormFieldsProps) => [
   <div key="name" className="md:col-span-1">
     <FormField
@@ -265,113 +295,137 @@ export const getEditAdminFormFields = ({
     </div>
   </div>,
 
-  <div key="weddingType" className="md:col-span-1">
-    <Label htmlFor="weddingType">Wedding Type</Label>
-    <Select
-      value={admin.weddingType || ''}
-      onValueChange={(value: string) =>
-        setAdmin({ ...admin, weddingType: value as UpdateAdminDto.weddingType })
-      }
-    >
-      <SelectTrigger>
-        <SelectValue placeholder="Select wedding type" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="chinese">Chinese</SelectItem>
-        <SelectItem value="malay">Malay</SelectItem>
-        <SelectItem value="indian">Indian</SelectItem>
-        <SelectItem value="western">Western</SelectItem>
-        <SelectItem value="others">Others</SelectItem>
-      </SelectContent>
-    </Select>
-  </div>,
+  // Conditional fields based on isCouple
+  ...(admin.isCouple ? [
+    // Show couple-specific fields (wedding preferences)
+    <div key="weddingType" className="md:col-span-1">
+      <Label htmlFor="weddingType">Wedding Type</Label>
+      <Select
+        value={admin.weddingType || ''}
+        onValueChange={(value: string) =>
+          setAdmin({ ...admin, weddingType: value as UpdateAdminDto.weddingType })
+        }
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select wedding type" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="chinese">Chinese</SelectItem>
+          <SelectItem value="malay">Malay</SelectItem>
+          <SelectItem value="indian">Indian</SelectItem>
+          <SelectItem value="western">Western</SelectItem>
+          <SelectItem value="others">Others</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>,
 
-  <div key="budgetBucket" className="md:col-span-1">
-    <Label htmlFor="budgetBucket">Budget Bucket</Label>
-    <Select
-      value={admin.budgetBucket || ''}
-      onValueChange={(value: string) =>
-        setAdmin({ ...admin, budgetBucket: value as UpdateAdminDto.budgetBucket })
-      }
-    >
-      <SelectTrigger>
-        <SelectValue placeholder="Select budget bucket" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="low">Low</SelectItem>
-        <SelectItem value="medium">Medium</SelectItem>
-        <SelectItem value="high">High</SelectItem>
-        <SelectItem value="luxury">Luxury</SelectItem>
-      </SelectContent>
-    </Select>
-  </div>,
+    <div key="budgetBucket" className="md:col-span-1">
+      <Label htmlFor="budgetBucket">Budget Bucket</Label>
+      <Select
+        value={admin.budgetBucket || ''}
+        onValueChange={(value: string) =>
+          setAdmin({ ...admin, budgetBucket: value as UpdateAdminDto.budgetBucket })
+        }
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select budget bucket" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="low">Low</SelectItem>
+          <SelectItem value="medium">Medium</SelectItem>
+          <SelectItem value="high">High</SelectItem>
+          <SelectItem value="luxury">Luxury</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>,
 
-  <div key="guestCountBucket" className="md:col-span-1">
-    <Label htmlFor="guestCountBucket">Guest Count Bucket</Label>
-    <Select
-      value={admin.guestCountBucket || ''}
-      onValueChange={(value: string) =>
-        setAdmin({ ...admin, guestCountBucket: value as UpdateAdminDto.guestCountBucket })
-      }
-    >
-      <SelectTrigger>
-        <SelectValue placeholder="Select guest count" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="small">Small</SelectItem>
-        <SelectItem value="medium">Medium</SelectItem>
-        <SelectItem value="large">Large</SelectItem>
-      </SelectContent>
-    </Select>
-  </div>,
+    <div key="guestCountBucket" className="md:col-span-1">
+      <Label htmlFor="guestCountBucket">Guest Count Bucket</Label>
+      <Select
+        value={admin.guestCountBucket || ''}
+        onValueChange={(value: string) =>
+          setAdmin({ ...admin, guestCountBucket: value as UpdateAdminDto.guestCountBucket })
+        }
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select guest count" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="small">Small</SelectItem>
+          <SelectItem value="medium">Medium</SelectItem>
+          <SelectItem value="large">Large</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>,
 
-  <div key="preferredStyle" className="md:col-span-1">
-    <Label htmlFor="preferredStyle">Preferred Style</Label>
-    <Select
-      value={admin.preferredStyle || ''}
-      onValueChange={(value: string) =>
-        setAdmin({ ...admin, preferredStyle: value as UpdateAdminDto.preferredStyle })
-      }
-    >
-      <SelectTrigger>
-        <SelectValue placeholder="Select preferred style" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="luxury">Luxury</SelectItem>
-        <SelectItem value="modern">Modern</SelectItem>
-        <SelectItem value="traditional">Traditional</SelectItem>
-        <SelectItem value="rustic">Rustic</SelectItem>
-      </SelectContent>
-    </Select>
-  </div>,
+    <div key="preferredStyle" className="md:col-span-1">
+      <Label htmlFor="preferredStyle">Preferred Style</Label>
+      <Select
+        value={admin.preferredStyle || ''}
+        onValueChange={(value: string) =>
+          setAdmin({ ...admin, preferredStyle: value as UpdateAdminDto.preferredStyle })
+        }
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select preferred style" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="luxury">Luxury</SelectItem>
+          <SelectItem value="modern">Modern</SelectItem>
+          <SelectItem value="traditional">Traditional</SelectItem>
+          <SelectItem value="rustic">Rustic</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>,
 
-  <div key="preferredServices" className="md:col-span-2">
-    <Label>Preferred Services</Label>
-    <div className="grid grid-cols-2 gap-2 mt-2">
-      {Object.values(WeddingService).map((service) => (
-        <div key={service} className="flex items-center space-x-2">
-          <Checkbox
-            id={`edit-service-${service}`}
-            checked={
-              admin.preferredServices?.includes(
-                service as
-                  | 'venue'
-                  | 'catering'
-                  | 'photography'
-                  | 'decoration'
-                  | 'music'
-                  | 'attire'
-                  | 'makeup'
-                  | 'transportation',
-              ) || false
-            }
-            onCheckedChange={() => handleServiceToggle(service)}
-          />
-          <Label htmlFor={`edit-service-${service}`} className="capitalize">
-            {service.replace('_', ' ')}
-          </Label>
-        </div>
-      ))}
-    </div>
-  </div>,
+    <div key="preferredServices" className="md:col-span-2">
+      <Label>Preferred Services</Label>
+      <div className="grid grid-cols-2 gap-2 mt-2">
+        {Object.values(WeddingService).map((service) => (
+          <div key={service} className="flex items-center space-x-2">
+            <Checkbox
+              id={`edit-service-${service}`}
+              checked={
+                admin.preferredServices?.includes(
+                  service as
+                    | 'venue'
+                    | 'catering'
+                    | 'photography'
+                    | 'decoration'
+                    | 'music'
+                    | 'attire'
+                    | 'makeup'
+                    | 'transportation',
+                ) || false
+              }
+              onCheckedChange={() => handleServiceToggle(service)}
+            />
+            <Label htmlFor={`edit-service-${service}`} className="capitalize">
+              {service.replace('_', ' ')}
+            </Label>
+          </div>
+        ))}
+      </div>
+    </div>,
+  ] : [
+    // Show wedding selection for non-couples
+    <div key="weddingSelection" className="md:col-span-2">
+      <Label htmlFor="weddingSelection">Select Wedding</Label>
+      <Select
+        value={admin.weddingId?.toString() || ''}
+        onValueChange={(value: string) => setAdmin({ ...admin, weddingId: parseInt(value) })}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select a wedding to tag this admin to" />
+        </SelectTrigger>
+        <SelectContent>
+          {weddings.map((wedding) => (
+            <SelectItem key={wedding.id} value={wedding.id.toString()}>
+              {wedding.name} - {new Date(wedding.date).toLocaleDateString()}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>,
+  ]),
 ];

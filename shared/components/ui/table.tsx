@@ -283,7 +283,7 @@ function DataTable<TData>({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="darkOutline">
-                    <Columns3Icon className="-ms-1 opacity-60" size={16} aria-hidden="true" />
+                    <Columns3Icon className="mr-2 -ms-1 opacity-60" size={16} aria-hidden="true" />
                     View
                   </Button>
                 </DropdownMenuTrigger>
@@ -339,8 +339,8 @@ function DataTable<TData>({
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-transparent">
                     {headerGroup.headers.map((header) => (
-                      <TableHead 
-                        key={header.id} 
+                      <TableHead
+                        key={header.id}
                         className="h-11"
                         style={{
                           width: header.getSize(),
@@ -390,7 +390,7 @@ function DataTable<TData>({
                   table.getRowModel().rows.map((row) => (
                     <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell 
+                        <TableCell
                           key={cell.id}
                           style={{
                             width: cell.column.getSize(),

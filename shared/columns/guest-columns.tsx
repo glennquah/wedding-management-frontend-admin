@@ -20,7 +20,7 @@ const getConfirmationStatusVariant = (
     case 'rejected':
       return 'destructive';
     default:
-      return 'secondary';
+      return 'outline';
   }
 };
 

@@ -4,11 +4,12 @@ import { getEditAdminFormFields } from '../../apps/internal/src/app/components/f
 import { DataTable, DeleteConfirmationModal } from './index';
 import { FormDialog } from './ui/form/form-dialog';
 import { getAdminColumns } from '@shared/columns/admin-columns';
-import { AdminResponseDto, UpdateAdminDto, WeddingService } from '@wedding/api-types';
+import { AdminResponseDto, UpdateAdminDto, WeddingResponseDto, WeddingService } from '@wedding/api-types';
 
 interface AdminTableProps {
   // Data
   admins: AdminResponseDto[];
+  weddings?: WeddingResponseDto[];
   isLoading: boolean;
 
   // Edit Modal State
@@ -33,6 +34,7 @@ interface AdminTableProps {
 
 export const AdminTable: React.FC<AdminTableProps> = ({
   admins,
+  weddings = [],
   isLoading,
   isEditingAdmin,
   editAdmin,
@@ -90,6 +92,7 @@ export const AdminTable: React.FC<AdminTableProps> = ({
           setAdmin: setEditAdmin,
           handleGeneratePassword: handleEditPasswordGenerate,
           handleServiceToggle: handleEditServiceToggle,
+          weddings,
         })}
         noOfColumns={2}
       />

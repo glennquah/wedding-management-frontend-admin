@@ -7,10 +7,16 @@ import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import {
   AdminResponseDto,
   AdminsService,
+  BudgetBucket,
   CreateAdminDto,
+  GuestCountBucket,
   UpdateAdminDto,
   UserRole,
+  WeddingResponseDto,
   WeddingService,
+  WeddingsService,
+  WeddingStyle,
+  WeddingType,
 } from '@wedding/api-types';
 import { Plus } from 'lucide-react';
 import { useSession } from 'next-auth/react';
@@ -25,6 +31,7 @@ export default function AdminManagementPage() {
 
   // Core data
   const [admins, setAdmins] = useState<AdminResponseDto[]>([]);
+  const [weddings, setWeddings] = useState<WeddingResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal states
@@ -34,25 +41,29 @@ export default function AdminManagementPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form data
-  const [newAdmin, setNewAdmin] = useState<Partial<CreateAdminDto & { id?: number }>>({});
-  const [editAdmin, setEditAdmin] = useState<Partial<UpdateAdminDto & { id?: number }>>({});
+  const [newAdmin, setNewAdmin] = useState<Partial<CreateAdminDto & { id?: number; weddingId?: number }>>({});
+  const [editAdmin, setEditAdmin] = useState<Partial<UpdateAdminDto & { id?: number; weddingId?: number }>>({});
 
-  // Fetch admins data
+  // Fetch admins and weddings data
   useEffect(() => {
-    const fetchAdmins = async () => {
+    const fetchData = async () => {
       try {
         setIsLoading(true);
-        const adminsData = await AdminsService.adminControllerGetAllAdmins();
+        const [adminsData, weddingsData] = await Promise.all([
+          AdminsService.adminControllerGetAllAdmins(),
+          WeddingsService.weddingControllerFindAll(),
+        ]);
         setAdmins(adminsData);
+        setWeddings(weddingsData);
       } catch (error) {
-        console.error('Failed to fetch admins:', error);
-        toast.error('Failed to load admins');
+        console.error('Failed to fetch data:', error);
+        toast.error('Failed to load data');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchAdmins();
+    fetchData();
   }, [session?.user, router]);
 
   // Generate random password
@@ -96,6 +107,7 @@ export default function AdminManagementPage() {
       guestCountBucket: admin.guestCountBucket as UpdateAdminDto.guestCountBucket,
       preferredStyle: admin.preferredStyle as UpdateAdminDto.preferredStyle,
       preferredServices: admin.preferredServices as UpdateAdminDto['preferredServices'],
+      weddingId: admin.weddings && admin.weddings.length > 0 ? admin.weddings[0].id : undefined,
     });
     setIsEditingAdmin(true);
   };
@@ -117,33 +129,52 @@ export default function AdminManagementPage() {
   const handleAddAdmin = async () => {
     setIsSubmitting(true);
     try {
-      if (
-        !newAdmin.name ||
-        !newAdmin.email ||
-        !newAdmin.password ||
-        !newAdmin.weddingType ||
-        !newAdmin.budgetBucket ||
-        !newAdmin.guestCountBucket ||
-        !newAdmin.preferredStyle ||
-        !newAdmin.preferredServices ||
-        !newAdmin.onboardedDate
-      ) {
+      // Basic required fields
+      if (!newAdmin.name || !newAdmin.email || !newAdmin.password || !newAdmin.onboardedDate) {
         toast.error('Please fill in all required fields');
         return;
       }
 
+      // Conditional validation based on isCouple
+      if (newAdmin.isCouple) {
+        if (
+          !newAdmin.weddingType ||
+          !newAdmin.budgetBucket ||
+          !newAdmin.guestCountBucket ||
+          !newAdmin.preferredStyle ||
+          !newAdmin.preferredServices
+        ) {
+          toast.error('Please fill in all wedding preference fields for couples');
+          return;
+        }
+      } else {
+        if (!newAdmin.weddingId) {
+          toast.error('Please select a wedding for non-couple admins');
+          return;
+        }
+      }
+
       const adminData: CreateAdminDto = {
-        name: newAdmin.name,
-        email: newAdmin.email,
-        password: newAdmin.password,
+        name: newAdmin.name!,
+        email: newAdmin.email!,
+        password: newAdmin.password!,
         role: UserRole.ADMIN,
         isCouple: newAdmin.isCouple || false,
-        onboardedDate: newAdmin.onboardedDate,
-        weddingType: newAdmin.weddingType,
-        budgetBucket: newAdmin.budgetBucket,
-        guestCountBucket: newAdmin.guestCountBucket,
-        preferredStyle: newAdmin.preferredStyle,
-        preferredServices: newAdmin.preferredServices,
+        onboardedDate: newAdmin.onboardedDate!,
+        ...(newAdmin.isCouple ? {
+          weddingType: newAdmin.weddingType!,
+          budgetBucket: newAdmin.budgetBucket!,
+          guestCountBucket: newAdmin.guestCountBucket!,
+          preferredStyle: newAdmin.preferredStyle!,
+          preferredServices: newAdmin.preferredServices!,
+        } : {
+          // For non-couples, we send default values since API still requires them
+          weddingType: WeddingType.WESTERN,
+          budgetBucket: BudgetBucket.MEDIUM,
+          guestCountBucket: GuestCountBucket.MEDIUM,
+          preferredStyle: WeddingStyle.MODERN,
+          preferredServices: [],
+        }),
       };
 
       await AdminsService.adminControllerCreate(adminData);
@@ -281,6 +312,7 @@ export default function AdminManagementPage() {
           setAdmin: setNewAdmin,
           handleGeneratePassword: handleCreatePasswordGenerate,
           handleServiceToggle: handleCreateServiceToggle,
+          weddings,
         })}
         noOfColumns={2}
       />
@@ -289,6 +321,7 @@ export default function AdminManagementPage() {
       <div className="w-full">
         <AdminTable
           admins={admins}
+          weddings={weddings}
           isLoading={isLoading}
           isEditingAdmin={isEditingAdmin}
           editAdmin={editAdmin}
