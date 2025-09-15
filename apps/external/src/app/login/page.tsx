@@ -55,7 +55,7 @@ export default function LoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="your email"
+              placeholder="Enter your email"
             />
           </div>
           <div className="mt-4 gap-2 flex flex-col">

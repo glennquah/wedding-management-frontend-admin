@@ -1,5 +1,6 @@
 'use client';
 
+import { useGuestManager } from '../../hooks/useCRUDGuests';
 import { ConfirmationStatus, CreateGuestDto } from '@shared/api';
 import { getGuestColumns } from '@shared/columns/guest-columns';
 import {
@@ -7,17 +8,26 @@ import {
   DataTable,
   DeleteConfirmationModal,
   GroupSelectDropdown,
-  PageHeader
+  PageHeader,
 } from '@shared/components';
 import { EmailModal } from '@shared/components/EmailModal';
 import FormField from '@shared/components/FormField';
 import GuestSummaryStats from '@shared/components/guest-management/GuestSummaryStats';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
-import { Input } from '@shared/components/ui/form/input';
 import { SingleSelectDropdown } from '@shared/components/ui/form/singleSelectDropdown';
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
 import { Plus, Trash2 } from 'lucide-react';
-import { useGuestManager } from '../../hooks/useCRUDGuests';
+
+type AccompanyingGuestData = {
+  name: string;
+  allergies?: string;
+  confirmationStatus: ConfirmationStatus;
+};
+
+type GuestFormData = Partial<CreateGuestDto> & {
+  id?: number;
+  accompanyingGuests?: AccompanyingGuestData[];
+};
 
 export default function GuestListPage() {
   const isMobile = useIsMobileScreen();
@@ -43,7 +53,7 @@ export default function GuestListPage() {
     // Form field management
     addAccompanyingGuestField,
     removeAccompanyingGuestField,
-    updateAccompanyingGuestName,
+    updateAccompanyingGuest,
 
     // Handlers
     handleAddGuest,
@@ -73,8 +83,8 @@ export default function GuestListPage() {
 
   // Add/Edit Guest Form Fields
   const guestFormFields = (
-    guest: Partial<CreateGuestDto & { id?: number }>,
-    setGuest: React.Dispatch<React.SetStateAction<Partial<CreateGuestDto & { id?: number }>>>,
+    guest: GuestFormData,
+    setGuest: React.Dispatch<React.SetStateAction<GuestFormData>>,
   ) => [
     <div key="name" className="md:col-span-2">
       <FormField
@@ -125,10 +135,7 @@ export default function GuestListPage() {
       <SingleSelectDropdown
         label="Confirmation Status"
         options={Object.values(ConfirmationStatus)}
-        selected={
-          guest.confirmationStatus ||
-          ConfirmationStatus.PENDING
-        }
+        selected={guest.confirmationStatus || ConfirmationStatus.PENDING}
         setSelected={(selected) =>
           setGuest({
             ...guest,
@@ -153,28 +160,71 @@ export default function GuestListPage() {
           Add Guest
         </Button>
       </div>
-      <div className="space-y-2">
-        {(guest.accompanyingGuestNames || ['']).map((name: string, index: number) => (
-          <div key={index} className="flex items-center gap-2">
-            <Input
-              value={name}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                updateAccompanyingGuestName(index, e.target.value, guest, setGuest)
-              }
-              placeholder={`Accompanying guest ${index + 1}`}
-              className="flex-1"
-            />
-            {(guest.accompanyingGuestNames?.length || 0) > 1 && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => removeAccompanyingGuestField(index, guest, setGuest)}
-                className="text-red-600 hover:text-red-700 px-2"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            )}
+      <div className="space-y-4">
+        {(
+          guest.accompanyingGuests || [
+            { name: '', allergies: '', confirmationStatus: ConfirmationStatus.PENDING },
+          ]
+        ).map((accompanyingGuest: AccompanyingGuestData, index: number) => (
+          <div key={index} className="border rounded-lg p-3 bg-gray-50">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-foreground">Guest {index + 1}</span>
+              {(guest.accompanyingGuests?.length || 0) > 1 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeAccompanyingGuestField(index, guest, setGuest)}
+                  className="text-red-600 hover:text-red-700 px-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <div>
+                <FormField
+                  label="Name"
+                  id={`accompanying-name-${index}`}
+                  type="text"
+                  value={accompanyingGuest.name}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    updateAccompanyingGuest(index, 'name', e.target.value, guest, setGuest)
+                  }
+                  placeholder={`Guest ${index + 1} name`}
+                />
+              </div>
+              <div>
+                <FormField
+                  label="Dietary Requirements"
+                  id={`accompanying-allergies-${index}`}
+                  type="text"
+                  value={accompanyingGuest.allergies || ''}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    updateAccompanyingGuest(index, 'allergies', e.target.value, guest, setGuest)
+                  }
+                  placeholder="Dietary requirements"
+                />
+              </div>
+              <div>
+                <SingleSelectDropdown
+                  label="Confirmation Status"
+                  options={Object.values(ConfirmationStatus)}
+                  selected={accompanyingGuest.confirmationStatus || ConfirmationStatus.PENDING}
+                  setSelected={(selected) =>
+                    updateAccompanyingGuest(
+                      index,
+                      'confirmationStatus',
+                      selected as ConfirmationStatus,
+                      guest,
+                      setGuest,
+                    )
+                  }
+                  placeholder="Select status"
+                  className="mt-4"
+                />
+              </div>
+            </div>
           </div>
         ))}
       </div>
@@ -220,11 +270,7 @@ export default function GuestListPage() {
             submitButtonText="Update Guest"
             formFields={guestFormFields(
               editingGuest!,
-              setEditingGuest as React.Dispatch<
-                React.SetStateAction<
-                  Partial<CreateGuestDto & { id?: number; accompanyingGuestNames?: string[] }>
-                >
-              >,
+              setEditingGuest as React.Dispatch<React.SetStateAction<GuestFormData>>,
             )}
             noOfColumns={2}
           />

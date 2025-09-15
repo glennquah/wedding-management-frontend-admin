@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from 'react';
 
+import { EmailModal } from '../../../../../shared/components/EmailModal';
+import GuestSummaryStats from '../../../../../shared/components/guest-management/GuestSummaryStats';
 import { getGuestColumns } from '@shared/columns/guest-columns';
 import {
   Button,
   DataTable,
   DeleteConfirmationModal,
   GroupSelectDropdown,
-  PageHeader
+  PageHeader,
 } from '@shared/components';
 import FormField from '@shared/components/FormField';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
@@ -19,14 +21,12 @@ import {
   CreateGuestDto,
   GuestResponseDto,
   GuestsService,
-  UpdateGuestDto
+  UpdateGuestDto,
 } from '@wedding/api-types';
 import { Plus, Trash2 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { EmailModal } from '../../../../../shared/components/EmailModal';
-import GuestSummaryStats from '../../../../../shared/components/guest-management/GuestSummaryStats';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,14 +39,11 @@ export default function GuestManagementPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal states
-  const [isAddingGuest, setIsAddingGuest] = useState(false);
   const [editingGuest, setEditingGuest] = useState<GuestResponseDto | null>(null);
   const [deleteConfirmGuest, setDeleteConfirmGuest] = useState<GuestResponseDto | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailModalGuest, setEmailModalGuest] = useState<GuestResponseDto | null>(null);
 
-  // Form data
-  const [newGuest, setNewGuest] = useState<Partial<CreateGuestDto & { id?: number }>>({});
 
   // Mock existing groups (you can replace this with actual API call)
   const [existingGroups] = useState<string[]>(['Family', 'Friends', 'Colleagues', 'Relatives']);
@@ -73,15 +70,6 @@ export default function GuestManagementPage() {
   const primaryGuests = guests.filter((guest) => !guest.primaryGuestId);
 
   // Modal controls
-  const openAddGuestModal = () => {
-    setNewGuest({});
-    setIsAddingGuest(true);
-  };
-
-  const closeAddGuestModal = () => {
-    setIsAddingGuest(false);
-    setNewGuest({});
-  };
 
   const closeEditGuestModal = () => {
     setEditingGuest(null);
@@ -100,39 +88,6 @@ export default function GuestManagementPage() {
   };
 
   // Handlers
-  const handleAddGuest = async () => {
-    setIsSubmitting(true);
-    try {
-      if (!newGuest.name || !newGuest.email || !newGuest.group) {
-        toast.error('Please fill in all required fields');
-        return;
-      }
-
-      const guestData: CreateGuestDto = {
-        name: newGuest.name,
-        email: newGuest.email,
-        group: newGuest.group,
-        weddingId: 1, // Default wedding ID for internal admin
-        allergies: newGuest.allergies || '',
-        confirmationStatus:
-          newGuest.confirmationStatus || ConfirmationStatus.PENDING,
-        accompanyingGuestNames:
-          newGuest.accompanyingGuestNames?.filter((name) => name.trim() !== '') || [],
-      };
-
-      await GuestsService.guestControllerCreate(guestData);
-      toast.success('Guest added successfully!');
-      closeAddGuestModal();
-      // Refresh guests list
-      const guestsData = await GuestsService.guestControllerGetAllGuests();
-      setGuests(guestsData);
-    } catch (error) {
-      console.error('Failed to add guest:', error);
-      toast.error('Failed to add guest');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleUpdateGuest = async () => {
     if (!editingGuest?.id) return;
