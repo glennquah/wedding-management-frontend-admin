@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 
+import { UserRole } from '@shared/api';
 import ResponsiveMenubar from '@shared/components/responsive-menubar';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/form/input';
 import { Label } from '@shared/components/ui/form/label';
-import { signIn, useSession } from 'next-auth/react';
+import { getSession, signIn, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -15,7 +16,6 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { data: session } = useSession();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,15 +27,38 @@ export default function LoginPage() {
         username,
         password,
       });
-      console.log(session);
-      // console.log(res)
-      if (!res?.ok) throw new Error('Signin failed');
-      if (session?.user.role == 'superAdmin')
-        throw new Error('Super Admins must use the Super Admin login page.');
-      toast('Successfully Login.');
-      router.push(session ? `/${session.user.role}` : '/');
+
+      if (res?.error) {
+        toast.error('Invalid username or password');
+        return;
+      }
+
+      // Get the session to check user role
+      const session = await getSession();
+
+      if (!session?.user) {
+        toast.error('Authentication failed. Please try again.');
+        return;
+      }
+
+      // Check if user has admin or vendor role (NOT super admin)
+      if (session.user.role === UserRole.SUPER_ADMIN) {
+        toast.error('Access denied. Super admins must use the super admin portal.');
+        await signOut({ redirect: false });
+        return;
+      }
+
+      if (session.user.role !== UserRole.ADMIN && session.user.role !== UserRole.VENDOR) {
+        toast.error('Access denied. Admin or vendor privileges required.');
+        await signOut({ redirect: false });
+        return;
+      }
+
+      toast.success('Successfully logged in!');
+      router.push(`/${session.user.role}`);
     } catch (err) {
-      console.log(err);
+      console.error('Unexpected error:', err);
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
