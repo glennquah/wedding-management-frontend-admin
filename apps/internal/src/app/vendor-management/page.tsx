@@ -11,6 +11,7 @@ import {
   WeddingType,
 } from '@shared/api';
 import {
+  Badge,
   Button,
   DataTable,
   DeleteConfirmationModal,
@@ -62,6 +63,42 @@ export default function VendorListPage() {
     closeEmailModal,
     handleSendEmail,
   } = useVendorManager();
+
+  // Helper functions for confirmation status
+  const getVendorOnboardingStatusVariant = (
+    status: VendorOnboardingStatus,
+  ): 'default' | 'secondary' | 'destructive' | 'outline' => {
+    switch (status) {
+      case 'onboarded':
+        return 'default';
+      case 'rejected':
+        return 'destructive';
+      default:
+        return 'outline';
+    }
+  };
+
+  const getOnboardingStatusLabel = (status: VendorOnboardingStatus) => {
+    switch (status) {
+      case 'onboarded':
+        return 'Onboarded';
+      case 'rejected':
+        return 'Rejected';
+      default:
+        return 'Pending';
+    }
+  };
+
+  const getOnboardingStatusIcon = (status: VendorOnboardingStatus) => {
+    switch (status) {
+      case 'onboarded':
+        return '✓';
+      case 'rejected':
+        return '✗';
+      default:
+        return '?';
+    }
+  };
 
   // Column definitions for Live Vendor DataTable
   const columns: ColumnDef<VendorResponseDto>[] = [
@@ -142,9 +179,15 @@ export default function VendorListPage() {
     {
       accessorKey: 'onboardingStatus',
       header: 'Onboarding Status',
-      cell: ({ row }) => (
-        <div className="text-sm text-foreground">{row.getValue('onboardingStatus') || '-'}</div>
-      ),
+      cell: ({ row }) => {
+        const status = row.getValue('onboardingStatus') as VendorOnboardingStatus;
+        return (
+          <Badge variant={getVendorOnboardingStatusVariant(status)} className="gap-1">
+            {getOnboardingStatusLabel(status)}
+            <span className="ml-1">{getOnboardingStatusIcon(status)}</span>
+          </Badge>
+        );
+      },
     },
     {
       id: 'actions',
