@@ -34,36 +34,6 @@ const NavigationBar = ({ session, signOut }: NavigationBarProps) => {
             <Bell size={16} />
             <span className="sr-only">Notifications</span>
           </Button>
-
-          {/* User menu */}
-          {/* {session?.user && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 gap-2 px-2">
-                  <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center">
-                    <User size={14} />
-                  </div>
-                  <span className="text-sm text-foreground">{session.user.name}</span>
-                  <ChevronsUpDown size={14} className="text-muted-foreground/80" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem disabled>Role: {session.user.role}</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/profile')}>
-                  <User size={16} className="mr-2" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/settings')}>
-                  <Settings size={16} className="mr-2" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-red-600" onClick={() => signOut()}>
-                  <LogOut size={16} className="mr-2" />
-                  Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )} */}
         </div>
       </div>
     </header>

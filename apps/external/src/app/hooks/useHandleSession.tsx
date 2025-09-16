@@ -103,7 +103,7 @@ export function useHandleSession() {
         errorMessage = errorMessage;
       }
 
-      toast.error('Signup Failed. ${errorMessage}');
+      toast.error(`Signup Failed. ${errorMessage}`);
     } finally {
       setLoading(false);
     }

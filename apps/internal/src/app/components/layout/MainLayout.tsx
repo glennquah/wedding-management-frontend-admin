@@ -6,7 +6,7 @@ import { cn } from '@shared/components/lib/utils';
 import { SidebarProvider, useSidebar } from '@shared/components/ui/sidebar';
 import { Toaster } from '@shared/components/ui/sonner';
 import { UserRole } from '@wedding/api-types';
-import { signOut, useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 function MainContent({ children }: { children: React.ReactNode }) {
@@ -46,7 +46,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     <SidebarProvider defaultOpen={true}>
       <SuperAdminSidebar />
       <div className="flex-1 flex flex-col">
-        <NavigationBar session={session} signOut={() => signOut()} />
+        <NavigationBar session={session} signOut={signOut} />
         <MainContent>{children}</MainContent>
       </div>
       <Toaster />

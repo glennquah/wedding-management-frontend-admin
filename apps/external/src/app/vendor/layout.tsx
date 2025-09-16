@@ -5,7 +5,7 @@ import { UserRole } from '@shared/api';
 import NavigationBar from '@shared/components/NavigationBar';
 import { SidebarProvider } from '@shared/components/ui/sidebar';
 import { Toaster } from '@shared/components/ui/sonner';
-import { signOut, useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 export default function VendorLayout({ children }: { children: React.ReactNode }) {
@@ -33,10 +33,15 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <VendorSidebar />
-      <div className="flex-1 flex flex-col">
-        <NavigationBar session={session} signOut={() => signOut()} />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+      <div className="flex w-full h-screen overflow-hidden">
+        {/* Sidebar */}
+        <VendorSidebar />
+
+        {/* Main content area */}
+        <div className="flex-1 flex flex-col min-w-0">
+          <NavigationBar session={session} signOut={signOut} />
+          <main className="flex-1 overflow-y-auto">{children}</main>
+        </div>
       </div>
       <Toaster />
     </SidebarProvider>

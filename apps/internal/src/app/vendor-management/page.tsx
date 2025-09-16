@@ -26,11 +26,9 @@ import FormField from '@shared/components/FormField';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import { MultiSelectDropdown } from '@shared/components/ui/form/multiSelectDropdown';
 import { SingleSelectDropdown } from '@shared/components/ui/form/singleSelectDropdown';
-import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
 import { ColumnDef } from '@tanstack/react-table';
 
 export default function VendorListPage() {
-  const isMobile = useIsMobileScreen();
   const {
     // Core data
     vendors,
@@ -147,8 +145,12 @@ export default function VendorListPage() {
       cell: ({ row }) => {
         const vendor = row.original;
         return (
-          <Button className="flex items-center" onClick={() => setSelectedVendor(vendor)}>
-            More Details
+          <Button
+            className="flex items-center whitespace-nowrap text-xs px-1 py-1 min-w-0"
+            size="sm"
+            onClick={() => setSelectedVendor(vendor)}
+          >
+            View
           </Button>
         );
       },
@@ -195,8 +197,12 @@ export default function VendorListPage() {
       cell: ({ row }) => {
         const vendor = row.original;
         return (
-          <Button className="flex items-center" onClick={() => setSelectedVendor(vendor)}>
-            More Details
+          <Button
+            className="flex items-center whitespace-nowrap text-xs px-1 py-1 min-w-0"
+            size="sm"
+            onClick={() => setSelectedVendor(vendor)}
+          >
+            View
           </Button>
         );
       },

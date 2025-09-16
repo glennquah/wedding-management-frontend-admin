@@ -1,14 +1,13 @@
-'use client'
+'use client';
 
 // Force dynamic rendering to prevent static generation issues
 export const dynamic = 'force-dynamic';
- 
+
 export default function GlobalError({
-  error: _error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
   return (
     <html>
@@ -17,5 +16,5 @@ export default function GlobalError({
         <button onClick={() => reset()}>Try again</button>
       </body>
     </html>
-  )
+  );
 }

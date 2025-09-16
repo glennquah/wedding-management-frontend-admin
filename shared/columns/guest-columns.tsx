@@ -83,9 +83,15 @@ export const getGuestColumns = ({
     columns.push({
       accessorKey: 'email',
       header: 'Email',
-      cell: ({ row }) => (
-        <div className="text-sm text-foreground">{row.getValue('email') || '-'}</div>
-      ),
+      cell: ({ row }) => {
+        const email = row.getValue('email') as string;
+        const truncatedEmail = email && email.length > 12 ? email.substring(0, 12) + '...' : email;
+        return (
+          <div className="text-sm text-foreground" title={email}>
+            {truncatedEmail || '-'}
+          </div>
+        );
+      },
     });
   }
 
@@ -124,10 +130,9 @@ export const getGuestColumns = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-auto p-1 text-sm font-normal justify-start"
+                className="h-auto p-1 text-xs font-normal justify-start whitespace-nowrap min-w-0"
               >
-                +{accompanyingGuestsList.length} guest
-                {accompanyingGuestsList.length === 1 ? '' : 's'}
+                +{accompanyingGuestsList.length}
                 <ChevronDown className="ml-1 h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
@@ -143,8 +148,8 @@ export const getGuestColumns = ({
       }
 
       return (
-        <div className="text-sm text-foreground">
-          +{accompanyingGuestsList.length} guest{accompanyingGuestsList.length === 1 ? '' : 's'}
+        <div className="text-xs text-foreground whitespace-nowrap">
+          +{accompanyingGuestsList.length}
         </div>
       );
     },
