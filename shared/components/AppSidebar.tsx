@@ -115,7 +115,7 @@ export default function AppSidebar({
               </DropdownMenuItem>
             ))}
             <Separator className="my-2" />
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem asChild className="text-red-600">
               <button
                 onClick={() =>
                   platform === 'internal'
