@@ -14,8 +14,8 @@ const tabs = [
     sectionHeader: 'Overview',
     items: [
       {
-        title: 'Dashboard',
-        href: '/vendor/dashboard',
+        title: 'Listings',
+        href: '/vendor/listing',
         icon: LayoutDashboard,
       },
       {
