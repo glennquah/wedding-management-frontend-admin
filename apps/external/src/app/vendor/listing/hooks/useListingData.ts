@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { VendorResponseDto, VendorsService } from '@shared/api';
+import { VendorResponseDto, VendorsService, ListingsService } from '@shared/api';
 import { toast } from 'sonner';
 import { Listing, UseListingDataReturn } from '../types';
 
@@ -24,10 +24,14 @@ export function useListingData(): UseListingDataReturn {
       const vendorResponse = await VendorsService.vendorControllerGetVendorByEmail(session.user.email);
       setVendor(vendorResponse);
 
-      // TODO: Fetch existing listings when backend endpoint is available
-      // const listings = await ListingsService.getListingsByVendor(vendorResponse.id);
-      // setListings(listings);
-      setListings([]);
+      // Use search endpoint with empty string to get all listings for this vendor
+      try {
+        const listingsResponse = await ListingsService.listingControllerSearch(vendorResponse.id, '');
+        setListings(listingsResponse);
+      } catch (listingError) {
+        console.warn('Failed to fetch listings, using empty array:', listingError);
+        setListings([]);
+      }
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
