@@ -20,7 +20,15 @@ import {
   Rating,
   RatingButton,
 } from '@shared/components';
-import { CheckCheck, CircleX, Edit2, ExternalLink, Image as ImageIcon, Trash2 } from 'lucide-react';
+import {
+  CheckCheck,
+  CircleX,
+  Edit2,
+  ExternalLink,
+  Image as ImageIcon,
+  OctagonX,
+  Trash2,
+} from 'lucide-react';
 
 interface VendorDetailsModalProps {
   open: boolean;
@@ -29,6 +37,8 @@ interface VendorDetailsModalProps {
   onDeleteVendor: (Vendor: VendorResponseDto) => void;
   onRejectOnboarding: (Vendor: VendorResponseDto) => void;
   onApproveOnboarding: (Vendor: VendorResponseDto) => void;
+  onSuspendVendor: (Vendor: VendorResponseDto) => void;
+  onUnsuspendVendor: (Vendor: VendorResponseDto) => void;
   vendor: VendorResponseDto;
 }
 
@@ -39,6 +49,8 @@ export function VendorDetailsModal({
   onDeleteVendor,
   onRejectOnboarding,
   onApproveOnboarding,
+  onSuspendVendor,
+  onUnsuspendVendor,
   vendor,
 }: VendorDetailsModalProps) {
   return (
@@ -67,7 +79,7 @@ export function VendorDetailsModal({
             </div>
 
             {/* Action Buttons Row */}
-            {vendor.onboardingStatus == VendorOnboardingStatus.PENDING ? (
+            {vendor.onboardingStatus == VendorOnboardingStatus.PENDING ? ( // Onboarding vendors
               <div className="absolute right-0 flex gap-2">
                 <Button size="sm" variant="ghost" onClick={() => onRejectOnboarding(vendor)}>
                   <CircleX className="w-4 h-4 mr-2" />
@@ -83,11 +95,29 @@ export function VendorDetailsModal({
                   Approve
                 </Button>
               </div>
-            ) : vendor.onboardingStatus === VendorOnboardingStatus.ONBOARDED ? (
+            ) : vendor.onboardingStatus === VendorOnboardingStatus.ONBOARDED &&
+              vendor.isSuspended == false ? ( // Live vendors
               <div className="absolute right-0 flex gap-2">
                 <Button size="sm" variant="ghost" onClick={() => onEditVendor(vendor)}>
                   <Edit2 className="w-4 h-4 mr-2" />
                   Update
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onSuspendVendor(vendor)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <OctagonX className="w-4 h-4 mr-2" />
+                  Suspend
+                </Button>
+              </div>
+            ) : vendor.onboardingStatus === VendorOnboardingStatus.ONBOARDED &&
+              vendor.isSuspended == true ? ( // Suspended vendors
+              <div className="absolute right-0 flex gap-2">
+                <Button size="sm" variant="ghost" onClick={() => onUnsuspendVendor(vendor)}>
+                  <CheckCheck className="w-4 h-4 mr-2" />
+                  Unsuspend
                 </Button>
                 <Button
                   size="sm"
@@ -100,6 +130,7 @@ export function VendorDetailsModal({
                 </Button>
               </div>
             ) : (
+              // Onboarding rejected vendors
               <div className="absolute right-0 flex gap-2">
                 <Button size="sm" variant="ghost" onClick={() => onEditVendor(vendor)}>
                   <Edit2 className="w-4 h-4 mr-2" />

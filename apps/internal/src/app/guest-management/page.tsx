@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from 'react';
 
+import { EmailModal } from '../../../../../shared/components/EmailModal';
+import GuestSummaryStats from '../../../../../shared/components/guest-management/GuestSummaryStats';
 import { getGuestColumns } from '@shared/columns/guest-columns';
 import {
   Button,
   DataTable,
   DeleteConfirmationModal,
   GroupSelectDropdown,
-  PageHeader
+  PageHeader,
 } from '@shared/components';
 import FormField from '@shared/components/FormField';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
@@ -19,14 +21,12 @@ import {
   CreateGuestDto,
   GuestResponseDto,
   GuestsService,
-  UpdateGuestDto
+  UpdateGuestDto,
 } from '@wedding/api-types';
 import { Plus, Trash2 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { EmailModal } from '../../../../../shared/components/EmailModal';
-import GuestSummaryStats from '../../../../../shared/components/guest-management/GuestSummaryStats';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,14 +39,11 @@ export default function GuestManagementPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal states
-  const [isAddingGuest, setIsAddingGuest] = useState(false);
   const [editingGuest, setEditingGuest] = useState<GuestResponseDto | null>(null);
   const [deleteConfirmGuest, setDeleteConfirmGuest] = useState<GuestResponseDto | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailModalGuest, setEmailModalGuest] = useState<GuestResponseDto | null>(null);
 
-  // Form data
-  const [newGuest, setNewGuest] = useState<Partial<CreateGuestDto & { id?: number }>>({});
 
   // Mock existing groups (you can replace this with actual API call)
   const [existingGroups] = useState<string[]>(['Family', 'Friends', 'Colleagues', 'Relatives']);
@@ -72,17 +69,6 @@ export default function GuestManagementPage() {
   // Get primary guests (guests who are not accompanying someone else)
   const primaryGuests = guests.filter((guest) => !guest.primaryGuestId);
 
-  // Modal controls
-  const openAddGuestModal = () => {
-    setNewGuest({});
-    setIsAddingGuest(true);
-  };
-
-  const closeAddGuestModal = () => {
-    setIsAddingGuest(false);
-    setNewGuest({});
-  };
-
   const closeEditGuestModal = () => {
     setEditingGuest(null);
   };
@@ -100,39 +86,6 @@ export default function GuestManagementPage() {
   };
 
   // Handlers
-  const handleAddGuest = async () => {
-    setIsSubmitting(true);
-    try {
-      if (!newGuest.name || !newGuest.email || !newGuest.group) {
-        toast.error('Please fill in all required fields');
-        return;
-      }
-
-      const guestData: CreateGuestDto = {
-        name: newGuest.name,
-        email: newGuest.email,
-        group: newGuest.group,
-        weddingId: 1, // Default wedding ID for internal admin
-        allergies: newGuest.allergies || '',
-        confirmationStatus:
-          newGuest.confirmationStatus || ConfirmationStatus.PENDING,
-        accompanyingGuestNames:
-          newGuest.accompanyingGuestNames?.filter((name) => name.trim() !== '') || [],
-      };
-
-      await GuestsService.guestControllerCreate(guestData);
-      toast.success('Guest added successfully!');
-      closeAddGuestModal();
-      // Refresh guests list
-      const guestsData = await GuestsService.guestControllerGetAllGuests();
-      setGuests(guestsData);
-    } catch (error) {
-      console.error('Failed to add guest:', error);
-      toast.error('Failed to add guest');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleUpdateGuest = async () => {
     if (!editingGuest?.id) return;
@@ -349,7 +302,9 @@ export default function GuestManagementPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <PageHeader title="Guest Management" description="Manage guests across all weddings" />
+      <div className="flex items-center justify-between">
+        <PageHeader title="Guest Management" description="Manage guests across all weddings" />
+      </div>
 
       {/* Edit Guest Modal */}
       {editingGuest && (
@@ -384,36 +339,40 @@ export default function GuestManagementPage() {
         />
       )}
 
-      <GuestSummaryStats
-        guests={guests.map((guest) => ({
-          ...guest,
-          confirmationStatus:
-            guest.confirmationStatus === 'pending'
-              ? ConfirmationStatus.PENDING
-              : guest.confirmationStatus === 'confirmed'
-                ? ConfirmationStatus.CONFIRMED
-                : ConfirmationStatus.REJECTED,
-        }))}
-      />
+      <div className="flex-shrink-0 mb-6">
+        <GuestSummaryStats
+          guests={guests.map((guest) => ({
+            ...guest,
+            confirmationStatus:
+              guest.confirmationStatus === 'pending'
+                ? ConfirmationStatus.PENDING
+                : guest.confirmationStatus === 'confirmed'
+                  ? ConfirmationStatus.CONFIRMED
+                  : ConfirmationStatus.REJECTED,
+          }))}
+        />
+      </div>
 
       {/* Guest List Table */}
-      <DataTable
-        data={primaryGuests.map((guest) => ({
-          ...guest,
-          email: guest.email || '',
-        }))}
-        columns={columns}
-        searchableColumns={[{ id: 'name', placeholder: 'Search by name...' }]}
-        enableSelection={false}
-        enableColumnVisibility={true}
-        enablePagination={true}
-        defaultPageSize={10}
-        title={`Guests (${guests.length})`}
-        isLoading={isLoading}
-        loadingMessage="Loading guests..."
-        emptyMessage="No guests added yet."
-        emptyDescription='Click "Add Guest" to get started!'
-      />
+      <div className="w-full">
+        <DataTable
+          data={primaryGuests.map((guest) => ({
+            ...guest,
+            email: guest.email || '',
+          }))}
+          columns={columns}
+          searchableColumns={[{ id: 'name', placeholder: 'Search by name...' }]}
+          enableSelection={false}
+          enableColumnVisibility={true}
+          enablePagination={true}
+          defaultPageSize={10}
+          title={`Guests (${guests.length})`}
+          isLoading={isLoading}
+          loadingMessage="Loading guests..."
+          emptyMessage="No guests added yet."
+          emptyDescription='Click "Add Guest" to get started!'
+        />
+      </div>
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal

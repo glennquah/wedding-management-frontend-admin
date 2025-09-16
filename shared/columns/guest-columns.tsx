@@ -1,3 +1,4 @@
+import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import {
   DropdownMenu,
@@ -10,14 +11,16 @@ import { ConfirmationStatus, GuestResponseDto } from '@wedding/api-types';
 import { ChevronDown, Edit2, Trash2 } from 'lucide-react';
 
 // Helper functions for confirmation status
-const getConfirmationStatusColor = (status: ConfirmationStatus) => {
+const getConfirmationStatusVariant = (
+  status: ConfirmationStatus,
+): 'default' | 'secondary' | 'destructive' | 'outline' => {
   switch (status) {
     case 'confirmed':
-      return 'bg-green-100 text-green-800';
+      return 'default';
     case 'rejected':
-      return 'bg-red-100 text-red-800';
+      return 'destructive';
     default:
-      return 'bg-yellow-100 text-yellow-800';
+      return 'outline';
   }
 };
 
@@ -80,9 +83,15 @@ export const getGuestColumns = ({
     columns.push({
       accessorKey: 'email',
       header: 'Email',
-      cell: ({ row }) => (
-        <div className="text-sm text-foreground">{row.getValue('email') || '-'}</div>
-      ),
+      cell: ({ row }) => {
+        const email = row.getValue('email') as string;
+        const truncatedEmail = email && email.length > 12 ? email.substring(0, 12) + '...' : email;
+        return (
+          <div className="text-sm text-foreground" title={email}>
+            {truncatedEmail || '-'}
+          </div>
+        );
+      },
     });
   }
 
@@ -93,14 +102,10 @@ export const getGuestColumns = ({
     cell: ({ row }) => {
       const status = row.getValue('confirmationStatus') as ConfirmationStatus;
       return (
-        <span
-          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getConfirmationStatusColor(
-            status,
-          )}`}
-        >
-          {showConfirmationIcon && getConfirmationIcon(status)}
+        <Badge variant={getConfirmationStatusVariant(status)} className="gap-1">
           {getConfirmationLabel(status)}
-        </span>
+          {showConfirmationIcon && <span className="ml-1">{getConfirmationIcon(status)}</span>}
+        </Badge>
       );
     },
   });
@@ -125,9 +130,9 @@ export const getGuestColumns = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-auto p-1 text-sm font-normal justify-start"
+                className="h-auto p-1 text-xs font-normal justify-start whitespace-nowrap min-w-0"
               >
-                +{accompanyingGuestsList.length} guest{accompanyingGuestsList.length === 1 ? '' : 's'}
+                +{accompanyingGuestsList.length}
                 <ChevronDown className="ml-1 h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
@@ -143,8 +148,8 @@ export const getGuestColumns = ({
       }
 
       return (
-        <div className="text-sm text-foreground">
-          +{accompanyingGuestsList.length} guest{accompanyingGuestsList.length === 1 ? '' : 's'}
+        <div className="text-xs text-foreground whitespace-nowrap">
+          +{accompanyingGuestsList.length}
         </div>
       );
     },

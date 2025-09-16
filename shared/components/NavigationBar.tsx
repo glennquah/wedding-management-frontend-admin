@@ -1,0 +1,43 @@
+'use client';
+
+import { Button } from '@shared/components/ui/button';
+import { SidebarTrigger } from '@shared/components/ui/sidebar';
+import { Bell } from 'lucide-react';
+import { Session } from 'next-auth';
+import { useRouter } from 'next/navigation';
+
+interface NavigationBarProps {
+  session: Session | null;
+  signOut: () => void;
+}
+
+const NavigationBar = ({ session, signOut }: NavigationBarProps) => {
+  const router = useRouter();
+
+  return (
+    <header className="sticky top-0 z-40 w-full bg-sidebar text-sidebar-foreground border-gray-600 shadow-sm px-4 md:px-6">
+      <div className="flex h-14 items-center justify-between gap-4">
+        {/* Left side */}
+        <div className="flex items-center gap-2">
+          <SidebarTrigger />
+        </div>
+
+        {/* Right side */}
+        <div className="flex items-center gap-4">
+          {/* Notification */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onClick={() => router.push('/notifications')}
+          >
+            <Bell size={16} />
+            <span className="sr-only">Notifications</span>
+          </Button>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default NavigationBar;

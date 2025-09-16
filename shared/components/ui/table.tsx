@@ -1,20 +1,37 @@
-"use client"
+'use client';
 
+import * as React from 'react';
+import { useId, useMemo, useRef, useState } from 'react';
+
+import { cn } from '../lib/utils';
+import { Button } from './button';
+import { Card, CardContent, CardHeader, CardTitle } from './card';
+import { Checkbox } from './checkbox';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from './form/dropdown-menu';
+import { Input } from './form/input';
+import { Label } from './form/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 import {
   ColumnDef,
   ColumnFiltersState,
+  PaginationState,
+  Row,
+  SortingState,
+  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  PaginationState,
-  Row,
-  SortingState,
   useReactTable,
-  VisibilityState,
-} from "@tanstack/react-table"
+} from '@tanstack/react-table';
 import {
   ChevronDownIcon,
   ChevronFirstIcon,
@@ -26,145 +43,113 @@ import {
   ListFilterIcon,
   Loader2,
   TrashIcon,
-} from "lucide-react"
-import * as React from "react"
-import { useId, useMemo, useRef, useState } from "react"
-
-import { cn } from "../lib/utils"
-import { Button } from "./button"
-import { Card, CardContent, CardHeader, CardTitle } from "./card"
-import { Checkbox } from "./checkbox"
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "./form/dropdown-menu"
-import { Input } from "./form/input"
-import { Label } from "./form/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./select"
+} from 'lucide-react';
 
 // Basic table components
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+function Table({ className, ...props }: React.ComponentProps<'table'>) {
   return (
     <div className="relative w-full overflow-auto">
       <table
         data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
+        className={cn('w-full caption-bottom text-sm', className)}
         {...props}
       />
     </div>
-  )
+  );
 }
 
-function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
-  return <thead data-slot="table-header" className={cn(className)} {...props} />
+function TableHeader({ className, ...props }: React.ComponentProps<'thead'>) {
+  return <thead data-slot="table-header" className={cn(className)} {...props} />;
 }
 
-function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
+function TableBody({ className, ...props }: React.ComponentProps<'tbody'>) {
   return (
     <tbody
       data-slot="table-body"
-      className={cn("[&_tr:last-child]:border-0", className)}
+      className={cn('[&_tr:last-child]:border-0', className)}
       {...props}
     />
-  )
+  );
 }
 
-function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
+function TableFooter({ className, ...props }: React.ComponentProps<'tfoot'>) {
   return (
     <tfoot
       data-slot="table-footer"
-      className={cn(
-        "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0",
-        className
-      )}
+      className={cn('bg-muted/50 border-t font-medium [&>tr]:last:border-b-0', className)}
       {...props}
     />
-  )
+  );
 }
 
-function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
   return (
     <tr
       data-slot="table-row"
       className={cn(
-        "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors",
-        className
+        'hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors',
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
-function TableHead({ className, ...props }: React.ComponentProps<"th">) {
+function TableHead({ className, ...props }: React.ComponentProps<'th'>) {
   return (
     <th
       data-slot="table-head"
       className={cn(
-        "text-muted-foreground h-12 px-3 text-left align-middle font-medium has-[role=checkbox]:w-px [&:has([role=checkbox])]:pr-0",
-        className
+        'text-muted-foreground h-12 px-3 text-left align-middle font-medium has-[role=checkbox]:w-px [&:has([role=checkbox])]:pr-0',
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
-function TableCell({ className, ...props }: React.ComponentProps<"td">) {
+function TableCell({ className, ...props }: React.ComponentProps<'td'>) {
   return (
     <td
       data-slot="table-cell"
-      className={cn(
-        "p-3 align-middle [&:has([role=checkbox])]:pr-0",
-        className
-      )}
+      className={cn('p-3 align-middle [&:has([role=checkbox])]:pr-0', className)}
       {...props}
     />
-  )
+  );
 }
 
-function TableCaption({
-  className,
-  ...props
-}: React.ComponentProps<"caption">) {
+function TableCaption({ className, ...props }: React.ComponentProps<'caption'>) {
   return (
     <caption
       data-slot="table-caption"
-      className={cn("text-muted-foreground mt-4 text-sm", className)}
+      className={cn('text-muted-foreground mt-4 text-sm', className)}
       {...props}
     />
-  )
+  );
 }
 
 interface DataTableProps<TData> {
-  data: TData[]
-  columns: ColumnDef<TData>[]
+  data: TData[];
+  columns: ColumnDef<TData>[];
   searchableColumns?: Array<{
-    id: keyof TData
-    placeholder?: string
-  }>
-  enableSelection?: boolean
-  enableColumnVisibility?: boolean
-  enablePagination?: boolean
-  pageSizeOptions?: number[]
-  defaultPageSize?: number
-  onRowSelectionChange?: (selectedRows: Row<TData>[]) => void
-  onDeleteSelected?: (selectedRows: Row<TData>[]) => void
-  className?: string
-  title?: string
-  isLoading?: boolean
-  loadingMessage?: string
-  emptyMessage?: string
-  emptyDescription?: string
-  cardClassName?: string
-  showCard?: boolean
+    id: keyof TData;
+    placeholder?: string;
+  }>;
+  enableSelection?: boolean;
+  enableColumnVisibility?: boolean;
+  enablePagination?: boolean;
+  pageSizeOptions?: number[];
+  defaultPageSize?: number;
+  onRowSelectionChange?: (selectedRows: Row<TData>[]) => void;
+  onDeleteSelected?: (selectedRows: Row<TData>[]) => void;
+  className?: string;
+  title?: string;
+  isLoading?: boolean;
+  loadingMessage?: string;
+  emptyMessage?: string;
+  emptyDescription?: string;
+  cardClassName?: string;
+  showCard?: boolean;
 }
 
 function DataTable<TData>({
@@ -181,34 +166,34 @@ function DataTable<TData>({
   className,
   title,
   isLoading = false,
-  loadingMessage = "Loading...",
-  emptyMessage = "No results found",
+  loadingMessage = 'Loading...',
+  emptyMessage = 'No results found',
   emptyDescription,
   cardClassName,
   showCard = true,
 }: DataTableProps<TData>) {
-  const id = useId()
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const id = useId();
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: defaultPageSize,
-  })
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [rowSelection, setRowSelection] = useState({})
-  const searchInputRef = useRef<HTMLInputElement>(null)
+  });
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [rowSelection, setRowSelection] = useState({});
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Add selection column if enabled
   const finalColumns = useMemo(() => {
-    if (!enableSelection) return columns
+    if (!enableSelection) return columns;
 
     const selectionColumn: ColumnDef<TData> = {
-      id: "select",
+      id: 'select',
       header: ({ table }) => (
         <Checkbox
           checked={
             table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
+            (table.getIsSomePageRowsSelected() && 'indeterminate')
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
@@ -224,10 +209,10 @@ function DataTable<TData>({
       enableSorting: false,
       enableHiding: false,
       size: 28,
-    }
+    };
 
-    return [selectionColumn, ...columns]
-  }, [columns, enableSelection])
+    return [selectionColumn, ...columns];
+  }, [columns, enableSelection]);
 
   const table = useReactTable({
     data,
@@ -243,6 +228,7 @@ function DataTable<TData>({
     getFilteredRowModel: getFilteredRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     onRowSelectionChange: setRowSelection,
+    columnResizeMode: 'onChange',
     state: {
       sorting,
       pagination,
@@ -250,39 +236,40 @@ function DataTable<TData>({
       columnVisibility,
       rowSelection,
     },
-  })
+  });
 
   // Handle row selection change
   useMemo(() => {
-    const selectedRows = table.getSelectedRowModel().rows
-    onRowSelectionChange?.(selectedRows)
-  }, [table.getSelectedRowModel().rows, onRowSelectionChange])
+    const selectedRows = table.getSelectedRowModel().rows;
+    onRowSelectionChange?.(selectedRows);
+  }, [table.getSelectedRowModel().rows, onRowSelectionChange]);
 
   const handleDeleteSelected = () => {
-    const selectedRows = table.getSelectedRowModel().rows
-    onDeleteSelected?.(selectedRows)
-    table.resetRowSelection()
-  }
+    const selectedRows = table.getSelectedRowModel().rows;
+    onDeleteSelected?.(selectedRows);
+    table.resetRowSelection();
+  };
 
   const tableContent = (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn('space-y-4', className)}>
       {/* Filters and controls */}
       {!isLoading && (
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
             {/* Search input for searchable columns */}
             {searchableColumns.length > 0 && (
-              <div className="relative">
+              <div className="relative w-full sm:w-auto">
                 <Input
                   ref={searchInputRef}
-                  className="min-w-60 ps-9 border-border text-gray-800 placeholder:text-gray-600"
+                  className="w-full sm:min-w-60 ps-9 border-border text-gray-800 placeholder:text-gray-600"
                   value={
-                    (table.getColumn(String(searchableColumns[0].id))?.getFilterValue() ?? "") as string
+                    (table.getColumn(String(searchableColumns[0].id))?.getFilterValue() ??
+                      '') as string
                   }
                   onChange={(e) =>
                     table.getColumn(String(searchableColumns[0].id))?.setFilterValue(e.target.value)
                   }
-                  placeholder={searchableColumns[0].placeholder || "Search..."}
+                  placeholder={searchableColumns[0].placeholder || 'Search...'}
                   type="text"
                 />
                 <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3">
@@ -295,13 +282,9 @@ function DataTable<TData>({
             {enableColumnVisibility && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="darkOutline">
-                    <Columns3Icon
-                      className="-ms-1 opacity-60"
-                      size={16}
-                      aria-hidden="true"
-                    />
-                    View
+                  <Button variant="darkOutline" className="shrink-0">
+                    <Columns3Icon className="sm:mr-2 -ms-1 opacity-60" size={16} aria-hidden="true" />
+                    <span className="hidden sm:inline">View</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -314,9 +297,7 @@ function DataTable<TData>({
                         key={column.id}
                         className="capitalize"
                         checked={column.getIsVisible()}
-                        onCheckedChange={(value) =>
-                          column.toggleVisibility(!!value)
-                        }
+                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
                         onSelect={(event) => event.preventDefault()}
                       >
                         {column.id}
@@ -330,11 +311,7 @@ function DataTable<TData>({
           {/* Delete selected button */}
           {enableSelection && onDeleteSelected && table.getSelectedRowModel().rows.length > 0 && (
             <Button variant="darkOutline" onClick={handleDeleteSelected}>
-              <TrashIcon
-                className="-ms-1 opacity-60"
-                size={16}
-                aria-hidden="true"
-              />
+              <TrashIcon className="-ms-1 opacity-60" size={16} aria-hidden="true" />
               Delete ({table.getSelectedRowModel().rows.length})
             </Button>
           )}
@@ -356,29 +333,33 @@ function DataTable<TData>({
       ) : (
         /* Table */
         <>
-          <div className="overflow-hidden rounded-md border">
-            <Table>
+          <div className="overflow-x-auto rounded-md border">
+            <Table style={{ tableLayout: 'fixed' }}>
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-transparent">
                     {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id} className="h-11">
+                      <TableHead
+                        key={header.id}
+                        className="h-11"
+                        style={{
+                          width: header.getSize(),
+                          minWidth: header.getSize(),
+                        }}
+                      >
                         {header.isPlaceholder ? null : header.column.getCanSort() ? (
                           <div
                             className="flex cursor-pointer items-center justify-between gap-2 select-none"
                             onClick={header.column.getToggleSortingHandler()}
                             onKeyDown={(e) => {
-                              if (e.key === "Enter" || e.key === " ") {
-                                e.preventDefault()
-                                header.column.getToggleSortingHandler()?.(e)
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                header.column.getToggleSortingHandler()?.(e);
                               }
                             }}
                             tabIndex={0}
                           >
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
+                            {flexRender(header.column.columnDef.header, header.getContext())}
                             {{
                               asc: (
                                 <ChevronUpIcon
@@ -397,10 +378,7 @@ function DataTable<TData>({
                             }[header.column.getIsSorted() as string] ?? null}
                           </div>
                         ) : (
-                          flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )
+                          flexRender(header.column.columnDef.header, header.getContext())
                         )}
                       </TableHead>
                     ))}
@@ -410,26 +388,23 @@ function DataTable<TData>({
               <TableBody>
                 {table.getRowModel().rows?.length ? (
                   table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() && "selected"}
-                    >
+                    <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
+                        <TableCell
+                          key={cell.id}
+                          style={{
+                            width: cell.column.getSize(),
+                            minWidth: cell.column.getSize(),
+                          }}
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell
-                      colSpan={finalColumns.length}
-                      className="h-24 text-center"
-                    >
+                    <TableCell colSpan={finalColumns.length} className="h-24 text-center">
                       No results.
                     </TableCell>
                   </TableRow>
@@ -440,22 +415,22 @@ function DataTable<TData>({
 
           {/* Pagination */}
           {enablePagination && (
-            <div className="flex items-center justify-between gap-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-8">
               <div className="flex items-center gap-3 text-gray-800">
                 <Label htmlFor={`${id}-page-size`}>Rows per page</Label>
                 <Select
                   value={table.getState().pagination.pageSize.toString()}
                   onValueChange={(value) => {
-                    const newPageSize = Number(value)
-                    const currentPageIndex = table.getState().pagination.pageIndex
-                    const totalRows = table.getFilteredRowModel().rows.length
-                    const maxPageIndex = Math.max(0, Math.ceil(totalRows / newPageSize) - 1)
-                    
-                    table.setPageSize(newPageSize)
-                    
+                    const newPageSize = Number(value);
+                    const currentPageIndex = table.getState().pagination.pageIndex;
+                    const totalRows = table.getFilteredRowModel().rows.length;
+                    const maxPageIndex = Math.max(0, Math.ceil(totalRows / newPageSize) - 1);
+
+                    table.setPageSize(newPageSize);
+
                     // Reset to page 0 if current page would be invalid
                     if (currentPageIndex > maxPageIndex) {
-                      table.setPageIndex(0)
+                      table.setPageIndex(0);
                     }
                   }}
                 >
@@ -472,20 +447,18 @@ function DataTable<TData>({
                 </Select>
               </div>
 
-              <div className="text-muted-foreground text-sm">
-                {table.getState().pagination.pageIndex *
-                  table.getState().pagination.pageSize +
-                  1}
-                -
-                {Math.min(
-                  (table.getState().pagination.pageIndex + 1) *
-                    table.getState().pagination.pageSize,
-                  table.getRowCount()
-                )}{" "}
-                of {table.getRowCount()}
-              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="text-muted-foreground text-sm whitespace-nowrap">
+                  {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}-
+                  {Math.min(
+                    (table.getState().pagination.pageIndex + 1) *
+                      table.getState().pagination.pageSize,
+                    table.getRowCount(),
+                  )}{' '}
+                  of {table.getRowCount()}
+                </div>
 
-              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 justify-center sm:justify-start">
                 <Button
                   size="sm"
                   variant="darkOutline"
@@ -522,21 +495,22 @@ function DataTable<TData>({
                 >
                   <ChevronLastIcon size={16} />
                 </Button>
+                </div>
               </div>
             </div>
           )}
         </>
       )}
     </div>
-  )
+  );
 
   // Wrap in card if showCard is true
   if (!showCard) {
-    return tableContent
+    return tableContent;
   }
 
   return (
-    <Card className={cn("bg-transparent border-brand-200", cardClassName)}>
+    <Card className={cn('bg-transparent border-brand-200', cardClassName)}>
       {title && (
         <CardHeader>
           <CardTitle className="text-foreground">
@@ -545,11 +519,9 @@ function DataTable<TData>({
           </CardTitle>
         </CardHeader>
       )}
-      <CardContent>
-        {tableContent}
-      </CardContent>
+      <CardContent>{tableContent}</CardContent>
     </Card>
-  )
+  );
 }
 
 export {
@@ -561,8 +533,7 @@ export {
   TableFooter,
   TableHead,
   TableHeader,
-  TableRow
-}
+  TableRow,
+};
 
-export type { DataTableProps }
-
+export type { DataTableProps };
