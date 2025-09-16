@@ -145,4 +145,44 @@ export class AdminsService {
             },
         });
     }
+    /**
+     * Suspend admin
+     * @param id
+     * @returns AdminResponseDto The admin has been marked as suspended.
+     * @throws ApiError
+     */
+    public static adminControllerSuspendAdmin(
+        id: number,
+    ): CancelablePromise<AdminResponseDto> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/admins/{id}/suspend',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Admin not found.`,
+            },
+        });
+    }
+    /**
+     * Unsuspend admin
+     * @param id
+     * @returns AdminResponseDto The admin has been marked as unsuspended.
+     * @throws ApiError
+     */
+    public static adminControllerUnsuspendAdmin(
+        id: number,
+    ): CancelablePromise<AdminResponseDto> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/admins/{id}/unsuspend',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Admin not found.`,
+            },
+        });
+    }
 }

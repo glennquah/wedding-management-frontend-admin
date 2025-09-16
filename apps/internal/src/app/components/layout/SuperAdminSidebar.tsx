@@ -1,7 +1,7 @@
 'use client';
 
 import AppSidebar from '@shared/components/AppSidebar';
-import { CheckSquare, LayoutDashboard, ListTodo, PersonStanding, Timer, UserStar } from 'lucide-react';
+import { CheckSquare, LayoutDashboard, ListTodo, Timer, User2, UserStar } from 'lucide-react';
 
 const tabs = [
   {
@@ -20,7 +20,7 @@ const tabs = [
       {
         title: 'Admin Management',
         href: '/admin-management',
-        icon: PersonStanding,
+        icon: User2,
       },
       {
         title: 'Vendor Management',
@@ -52,5 +52,5 @@ const tabs = [
 ];
 
 export default function SuperAdminSidebar() {
-  return <AppSidebar tabs={tabs} />;
+  return <AppSidebar tabs={tabs} platform="internal" />;
 }

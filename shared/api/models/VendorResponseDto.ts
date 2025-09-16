@@ -57,5 +57,9 @@ export type VendorResponseDto = {
      */
     capacity?: number;
     onboardingStatus: VendorOnboardingStatus;
+    /**
+     * Is the vendor suspended?
+     */
+    isSuspended?: boolean;
 };
 

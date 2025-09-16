@@ -219,8 +219,8 @@ export default function SuperAdminManagementPage() {
   });
 
   return (
-    <div className='container mx-auto px-4 py-8'>
-        <div className='flex items-center justify-between'>
+    <div className="w-full px-6 py-4">
+        <div className='flex items-center justify-between mb-6 flex-shrink-0'>
         <PageHeader 
             title='Super Admin Management' 
             description='Manage super admins and their access levels'
@@ -246,7 +246,8 @@ export default function SuperAdminManagementPage() {
 
 
         {/* Super Admin List Table */}
-        <DataTable
+        <div className="w-full">
+          <DataTable
             data={superAdmins}
             columns={columns}
             searchableColumns={[
@@ -262,7 +263,10 @@ export default function SuperAdminManagementPage() {
             loadingMessage='Loading super admins...'
             emptyMessage='No super admins added yet.'
             emptyDescription='Add a super admin using the "Add Super Admin" button.'
-        />
+            showCard={false}
+            className="w-full h-full"
+          />
+        </div>
 
         {/* Delete Confirmation Modal */}
         <DeleteConfirmationModal

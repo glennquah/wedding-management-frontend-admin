@@ -55,12 +55,6 @@ export function useHandleSession() {
         name,
         role: UserRole.ADMIN,
         isCouple: true,
-        onboardedDate: new Date().toISOString(),
-        weddingType,
-        budgetBucket,
-        guestCountBucket,
-        preferredStyle,
-        preferredServices,
       } satisfies CreateAdminDto);
 
       toast.success('Signup Successful.');

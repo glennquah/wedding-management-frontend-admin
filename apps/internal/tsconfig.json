@@ -28,8 +28,10 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "../../shared/components/EmailModal.tsx",
-    "../../shared/components/guest-management/GuestSummaryStats.tsx"
+  
+    "../../shared/components/guest-management/GuestSummaryStats.tsx",
+    "../../shared/components/NavigationBar.tsx",
+    "../../shared/components/EmailModal.tsx"
   ],
   "exclude": ["node_modules"]
 }
