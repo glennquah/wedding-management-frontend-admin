@@ -1,17 +1,8 @@
 'use client';
 
-import { Button } from './ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './ui/form/dropdown-menu';
-import { Separator } from './ui/separator';
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -20,8 +11,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from './ui/sidebar';
-import { ChevronUp, LogOut, Settings, User, UserCircle } from 'lucide-react';
-import { signOut, useSession } from 'next-auth/react';
+import { Settings, User } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -91,7 +82,7 @@ export default function AppSidebar({
         ))}
       </SidebarContent>
 
-      <SidebarFooter>
+      {/* <SidebarFooter>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -130,7 +121,7 @@ export default function AppSidebar({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </SidebarFooter>
+      </SidebarFooter> */}
     </Sidebar>
   );
 }

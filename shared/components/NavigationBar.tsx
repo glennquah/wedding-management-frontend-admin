@@ -10,14 +10,15 @@ import {
 import { SidebarTrigger } from '@shared/components/ui/sidebar';
 import { Bell, ChevronsUpDown, LogOut, Settings, User } from 'lucide-react';
 import { Session } from 'next-auth';
+import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 interface NavigationBarProps {
   session: Session | null;
-  signOut: () => void;
+  platform?: 'internal' | 'external';
 }
 
-const NavigationBar = ({ session, signOut }: NavigationBarProps) => {
+const NavigationBar = ({ session, platform = 'external' }: NavigationBarProps) => {
   const router = useRouter();
 
   return (
@@ -49,7 +50,7 @@ const NavigationBar = ({ session, signOut }: NavigationBarProps) => {
                   <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center">
                     <User size={14} />
                   </div>
-                  <span className="text-sm text-foreground">{session.user.name}</span>
+                  <span className="text-sm text-foreground ">{session.user.name}</span>
                   <ChevronsUpDown size={14} className="text-muted-foreground/80" />
                 </Button>
               </DropdownMenuTrigger>
@@ -63,7 +64,14 @@ const NavigationBar = ({ session, signOut }: NavigationBarProps) => {
                   <Settings size={16} className="mr-2" />
                   Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-red-600" onClick={() => signOut()}>
+                <DropdownMenuItem
+                  className="text-red-600"
+                  onClick={() =>
+                    platform === 'internal'
+                      ? signOut({ callbackUrl: window.location.origin, redirect: false })
+                      : signOut({ callbackUrl: window.location.origin })
+                  }
+                >
                   <LogOut size={16} className="mr-2" />
                   Sign Out
                 </DropdownMenuItem>
