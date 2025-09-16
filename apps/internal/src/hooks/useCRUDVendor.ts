@@ -6,6 +6,7 @@ import {
   UserRole,
   VendorResponseDto,
   VendorsService,
+  WeddingService,
 } from '@shared/api';
 import { toast } from 'sonner';
 
@@ -32,6 +33,7 @@ export function useVendorManager() {
   const [validationErrors, setValidationErrors] = useState<{
     name?: string;
     email?: string;
+    capacity?: string;
   }>({});
 
   // Core CRUD operations
@@ -90,7 +92,7 @@ export function useVendorManager() {
 
   // Validation
   const validateVendorData = (vendorData: VendorFormData) => {
-    const errors: { name?: string; email?: string } = {};
+    const errors: { name?: string; email?: string; capacity?: string } = {};
 
     // Debug logging
     console.log('Validating vendor data:', {
@@ -116,6 +118,10 @@ export function useVendorManager() {
       errors.email = 'Please enter a valid email address';
     }
 
+    if (vendorData.capacity == 0) {
+      errors.capacity = 'Venue capacity cannot be 0';
+    }
+
     console.log('Validation errors:', errors);
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
@@ -126,7 +132,8 @@ export function useVendorManager() {
     if (!editingVendor) return;
 
     if (!validateVendorData(editingVendor)) {
-      toast.error('Please fill in all required fields');
+      const errorMessages = Object.values(validationErrors).filter(Boolean).join(',\n');
+      toast.error(errorMessages);
       return;
     }
 
@@ -142,7 +149,7 @@ export function useVendorManager() {
         serviceOffered: editingVendor.serviceOffered,
         styleOffered: editingVendor.styleOffered,
         weddingTypes: editingVendor.weddingTypes,
-        capacity: editingVendor.capacity,
+        capacity: editingVendor.serviceOffered == WeddingService.VENUE ? editingVendor.capacity : 0,
       };
 
       if (!editingVendor.id) {
