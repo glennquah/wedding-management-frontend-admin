@@ -1,14 +1,8 @@
 'use client';
 
 import { Button } from '@shared/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@shared/components/ui/form/dropdown-menu';
 import { SidebarTrigger } from '@shared/components/ui/sidebar';
-import { Bell, ChevronsUpDown, LogOut, Settings, User } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { Session } from 'next-auth';
 import { useRouter } from 'next/navigation';
 
@@ -42,7 +36,7 @@ const NavigationBar = ({ session, signOut }: NavigationBarProps) => {
           </Button>
 
           {/* User menu */}
-          {session?.user && (
+          {/* {session?.user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 gap-2 px-2">
@@ -69,7 +63,7 @@ const NavigationBar = ({ session, signOut }: NavigationBarProps) => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          )}
+          )} */}
         </div>
       </div>
     </header>
