@@ -7,6 +7,7 @@ import { SidebarProvider, useSidebar } from '@shared/components/ui/sidebar';
 import { Toaster } from '@shared/components/ui/sonner';
 import { UserRole } from '@wedding/api-types';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 function MainContent({ children }: { children: React.ReactNode }) {
   const sidebar = useSidebar();
@@ -25,6 +26,7 @@ function MainContent({ children }: { children: React.ReactNode }) {
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   if (status === 'loading') {
     return (
@@ -35,12 +37,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   }
 
   if (!session?.user || session.user.role !== UserRole.SUPER_ADMIN) {
-    return (
-      <main className="flex flex-1 flex-col overflow-y-auto">
-        {children}
-        <Toaster />
-      </main>
-    );
+    console.log('Access denied - Session:', session);
+    router.push('/login');
+    return <main className="flex flex-1 flex-col overflow-y-auto">{children}</main>;
   }
 
   return (

@@ -3,40 +3,46 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { CreateListingDto } from '../models/CreateListingDto';
+import type { ListingResponseDto } from '../models/ListingResponseDto';
 import type { UpdateListingDto } from '../models/UpdateListingDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class ListingsService {
     /**
+     * Create a new listing
      * @param requestBody
-     * @returns any
+     * @returns ListingResponseDto The listing has been successfully created.
      * @throws ApiError
      */
     public static listingControllerCreate(
         requestBody: CreateListingDto,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<ListingResponseDto> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/listings',
             body: requestBody,
             mediaType: 'application/json',
+            errors: {
+                400: `Bad request.`,
+            },
         });
     }
     /**
+     * Update a listing
      * @param vendorId
      * @param id
      * @param requestBody
-     * @returns any
+     * @returns ListingResponseDto The listing has been successfully updated.
      * @throws ApiError
      */
     public static listingControllerUpdate(
         vendorId: number,
         id: number,
         requestBody: UpdateListingDto,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<ListingResponseDto> {
         return __request(OpenAPI, {
-            method: 'PATCH',
+            method: 'PUT',
             url: '/listings/{vendorId}/{id}',
             path: {
                 'vendorId': vendorId,
@@ -44,12 +50,17 @@ export class ListingsService {
             },
             body: requestBody,
             mediaType: 'application/json',
+            errors: {
+                400: `Bad request.`,
+                404: `Listing not found.`,
+            },
         });
     }
     /**
+     * Delete a listing
      * @param vendorId
      * @param id
-     * @returns any
+     * @returns any The listing has been successfully deleted.
      * @throws ApiError
      */
     public static listingControllerDelete(
@@ -63,18 +74,22 @@ export class ListingsService {
                 'vendorId': vendorId,
                 'id': id,
             },
+            errors: {
+                404: `Listing not found.`,
+            },
         });
     }
     /**
+     * Search listings by vendor name
      * @param vendorId
      * @param listingName
-     * @returns any
+     * @returns ListingResponseDto The listing search results.
      * @throws ApiError
      */
     public static listingControllerSearch(
         vendorId: number,
         listingName: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<Array<ListingResponseDto>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/listings/{vendorId}/search',
@@ -83,6 +98,9 @@ export class ListingsService {
             },
             query: {
                 'listingName': listingName,
+            },
+            errors: {
+                404: `Vendor not found.`,
             },
         });
     }

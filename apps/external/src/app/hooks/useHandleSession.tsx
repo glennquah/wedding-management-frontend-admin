@@ -50,18 +50,17 @@ export function useHandleSession() {
       ) {
         throw new Error('Missing field.');
       }
-      // First create the wedding
+
+      // create wedding get id
       const wedding = await WeddingsService.weddingControllerCreate({
-        name: `${name}'s Wedding`,
-        date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // Default to 1 year from now
-        weddingType,
-        budgetBucket,
-        guestCountBucket,
-        preferredStyle,
-        preferredServices,
+        name: name + "'s Wedding",
+        weddingType: weddingType,
+        budgetBucket: budgetBucket,
+        guestCountBucket: guestCountBucket,
+        preferredStyle: preferredStyle,
+        preferredServices: preferredServices,
       });
 
-      // Then create the admin with the wedding ID
       await AuthService.authControllerRegisterAdmin({
         email,
         password,
@@ -69,7 +68,7 @@ export function useHandleSession() {
         role: UserRole.ADMIN,
         isCouple: true,
         weddingId: wedding.id,
-      } satisfies CreateAdminDto);
+      } as CreateAdminDto);
 
       toast.success('Signup Successful.');
       const signin_res = await signIn('credentials', {
@@ -155,7 +154,7 @@ export function useHandleSession() {
         uenNumber,
         bio,
         onboardedDate: new Date().toISOString(),
-      } satisfies CreateVendorDto);
+      } as CreateVendorDto);
 
       toast.success('Signup Successful.');
       const signin_res = await signIn('credentials', {

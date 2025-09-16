@@ -15,7 +15,7 @@ export type CreateWeddingDto = {
     /**
      * Wedding date
      */
-    date: string;
+    date?: string;
     /**
      * Wedding location
      */

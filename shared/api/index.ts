@@ -19,6 +19,7 @@ export type { CreateVendorDto } from './models/CreateVendorDto';
 export type { CreateWeddingDto } from './models/CreateWeddingDto';
 export { GuestCountBucket } from './models/GuestCountBucket';
 export type { GuestResponseDto } from './models/GuestResponseDto';
+export type { ListingResponseDto } from './models/ListingResponseDto';
 export type { LoginDto } from './models/LoginDto';
 export type { SuperAdminResponseDto } from './models/SuperAdminResponseDto';
 export type { TokensDto } from './models/TokensDto';
