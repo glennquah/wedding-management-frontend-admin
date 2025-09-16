@@ -5,7 +5,8 @@ import { useState } from 'react';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/form/input';
 import { Label } from '@shared/components/ui/form/label';
-import { signIn } from 'next-auth/react';
+import { UserRole } from '@wedding/api-types';
+import { getSession, signIn, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -25,12 +26,30 @@ export default function LoginPage() {
         username,
         password,
       });
+
       if (res?.error) {
         toast.error('Invalid username or password');
         return;
       }
-      toast('Successfully Login.');
-      router.push('/main-dashboard');
+
+      // Get the session to check user role
+      const session = await getSession();
+
+      if (!session?.user) {
+        toast.error('Authentication failed. Please try again.');
+        return;
+      }
+
+      // Check if user has super admin role
+      if (session.user.role !== UserRole.SUPER_ADMIN) {
+        toast.error('Access denied. Super admin privileges required.');
+        // Sign out the user since they don't have the right role
+        await signOut({ redirect: false });
+        return;
+      }
+
+      toast.success('Successfully logged in!');
+      router.push('/admin-management');
     } catch (err) {
       console.error('Unexpected error:', err);
       toast.error('Something went wrong. Please try again.');

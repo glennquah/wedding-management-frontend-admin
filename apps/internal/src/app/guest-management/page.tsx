@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from 'react';
 
+import { EmailModal } from '../../../../../shared/components/EmailModal';
+import GuestSummaryStats from '../../../../../shared/components/guest-management/GuestSummaryStats';
 import { getGuestColumns } from '@shared/columns/guest-columns';
 import {
   Button,
   DataTable,
   DeleteConfirmationModal,
   GroupSelectDropdown,
-  PageHeader
+  PageHeader,
 } from '@shared/components';
 import FormField from '@shared/components/FormField';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
@@ -19,14 +21,12 @@ import {
   CreateGuestDto,
   GuestResponseDto,
   GuestsService,
-  UpdateGuestDto
+  UpdateGuestDto,
 } from '@wedding/api-types';
 import { Plus, Trash2 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { EmailModal } from '../../../../../shared/components/EmailModal';
-import GuestSummaryStats from '../../../../../shared/components/guest-management/GuestSummaryStats';
 
 export const dynamic = 'force-dynamic';
 
@@ -114,8 +114,7 @@ export default function GuestManagementPage() {
         group: newGuest.group,
         weddingId: 1, // Default wedding ID for internal admin
         allergies: newGuest.allergies || '',
-        confirmationStatus:
-          newGuest.confirmationStatus || ConfirmationStatus.PENDING,
+        confirmationStatus: newGuest.confirmationStatus || ConfirmationStatus.PENDING,
         accompanyingGuestNames:
           newGuest.accompanyingGuestNames?.filter((name) => name.trim() !== '') || [],
       };
@@ -348,8 +347,10 @@ export default function GuestManagementPage() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <PageHeader title="Guest Management" description="Manage guests across all weddings" />
+    <div className="w-full px-6 py-4">
+      <div className="flex-shrink-0 mb-6">
+        <PageHeader title="Guest Management" description="Manage guests across all weddings" />
+      </div>
 
       {/* Edit Guest Modal */}
       {editingGuest && (
@@ -384,36 +385,40 @@ export default function GuestManagementPage() {
         />
       )}
 
-      <GuestSummaryStats
-        guests={guests.map((guest) => ({
-          ...guest,
-          confirmationStatus:
-            guest.confirmationStatus === 'pending'
-              ? ConfirmationStatus.PENDING
-              : guest.confirmationStatus === 'confirmed'
-                ? ConfirmationStatus.CONFIRMED
-                : ConfirmationStatus.REJECTED,
-        }))}
-      />
+      <div className="flex-shrink-0 mb-6">
+        <GuestSummaryStats
+          guests={guests.map((guest) => ({
+            ...guest,
+            confirmationStatus:
+              guest.confirmationStatus === 'pending'
+                ? ConfirmationStatus.PENDING
+                : guest.confirmationStatus === 'confirmed'
+                  ? ConfirmationStatus.CONFIRMED
+                  : ConfirmationStatus.REJECTED,
+          }))}
+        />
+      </div>
 
       {/* Guest List Table */}
-      <DataTable
-        data={primaryGuests.map((guest) => ({
-          ...guest,
-          email: guest.email || '',
-        }))}
-        columns={columns}
-        searchableColumns={[{ id: 'name', placeholder: 'Search by name...' }]}
-        enableSelection={false}
-        enableColumnVisibility={true}
-        enablePagination={true}
-        defaultPageSize={10}
-        title={`Guests (${guests.length})`}
-        isLoading={isLoading}
-        loadingMessage="Loading guests..."
-        emptyMessage="No guests added yet."
-        emptyDescription='Click "Add Guest" to get started!'
-      />
+      <div className="w-full">
+        <DataTable
+          data={primaryGuests.map((guest) => ({
+            ...guest,
+            email: guest.email || '',
+          }))}
+          columns={columns}
+          searchableColumns={[{ id: 'name', placeholder: 'Search by name...' }]}
+          enableSelection={false}
+          enableColumnVisibility={true}
+          enablePagination={true}
+          defaultPageSize={10}
+          title={`Guests (${guests.length})`}
+          isLoading={isLoading}
+          loadingMessage="Loading guests..."
+          emptyMessage="No guests added yet."
+          emptyDescription='Click "Add Guest" to get started!'
+        />
+      </div>
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal

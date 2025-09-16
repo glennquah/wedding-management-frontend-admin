@@ -20,57 +20,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from './ui/sidebar';
-import {
-  CheckSquare,
-  ChevronUp,
-  ListTodo,
-  LogOut,
-  Settings,
-  Timer,
-  User,
-  UserCircle,
-} from 'lucide-react';
+import { ChevronUp, LogOut, Settings, User, UserCircle } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
-
-const tabs = [
-  {
-    sectionHeader: 'Management',
-    items: [
-      {
-        title: 'Admin Management',
-        href: '/admin-management',
-        icon: Timer,
-      },
-      {
-        title: 'Vendor Management',
-        href: '/vendor-management',
-        icon: CheckSquare,
-      },
-      {
-        title: 'Guest Management',
-        href: '/guest-management',
-        icon: ListTodo,
-      },
-    ],
-  },
-  {
-    sectionHeader: 'Analytics',
-    items: [
-      {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: Timer,
-      },
-      {
-        title: 'Reports',
-        href: '/reports',
-        icon: CheckSquare,
-      },
-    ],
-  },
-];
 
 // Profile dropdown items
 const profileItems = [
@@ -88,6 +41,7 @@ const profileItems = [
 
 export default function AppSidebar({
   tabs,
+  platform = 'external',
 }: {
   tabs: Array<{
     sectionHeader: string;
@@ -97,6 +51,7 @@ export default function AppSidebar({
       icon: React.ComponentType<{ className?: string }>;
     }>;
   }>;
+  platform?: 'external' | 'internal';
 }) {
   const { data: session } = useSession();
   return (
@@ -110,7 +65,7 @@ export default function AppSidebar({
           style={{ objectFit: 'contain' }}
         />
         <div className="absolute right-5 bottom-[1px] text-primary italic font-montserrat font-black text-[8px]">
-          Tie the Knot, Stress Not.
+          Stress Not, Tie the Knot.
         </div>
       </SidebarHeader>
 
@@ -161,7 +116,14 @@ export default function AppSidebar({
             ))}
             <Separator className="my-2" />
             <DropdownMenuItem asChild>
-              <button onClick={() => signOut()} className="flex w-full items-center text-bold">
+              <button
+                onClick={() =>
+                  platform === 'internal'
+                    ? signOut({ callbackUrl: window.location.origin, redirect: false })
+                    : signOut()
+                }
+                className="flex w-full items-center text-bold"
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign Out
               </button>
