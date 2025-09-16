@@ -1,6 +1,6 @@
 'use client';
 
-import { useGuestManager } from '../../hooks/useCRUDGuests';
+import { useGuestManager } from '../../hooks/useGuestManager';
 import { ConfirmationStatus, CreateGuestDto } from '@shared/api';
 import { getGuestColumns } from '@shared/columns/guest-columns';
 import {
@@ -323,7 +323,7 @@ export default function GuestListPage() {
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
       {!isMobile && <div className="mt-[72px] w-full"></div>}
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pt-4 md:pt-6">
         <PageHeader
           title="Guest List"
           description="Manage your wedding guests and track RSVPs"
@@ -379,10 +379,7 @@ export default function GuestListPage() {
 
         {/* Guest List Table */}
         <DataTable
-          data={primaryGuests.map((guest) => ({
-            ...guest,
-            email: guest.email || '',
-          }))}
+          data={primaryGuests}
           columns={columns}
           searchableColumns={[{ id: 'name', placeholder: 'Search by name...' }]}
           enableSelection={false}

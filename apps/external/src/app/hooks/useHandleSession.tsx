@@ -8,6 +8,7 @@ import {
   WeddingService,
   WeddingStyle,
   WeddingType,
+  WeddingsService,
 } from '@shared/api';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -49,12 +50,25 @@ export function useHandleSession() {
       ) {
         throw new Error('Missing field.');
       }
+      // First create the wedding
+      const wedding = await WeddingsService.weddingControllerCreate({
+        name: `${name}'s Wedding`,
+        date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // Default to 1 year from now
+        weddingType,
+        budgetBucket,
+        guestCountBucket,
+        preferredStyle,
+        preferredServices,
+      });
+
+      // Then create the admin with the wedding ID
       await AuthService.authControllerRegisterAdmin({
         email,
         password,
         name,
         role: UserRole.ADMIN,
         isCouple: true,
+        weddingId: wedding.id,
       } satisfies CreateAdminDto);
 
       toast.success('Signup Successful.');

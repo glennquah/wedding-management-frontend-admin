@@ -24,6 +24,6 @@ export type CreateAdminDto = {
     /**
      * Wedding ID to associate with this admin
      */
-    weddingId?: number;
+    weddingId: number;
 };
 

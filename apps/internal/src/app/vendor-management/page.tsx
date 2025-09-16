@@ -108,8 +108,12 @@ export default function VendorListPage() {
       cell: ({ row }) => {
         const vendor = row.original;
         return (
-          <Button className="flex items-center" onClick={() => setSelectedVendor(vendor)}>
-            More Details
+          <Button
+            className="flex items-center whitespace-nowrap text-xs px-1 py-1 min-w-0"
+            size="sm"
+            onClick={() => setSelectedVendor(vendor)}
+          >
+            View
           </Button>
         );
       },
@@ -150,8 +154,12 @@ export default function VendorListPage() {
       cell: ({ row }) => {
         const vendor = row.original;
         return (
-          <Button className="flex items-center" onClick={() => setSelectedVendor(vendor)}>
-            More Details
+          <Button
+            className="flex items-center whitespace-nowrap text-xs px-1 py-1 min-w-0"
+            size="sm"
+            onClick={() => setSelectedVendor(vendor)}
+          >
+            View
           </Button>
         );
       },
