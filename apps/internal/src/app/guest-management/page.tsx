@@ -39,10 +39,14 @@ export default function GuestManagementPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal states
+  const [isAddingGuest, setIsAddingGuest] = useState(false);
   const [editingGuest, setEditingGuest] = useState<GuestResponseDto | null>(null);
   const [deleteConfirmGuest, setDeleteConfirmGuest] = useState<GuestResponseDto | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailModalGuest, setEmailModalGuest] = useState<GuestResponseDto | null>(null);
+
+  // Form data
+  const [newGuest, setNewGuest] = useState<Partial<CreateGuestDto & { id?: number }>>({});
 
   // Mock existing groups (you can replace this with actual API call)
   const [existingGroups] = useState<string[]>(['Family', 'Friends', 'Colleagues', 'Relatives']);
@@ -69,6 +73,15 @@ export default function GuestManagementPage() {
   const primaryGuests = guests.filter((guest) => !guest.primaryGuestId);
 
   // Modal controls
+  const openAddGuestModal = () => {
+    setNewGuest({});
+    setIsAddingGuest(true);
+  };
+
+  const closeAddGuestModal = () => {
+    setIsAddingGuest(false);
+    setNewGuest({});
+  };
 
   const closeEditGuestModal = () => {
     setEditingGuest(null);
