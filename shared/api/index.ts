@@ -6,6 +6,7 @@ export { ApiError } from './core/ApiError';
 export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
+
 export type { AdminResponseDto } from './models/AdminResponseDto';
 export type { AuthResponseDto } from './models/AuthResponseDto';
 export { BudgetBucket } from './models/BudgetBucket';
@@ -18,6 +19,7 @@ export type { CreateVendorDto } from './models/CreateVendorDto';
 export type { CreateWeddingDto } from './models/CreateWeddingDto';
 export { GuestCountBucket } from './models/GuestCountBucket';
 export type { GuestResponseDto } from './models/GuestResponseDto';
+export type { ListingResponseDto } from './models/ListingResponseDto';
 export type { LoginDto } from './models/LoginDto';
 export type { SuperAdminResponseDto } from './models/SuperAdminResponseDto';
 export type { TokensDto } from './models/TokensDto';
@@ -36,6 +38,7 @@ export type { WeddingResponseDto } from './models/WeddingResponseDto';
 export { WeddingService } from './models/WeddingService';
 export { WeddingStyle } from './models/WeddingStyle';
 export { WeddingType } from './models/WeddingType';
+
 export { AdminsService } from './services/AdminsService';
 export { AuthService } from './services/AuthService';
 export { GuestsService } from './services/GuestsService';
