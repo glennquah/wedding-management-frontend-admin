@@ -11,6 +11,7 @@ import {
   WeddingType,
 } from '@shared/api';
 import {
+  Badge,
   Button,
   DataTable,
   DeleteConfirmationModal,
@@ -52,6 +53,8 @@ export default function VendorListPage() {
     handleEditVendor,
     handleRejectOnboarding,
     handleApproveOnboarding,
+    handleSuspendVendor,
+    handleUnsuspendVendor,
 
     // Modal controls
     closeEditVendorModal,
@@ -60,6 +63,42 @@ export default function VendorListPage() {
     closeEmailModal,
     handleSendEmail,
   } = useVendorManager();
+
+  // Helper functions for confirmation status
+  const getVendorOnboardingStatusVariant = (
+    status: VendorOnboardingStatus,
+  ): 'default' | 'secondary' | 'destructive' | 'outline' => {
+    switch (status) {
+      case 'onboarded':
+        return 'default';
+      case 'rejected':
+        return 'destructive';
+      default:
+        return 'outline';
+    }
+  };
+
+  const getOnboardingStatusLabel = (status: VendorOnboardingStatus) => {
+    switch (status) {
+      case 'onboarded':
+        return 'Onboarded';
+      case 'rejected':
+        return 'Rejected';
+      default:
+        return 'Pending';
+    }
+  };
+
+  const getOnboardingStatusIcon = (status: VendorOnboardingStatus) => {
+    switch (status) {
+      case 'onboarded':
+        return '✓';
+      case 'rejected':
+        return '✗';
+      default:
+        return '?';
+    }
+  };
 
   // Column definitions for Live Vendor DataTable
   const columns: ColumnDef<VendorResponseDto>[] = [
@@ -140,9 +179,15 @@ export default function VendorListPage() {
     {
       accessorKey: 'onboardingStatus',
       header: 'Onboarding Status',
-      cell: ({ row }) => (
-        <div className="text-sm text-foreground">{row.getValue('onboardingStatus') || '-'}</div>
-      ),
+      cell: ({ row }) => {
+        const status = row.getValue('onboardingStatus') as VendorOnboardingStatus;
+        return (
+          <Badge variant={getVendorOnboardingStatusVariant(status)} className="gap-1">
+            {getOnboardingStatusLabel(status)}
+            <span className="ml-1">{getOnboardingStatusIcon(status)}</span>
+          </Badge>
+        );
+      },
     },
     {
       id: 'actions',
@@ -272,136 +317,167 @@ export default function VendorListPage() {
   ];
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
-      {!isMobile && <div className="mt-[72px] w-full"></div>}
-
-      <div className="container mx-auto px-4">
-        <PageHeader title="Vendor List" description="Manage vendors" />
-
-        {/* View Selected Vendor Modal */}
-        {selectedVendor && (
-          <VendorDetailsModal
-            open={!!selectedVendor}
-            onOpenChange={(open) => !open && setSelectedVendor(null)}
-            onEditVendor={handleEditVendor}
-            onDeleteVendor={openDeleteConfirmModal}
-            onRejectOnboarding={handleRejectOnboarding}
-            onApproveOnboarding={handleApproveOnboarding}
-            vendor={selectedVendor}
-          />
-        )}
-
-        {/* Edit Vendor Modal */}
-        {editingVendor && (
-          <FormDialog
-            open={!!editingVendor}
-            onOpenChange={closeEditVendorModal}
-            title="Edit Vendor"
-            isSubmitting={isSubmitting}
-            onSubmit={handleUpdateVendor}
-            onCancel={closeEditVendorModal}
-            submitButtonText="Update Vendor"
-            formFields={vendorFormFields(
-              editingVendor!,
-              setEditingVendor as React.Dispatch<
-                React.SetStateAction<Partial<UpdateVendorDto & { id?: number }>>
-              >,
-            )}
-            noOfColumns={2}
-          />
-        )}
-
-        {/* Delete Confirmation Modal */}
-        <DeleteConfirmationModal
-          open={!!deleteConfirmVendor}
-          onOpenChange={closeDeleteConfirmModal}
-          itemName={deleteConfirmVendor?.name || 'this guest'}
-          description={
-            deleteConfirmVendor && (
-              <>
-                Are you sure you want to delete {deleteConfirmVendor.name}? This action cannot be
-                undone.
-              </>
-            )
-          }
-          onConfirm={confirmDeleteVendor}
-          onCancel={closeDeleteConfirmModal}
-        />
-
-        {/* Email Guest Vendor */}
-        {emailModalVendor && (
-          <EmailModal
-            open={!!emailModalVendor}
-            onOpenChange={closeEmailModal}
-            name={emailModalVendor.name}
-            email={emailModalVendor.email}
-            onSendEmail={handleSendEmail}
-          />
-        )}
-
-        <Tabs defaultValue="live">
-          <TabsList className="bg-muted/50 rounded-lg p-1 flex space-x-2">
-            <TabsTrigger
-              value="live"
-              className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
-            >
-              Live vendors
-            </TabsTrigger>
-            <TabsTrigger
-              value="onboarding"
-              className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
-            >
-              Onboarding
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Live Vendors */}
-          <TabsContent value="live">
-            <DataTable
-              data={vendors
-                .filter((vendor) => vendor.onboardingStatus == VendorOnboardingStatus.ONBOARDED)
-                .map((vendor) => ({
-                  ...vendor,
-                }))}
-              columns={columns}
-              searchableColumns={[{ id: 'name', placeholder: 'Seacrch by name...' }]}
-              enableSelection={false}
-              enableColumnVisibility={true}
-              enablePagination={true}
-              defaultPageSize={10}
-              title={`Vendors (${vendors.filter((vendor) => vendor.onboardingStatus == VendorOnboardingStatus.ONBOARDED).length})`}
-              isLoading={isLoading}
-              loadingMessage="Loading vendors..."
-              emptyMessage="No vendors onboarded yet."
-            />
-          </TabsContent>
-
-          {/* Vendor Applicaitons */}
-          <TabsContent value="onboarding">
-            <DataTable
-              data={vendors
-                .filter(
-                  (vendor) =>
-                    vendor.onboardingStatus == VendorOnboardingStatus.PENDING ||
-                    vendor.onboardingStatus == VendorOnboardingStatus.REJECTED,
-                )
-                .map((vendor) => ({
-                  ...vendor,
-                }))}
-              columns={onboardingColumns}
-              searchableColumns={[{ id: 'name', placeholder: 'Seacrch by name...' }]}
-              enableSelection={false}
-              enableColumnVisibility={true}
-              enablePagination={true}
-              defaultPageSize={10}
-              title={`Vendor Application (${vendors.filter((vendor) => vendor.onboardingStatus == VendorOnboardingStatus.PENDING || vendor.onboardingStatus == VendorOnboardingStatus.REJECTED).length})`}
-              isLoading={isLoading}
-              loadingMessage="Loading application..."
-              emptyMessage="No vendors applications."
-            />
-          </TabsContent>
-        </Tabs>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between">
+        <PageHeader title="Vendor Management" description="Manage vendors in Knotly" />
       </div>
+
+      {/* View Selected Vendor Modal */}
+      {selectedVendor && (
+        <VendorDetailsModal
+          open={!!selectedVendor}
+          onOpenChange={(open) => !open && setSelectedVendor(null)}
+          onEditVendor={handleEditVendor}
+          onDeleteVendor={openDeleteConfirmModal}
+          onRejectOnboarding={handleRejectOnboarding}
+          onApproveOnboarding={handleApproveOnboarding}
+          onSuspendVendor={handleSuspendVendor}
+          onUnsuspendVendor={handleUnsuspendVendor}
+          vendor={selectedVendor}
+        />
+      )}
+
+      {/* Edit Vendor Modal */}
+      {editingVendor && (
+        <FormDialog
+          open={!!editingVendor}
+          onOpenChange={closeEditVendorModal}
+          title="Edit Vendor"
+          isSubmitting={isSubmitting}
+          onSubmit={handleUpdateVendor}
+          onCancel={closeEditVendorModal}
+          submitButtonText="Update Vendor"
+          formFields={vendorFormFields(
+            editingVendor!,
+            setEditingVendor as React.Dispatch<
+              React.SetStateAction<Partial<UpdateVendorDto & { id?: number }>>
+            >,
+          )}
+          noOfColumns={2}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={!!deleteConfirmVendor}
+        onOpenChange={closeDeleteConfirmModal}
+        itemName={deleteConfirmVendor?.name || 'this guest'}
+        description={
+          deleteConfirmVendor && (
+            <>
+              Are you sure you want to delete {deleteConfirmVendor.name}? This action cannot be
+              undone.
+            </>
+          )
+        }
+        onConfirm={confirmDeleteVendor}
+        onCancel={closeDeleteConfirmModal}
+      />
+
+      {/* Email Guest Vendor */}
+      {emailModalVendor && (
+        <EmailModal
+          open={!!emailModalVendor}
+          onOpenChange={closeEmailModal}
+          name={emailModalVendor.name}
+          email={emailModalVendor.email}
+          onSendEmail={handleSendEmail}
+        />
+      )}
+
+      <Tabs defaultValue="live">
+        <TabsList className="bg-muted/50 rounded-lg p-1 flex space-x-2">
+          <TabsTrigger
+            value="live"
+            className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+          >
+            Live vendors
+          </TabsTrigger>
+          <TabsTrigger
+            value="suspended"
+            className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+          >
+            Suspended vendors
+          </TabsTrigger>
+          <TabsTrigger
+            value="onboarding"
+            className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+          >
+            Onboarding vendors
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Live Vendors */}
+        <TabsContent value="live">
+          <DataTable
+            data={vendors
+              .filter(
+                (vendor) =>
+                  vendor.onboardingStatus == VendorOnboardingStatus.ONBOARDED &&
+                  vendor.isSuspended == false,
+              )
+              .map((vendor) => ({
+                ...vendor,
+              }))}
+            columns={columns}
+            searchableColumns={[{ id: 'name', placeholder: 'Seacrch by name...' }]}
+            enableSelection={false}
+            enableColumnVisibility={true}
+            enablePagination={true}
+            defaultPageSize={10}
+            title={`Vendors (${vendors.filter((vendor) => vendor.onboardingStatus == VendorOnboardingStatus.ONBOARDED && vendor.isSuspended == false).length})`}
+            isLoading={isLoading}
+            loadingMessage="Loading live vendors..."
+            emptyMessage="No live vendors."
+          />
+        </TabsContent>
+
+        {/* Suspended Vendors */}
+        <TabsContent value="suspended">
+          <DataTable
+            data={vendors
+              .filter((vendor) => vendor.isSuspended === true)
+              .map((vendor) => ({
+                ...vendor,
+              }))}
+            columns={columns}
+            searchableColumns={[{ id: 'name', placeholder: 'Seacrch by name...' }]}
+            enableSelection={false}
+            enableColumnVisibility={true}
+            enablePagination={true}
+            defaultPageSize={10}
+            title={`Suspended Vendors (${vendors.filter((vendor) => vendor.isSuspended === true).length})`}
+            isLoading={isLoading}
+            loadingMessage="Loading suspended vendors..."
+            emptyMessage="No suspended vendors."
+          />
+        </TabsContent>
+
+        {/* Vendor Applicaitons */}
+        <TabsContent value="onboarding">
+          <DataTable
+            data={vendors
+              .filter(
+                (vendor) =>
+                  vendor.onboardingStatus == VendorOnboardingStatus.PENDING ||
+                  vendor.onboardingStatus == VendorOnboardingStatus.REJECTED,
+              )
+              .map((vendor) => ({
+                ...vendor,
+              }))}
+            columns={onboardingColumns}
+            searchableColumns={[{ id: 'name', placeholder: 'Seacrch by name...' }]}
+            enableSelection={false}
+            enableColumnVisibility={true}
+            enablePagination={true}
+            defaultPageSize={10}
+            title={`Vendor Application (${vendors.filter((vendor) => vendor.onboardingStatus == VendorOnboardingStatus.PENDING || vendor.onboardingStatus == VendorOnboardingStatus.REJECTED).length})`}
+            isLoading={isLoading}
+            loadingMessage="Loading application..."
+            emptyMessage="No vendors applications."
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -347,8 +347,8 @@ export default function GuestManagementPage() {
   ];
 
   return (
-    <div className="w-full px-6 py-4">
-      <div className="flex-shrink-0 mb-6">
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between">
         <PageHeader title="Guest Management" description="Manage guests across all weddings" />
       </div>
 
