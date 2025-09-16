@@ -19,6 +19,7 @@ export function useListingOperations(
     if (!listingData.listingName?.trim() ||
         listingData.listingName.trim().length < VALIDATION_RULES.LISTING_NAME.MIN_LENGTH ||
         !listingData.price ||
+        isNaN(listingData.price) ||
         listingData.price < VALIDATION_RULES.PRICE.MIN) {
       toast.error(MESSAGES.ERROR.VALIDATION_FAILED);
       return false;
