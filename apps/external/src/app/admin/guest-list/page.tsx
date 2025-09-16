@@ -81,8 +81,98 @@ export default function GuestListPage() {
     detailedAccompanyingGuests: true,
   });
 
-  // Add/Edit Guest Form Fields
-  const guestFormFields = (
+  // Add Guest Form Fields (without dietary requirements and confirmation status)
+  const addGuestFormFields = (
+    guest: GuestFormData,
+    setGuest: React.Dispatch<React.SetStateAction<GuestFormData>>,
+  ) => [
+    <div key="name" className="md:col-span-2">
+      <FormField
+        label="Name *"
+        id="name"
+        type="text"
+        value={guest.name || ''}
+        onChange={(e) => setGuest({ ...guest, name: e.target.value })}
+        required
+        placeholder="Guest Name"
+      />
+    </div>,
+
+    <div key="group" className="md:col-span-2">
+      <GroupSelectDropdown
+        label="Group *"
+        existingGroups={existingGroups}
+        selected={guest.group || ''}
+        setSelected={(group) => setGuest({ ...guest, group })}
+        placeholder="Select or add group"
+      />
+    </div>,
+
+    <div key="email" className="md:col-span-2">
+      <FormField
+        label="Email *"
+        id="email"
+        type="email"
+        value={guest.email || ''}
+        onChange={(e) => setGuest({ ...guest, email: e.target.value })}
+        required
+        placeholder="Guest email address"
+      />
+    </div>,
+
+    <div key="accompanyingGuests" className="md:col-span-2">
+      <div className="flex justify-between items-center">
+        <label className="block text-sm font-medium text-foreground">Accompanying Guests</label>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => addAccompanyingGuestField(guest, setGuest)}
+          className="text-brand-600 hover:text-brand-700"
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Add Guest
+        </Button>
+      </div>
+      <div className="space-y-4">
+        {guest.accompanyingGuests &&
+          guest.accompanyingGuests.map(
+            (accompanyingGuest: AccompanyingGuestData, index: number) => (
+              <div key={index} className="rounded-lg ">
+                <div className="flex items-end gap-1">
+                  <div className="flex-1">
+                    <FormField
+                      label="Name"
+                      id={`accompanying-name-${index}`}
+                      type="text"
+                      value={accompanyingGuest.name}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        updateAccompanyingGuest(index, 'name', e.target.value, guest, setGuest)
+                      }
+                      placeholder={`Guest ${index + 1} name`}
+                    />
+                  </div>
+                  {(guest.accompanyingGuests?.length || 0) > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeAccompanyingGuestField(index, guest, setGuest)}
+                      className="text-red-600 hover:text-red-700 px-2 mb-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ),
+          )}
+      </div>
+    </div>,
+  ];
+
+  // Edit Guest Form Fields (with all fields including dietary requirements and confirmation status)
+  const editGuestFormFields = (
     guest: GuestFormData,
     setGuest: React.Dispatch<React.SetStateAction<GuestFormData>>,
   ) => [
@@ -161,72 +251,70 @@ export default function GuestListPage() {
         </Button>
       </div>
       <div className="space-y-4">
-        {(
-          guest.accompanyingGuests || [
-            { name: '', allergies: '', confirmationStatus: ConfirmationStatus.PENDING },
-          ]
-        ).map((accompanyingGuest: AccompanyingGuestData, index: number) => (
-          <div key={index} className="border rounded-lg p-3 bg-gray-50">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-foreground">Guest {index + 1}</span>
-              {(guest.accompanyingGuests?.length || 0) > 1 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeAccompanyingGuestField(index, guest, setGuest)}
-                  className="text-red-600 hover:text-red-700 px-2"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              )}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-              <div>
-                <FormField
-                  label="Name"
-                  id={`accompanying-name-${index}`}
-                  type="text"
-                  value={accompanyingGuest.name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    updateAccompanyingGuest(index, 'name', e.target.value, guest, setGuest)
-                  }
-                  placeholder={`Guest ${index + 1} name`}
-                />
+        {guest.accompanyingGuests &&
+          guest.accompanyingGuests.map(
+            (accompanyingGuest: AccompanyingGuestData, index: number) => (
+              <div key={index} className="rounded-lg ">
+                <div className="flex items-center justify-end">
+                  {(guest.accompanyingGuests?.length || 0) > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeAccompanyingGuestField(index, guest, setGuest)}
+                      className="text-red-600 hover:text-red-700 px-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <div>
+                    <FormField
+                      label="Name"
+                      id={`accompanying-name-${index}`}
+                      type="text"
+                      value={accompanyingGuest.name}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        updateAccompanyingGuest(index, 'name', e.target.value, guest, setGuest)
+                      }
+                      placeholder={`Guest ${index + 1} name`}
+                    />
+                  </div>
+                  <div>
+                    <FormField
+                      label="Dietary Requirements"
+                      id={`accompanying-allergies-${index}`}
+                      type="text"
+                      value={accompanyingGuest.allergies || ''}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        updateAccompanyingGuest(index, 'allergies', e.target.value, guest, setGuest)
+                      }
+                      placeholder="Dietary requirements"
+                    />
+                  </div>
+                  <div>
+                    <SingleSelectDropdown
+                      label="Confirmation Status"
+                      options={Object.values(ConfirmationStatus)}
+                      selected={accompanyingGuest.confirmationStatus || ConfirmationStatus.PENDING}
+                      setSelected={(selected) =>
+                        updateAccompanyingGuest(
+                          index,
+                          'confirmationStatus',
+                          selected as ConfirmationStatus,
+                          guest,
+                          setGuest,
+                        )
+                      }
+                      placeholder="Select status"
+                      className="mt-4"
+                    />
+                  </div>
+                </div>
               </div>
-              <div>
-                <FormField
-                  label="Dietary Requirements"
-                  id={`accompanying-allergies-${index}`}
-                  type="text"
-                  value={accompanyingGuest.allergies || ''}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    updateAccompanyingGuest(index, 'allergies', e.target.value, guest, setGuest)
-                  }
-                  placeholder="Dietary requirements"
-                />
-              </div>
-              <div>
-                <SingleSelectDropdown
-                  label="Confirmation Status"
-                  options={Object.values(ConfirmationStatus)}
-                  selected={accompanyingGuest.confirmationStatus || ConfirmationStatus.PENDING}
-                  setSelected={(selected) =>
-                    updateAccompanyingGuest(
-                      index,
-                      'confirmationStatus',
-                      selected as ConfirmationStatus,
-                      guest,
-                      setGuest,
-                    )
-                  }
-                  placeholder="Select status"
-                  className="mt-4"
-                />
-              </div>
-            </div>
-          </div>
-        ))}
+            ),
+          )}
       </div>
     </div>,
   ];
@@ -254,7 +342,7 @@ export default function GuestListPage() {
           onSubmit={handleAddGuest}
           onCancel={closeAddGuestModal}
           submitButtonText="Add Guest"
-          formFields={guestFormFields(newGuest, setNewGuest)}
+          formFields={addGuestFormFields(newGuest, setNewGuest)}
           noOfColumns={2}
         />
 
@@ -268,7 +356,7 @@ export default function GuestListPage() {
             onSubmit={handleUpdateGuest}
             onCancel={closeEditGuestModal}
             submitButtonText="Update Guest"
-            formFields={guestFormFields(
+            formFields={editGuestFormFields(
               editingGuest!,
               setEditingGuest as React.Dispatch<React.SetStateAction<GuestFormData>>,
             )}

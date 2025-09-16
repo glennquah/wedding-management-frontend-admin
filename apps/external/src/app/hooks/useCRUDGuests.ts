@@ -24,7 +24,7 @@ const getDefaultNewGuest = (weddingId: number): GuestFormData => ({
   confirmationStatus: ConfirmationStatus.PENDING,
   weddingId,
   primaryGuestId: undefined,
-  accompanyingGuests: [{ name: '', allergies: '', confirmationStatus: ConfirmationStatus.PENDING }],
+  accompanyingGuests: [],
 });
 
 const confirmationStatusOptions = [
@@ -387,13 +387,11 @@ export function useGuestManager() {
     }
     // Get accompanying guests for this primary guest
     const accompanyingGuests = guests.filter(g => g.primaryGuestId === guest.id);
-    const accompanyingGuestData: AccompanyingGuestData[] = accompanyingGuests.length > 0
-      ? accompanyingGuests.map(g => ({
-          name: g.name,
-          allergies: g.allergies || '',
-          confirmationStatus: g.confirmationStatus
-        }))
-      : [{ name: '', allergies: '', confirmationStatus: ConfirmationStatus.PENDING }];
+    const accompanyingGuestData: AccompanyingGuestData[] = accompanyingGuests.map(g => ({
+      name: g.name,
+      allergies: g.allergies || '',
+      confirmationStatus: g.confirmationStatus
+    }));
 
     // Map the confirmation status from GuestResponseDto to ConfirmationStatus
     const mapResponseConfirmationStatus = (status: ConfirmationStatus): ConfirmationStatus => {
