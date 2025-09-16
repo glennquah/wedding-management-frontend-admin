@@ -3,12 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import { getSuperAdminColumns } from '../../../../../shared/columns/superadmin-columns';
-import {
-  Button,
-  DataTable,
-  DeleteConfirmationModal,
-  PageHeader,
-} from '@shared/components';
+import { Button, DataTable, DeleteConfirmationModal, PageHeader } from '@shared/components';
 import FormField from '@shared/components/FormField';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import { Input } from '@shared/components/ui/form/input';
@@ -19,7 +14,7 @@ import {
   SuperAdminsService,
   UserRole,
 } from '@wedding/api-types';
-import { Plus, Cog } from 'lucide-react';
+import { Cog, Plus } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -36,11 +31,14 @@ export default function SuperAdminManagementPage() {
 
   // Modal states
   const [isAddingSuperAdmin, setIsAddingSuperAdmin] = useState(false);
-  const [deleteConfirmSuperAdmin, setDeleteConfirmSuperAdmin] = useState<SuperAdminResponseDto | null>(null);
+  const [deleteConfirmSuperAdmin, setDeleteConfirmSuperAdmin] =
+    useState<SuperAdminResponseDto | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form data
-  const [newSuperAdmin, setNewSuperAdmin] = useState<Partial<CreateSuperAdminDto & { id?: number }>>({});
+  const [newSuperAdmin, setNewSuperAdmin] = useState<
+    Partial<CreateSuperAdminDto & { id?: number }>
+  >({});
 
   // Fetch super admins data
   useEffect(() => {
@@ -74,9 +72,9 @@ export default function SuperAdminManagementPage() {
   // Modal controls
   const openAddSuperAdminModal = () => {
     const generatedPassword = generateRandomPassword();
-    setNewSuperAdmin({ 
+    setNewSuperAdmin({
       role: UserRole.SUPER_ADMIN,
-      password: generatedPassword 
+      password: generatedPassword,
     });
     setIsAddingSuperAdmin(true);
   };
@@ -85,7 +83,6 @@ export default function SuperAdminManagementPage() {
     setIsAddingSuperAdmin(false);
     setNewSuperAdmin({});
   };
-
 
   const openDeleteConfirmModal = (superAdmin: SuperAdminResponseDto) => {
     setDeleteConfirmSuperAdmin(superAdmin);
@@ -99,7 +96,7 @@ export default function SuperAdminManagementPage() {
   const handleAddSuperAdmin = async () => {
     setIsSubmitting(true);
     try {
-      if (!newSuperAdmin.name || !newSuperAdmin.email || !newSuperAdmin.password ) {
+      if (!newSuperAdmin.name || !newSuperAdmin.email || !newSuperAdmin.password) {
         toast.error('Please fill in all required fields');
         return;
       }
@@ -125,7 +122,6 @@ export default function SuperAdminManagementPage() {
     }
   };
 
-
   const confirmDeleteSuperAdmin = async () => {
     if (!deleteConfirmSuperAdmin?.id) return;
 
@@ -145,7 +141,6 @@ export default function SuperAdminManagementPage() {
     }
   };
 
-
   const handleGeneratePassword = () => {
     const newPassword = generateRandomPassword();
     setNewSuperAdmin({ ...newSuperAdmin, password: newPassword });
@@ -155,58 +150,60 @@ export default function SuperAdminManagementPage() {
   // Add Super Admin Form Fields
   const superAdminFormFields = (
     superAdmin: Partial<CreateSuperAdminDto & { id?: number }>,
-    setSuperAdmin: React.Dispatch<React.SetStateAction<Partial<CreateSuperAdminDto & { id?: number }>>>,
+    setSuperAdmin: React.Dispatch<
+      React.SetStateAction<Partial<CreateSuperAdminDto & { id?: number }>>
+    >,
   ) => [
-    <div key='name' className='md:col-span-2'>
+    <div key="name" className="md:col-span-2">
       <FormField
-        label='Name *'
-        id='name'
-        type='text'
+        label="Name *"
+        id="name"
+        type="text"
         value={superAdmin.name || ''}
         onChange={(e) => setSuperAdmin({ ...superAdmin, name: e.target.value })}
         required
-        placeholder='Super Admin Name'
+        placeholder="Super Admin Name"
       />
     </div>,
 
-    <div key='email' className='md:col-span-2'>
+    <div key="email" className="md:col-span-2">
       <FormField
-        label='Email *'
-        id='email'
-        type='email'
+        label="Email *"
+        id="email"
+        type="email"
         value={superAdmin.email || ''}
         onChange={(e) => setSuperAdmin({ ...superAdmin, email: e.target.value })}
         required
-        placeholder='Email address'
+        placeholder="Email address"
       />
     </div>,
 
-    <div key='password' className='md:col-span-2'>
-      <div className='mt-4 gap-2 flex flex-col'>
-        <Label htmlFor='password'>Password *</Label>
-        <div className='relative w-full'>
+    <div key="password" className="md:col-span-2">
+      <div className="mt-4 gap-2 flex flex-col">
+        <Label htmlFor="password">Password *</Label>
+        <div className="relative w-full">
           <Input
-              id='password'
-              type='text'
-              value={superAdmin.password || ''}
-              onChange={(e) => setSuperAdmin({ ...superAdmin, password: e.target.value })}
-              required
-              placeholder='Generated password will appear here'
-              readOnly
-              className='w-full pr-10'
+            id="password"
+            type="text"
+            value={superAdmin.password || ''}
+            onChange={(e) => setSuperAdmin({ ...superAdmin, password: e.target.value })}
+            required
+            placeholder="Generated password will appear here"
+            readOnly
+            className="w-full pr-10"
           />
           <Button
-              type='button'
-              variant='ghost'
-              size='sm'
-              onClick={handleGeneratePassword}
-              className='absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100'
-              title='Click to regenerate random password'
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleGeneratePassword}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100"
+            title="Click to regenerate random password"
           >
-            <Cog className='h-4 w-4' />
+            <Cog className="h-4 w-4" />
           </Button>
         </div>
-        <p className='text-xs text-gray-500 mt-1'>
+        <p className="text-xs text-gray-500 mt-1">
           A secure password will be generated. The super admin can change it after first login.
         </p>
       </div>
@@ -219,71 +216,69 @@ export default function SuperAdminManagementPage() {
   });
 
   return (
-    <div className="w-full px-6 py-4">
-        <div className='flex items-center justify-between mb-6 flex-shrink-0'>
-        <PageHeader 
-            title='Super Admin Management' 
-            description='Manage super admins and their access levels'
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between">
+        <PageHeader
+          title="Super Admin Management"
+          description="Manage super admins and their access levels"
         />
         <Button onClick={openAddSuperAdminModal}>
-            <Plus className='w-4 h-4 mr-2' />
-            Add Super Admin
+          <Plus className="w-4 h-4 mr-2" />
+          Add Super Admin
         </Button>
-        </div>
+      </div>
 
-        {/* Add Super Admin Modal */}
-        <FormDialog
-            open={isAddingSuperAdmin}
-            onOpenChange={closeAddSuperAdminModal}
-            title='Add Super Admin'
-            isSubmitting={isSubmitting}
-            onSubmit={handleAddSuperAdmin}
-            onCancel={closeAddSuperAdminModal}
-            submitButtonText='Add Super Admin'
-            formFields={superAdminFormFields(newSuperAdmin, setNewSuperAdmin)}
-            noOfColumns={2}
-        />
+      {/* Add Super Admin Modal */}
+      <FormDialog
+        open={isAddingSuperAdmin}
+        onOpenChange={closeAddSuperAdminModal}
+        title="Add Super Admin"
+        isSubmitting={isSubmitting}
+        onSubmit={handleAddSuperAdmin}
+        onCancel={closeAddSuperAdminModal}
+        submitButtonText="Add Super Admin"
+        formFields={superAdminFormFields(newSuperAdmin, setNewSuperAdmin)}
+        noOfColumns={2}
+      />
 
-
-        {/* Super Admin List Table */}
-        <div className="w-full">
-          <DataTable
-            data={superAdmins}
-            columns={columns}
-            searchableColumns={[
+      {/* Super Admin List Table */}
+      <div className="w-full">
+        <DataTable
+          data={superAdmins}
+          columns={columns}
+          searchableColumns={[
             { id: 'name', placeholder: 'Search by name...' },
             { id: 'email', placeholder: 'Search by email...' },
-            ]}
-            enableSelection={false}
-            enableColumnVisibility={true}
-            enablePagination={true}
-            defaultPageSize={10}
-            title={`Super Admins (${superAdmins.length})`}
-            isLoading={isLoading}
-            loadingMessage='Loading super admins...'
-            emptyMessage='No super admins added yet.'
-            emptyDescription='Add a super admin using the "Add Super Admin" button.'
-            showCard={false}
-            className="w-full h-full"
-          />
-        </div>
-
-        {/* Delete Confirmation Modal */}
-        <DeleteConfirmationModal
-            open={!!deleteConfirmSuperAdmin}
-            onOpenChange={closeDeleteConfirmModal}
-            itemName={deleteConfirmSuperAdmin?.name || 'this super admin'}
-            description={
-            deleteConfirmSuperAdmin && (
-                <>
-                Are you sure you want to delete {deleteConfirmSuperAdmin.name}? This action cannot be
-                undone and will permanently remove their access to the system.
-                </>
-            )
-            }
-            onConfirm={confirmDeleteSuperAdmin}
-            onCancel={closeDeleteConfirmModal}
+          ]}
+          enableSelection={false}
+          enableColumnVisibility={true}
+          enablePagination={true}
+          defaultPageSize={10}
+          title={`Super Admins (${superAdmins.length})`}
+          isLoading={isLoading}
+          loadingMessage="Loading super admins..."
+          emptyMessage="No super admins added yet."
+          emptyDescription='Add a super admin using the "Add Super Admin" button.'
+          className="w-full h-full"
         />
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={!!deleteConfirmSuperAdmin}
+        onOpenChange={closeDeleteConfirmModal}
+        itemName={deleteConfirmSuperAdmin?.name || 'this super admin'}
+        description={
+          deleteConfirmSuperAdmin && (
+            <>
+              Are you sure you want to delete {deleteConfirmSuperAdmin.name}? This action cannot be
+              undone and will permanently remove their access to the system.
+            </>
+          )
+        }
+        onConfirm={confirmDeleteSuperAdmin}
+        onCancel={closeDeleteConfirmModal}
+      />
     </div>
   );
 }
