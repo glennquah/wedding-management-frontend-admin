@@ -8,6 +8,7 @@ export {
     CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi
 } from './ui/carousel'
 export { Checkbox } from './ui/checkbox'
+export { DatePicker } from './ui/date-picker'
 export { DeleteConfirmationModal } from './ui/delete-confirmation-modal'
 export { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
 export { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/form/dropdown-menu'

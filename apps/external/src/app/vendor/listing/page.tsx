@@ -34,13 +34,7 @@ export default function ListingPage() {
         <EmptyState
           icon={Calendar}
           title="No listings to display"
-          description="Create your first service listing to see it here as a card"
-          action={
-            <Button onClick={openAddForm} className="flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Create Your First Listing
-            </Button>
-          }
+          description="Create your first service listing to see it here"
         />
       );
     }
@@ -58,7 +52,7 @@ export default function ListingPage() {
   };
 
   const getListingGrid = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 lg:gap-6">
       {filteredListings.map((listing) => (
         <ListingCard
           key={listing.id}
@@ -83,40 +77,40 @@ export default function ListingPage() {
 
   const emptyState = getEmptyState();
   const listingCount = filteredListings.length === listings.length
-    ? `${listings.length} listings displayed as cards`
+    ? `${listings.length} listings`
     : `${filteredListings.length} of ${listings.length} listings match your filters`;
 
   return (
-    <div className="flex-1 min-h-screen bg-gradient-to-b from-white to-brand-100">
-      <div className="w-full px-6 py-4">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100">
+      <div className="w-full p-4 lg:p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
           <PageHeader
             title="My Listings"
             description="Manage your service listings and availability"
           />
-          <Button onClick={openAddForm} className="flex items-center gap-2 self-start md:self-auto">
+          <Button onClick={openAddForm} className="flex items-center gap-2 self-start lg:self-auto">
             <Plus className="w-4 h-4" />
             Add New Listing
           </Button>
         </div>
-      </div>
 
-      <div className="w-full px-6 mt-4">
-        <ListingFilters
-          filters={filters}
-          onFiltersChange={setFilters}
-          onClearFilters={clearFilters}
-        />
-      </div>
-
-      <div className="w-full px-6 mt-4">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">Card View</h2>
-            <p className="text-sm text-gray-600 mt-1">{listingCount}</p>
-          </div>
+        <div className="mb-6">
+          <ListingFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+            onClearFilters={clearFilters}
+          />
         </div>
-        {emptyState || getListingGrid()}
+
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">Your Listings</h2>
+              <p className="text-sm text-gray-600 mt-1">{listingCount}</p>
+            </div>
+          </div>
+          {emptyState || getListingGrid()}
+        </div>
       </div>
 
       <ListingFormDialog

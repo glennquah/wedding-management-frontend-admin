@@ -13,13 +13,15 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex h-screen">
+      <div className="flex h-screen w-full">
         <VendorSidebar />
-        <main className="relative flex-1 overflow-auto">
+        <main className="relative flex-1 overflow-auto min-w-0">
           <div className="absolute left-2 top-4 z-50">
             <SidebarTrigger />
           </div>
-          {children}
+          <div className="w-full h-full">
+            {children}
+          </div>
         </main>
       </div>
     </SidebarProvider>
