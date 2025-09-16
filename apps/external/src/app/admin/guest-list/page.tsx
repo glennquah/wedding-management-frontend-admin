@@ -321,7 +321,7 @@ export default function GuestListPage() {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
-      {!isMobile && <div className="mt-[72px] w-full"></div>}
+      {!isMobile && <div className="mt-6 w-full"></div>}
 
       <div className="container mx-auto px-4 pt-4 md:pt-6">
         <PageHeader

@@ -26,11 +26,9 @@ import FormField from '@shared/components/FormField';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import { MultiSelectDropdown } from '@shared/components/ui/form/multiSelectDropdown';
 import { SingleSelectDropdown } from '@shared/components/ui/form/singleSelectDropdown';
-import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
 import { ColumnDef } from '@tanstack/react-table';
 
 export default function VendorListPage() {
-  const isMobile = useIsMobileScreen();
   const {
     // Core data
     vendors,
