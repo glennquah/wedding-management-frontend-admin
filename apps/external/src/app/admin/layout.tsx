@@ -5,7 +5,7 @@ import { UserRole } from '@shared/api';
 import NavigationBar from '@shared/components/NavigationBar';
 import { SidebarProvider } from '@shared/components/ui/sidebar';
 import { Toaster } from '@shared/components/ui/sonner';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -39,7 +39,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Main content area */}
         <div className="flex-1 flex flex-col min-w-0">
-          <NavigationBar session={session} />
+          <NavigationBar session={session} signOut={signOut} />
           <main className="flex-1 overflow-y-auto">{children}</main>
         </div>
       </div>
