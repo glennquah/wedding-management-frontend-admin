@@ -65,6 +65,18 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
 
+  cookies: {
+    sessionToken: {
+      name: 'next-auth.session-token-external',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
+  },
+
   callbacks: {
     async jwt({ token, user }) {
       if (user) return { ...token, ...user };
