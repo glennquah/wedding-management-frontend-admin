@@ -39,6 +39,11 @@ export default withAuth(
     callbacks: {
       authorized: () => true,
     },
+    cookies: {
+      sessionToken: {
+        name: 'next-auth.session-token-external',
+      },
+    },
   },
 );
 
