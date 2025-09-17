@@ -96,7 +96,7 @@ export const getAdminColumns = ({
       accessorKey: 'isSuspended',
       header: 'Status',
       cell: ({ row }) => (
-        <Badge variant={row.getValue('isSuspended') ? 'destructive' : 'default'}>
+        <Badge variant={row.getValue('isSuspended') ? 'destructive' : 'outline'}>
           {row.getValue('isSuspended') ? 'Suspended' : 'Active'}
         </Badge>
       ),
