@@ -64,6 +64,7 @@ export const getWeddingFormFields = ({ wedding, setWedding }: WeddingFormFieldsP
       value={wedding.date || ''}
       onChange={(e) => setWedding({ ...wedding, date: e.target.value })}
       placeholder="Select wedding date"
+      min={new Date().toISOString().split('T')[0]}
     />
   </div>,
 
@@ -218,10 +219,11 @@ export const getEditWeddingFormFields = ({ wedding, setWedding }: EditWeddingFor
       value={wedding.date || ''}
       onChange={(e) => setWedding({ ...wedding, date: e.target.value })}
       placeholder="Select wedding date"
+      min={new Date().toISOString().split('T')[0]}
     />
   </div>,
 
-  <div key="weddingType" className="md:col-span">
+  <div key="weddingType" className="md:col-span-1">
     <div className="mt-4 gap-2 flex flex-col">
       <Label htmlFor="weddingType">Wedding Type</Label>
       <Select

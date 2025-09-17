@@ -170,11 +170,7 @@ export const getWeddingColumns = ({
           return <div className="text-sm text-muted-foreground">No services</div>;
         }
 
-        const serviceNames = services
-          .slice(0, 2)
-          .map((s) => capitalizeFirst(s))
-          .join(', ');
-        const additionalCount = services.length > 2 ? ` +${services.length - 2} more` : '';
+        const serviceNames = services.map((s) => capitalizeFirst(s)).join(', ');
 
         return (
           <div
@@ -182,7 +178,6 @@ export const getWeddingColumns = ({
             title={services.map((s) => capitalizeFirst(s)).join(', ')}
           >
             {serviceNames}
-            {additionalCount}
           </div>
         );
       },

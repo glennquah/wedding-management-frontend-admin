@@ -111,21 +111,49 @@ export default function WeddingManagementPage() {
     setDeleteConfirmWedding(null);
   };
 
+  const validateWeddingForm = (wedding: Partial<CreateWeddingDto>): string | null => {
+    if (!wedding.name?.trim()) {
+      return 'Wedding name is required';
+    }
+    if (!wedding.weddingType) {
+      return 'Wedding type is required';
+    }
+    if (!wedding.budgetBucket) {
+      return 'Budget range is required';
+    }
+    if (!wedding.guestCountBucket) {
+      return 'Guest count is required';
+    }
+    if (!wedding.preferredStyle) {
+      return 'Preferred style is required';
+    }
+    if (!wedding.preferredServices || wedding.preferredServices.length === 0) {
+      return 'At least one preferred service is required';
+    }
+
+    if (wedding.date) {
+      const selectedDate = new Date(wedding.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (selectedDate < today) {
+        return 'Wedding date cannot be in the past';
+      }
+    }
+
+    return null;
+  };
+
+  const isFormValid = validateWeddingForm(newWedding) === null;
+
   // Handlers
   const handleAddWedding = async () => {
     setIsSubmitting(true);
     try {
-      // Basic required fields validation
-      if (
-        !newWedding.name ||
-        !newWedding.weddingType ||
-        !newWedding.budgetBucket ||
-        !newWedding.guestCountBucket ||
-        !newWedding.preferredStyle ||
-        !newWedding.preferredServices ||
-        newWedding.preferredServices.length === 0
-      ) {
-        toast.error('Please fill in all required fields');
+      // Validate required fields
+      const validationError = validateWeddingForm(newWedding);
+      if (validationError) {
+        toast.error(validationError);
         return;
       }
 
@@ -230,6 +258,7 @@ export default function WeddingManagementPage() {
           setWedding: setNewWedding,
         })}
         noOfColumns={2}
+        disabled={!isFormValid}
       />
 
       {/* Wedding Table with Edit/Delete Modals */}
