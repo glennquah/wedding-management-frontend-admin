@@ -69,6 +69,7 @@ export {
 
 // Tables
 export { AdminTable } from './AdminTable';
+export { WeddingTable } from './WeddingTable';
 
 // Utilities
 export { cn } from './lib/utils';
