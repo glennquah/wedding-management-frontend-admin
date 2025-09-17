@@ -17,6 +17,7 @@ interface AdminTableProps {
   editAdmin: Partial<UpdateAdminDto & { id?: number }>;
   setEditAdmin: React.Dispatch<React.SetStateAction<Partial<UpdateAdminDto & { id?: number }>>>;
   isSubmitting: boolean;
+  isEditFormValid?: boolean;
 
   // Delete Modal State
   deleteConfirmAdmin: AdminResponseDto | null;
@@ -39,6 +40,7 @@ export const AdminTable: React.FC<AdminTableProps> = ({
   editAdmin,
   setEditAdmin,
   isSubmitting,
+  isEditFormValid = true,
   deleteConfirmAdmin,
   onEditAdmin,
   onDeleteAdmin,
@@ -91,6 +93,7 @@ export const AdminTable: React.FC<AdminTableProps> = ({
           handleGeneratePassword: handleEditPasswordGenerate,
         })}
         noOfColumns={2}
+        disabled={!isEditFormValid}
       />
 
       {/* Delete Confirmation Modal */}

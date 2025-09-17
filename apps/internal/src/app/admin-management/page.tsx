@@ -144,15 +144,32 @@ export default function AdminManagementPage() {
     }
   };
 
+  // Validation helper for edit admin
+  const validateEditAdmin = (admin: Partial<UpdateAdminDto & { id?: number }>): boolean => {
+    return !!(admin.name?.trim() && admin.email?.trim());
+  };
+
+  const isEditFormValid = validateEditAdmin(editAdmin);
+
   const handleEditAdmin = async () => {
     if (!editAdmin.id) return;
 
     setIsSubmitting(true);
     try {
+      // Validate admin name
+      if (!editAdmin.name?.trim()) {
+        toast.error('Admin name is required');
+        return;
+      }
+
+      if (!editAdmin.email?.trim()) {
+        toast.error('Admin email is required');
+        return;
+      }
+
       const updateData: UpdateAdminDto = {
         name: editAdmin.name,
         email: editAdmin.email,
-        password: editAdmin.password,
         role: editAdmin.role || UserRole.ADMIN,
       };
 
@@ -244,6 +261,7 @@ export default function AdminManagementPage() {
           editAdmin={editAdmin}
           setEditAdmin={setEditAdmin}
           isSubmitting={isSubmitting}
+          isEditFormValid={isEditFormValid}
           deleteConfirmAdmin={deleteConfirmAdmin}
           onEditAdmin={openEditAdminModal}
           onDeleteAdmin={openDeleteConfirmModal}
