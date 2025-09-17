@@ -118,7 +118,7 @@ export function useVendorManager() {
       errors.email = 'Please enter a valid email address';
     }
 
-    if (vendorData.capacity == 0) {
+    if (vendorData.serviceOffered == WeddingService.VENUE && vendorData.capacity == 0) {
       errors.capacity = 'Venue capacity cannot be 0';
     }
 
