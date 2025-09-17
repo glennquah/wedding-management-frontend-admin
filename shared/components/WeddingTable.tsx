@@ -3,7 +3,7 @@ import React from 'react';
 import { DataTable, DeleteConfirmationModal } from './index';
 import { FormDialog } from './ui/form/form-dialog';
 import { getWeddingColumns } from '@shared/columns/wedding-columns';
-import { WeddingResponseDto, UpdateWeddingDto } from '@wedding/api-types';
+import { UpdateWeddingDto, WeddingResponseDto } from '@wedding/api-types';
 
 interface WeddingTableProps {
   // Data
@@ -35,8 +35,6 @@ export const WeddingTable: React.FC<WeddingTableProps> = ({
   weddings,
   isLoading,
   isEditingWedding,
-  editWedding,
-  setEditWedding,
   isSubmitting,
   deleteConfirmWedding,
   onEditWedding,
