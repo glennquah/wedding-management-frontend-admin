@@ -19,7 +19,7 @@ export default withAuth(
     ];
 
     // Allow access to public pages
-    if (publicPages.some(page => pathname.startsWith(page))) {
+    if (publicPages.some((page) => pathname.startsWith(page))) {
       return NextResponse.next();
     }
 
@@ -47,7 +47,7 @@ export const config = {
     /*
      * Match all request paths except for the ones we want to exclude
      * - api (API routes)
-     * - _next/static (static files)  
+     * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
