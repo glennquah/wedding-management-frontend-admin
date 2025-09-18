@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { GuestCountBucket as SeatingGuestCountBucket } from '../../../lib/seating';
 import { useGuestManager } from '../../hooks/useGuestManager';
@@ -10,9 +10,8 @@ import { PriorityRankingDialog } from './components/PriorityRankingDialog';
 import { SeatingVisualization } from './components/SeatingVisualization';
 import { ConfirmationStatus, GuestCountBucket } from '@shared/api';
 import { PageHeader } from '@shared/components';
-import { Button } from '@shared/components/ui/button';
-import { Settings2 } from 'lucide-react';
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
+import { Settings2 } from 'lucide-react';
 
 // Mapping from API GuestCountBucket to Seating GuestCountBucket
 const mapGuestCountBucket = (bucket: GuestCountBucket): SeatingGuestCountBucket => {
@@ -42,11 +41,11 @@ export default function SeatingArrangementPage() {
     seatingArrangement,
     isOptimizing,
     isLoadingLayout,
-    isLoadingArrangement,
     optimizeSeating,
     loadLayout,
     loadSeatingArrangementWithLayout,
     saveGroupPriorities,
+    moveGuest,
   } = useSeatingManager(wedding?.id);
 
   // Get group priorities from seating arrangement or initialize empty
@@ -57,9 +56,71 @@ export default function SeatingArrangementPage() {
     (guest) => guest.confirmationStatus === ConfirmationStatus.CONFIRMED,
   );
 
+  // Separate primary and accompanying confirmed guests for clarity
+  const confirmedPrimaryGuests = confirmedGuests.filter((guest) => !guest.primaryGuestId);
+  const confirmedAccompanyingGuests = confirmedGuests.filter((guest) => guest.primaryGuestId);
+
   // Calculate stats
   const totalConfirmed = confirmedGuests.length;
   const availableSeats = layout ? layout.tables.length * 10 : 0;
+
+  const {
+    guestRequests,
+    totalSeatCount,
+    orphanedAccompanyingGuests,
+    accompanyingByPrimary,
+    primaryRequestsById,
+  } = useMemo(() => {
+    const primaryGuestIds = new Set(confirmedPrimaryGuests.map((g) => g.id));
+    const accompanyingMap = confirmedAccompanyingGuests.reduce<Record<number, string[]>>(
+      (acc, guest) => {
+        const primaryId = guest.primaryGuestId;
+        if (primaryId && primaryGuestIds.has(primaryId)) {
+          if (!acc[primaryId]) {
+            acc[primaryId] = [];
+          }
+          acc[primaryId].push(guest.name);
+        }
+        return acc;
+      },
+      {},
+    );
+
+    const orphaned = confirmedAccompanyingGuests.filter(
+      (guest) => guest.primaryGuestId && !primaryGuestIds.has(guest.primaryGuestId),
+    );
+
+    const primaryRequests = confirmedPrimaryGuests.map((guest) => ({
+      name: guest.name,
+      group: guest.group || 'Others',
+      plus_ones: accompanyingMap[guest.id] || [],
+    }));
+
+    const primaryRequestMap: Record<number, (typeof primaryRequests)[number]> = {};
+    confirmedPrimaryGuests.forEach((guest, index) => {
+      primaryRequestMap[guest.id] = primaryRequests[index];
+    });
+
+    const orphanedRequests = orphaned.map((guest) => ({
+      name: guest.name,
+      group: guest.group || 'Others',
+      plus_ones: [],
+    }));
+
+    const allRequests = [...primaryRequests, ...orphanedRequests];
+    const seats = allRequests.reduce((sum, req) => sum + 1 + req.plus_ones.length, 0);
+
+    return {
+      guestRequests: allRequests,
+      totalSeatCount: seats,
+      orphanedAccompanyingGuests: orphaned,
+      accompanyingByPrimary: accompanyingMap,
+      primaryRequestsById: primaryRequestMap,
+    };
+  }, [confirmedPrimaryGuests, confirmedAccompanyingGuests]);
+
+  const seatablePrimaryCount = confirmedPrimaryGuests.length;
+  const seatableAccompanyingCount = totalSeatCount - seatablePrimaryCount;
 
   // Auto-set guest count bucket from wedding data and load seating arrangement with layout
   useEffect(() => {
@@ -79,7 +140,7 @@ export default function SeatingArrangementPage() {
   }, [guestCountBucket, loadLayout, seatingArrangement]);
 
   const handleOptimizeSeating = async () => {
-    if (!guestCountBucket || confirmedGuests.length === 0) return;
+    if (!guestCountBucket || confirmedPrimaryGuests.length === 0) return;
 
     // Always show priority dialog when generate seating is clicked
     setShowPriorityDialog(true);
@@ -90,22 +151,26 @@ export default function SeatingArrangementPage() {
       await saveGroupPriorities(priorities);
       setShowPriorityDialog(false);
 
-      // Now proceed with seating optimization
-      const guestRequests = confirmedGuests
-        .filter((guest) => !guest.primaryGuestId) // Only primary guests
-        .map((guest) => {
-          const accompanyingGuests = confirmedGuests
-            .filter((g) => g.primaryGuestId === guest.id)
-            .map((g) => g.name);
-
-          return {
-            name: guest.name,
-            group: guest.group || 'Others',
-            plus_ones: accompanyingGuests,
-          };
-        });
-
       if (!guestCountBucket) return;
+
+      if (orphanedAccompanyingGuests.length > 0) {
+        // Check what happened to their primary guests
+        const orphanedPrimaryIds = [
+          ...new Set(orphanedAccompanyingGuests.map((g) => g.primaryGuestId)),
+        ];
+        orphanedPrimaryIds.forEach((primaryId) => {
+          const primaryGuest = guests.find((g) => g.id === primaryId);
+        });
+      }
+
+      // Also check if any primary guests have no accompanying guests when they should
+      confirmedPrimaryGuests.forEach((primaryGuest) => {
+        const expectedAccompanying = accompanyingByPrimary[primaryGuest.id] || [];
+        const req = primaryRequestsById[primaryGuest.id];
+        if (!req) {
+          return;
+        }
+      });
 
       const request = {
         guests: guestRequests,
@@ -119,7 +184,6 @@ export default function SeatingArrangementPage() {
       // You might want to show a toast notification here
     }
   };
-
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
@@ -135,7 +199,7 @@ export default function SeatingArrangementPage() {
           isButtonDisabled={
             isOptimizing ||
             !guestCountBucket ||
-            confirmedGuests.length === 0 ||
+            confirmedPrimaryGuests.length === 0 ||
             isLoadingLayout ||
             isLoadingWedding
           }
@@ -147,6 +211,7 @@ export default function SeatingArrangementPage() {
             layout={layout}
             seatingResult={seatingResult}
             isLoading={isOptimizing || isLoadingLayout}
+            onGuestMove={moveGuest}
           />
         )}
 
@@ -161,7 +226,7 @@ export default function SeatingArrangementPage() {
           </div>
         )}
 
-        {confirmedGuests.length === 0 && (
+        {confirmedPrimaryGuests.length === 0 && (
           <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-yellow-800 text-sm">
               ℹ️ No confirmed guests found. Make sure to confirm your guests in the Guest List page

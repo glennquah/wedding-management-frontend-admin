@@ -1,21 +1,58 @@
 import { useState } from 'react';
 
 import { HallLayout, SeatingResult } from '../../../../lib/seating';
-import { Card } from '@shared/components/ui/card';
 import { Skeleton } from '@shared/components/ui/skeleton';
+import { TableDropZone } from './TableDropZone';
 
 interface SeatingVisualizationProps {
   layout: HallLayout;
   seatingResult?: SeatingResult | null;
   isLoading?: boolean;
+  onGuestMove?: (guestName: string, fromTable: string, toTable: string) => void;
 }
 
 export function SeatingVisualization({
   layout,
   seatingResult,
   isLoading,
+  onGuestMove,
 }: SeatingVisualizationProps) {
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
+  const [draggedGuest, setDraggedGuest] = useState<{ name: string; fromTable: string } | null>(null);
+  const [dragOverTable, setDragOverTable] = useState<string | null>(null);
+
+  // Drag and drop handlers
+  const handleGuestDragStart = (guestName: string, fromTable: string) => {
+    setDraggedGuest({ name: guestName, fromTable });
+  };
+
+  const handleGuestDragEnd = () => {
+    setDraggedGuest(null);
+    setDragOverTable(null);
+  };
+
+  const handleTableDragOver = (e: React.DragEvent, tableId: string) => {
+    e.preventDefault();
+    setDragOverTable(tableId);
+  };
+
+  const handleTableDragLeave = () => {
+    setDragOverTable(null);
+  };
+
+  const handleTableDrop = (e: React.DragEvent, toTable: string) => {
+    e.preventDefault();
+    try {
+      const guestInfo = JSON.parse(e.dataTransfer.getData('text/plain'));
+      if (guestInfo && guestInfo.fromTable !== toTable && onGuestMove) {
+        onGuestMove(guestInfo.name, guestInfo.fromTable, toTable);
+      }
+    } catch (error) {
+      console.error('Error handling drop:', error);
+    }
+    setDraggedGuest(null);
+    setDragOverTable(null);
+  };
 
   if (isLoading) {
     return (
@@ -266,32 +303,39 @@ export function SeatingVisualization({
         </div>
       </div>
 
-      {/* Table Assignments Overview */}
+      {/* Table Assignments Overview with Drag & Drop */}
       {seatingResult?.seating_arrangement && (
         <div className="space-y-4">
-          <h4 className="text-lg font-semibold">Table Assignments</h4>
+          <div className="flex items-center justify-between">
+            <h4 className="text-lg font-semibold">Table Assignments</h4>
+            {onGuestMove && (
+              <p className="text-sm text-gray-600">
+                💡 Drag guests between tables to rearrange seating
+              </p>
+            )}
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Object.entries(seatingResult.seating_arrangement)
-              .filter(([, guests]) => guests.length > 0)
               .sort(([a], [b]) => parseInt(a) - parseInt(b))
-              .map(([tableId, guests]) => (
-                <Card key={tableId} className="p-4">
-                  <h5 className="font-semibold mb-3 text-brand-600">
-                    Table {tableId} ({guests.length} guests)
-                  </h5>
-                  <div className="space-y-2">
-                    {guests.map((guest, index) => (
-                      <div
-                        key={index}
-                        className="text-sm text-muted-foreground flex items-center gap-2"
-                      >
-                        <span className="w-2 h-2 bg-brand-500 rounded-full"></span>
-                        {guest}
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              ))}
+              .map(([tableId, guests]) => {
+                const tableCapacity = layout.tables.find(t => t.id.toString() === tableId)?.capacity || 10;
+                return (
+                  <TableDropZone
+                    key={tableId}
+                    tableId={tableId}
+                    guests={guests}
+                    capacity={tableCapacity}
+                    isDropTarget={dragOverTable === tableId}
+                    draggedGuest={draggedGuest}
+                    onDragOver={handleTableDragOver}
+                    onDragLeave={handleTableDragLeave}
+                    onDrop={handleTableDrop}
+                    onGuestDragStart={handleGuestDragStart}
+                    onGuestDragEnd={handleGuestDragEnd}
+                  />
+                );
+              })}
           </div>
         </div>
       )}

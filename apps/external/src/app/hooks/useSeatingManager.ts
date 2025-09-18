@@ -195,6 +195,71 @@ export function useSeatingManager(weddingId?: number) {
     [weddingId],
   );
 
+  // Function to move a guest between tables
+  const moveGuest = useCallback(
+    async (guestName: string, fromTable: string, toTable: string) => {
+      if (!seatingResult?.seating_arrangement) return;
+
+      // Update the local seating result immediately for optimistic UI
+      const updatedArrangement = { ...seatingResult.seating_arrangement };
+
+      // Remove guest from source table
+      const fromTableId = parseInt(fromTable);
+      const toTableId = parseInt(toTable);
+
+      if (updatedArrangement[fromTableId]) {
+        updatedArrangement[fromTableId] = updatedArrangement[fromTableId].filter(
+          (guest) => guest !== guestName
+        );
+      }
+
+      // Add guest to destination table
+      if (!updatedArrangement[toTableId]) {
+        updatedArrangement[toTableId] = [];
+      }
+      updatedArrangement[toTableId].push(guestName);
+
+      // Update the seating result state
+      setSeatingResult({
+        ...seatingResult,
+        seating_arrangement: updatedArrangement,
+      });
+
+      // Convert back to tables array format and save to database
+      try {
+        const tables: string[][] = [];
+        const maxTableId = Math.max(...Object.keys(updatedArrangement).map(Number));
+
+        for (let i = 1; i <= maxTableId; i++) {
+          tables[i - 1] = updatedArrangement[i] || [];
+        }
+
+        if (weddingId) {
+          const updatedSeatingArrangement = await SeatingAPI.setTables(weddingId, tables);
+          setSeatingArrangement(updatedSeatingArrangement);
+        }
+      } catch (error) {
+        console.error('Error saving guest move:', error);
+        // Revert the optimistic update on error
+        // You might want to show a toast notification here
+        const revertedArrangement = { ...seatingResult.seating_arrangement };
+        if (!revertedArrangement[fromTableId]) {
+          revertedArrangement[fromTableId] = [];
+        }
+        revertedArrangement[fromTableId].push(guestName);
+        revertedArrangement[toTableId] = revertedArrangement[toTableId].filter(
+          (guest) => guest !== guestName
+        );
+
+        setSeatingResult({
+          ...seatingResult,
+          seating_arrangement: revertedArrangement,
+        });
+      }
+    },
+    [seatingResult, weddingId],
+  );
+
   return {
     guestCountBucket,
     setGuestCountBucket,
@@ -209,5 +274,6 @@ export function useSeatingManager(weddingId?: number) {
     loadSeatingArrangement,
     loadSeatingArrangementWithLayout,
     saveGroupPriorities,
+    moveGuest,
   };
 }
