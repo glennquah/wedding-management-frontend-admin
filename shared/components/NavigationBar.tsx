@@ -1,23 +1,17 @@
 'use client';
 
 import { Button } from '@shared/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@shared/components/ui/form/dropdown-menu';
 import { SidebarTrigger } from '@shared/components/ui/sidebar';
-import { Bell, ChevronsUpDown, LogOut, Settings, User } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { Session } from 'next-auth';
 import { useRouter } from 'next/navigation';
 
 interface NavigationBarProps {
   session: Session | null;
-  signOut: () => void;
+  additionalTabs?: React.ReactNode;
 }
 
-const NavigationBar = ({ session, signOut }: NavigationBarProps) => {
+const NavigationBar = ({ session, additionalTabs }: NavigationBarProps) => {
   const router = useRouter();
 
   return (
@@ -41,35 +35,7 @@ const NavigationBar = ({ session, signOut }: NavigationBarProps) => {
             <span className="sr-only">Notifications</span>
           </Button>
 
-          {/* User menu */}
-          {session?.user && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 gap-2 px-2">
-                  <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center">
-                    <User size={14} />
-                  </div>
-                  <span className="text-sm text-foreground">{session.user.name}</span>
-                  <ChevronsUpDown size={14} className="text-muted-foreground/80" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem disabled>Role: {session.user.role}</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/profile')}>
-                  <User size={16} className="mr-2" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/settings')}>
-                  <Settings size={16} className="mr-2" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-red-600" onClick={() => signOut()}>
-                  <LogOut size={16} className="mr-2" />
-                  Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+          {additionalTabs}
         </div>
       </div>
     </header>

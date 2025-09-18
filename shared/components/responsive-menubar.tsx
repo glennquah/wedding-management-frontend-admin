@@ -1,17 +1,14 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import useIsMobileScreen from "../hooks/useIsMobileScreen";
-import { Button } from "./ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger
-} from "./ui/sheet";
+import { useEffect, useState } from 'react';
 
-export const menubar_items = ["Essentials", "Guest & Vendor", "The Big Day"];
+import useIsMobileScreen from '../hooks/useIsMobileScreen';
+import { Button } from './ui/button';
+import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
+
+export const menubar_items = ['Essentials', 'Guest & Vendor', 'The Big Day'];
 
 const MobileMenubar = () => {
   const [isClient, setIsClient] = useState(false);
@@ -30,18 +27,18 @@ const MobileMenubar = () => {
     <div className="fixed top-6 z-[100] ml-[0.8rem] flex w-[calc(100vw-1.75rem)] items-center justify-between rounded-3xl bg-base-white px-6 py-1 shadow-md">
       {/* LG Icon Far-left */}
       <div
-        onClick={() => router.push("/")}
+        onClick={() => router.push('/')}
         className="m-[-16px] mt-[-14px] cursor-pointer p-2 flex items-center"
         style={{ minWidth: 40, minHeight: 40 }}
       >
-          <Image
-            src="/images/logo-single.png"
-            alt="Logo"
-            width={25}
-            height={25}
-            className="w-auto object-contain"
-            priority
-          />
+        <Image
+          src="/images/logo-single.png"
+          alt="Logo"
+          width={25}
+          height={25}
+          className="w-auto object-contain"
+          priority
+        />
       </div>
       {/* Hamburger menubar */}
       <div className="flex items-center gap-4 ">
@@ -62,7 +59,7 @@ const MobileMenubar = () => {
                     <div
                       key={item}
                       className={`hover:font-bold font-normal text-lg hover:text-red cursor-pointer ${
-                        isActive ? "font-bold text-red" : "font-light"
+                        isActive ? 'font-bold text-red' : 'font-light'
                       }`}
                       onClick={() =>
                         !isActive && router.push(`/${item.toLowerCase().replace(/\s+/g, '-')}`)
@@ -72,8 +69,8 @@ const MobileMenubar = () => {
                     </div>
                     {isLast && (
                       <Button
-                        variant={"ghost"}
-                        onClick={() => router.push("/vendor")}
+                        variant={'ghost'}
+                        onClick={() => router.push('/for-businesses')}
                         className="text-base text-secondary hover:bg-secondary/10"
                       >
                         For Businesses
@@ -83,16 +80,13 @@ const MobileMenubar = () => {
                 );
               })}
               <Button
-                variant={"default"}
-                onClick={() => router.push("/get-started")}
+                variant={'default'}
+                onClick={() => router.push('/get-started')}
                 className="-mb-2"
               >
                 Get Started
               </Button>
-              <Button
-                variant={"ghost"}
-                onClick={() => router.push("/login")}
-              >
+              <Button variant={'ghost'} onClick={() => router.push('/login')}>
                 Login
               </Button>
             </div>
@@ -136,7 +130,7 @@ const DesktopMenubar = () => {
       {/* Left: Logo + Menubar Items */}
       <div className="flex items-center gap-8">
         <div
-          onClick={() => router.push("/")}
+          onClick={() => router.push('/')}
           className="m-[-16px] cursor-pointer p-2 flex items-center"
         >
           <Image
@@ -161,16 +155,16 @@ const DesktopMenubar = () => {
                   }
                   className={`font-medium ${
                     isActive
-                      ? "cursor-not-allowed"
-                      : "cursor-pointer hover:font-bold hover:text-red"
+                      ? 'cursor-not-allowed'
+                      : 'cursor-pointer hover:font-bold hover:text-red'
                   }`}
                 >
                   {item}
                 </h6>
                 {isLast && (
                   <Button
-                    variant={"ghost"}
-                    onClick={() => router.push("/vendor")}
+                    variant={'ghost'}
+                    onClick={() => router.push('/for-businesses')}
                     className="font-montserrat text-lg text-secondary hover:bg-secondary/10"
                   >
                     For Businesses
@@ -183,18 +177,12 @@ const DesktopMenubar = () => {
       </div>
       {/* Right: Buttons */}
       <div className="flex items-center gap-2">
-            <Button
-                variant={"default"}
-                onClick={() => router.push("/get-started")}
-              >
-                Get Started
-              </Button>
-              <Button
-                variant={"darkOutline"}
-                onClick={() => router.push("/login")}
-              >
-                Login
-              </Button>
+        <Button variant={'default'} onClick={() => router.push('/get-started')}>
+          Get Started
+        </Button>
+        <Button variant={'darkOutline'} onClick={() => router.push('/login')}>
+          Login
+        </Button>
       </div>
     </div>
   );

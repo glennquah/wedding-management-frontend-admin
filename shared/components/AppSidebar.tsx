@@ -21,7 +21,7 @@ import {
   SidebarMenuItem,
 } from './ui/sidebar';
 import { ChevronUp, LogOut, Settings, User, UserCircle } from 'lucide-react';
-import { signOut, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -41,7 +41,7 @@ const profileItems = [
 
 export default function AppSidebar({
   tabs,
-  platform = 'external',
+  signOut,
 }: {
   tabs: Array<{
     sectionHeader: string;
@@ -51,7 +51,7 @@ export default function AppSidebar({
       icon: React.ComponentType<{ className?: string }>;
     }>;
   }>;
-  platform?: 'external' | 'internal';
+  signOut?: () => void;
 }) {
   const { data: session } = useSession();
   return (
@@ -105,7 +105,8 @@ export default function AppSidebar({
               <ChevronUp className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent className="w-52">
+            <DropdownMenuItem disabled>Role: {session?.user.role}</DropdownMenuItem>
             {profileItems.map((item) => (
               <DropdownMenuItem key={item.title} asChild>
                 <Link href={item.href} className="flex items-center">
@@ -115,13 +116,9 @@ export default function AppSidebar({
               </DropdownMenuItem>
             ))}
             <Separator className="my-2" />
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem asChild className="text-red-600">
               <button
-                onClick={() =>
-                  platform === 'internal'
-                    ? signOut({ callbackUrl: window.location.origin, redirect: false })
-                    : signOut()
-                }
+                onClick={() => signOut && signOut()}
                 className="flex w-full items-center text-bold"
               >
                 <LogOut className="mr-2 h-4 w-4" />

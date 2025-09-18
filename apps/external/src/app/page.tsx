@@ -175,7 +175,11 @@ export default function LandingPage() {
             effective B2B tools empower you to grow your business and manage everything in one
             place.
           </p>
-          <Button variant={'secondary'} className="mt-6" onClick={() => router.push('/vendor')}>
+          <Button
+            variant={'secondary'}
+            className="mt-6"
+            onClick={() => router.push('/for-businesses')}
+          >
             Learn More
           </Button>
         </div>

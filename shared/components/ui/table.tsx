@@ -254,14 +254,14 @@ function DataTable<TData>({
     <div className={cn('space-y-4', className)}>
       {/* Filters and controls */}
       {!isLoading && (
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
             {/* Search input for searchable columns */}
             {searchableColumns.length > 0 && (
-              <div className="relative">
+              <div className="relative w-full sm:w-auto">
                 <Input
                   ref={searchInputRef}
-                  className="min-w-60 ps-9 border-border text-gray-800 placeholder:text-gray-600"
+                  className="w-full sm:min-w-60 ps-9 border-border text-gray-800 placeholder:text-gray-600"
                   value={
                     (table.getColumn(String(searchableColumns[0].id))?.getFilterValue() ??
                       '') as string
@@ -282,9 +282,9 @@ function DataTable<TData>({
             {enableColumnVisibility && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="darkOutline">
-                    <Columns3Icon className="mr-2 -ms-1 opacity-60" size={16} aria-hidden="true" />
-                    View
+                  <Button variant="darkOutline" className="shrink-0">
+                    <Columns3Icon className="sm:mr-2 -ms-1 opacity-60" size={16} aria-hidden="true" />
+                    <span className="hidden sm:inline">View</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -415,7 +415,7 @@ function DataTable<TData>({
 
           {/* Pagination */}
           {enablePagination && (
-            <div className="flex items-center justify-between gap-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-8">
               <div className="flex items-center gap-3 text-gray-800">
                 <Label htmlFor={`${id}-page-size`}>Rows per page</Label>
                 <Select
@@ -447,17 +447,18 @@ function DataTable<TData>({
                 </Select>
               </div>
 
-              <div className="text-muted-foreground text-sm">
-                {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}-
-                {Math.min(
-                  (table.getState().pagination.pageIndex + 1) *
-                    table.getState().pagination.pageSize,
-                  table.getRowCount(),
-                )}{' '}
-                of {table.getRowCount()}
-              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="text-muted-foreground text-sm whitespace-nowrap">
+                  {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}-
+                  {Math.min(
+                    (table.getState().pagination.pageIndex + 1) *
+                      table.getState().pagination.pageSize,
+                    table.getRowCount(),
+                  )}{' '}
+                  of {table.getRowCount()}
+                </div>
 
-              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 justify-center sm:justify-start">
                 <Button
                   size="sm"
                   variant="darkOutline"
@@ -494,6 +495,7 @@ function DataTable<TData>({
                 >
                   <ChevronLastIcon size={16} />
                 </Button>
+                </div>
               </div>
             </div>
           )}

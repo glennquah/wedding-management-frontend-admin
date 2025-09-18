@@ -39,14 +39,11 @@ export default function GuestManagementPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal states
-  const [isAddingGuest, setIsAddingGuest] = useState(false);
   const [editingGuest, setEditingGuest] = useState<GuestResponseDto | null>(null);
   const [deleteConfirmGuest, setDeleteConfirmGuest] = useState<GuestResponseDto | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailModalGuest, setEmailModalGuest] = useState<GuestResponseDto | null>(null);
 
-  // Form data
-  const [newGuest, setNewGuest] = useState<Partial<CreateGuestDto & { id?: number }>>({});
 
   // Mock existing groups (you can replace this with actual API call)
   const [existingGroups] = useState<string[]>(['Family', 'Friends', 'Colleagues', 'Relatives']);
@@ -72,17 +69,6 @@ export default function GuestManagementPage() {
   // Get primary guests (guests who are not accompanying someone else)
   const primaryGuests = guests.filter((guest) => !guest.primaryGuestId);
 
-  // Modal controls
-  const openAddGuestModal = () => {
-    setNewGuest({});
-    setIsAddingGuest(true);
-  };
-
-  const closeAddGuestModal = () => {
-    setIsAddingGuest(false);
-    setNewGuest({});
-  };
-
   const closeEditGuestModal = () => {
     setEditingGuest(null);
   };
@@ -100,38 +86,6 @@ export default function GuestManagementPage() {
   };
 
   // Handlers
-  const handleAddGuest = async () => {
-    setIsSubmitting(true);
-    try {
-      if (!newGuest.name || !newGuest.email || !newGuest.group) {
-        toast.error('Please fill in all required fields');
-        return;
-      }
-
-      const guestData: CreateGuestDto = {
-        name: newGuest.name,
-        email: newGuest.email,
-        group: newGuest.group,
-        weddingId: 1, // Default wedding ID for internal admin
-        allergies: newGuest.allergies || '',
-        confirmationStatus: newGuest.confirmationStatus || ConfirmationStatus.PENDING,
-        accompanyingGuestNames:
-          newGuest.accompanyingGuestNames?.filter((name) => name.trim() !== '') || [],
-      };
-
-      await GuestsService.guestControllerCreate(guestData);
-      toast.success('Guest added successfully!');
-      closeAddGuestModal();
-      // Refresh guests list
-      const guestsData = await GuestsService.guestControllerGetAllGuests();
-      setGuests(guestsData);
-    } catch (error) {
-      console.error('Failed to add guest:', error);
-      toast.error('Failed to add guest');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleUpdateGuest = async () => {
     if (!editingGuest?.id) return;
@@ -347,8 +301,8 @@ export default function GuestManagementPage() {
   ];
 
   return (
-    <div className="w-full px-6 py-4">
-      <div className="flex-shrink-0 mb-6">
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between">
         <PageHeader title="Guest Management" description="Manage guests across all weddings" />
       </div>
 

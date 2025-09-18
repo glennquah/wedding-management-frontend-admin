@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Users,
 } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 
 const tabs = [
   {
@@ -48,5 +49,10 @@ const tabs = [
 ];
 
 export default function VendorSidebar() {
-  return <AppSidebar tabs={tabs} />;
+  return (
+    <AppSidebar
+      tabs={tabs}
+      signOut={() => signOut({ callbackUrl: window.location.origin, redirect: false })}
+    />
+  );
 }
