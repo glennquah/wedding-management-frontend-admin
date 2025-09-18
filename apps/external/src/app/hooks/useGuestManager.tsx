@@ -1,6 +1,15 @@
-import { ConfirmationStatus, CreateGuestDto, GuestResponseDto, GuestsService, OpenAPI, UpdateGuestDto, WeddingsService } from '@shared/api';
-import { useSession } from 'next-auth/react';
 import { useCallback, useEffect, useState } from 'react';
+
+import { useWeddingStore } from '../store/sessionStore';
+import {
+  ConfirmationStatus,
+  CreateGuestDto,
+  GuestResponseDto,
+  GuestsService,
+  OpenAPI,
+  UpdateGuestDto,
+} from '@shared/api';
+import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 
 type AccompanyingGuestData = {
@@ -30,35 +39,38 @@ const getDefaultNewGuest = (weddingId: number): GuestFormData => ({
 const confirmationStatusOptions = [
   { value: ConfirmationStatus.PENDING, label: 'Pending' },
   { value: ConfirmationStatus.CONFIRMED, label: 'Confirmed' },
-  { value: ConfirmationStatus.REJECTED, label: 'Rejected' }
+  { value: ConfirmationStatus.REJECTED, label: 'Rejected' },
 ];
 
 export function useGuestManager() {
   const { data: session, status } = useSession();
-  
+  const currentWeddingId = useWeddingStore((state) => state.selectedWeddingId);
+
   // Core guest data
   const [guests, setGuests] = useState<GuestResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentWeddingId, setCurrentWeddingId] = useState<number | null>(null);
 
   // Modal states
   const [isAddingGuest, setIsAddingGuest] = useState(false);
   const [editingGuest, setEditingGuest] = useState<GuestFormData | null>(null);
   const [deleteConfirmGuest, setDeleteConfirmGuest] = useState<GuestResponseDto | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [emailModalGuest, setEmailModalGuest] = useState<{ name: string; email: string } | null>(null);
-  
+  const [emailModalGuest, setEmailModalGuest] = useState<{ name: string; email: string } | null>(
+    null,
+  );
+
   // Validation states
   const [validationErrors, setValidationErrors] = useState<{
     name?: string;
     email?: string;
     group?: string;
   }>({});
-  
 
   // Form data
-  const [newGuest, setNewGuest] = useState<GuestFormData>(getDefaultNewGuest(1));
+  const [newGuest, setNewGuest] = useState<GuestFormData>(
+    getDefaultNewGuest(currentWeddingId || 1),
+  );
 
   // Authentication setup
   const setupAuth = useCallback(() => {
@@ -67,43 +79,20 @@ export function useGuestManager() {
     }
   }, [session]);
 
-  // Fetch wedding ID for the current user (use first wedding in array)
-  const fetchUserWeddingId = useCallback(async (): Promise<number | null> => {
-    try {
-      setupAuth();
-      const weddings = await WeddingsService.weddingControllerFindAll();
-      if (weddings.length > 0) {
-        return weddings[0].id;
-      }
-      return null;
-    } catch (err) {
-      console.error('Error fetching user wedding:', err);
-      toast.error('Failed to fetch wedding information');
-      return null;
-    }
-  }, [setupAuth]);
-
   // Core CRUD operations
   const fetchGuests = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // Setup authentication
       setupAuth();
-      
-      // Get wedding ID if not already set
-      let weddingId = currentWeddingId;
-      if (!weddingId) {
-        weddingId = await fetchUserWeddingId();
-        setCurrentWeddingId(weddingId);
+
+      if (!currentWeddingId) {
+        throw new Error('No wedding selected. Please select a wedding first.');
       }
-      
-      if (!weddingId) {
-        throw new Error('No wedding found for this user');
-      }
-      
-      const fetchedGuests = await GuestsService.guestControllerGetGuestsByWedding(weddingId);
+
+      const fetchedGuests = await GuestsService.guestControllerGetGuestsByWedding(currentWeddingId);
       setGuests(fetchedGuests);
     } catch (err) {
       setError('Failed to fetch guests. Please try again.');
@@ -111,11 +100,11 @@ export function useGuestManager() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentWeddingId, fetchUserWeddingId, setupAuth]);
+  }, [currentWeddingId, setupAuth]);
 
   const addGuest = async (
     primaryGuestData: CreateGuestDto,
-    accompanyingGuestsData: CreateGuestDto[]
+    accompanyingGuestsData: CreateGuestDto[],
   ) => {
     setupAuth();
     const createdPrimaryGuest = await GuestsService.guestControllerCreate(primaryGuestData);
@@ -136,13 +125,13 @@ export function useGuestManager() {
   const updateGuest = async (
     guestId: number,
     updateData: UpdateGuestDto,
-    accompanyingGuestsData: CreateGuestDto[]
+    accompanyingGuestsData: CreateGuestDto[],
   ) => {
     setupAuth();
     await GuestsService.guestControllerUpdate(guestId, updateData);
 
     // Delete existing accompanying guests
-    const existingAccompanyingGuests = guests.filter(g => g.primaryGuestId === guestId);
+    const existingAccompanyingGuests = guests.filter((g) => g.primaryGuestId === guestId);
     for (const guest of existingAccompanyingGuests) {
       await GuestsService.guestControllerDelete(guest.id);
     }
@@ -163,7 +152,7 @@ export function useGuestManager() {
   const deleteGuest = async (id: number) => {
     setupAuth();
     // First delete any accompanying guests before deleting the primary guest
-    const accompanyingGuests = guests.filter(g => g.primaryGuestId === id);
+    const accompanyingGuests = guests.filter((g) => g.primaryGuestId === id);
     for (const guest of accompanyingGuests) {
       await GuestsService.guestControllerDelete(guest.id);
     }
@@ -175,7 +164,7 @@ export function useGuestManager() {
   // Validation
   const validateGuestData = (guestData: GuestFormData) => {
     const errors: { name?: string; email?: string; group?: string } = {};
-    
+
     // Debug logging
     console.log('Validating guest data:', {
       name: guestData.name,
@@ -183,51 +172,51 @@ export function useGuestManager() {
       group: guestData.group,
       nameCheck: !guestData.name?.trim(),
       emailCheck: !guestData.email?.trim(),
-      groupCheck: !guestData.group?.trim()
+      groupCheck: !guestData.group?.trim(),
     });
-    
+
     if (!guestData.name?.trim()) {
       errors.name = 'Name is required';
     }
-    
+
     if (!guestData.email?.trim()) {
       errors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(guestData.email)) {
       errors.email = 'Please enter a valid email address';
     }
-    
+
     if (!guestData.group?.trim()) {
       errors.group = 'Group is required';
     }
-    
+
     console.log('Validation errors:', errors);
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   // Form field management
-  const addAccompanyingGuestField = (
-    guest: GuestFormData,
-    setGuest: GuestFormSetter
-  ) => {
+  const addAccompanyingGuestField = (guest: GuestFormData, setGuest: GuestFormSetter) => {
     const currentGuests = guest.accompanyingGuests || [];
     setGuest({
       ...guest,
-      accompanyingGuests: [...currentGuests, { name: '', allergies: '', confirmationStatus: ConfirmationStatus.PENDING }]
+      accompanyingGuests: [
+        ...currentGuests,
+        { name: '', allergies: '', confirmationStatus: ConfirmationStatus.PENDING },
+      ],
     });
   };
 
   const removeAccompanyingGuestField = (
     index: number,
     guest: GuestFormData,
-    setGuest: GuestFormSetter
+    setGuest: GuestFormSetter,
   ) => {
     const currentGuests = guest.accompanyingGuests || [];
     if (currentGuests.length > 1) {
       const newGuests = currentGuests.filter((_, i) => i !== index);
       setGuest({
         ...guest,
-        accompanyingGuests: newGuests
+        accompanyingGuests: newGuests,
       });
     }
   };
@@ -237,14 +226,14 @@ export function useGuestManager() {
     field: keyof AccompanyingGuestData,
     value: string | ConfirmationStatus,
     guest: GuestFormData,
-    setGuest: GuestFormSetter
+    setGuest: GuestFormSetter,
   ) => {
     const currentGuests = guest.accompanyingGuests || [];
     const newGuests = [...currentGuests];
     newGuests[index] = { ...newGuests[index], [field]: value };
     setGuest({
       ...guest,
-      accompanyingGuests: newGuests
+      accompanyingGuests: newGuests,
     });
   };
 
@@ -270,29 +259,33 @@ export function useGuestManager() {
 
       const accompanyingGuestsData: CreateGuestDto[] = [];
       if (newGuest.accompanyingGuests) {
-        const validAccompanyingGuests = newGuest.accompanyingGuests.filter(guest => guest.name.trim());
-        accompanyingGuestsData.push(...validAccompanyingGuests.map(guestData => ({
-          name: guestData.name.trim(),
-          email: '',
-          allergies: guestData.allergies || undefined,
-          group: newGuest.group,
-          confirmationStatus: guestData.confirmationStatus,
-          weddingId: currentWeddingId || 1,
-          primaryGuestId: undefined,
-        })));
+        const validAccompanyingGuests = newGuest.accompanyingGuests.filter((guest) =>
+          guest.name.trim(),
+        );
+        accompanyingGuestsData.push(
+          ...validAccompanyingGuests.map((guestData) => ({
+            name: guestData.name.trim(),
+            email: '',
+            allergies: guestData.allergies || undefined,
+            group: newGuest.group,
+            confirmationStatus: guestData.confirmationStatus,
+            weddingId: currentWeddingId || 1,
+            primaryGuestId: undefined,
+          })),
+        );
       }
 
       await addGuest(primaryGuestData, accompanyingGuestsData);
 
       setNewGuest(getDefaultNewGuest(currentWeddingId || 1));
       setIsAddingGuest(false);
-      
+
       // Show email modal for the newly added guest
       setEmailModalGuest({
         name: primaryGuestData.name!,
-        email: primaryGuestData.email!
+        email: primaryGuestData.email!,
       });
-      
+
       toast.success('Guest added successfully!');
     } catch (err) {
       toast.error('Failed to add guest. Please try again.');
@@ -304,7 +297,7 @@ export function useGuestManager() {
 
   const handleUpdateGuest = async () => {
     if (!editingGuest) return;
-    
+
     if (!validateGuestData(editingGuest)) {
       toast.error('Please fill in all required fields');
       return;
@@ -336,16 +329,20 @@ export function useGuestManager() {
 
       const accompanyingGuestsData: CreateGuestDto[] = [];
       if (editingGuest.accompanyingGuests) {
-        const validAccompanyingGuests = editingGuest.accompanyingGuests.filter(guest => guest.name.trim());
-        accompanyingGuestsData.push(...validAccompanyingGuests.map(guestData => ({
-          name: guestData.name.trim(),
-          email: '',
-          allergies: guestData.allergies || undefined,
-          group: editingGuest.group,
-          confirmationStatus: guestData.confirmationStatus,
-          weddingId: currentWeddingId || 1,
-          primaryGuestId: undefined,
-        })));
+        const validAccompanyingGuests = editingGuest.accompanyingGuests.filter((guest) =>
+          guest.name.trim(),
+        );
+        accompanyingGuestsData.push(
+          ...validAccompanyingGuests.map((guestData) => ({
+            name: guestData.name.trim(),
+            email: '',
+            allergies: guestData.allergies || undefined,
+            group: editingGuest.group,
+            confirmationStatus: guestData.confirmationStatus,
+            weddingId: currentWeddingId || 1,
+            primaryGuestId: undefined,
+          })),
+        );
       }
 
       if (!editingGuest.id) {
@@ -386,11 +383,11 @@ export function useGuestManager() {
       return;
     }
     // Get accompanying guests for this primary guest
-    const accompanyingGuests = guests.filter(g => g.primaryGuestId === guest.id);
-    const accompanyingGuestData: AccompanyingGuestData[] = accompanyingGuests.map(g => ({
+    const accompanyingGuests = guests.filter((g) => g.primaryGuestId === guest.id);
+    const accompanyingGuestData: AccompanyingGuestData[] = accompanyingGuests.map((g) => ({
       name: g.name,
       allergies: g.allergies || '',
-      confirmationStatus: g.confirmationStatus
+      confirmationStatus: g.confirmationStatus,
     }));
 
     // Map the confirmation status from GuestResponseDto to ConfirmationStatus
@@ -410,7 +407,7 @@ export function useGuestManager() {
     setEditingGuest({
       ...guest,
       confirmationStatus: mapResponseConfirmationStatus(guest.confirmationStatus),
-      accompanyingGuests: accompanyingGuestData
+      accompanyingGuests: accompanyingGuestData,
     });
   };
 
@@ -441,27 +438,16 @@ export function useGuestManager() {
     }
   };
 
-
   // Derived data
-  const primaryGuests = guests.filter(guest => !guest.primaryGuestId);
-  const existingGroups = Array.from(new Set(guests.filter(g => g.group?.trim()).map(g => g.group!))).sort();
+  const primaryGuests = guests.filter((guest) => !guest.primaryGuestId);
+  const existingGroups = Array.from(
+    new Set(guests.filter((g) => g.group?.trim()).map((g) => g.group!)),
+  ).sort();
 
-  // Initialize wedding ID when session is available
-  useEffect(() => {
-    if (status === 'authenticated' && session && !currentWeddingId) {
-      const initWeddingId = async () => {
-        const weddingId = await fetchUserWeddingId();
-        if (weddingId) {
-          setCurrentWeddingId(weddingId);
-          setNewGuest(getDefaultNewGuest(weddingId));
-        }
-      };
-      initWeddingId();
-    }
-  }, [status, session, currentWeddingId, fetchUserWeddingId]);
-
+  // Initialize when wedding ID changes
   useEffect(() => {
     if (currentWeddingId) {
+      setNewGuest(getDefaultNewGuest(currentWeddingId));
       fetchGuests();
     }
   }, [currentWeddingId, fetchGuests]);
@@ -474,46 +460,44 @@ export function useGuestManager() {
     isLoading,
     error,
     setError,
-    
+
     // Modal states
     isAddingGuest,
     editingGuest,
     deleteConfirmGuest,
     isSubmitting,
     emailModalGuest,
-    
+
     // Validation
     validationErrors,
     clearValidationErrors,
-    
-    
+
     // Form data
     newGuest,
     setNewGuest,
     setEditingGuest,
-    
+
     // Constants
     confirmationStatusOptions,
-    
+
     // CRUD operations
     fetchGuests,
     addGuest,
     updateGuest,
     deleteGuest,
-    
+
     // Form field management
     addAccompanyingGuestField,
     removeAccompanyingGuestField,
     updateAccompanyingGuest,
-    
+
     // Handlers
     handleAddGuest,
     handleUpdateGuest,
     handleDeleteGuest,
     confirmDeleteGuest,
     handleEditGuest,
-    
-    
+
     // Modal controls
     openAddGuestModal,
     closeAddGuestModal,

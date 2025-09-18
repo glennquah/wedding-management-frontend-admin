@@ -29,6 +29,10 @@ export type GuestResponseDto = {
      */
     weddingId: number;
     /**
+     * Wedding name this guest belongs to
+     */
+    weddingName: string;
+    /**
      * Primary guest ID if this is an accompanying guest
      */
     primaryGuestId?: number;

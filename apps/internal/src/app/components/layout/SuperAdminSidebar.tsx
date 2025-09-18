@@ -10,6 +10,7 @@ import {
   UserStar,
   Users,
 } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 
 const tabs = [
   {
@@ -70,5 +71,10 @@ const tabs = [
 ];
 
 export default function SuperAdminSidebar() {
-  return <AppSidebar tabs={tabs} platform="internal" />;
+  return (
+    <AppSidebar
+      tabs={tabs}
+      signOut={() => signOut({ callbackUrl: window.location.origin, redirect: false })}
+    />
+  );
 }

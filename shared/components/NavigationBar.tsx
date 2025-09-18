@@ -8,10 +8,10 @@ import { useRouter } from 'next/navigation';
 
 interface NavigationBarProps {
   session: Session | null;
-  signOut: () => void;
+  additionalTabs?: React.ReactNode;
 }
 
-const NavigationBar = ({ session, signOut }: NavigationBarProps) => {
+const NavigationBar = ({ session, additionalTabs }: NavigationBarProps) => {
   const router = useRouter();
 
   return (
@@ -34,6 +34,8 @@ const NavigationBar = ({ session, signOut }: NavigationBarProps) => {
             <Bell size={16} />
             <span className="sr-only">Notifications</span>
           </Button>
+
+          {additionalTabs}
         </div>
       </div>
     </header>

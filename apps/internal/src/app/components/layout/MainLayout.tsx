@@ -6,7 +6,7 @@ import { UserRole } from '@shared/api';
 import { cn } from '@shared/components/lib/utils';
 import { SidebarProvider, useSidebar } from '@shared/components/ui/sidebar';
 import { Toaster } from '@shared/components/ui/sonner';
-import { signOut, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 function MainContent({ children }: { children: React.ReactNode }) {
@@ -42,10 +42,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   if (!session?.user || session.user.role !== UserRole.SUPER_ADMIN) {
     console.log('Access denied - Session:', session);
     router.push('/login');
+    console.log('Access denied - Session:', session);
+    router.push('/login');
     return (
       <>
         <main className="flex flex-1 flex-col overflow-y-auto">{children}</main>
-        <Toaster />
+        <>
+          <main className="flex flex-1 flex-col overflow-y-auto">{children}</main>
+          <Toaster />
+        </>
       </>
     );
   }
@@ -54,7 +59,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     <SidebarProvider defaultOpen={true}>
       <SuperAdminSidebar />
       <div className="flex-1 flex flex-col">
-        <NavigationBar session={session} signOut={signOut} />
+        <NavigationBar session={session} />
         <MainContent>{children}</MainContent>
       </div>
       <Toaster />
