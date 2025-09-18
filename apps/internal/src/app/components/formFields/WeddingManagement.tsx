@@ -236,7 +236,7 @@ export const getEditWeddingFormFields = ({ wedding, setWedding }: EditWeddingFor
           <SelectValue placeholder="Select wedding type" />
         </SelectTrigger>
         <SelectContent>
-          {Object.values(UpdateWeddingDto.weddingType).map((type) => (
+          {Object.values(WeddingType).map((type) => (
             <SelectItem key={type} value={type}>
               {capitalizeFirst(type)}
             </SelectItem>
