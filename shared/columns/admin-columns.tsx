@@ -2,7 +2,7 @@ import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { ColumnDef } from '@tanstack/react-table';
 import { AdminResponseDto, UserRole } from '@wedding/api-types';
-import { Edit2, Trash2 } from 'lucide-react';
+import { CheckCheck, Edit2, OctagonX, Trash2 } from 'lucide-react';
 
 const getRoleVariant = (role: UserRole): 'default' | 'secondary' | 'destructive' | 'outline' => {
   switch (role) {
@@ -38,15 +38,21 @@ const capitalizeFirst = (str: string) => str.charAt(0).toUpperCase() + str.slice
 interface AdminColumnsProps {
   onEditAdmin: (admin: AdminResponseDto) => void;
   onDeleteAdmin: (admin: AdminResponseDto) => void;
+  onSuspendAdmin: (admin: AdminResponseDto) => void;
+  onUnsuspendAdmin: (admin: AdminResponseDto) => void;
   includeId?: boolean;
   includeUpdatedAt?: boolean;
+  isSuspendedTable?: boolean;
 }
 
 export const getAdminColumns = ({
   onEditAdmin,
   onDeleteAdmin,
+  onSuspendAdmin,
+  onUnsuspendAdmin,
   includeId = false,
   includeUpdatedAt = false,
+  isSuspendedTable = false,
 }: AdminColumnsProps): ColumnDef<AdminResponseDto>[] => {
   const columns: ColumnDef<AdminResponseDto>[] = [];
 
@@ -75,30 +81,12 @@ export const getAdminColumns = ({
       ),
     },
     {
-      accessorKey: 'role',
-      header: 'Role',
-      cell: ({ row }) => (
-        <Badge variant={getRoleVariant(row.getValue('role'))}>
-          {row.getValue('role') === UserRole.SUPER_ADMIN ? 'Super Admin' : 'Admin'}
-        </Badge>
-      ),
-    },
-    {
       accessorKey: 'onboardedDate',
       header: 'Onboarded',
       cell: ({ row }) => (
         <div className="text-sm text-foreground whitespace-nowrap">
           {formatOnboardedDate(row.getValue('onboardedDate'))}
         </div>
-      ),
-    },
-    {
-      accessorKey: 'isSuspended',
-      header: 'Status',
-      cell: ({ row }) => (
-        <Badge variant={row.getValue('isSuspended') ? 'destructive' : 'outline'}>
-          {row.getValue('isSuspended') ? 'Suspended' : 'Active'}
-        </Badge>
       ),
     },
     {
@@ -128,6 +116,15 @@ export const getAdminColumns = ({
         );
       },
     },
+    {
+      accessorKey: 'isSuspended',
+      header: 'Status',
+      cell: ({ row }) => (
+        <Badge variant={row.getValue('isSuspended') ? 'destructive' : 'outline'}>
+          {row.getValue('isSuspended') ? 'Suspended' : 'Active'}
+        </Badge>
+      ),
+    },
   );
 
   if (includeUpdatedAt) {
@@ -152,14 +149,35 @@ export const getAdminColumns = ({
           <Button size="sm" variant="ghost" onClick={() => onEditAdmin(admin)}>
             <Edit2 className="w-4 h-4" />
           </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => onDeleteAdmin(admin)}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
+          {isSuspendedTable ? (
+            <>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => onUnsuspendAdmin(admin)}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <CheckCheck className="w-4 h-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => onDeleteAdmin(admin)}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </>
+          ) : (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => onSuspendAdmin(admin)}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <OctagonX className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       );
     },

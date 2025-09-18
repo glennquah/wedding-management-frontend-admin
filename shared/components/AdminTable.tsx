@@ -22,9 +22,14 @@ interface AdminTableProps {
   // Delete Modal State
   deleteConfirmAdmin: AdminResponseDto | null;
 
+  // Suspended Table
+  isSuspendedTable?: boolean;
+
   // Handlers
   onEditAdmin: (admin: AdminResponseDto) => void;
   onDeleteAdmin: (admin: AdminResponseDto) => void;
+  onSuspendAdmin: (admin: AdminResponseDto) => void;
+  onUnsuspendAdmin: (admin: AdminResponseDto) => void;
   handleEditAdmin: () => Promise<void>;
   handleEditPasswordGenerate: () => void;
   closeEditAdminModal: () => void;
@@ -41,9 +46,12 @@ export const AdminTable: React.FC<AdminTableProps> = ({
   setEditAdmin,
   isSubmitting,
   isEditFormValid = true,
+  isSuspendedTable = false,
   deleteConfirmAdmin,
   onEditAdmin,
   onDeleteAdmin,
+  onSuspendAdmin,
+  onUnsuspendAdmin,
   handleEditAdmin,
   handleEditPasswordGenerate,
   closeEditAdminModal,
@@ -53,6 +61,9 @@ export const AdminTable: React.FC<AdminTableProps> = ({
   const columns = getAdminColumns({
     onEditAdmin,
     onDeleteAdmin,
+    onSuspendAdmin,
+    onUnsuspendAdmin,
+    isSuspendedTable,
   });
 
   return (
