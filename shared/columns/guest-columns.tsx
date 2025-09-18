@@ -164,6 +164,15 @@ export const getGuestColumns = ({
     ),
   });
 
+  columns.push({
+    accessorKey: 'weddingName',
+    header: 'Wedding Name',
+    cell: ({ row }) => (
+      <div className="text-sm text-foreground">{row.getValue('weddingName') || '-'}</div>
+    ),
+    size: 200,
+  });
+
   // Add actions column
   columns.push({
     id: 'actions',

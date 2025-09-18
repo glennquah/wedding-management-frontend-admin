@@ -15,6 +15,7 @@ interface FormDialogProps {
   submitButtonText: string;
   formFields: ReactNode[];
   noOfColumns?: number;
+  disabled?: boolean;
 }
 
 export function FormDialog({
@@ -27,6 +28,7 @@ export function FormDialog({
   submitButtonText,
   formFields,
   noOfColumns = 1,
+  disabled = false,
 }: FormDialogProps) {
   const getGridClasses = () => {
     switch (noOfColumns) {
@@ -54,7 +56,7 @@ export function FormDialog({
           <Button variant="secondary" onClick={onCancel} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button onClick={onSubmit} disabled={isSubmitting}>
+          <Button onClick={onSubmit} disabled={isSubmitting || disabled}>
             {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             {submitButtonText}
           </Button>

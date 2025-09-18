@@ -1,8 +1,8 @@
 'use client';
 
-import { UserRole } from '@shared/api';
 import NavigationBar from '../../../../../../shared/components/NavigationBar';
 import SuperAdminSidebar from './SuperAdminSidebar';
+import { UserRole } from '@shared/api';
 import { cn } from '@shared/components/lib/utils';
 import { SidebarProvider, useSidebar } from '@shared/components/ui/sidebar';
 import { Toaster } from '@shared/components/ui/sonner';
