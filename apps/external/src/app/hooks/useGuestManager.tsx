@@ -4,10 +4,13 @@ import { useWeddingStore } from '../store/sessionStore';
 import {
   ConfirmationStatus,
   CreateGuestDto,
+  GuestCountBucket,
   GuestResponseDto,
   GuestsService,
   OpenAPI,
   UpdateGuestDto,
+  WeddingResponseDto,
+  WeddingsService,
 } from '@shared/api';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
@@ -36,6 +39,13 @@ const getDefaultNewGuest = (weddingId: number): GuestFormData => ({
   accompanyingGuests: [],
 });
 
+// Guest count bucket capacity mappings
+const GUEST_COUNT_LIMITS = {
+  [GuestCountBucket.SMALL]: 50,
+  [GuestCountBucket.MEDIUM]: 150,
+  [GuestCountBucket.LARGE]: 500,
+};
+
 const confirmationStatusOptions = [
   { value: ConfirmationStatus.PENDING, label: 'Pending' },
   { value: ConfirmationStatus.CONFIRMED, label: 'Confirmed' },
@@ -45,9 +55,11 @@ const confirmationStatusOptions = [
 export function useGuestManager() {
   const { data: session, status } = useSession();
   const currentWeddingId = useWeddingStore((state) => state.selectedWeddingId);
+  const setSelectedWeddingId = useWeddingStore((state) => state.setSelectedWeddingId);
 
   // Core guest data
   const [guests, setGuests] = useState<GuestResponseDto[]>([]);
+  const [wedding, setWedding] = useState<WeddingResponseDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -79,6 +91,24 @@ export function useGuestManager() {
     }
   }, [session]);
 
+  // Fetch wedding data for the current user (use first wedding in array)
+  const fetchUserWedding = useCallback(async (): Promise<WeddingResponseDto | null> => {
+    try {
+      setupAuth();
+      const weddings = await WeddingsService.weddingControllerFindAll();
+      if (weddings.length > 0) {
+        const weddingData = weddings[0];
+        setWedding(weddingData);
+        return weddingData;
+      }
+      return null;
+    } catch (err) {
+      console.error('Error fetching user wedding:', err);
+      toast.error('Failed to fetch wedding information');
+      return null;
+    }
+  }, [setupAuth]);
+
   // Core CRUD operations
   const fetchGuests = useCallback(async () => {
     try {
@@ -88,11 +118,21 @@ export function useGuestManager() {
       // Setup authentication
       setupAuth();
 
-      if (!currentWeddingId) {
-        throw new Error('No wedding selected. Please select a wedding first.');
+      // Get wedding data if not already set
+      let weddingId = currentWeddingId;
+      if (!weddingId || !wedding) {
+        const weddingData = await fetchUserWedding();
+        if (weddingData) {
+          setSelectedWeddingId(weddingData.id);
+          weddingId = weddingData.id;
+        }
       }
 
-      const fetchedGuests = await GuestsService.guestControllerGetGuestsByWedding(currentWeddingId);
+      if (!weddingId) {
+        throw new Error('No wedding found for this user');
+      }
+
+      const fetchedGuests = await GuestsService.guestControllerGetGuestsByWedding(weddingId!);
       setGuests(fetchedGuests);
     } catch (err) {
       setError('Failed to fetch guests. Please try again.');
@@ -100,12 +140,55 @@ export function useGuestManager() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentWeddingId, setupAuth]);
+  }, [currentWeddingId, wedding, fetchUserWedding, setupAuth, setSelectedWeddingId]);
+
+  // Guest capacity validation
+  const getGuestCapacityInfo = useCallback(() => {
+    if (!wedding?.guestCountBucket) {
+      return { limit: 0, current: guests.length, available: 0, isAtCapacity: false };
+    }
+
+    const limit = GUEST_COUNT_LIMITS[wedding.guestCountBucket];
+    const current = guests.length;
+    const available = Math.max(0, limit - current);
+    const isAtCapacity = current >= limit;
+
+    return { limit, current, available, isAtCapacity };
+  }, [wedding, guests]);
+
+  const validateGuestCapacity = useCallback(
+    (additionalGuestCount: number = 1) => {
+      const capacityInfo = getGuestCapacityInfo();
+
+      if (capacityInfo.isAtCapacity) {
+        toast.error(
+          `Guest count exceeded! Your ${wedding?.guestCountBucket.toLowerCase()} plan allows up to ${capacityInfo.limit} guests.`,
+        );
+        return false;
+      }
+
+      if (capacityInfo.available < additionalGuestCount) {
+        toast.error(
+          `Cannot add ${additionalGuestCount} guest(s). Only ${capacityInfo.available} slot(s) remaining in your ${wedding?.guestCountBucket.toLowerCase()} plan.`,
+        );
+        return false;
+      }
+
+      return true;
+    },
+    [getGuestCapacityInfo, wedding],
+  );
 
   const addGuest = async (
     primaryGuestData: CreateGuestDto,
     accompanyingGuestsData: CreateGuestDto[],
   ) => {
+    // Validate capacity before adding guests
+    const totalNewGuests = 1 + accompanyingGuestsData.length;
+    if (!validateGuestCapacity(totalNewGuests)) {
+      return;
+    }
+
     setupAuth();
     const createdPrimaryGuest = await GuestsService.guestControllerCreate(primaryGuestData);
 
@@ -196,6 +279,11 @@ export function useGuestManager() {
 
   // Form field management
   const addAccompanyingGuestField = (guest: GuestFormData, setGuest: GuestFormSetter) => {
+    // Check capacity before adding an accompanying guest field
+    if (!validateGuestCapacity(1)) {
+      return;
+    }
+
     const currentGuests = guest.accompanyingGuests || [];
     setGuest({
       ...guest,
@@ -444,7 +532,20 @@ export function useGuestManager() {
     new Set(guests.filter((g) => g.group?.trim()).map((g) => g.group!)),
   ).sort();
 
-  // Initialize when wedding ID changes
+  // Initialize wedding data when session is available
+  useEffect(() => {
+    if (status === 'authenticated' && session && !currentWeddingId) {
+      const initWedding = async () => {
+        const weddingData = await fetchUserWedding();
+        if (weddingData) {
+          setSelectedWeddingId(weddingData.id);
+          setNewGuest(getDefaultNewGuest(weddingData.id));
+        }
+      };
+      initWedding();
+    }
+  }, [status, session, currentWeddingId, fetchUserWedding, setSelectedWeddingId]);
+
   useEffect(() => {
     if (currentWeddingId) {
       setNewGuest(getDefaultNewGuest(currentWeddingId));
@@ -455,11 +556,16 @@ export function useGuestManager() {
   return {
     // Core data
     guests,
+    wedding,
     primaryGuests,
     existingGroups,
     isLoading,
     error,
     setError,
+
+    // Capacity management
+    getGuestCapacityInfo,
+    validateGuestCapacity,
 
     // Modal states
     isAddingGuest,

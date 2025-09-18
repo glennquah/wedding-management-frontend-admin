@@ -2,7 +2,7 @@
 
 import { signOut } from '../../store/sessionStore';
 import AppSidebar from '@shared/components/AppSidebar';
-import { Calendar, CheckSquare, Clock, LayoutDashboard, ListTodo, Users } from 'lucide-react';
+import { Calendar, CheckSquare, Clock, LayoutDashboard, ListTodo, Users, MapPin } from 'lucide-react';
 
 const tabs = [
   {
@@ -32,6 +32,11 @@ const tabs = [
         title: 'Guest List',
         href: '/admin/guest-list',
         icon: Users,
+      },
+      {
+        title: 'Seating Arrangement',
+        href: '/admin/seating-arrangement',
+        icon: MapPin,
       },
       {
         title: 'Timeline',
