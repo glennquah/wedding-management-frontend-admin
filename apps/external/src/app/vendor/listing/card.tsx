@@ -1,5 +1,6 @@
 import { Button } from "@shared/components";
-import { Calendar, DollarSign, Edit2, Trash2, Clock, FileText } from "lucide-react";
+import { Calendar, Clock, DollarSign, Edit2, FileText, Trash2 } from "lucide-react";
+import Image from "next/image";
 
 interface Listing {
   id: number;
@@ -37,11 +38,23 @@ export const ListingCard = ({ listing, onEdit, onDelete }: ListingCardProps) => 
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6">
-      <div className="flex justify-between items-start mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 truncate pr-4">
-          {listing.listingName}
-        </h3>
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+      {/* Image Section */}
+      <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
+        <Image
+          src="/flaticon.svg"
+          alt={listing.listingName}
+          width={120}
+          height={120}
+          className="object-contain"
+        />
+      </div>
+
+      <div className="p-6">
+        <div className="flex justify-between items-start mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 truncate pr-4">
+            {listing.listingName}
+          </h3>
         <div className="flex items-center gap-1 shrink-0">
           <Button
             variant="ghost"
@@ -68,29 +81,30 @@ export const ListingCard = ({ listing, onEdit, onDelete }: ListingCardProps) => 
           <span className="text-xl font-bold text-green-600">${listing.price}</span>
         </div>
 
-        <div className="flex items-start gap-2">
-          <Calendar className="w-4 h-4 text-blue-600 mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-gray-700">Available Dates</p>
-            <p className="text-sm text-gray-600">{formatAvailabilities(listing.availabilities)}</p>
-          </div>
-        </div>
-
-        {listing.remarks && (
           <div className="flex items-start gap-2">
-            <FileText className="w-4 h-4 text-gray-500 mt-0.5" />
+            <Calendar className="w-4 h-4 text-blue-600 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-gray-700">Remarks</p>
-              <p className="text-sm text-gray-600 line-clamp-2">{listing.remarks}</p>
+              <p className="text-sm font-medium text-gray-700">Available Dates</p>
+              <p className="text-sm text-gray-600">{formatAvailabilities(listing.availabilities)}</p>
             </div>
           </div>
-        )}
 
-        <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-          <Clock className="w-3 h-3 text-gray-400" />
-          <span className="text-xs text-gray-500">
-            Updated {formatDate(listing.updatedAt)}
-          </span>
+          {listing.remarks && (
+            <div className="flex items-start gap-2">
+              <FileText className="w-4 h-4 text-gray-500 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-gray-700">Remarks</p>
+                <p className="text-sm text-gray-600 line-clamp-2">{listing.remarks}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+            <Clock className="w-3 h-3 text-gray-400" />
+            <span className="text-xs text-gray-500">
+              Updated {formatDate(listing.updatedAt)}
+            </span>
+          </div>
         </div>
       </div>
     </div>
