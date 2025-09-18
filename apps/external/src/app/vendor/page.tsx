@@ -1,12 +1,42 @@
 'use client';
 
+import { useState } from 'react';
+
+import { ImageUploadWidget } from '@shared/components';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { Activity, CreditCard, DollarSign, Users } from 'lucide-react';
+import { CldImage } from 'next-cloudinary';
 
 export default function VendorDashboard() {
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+
   return (
     <div className="flex-1 space-y-4 p-6 pt-12">
       <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+
+      {/* Example: Upload widget */}
+      <ImageUploadWidget
+        onUpload={(url) => {
+          setUploadedImageUrl(url);
+        }}
+        maxImageWidth={500}
+      />
+
+      {/* Example: Image Uploaded */}
+      <div className="mt-4">
+        {uploadedImageUrl ? (
+          <CldImage
+            width={300}
+            height={300}
+            src={uploadedImageUrl}
+            sizes="100vw"
+            alt="Uploaded image"
+            className="rounded-lg shadow"
+          />
+        ) : (
+          <p>No image uploaded yet.</p>
+        )}
+      </div>
 
       {/* Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
