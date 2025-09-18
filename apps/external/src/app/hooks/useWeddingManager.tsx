@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 
 export function useWeddingManager() {
   const [loading, setLoading] = useState(false);
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const setWeddings = useWeddingStore((state) => state.setWeddings);
   const setSelectedWeddingId = useWeddingStore((state) => state.setSelectedWeddingId);
   const setMainWeddingId = useWeddingStore((state) => state.setMainWeddingId);
@@ -32,8 +32,12 @@ export function useWeddingManager() {
       setupAuth();
       const mainWedding = await AdminsService.adminControllerGetMyMainWedding();
       if (mainWedding && mainWedding.mainWeddingId) {
-        setMainWeddingId && setMainWeddingId(mainWedding.mainWeddingId);
-        setSelectedWeddingId && setSelectedWeddingId(mainWedding.mainWeddingId);
+        if (setMainWeddingId) {
+          setMainWeddingId(mainWedding.mainWeddingId);
+        }
+        if (setSelectedWeddingId) {
+          setSelectedWeddingId(mainWedding.mainWeddingId);
+        }
       }
       return null;
     } catch (err) {
@@ -52,7 +56,9 @@ export function useWeddingManager() {
       setupAuth();
       const weddings = await WeddingsService.weddingControllerGetAdminWeddings();
       if (weddings.length > 0) {
-        setWeddings && setWeddings(weddings);
+        if (setWeddings) {
+          setWeddings(weddings);
+        }
       }
       return null;
     } catch (err) {
@@ -62,11 +68,13 @@ export function useWeddingManager() {
     } finally {
       setLoading(false);
     }
-  }, [setupAuth]);
+  }, [setupAuth, setWeddings]);
 
   const selectWedding = useCallback(
     (weddingId: number | null) => {
-      setSelectedWeddingId && setSelectedWeddingId(weddingId);
+      if (setSelectedWeddingId) {
+        setSelectedWeddingId(weddingId);
+      }
     },
     [setSelectedWeddingId],
   );

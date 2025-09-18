@@ -1,7 +1,15 @@
 'use client';
 
 import AppSidebar from '@shared/components/AppSidebar';
-import { CheckSquare, LayoutDashboard, ListTodo, Timer, User2, UserStar } from 'lucide-react';
+import {
+  CheckSquare,
+  LayoutDashboard,
+  ListTodo,
+  Timer,
+  User2,
+  UserStar,
+  Users,
+} from 'lucide-react';
 import { signOut } from 'next-auth/react';
 
 const tabs = [
