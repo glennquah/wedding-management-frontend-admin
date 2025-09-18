@@ -197,6 +197,7 @@ export const getEditWeddingFormFields = ({ wedding, setWedding }: EditWeddingFor
       value={wedding.name || ''}
       onChange={(e) => setWedding({ ...wedding, name: e.target.value })}
       placeholder="Enter wedding name"
+      required
     />
   </div>,
 
