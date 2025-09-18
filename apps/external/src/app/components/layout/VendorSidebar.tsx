@@ -16,12 +16,12 @@ const tabs = [
     items: [
       {
         title: 'Dashboard',
-        href: '/vendor/dashboard',
+        href: '/',
         icon: LayoutDashboard,
       },
       {
         title: 'Revenue',
-        href: '/vendor/revenue',
+        href: '/revenue',
         icon: CircleDollarSign,
       },
     ],
@@ -31,17 +31,17 @@ const tabs = [
     items: [
       {
         title: 'Customers',
-        href: '/vendor/customers',
+        href: '/customers',
         icon: Users,
       },
       {
         title: 'Services',
-        href: '/vendor/services',
+        href: '/services',
         icon: FileSpreadsheet,
       },
       {
         title: 'Calendar',
-        href: '/vendor/calendar',
+        href: '/calendar',
         icon: CalendarDays,
       },
     ],
@@ -53,6 +53,7 @@ export default function VendorSidebar() {
     <AppSidebar
       tabs={tabs}
       signOut={() => signOut({ callbackUrl: window.location.origin, redirect: false })}
+      basePath='vendor'
     />
   );
 }

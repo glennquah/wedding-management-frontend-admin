@@ -4,7 +4,7 @@ import { useOpenAICall } from "../hooks/useOpenAICall";
 import { Label } from "./ui/form/label";
 
 type TextInputWithAIProps = {
-  label: string;
+  label?: string;
   placeholder?: string;
   value: string;
   setValue: (val: string) => void;

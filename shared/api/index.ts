@@ -28,7 +28,7 @@ export type { UpdateGuestDto } from './models/UpdateGuestDto';
 export type { UpdateListingDto } from './models/UpdateListingDto';
 export type { UpdateSuperAdminDto } from './models/UpdateSuperAdminDto';
 export type { UpdateVendorDto } from './models/UpdateVendorDto';
-export { UpdateWeddingDto } from './models/UpdateWeddingDto';
+export type { UpdateWeddingDto } from './models/UpdateWeddingDto';
 export type { UserResponseDto } from './models/UserResponseDto';
 export { UserRole } from './models/UserRole';
 export { VendorOnboardingStatus } from './models/VendorOnboardingStatus';
