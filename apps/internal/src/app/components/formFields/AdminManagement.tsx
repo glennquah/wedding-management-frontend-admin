@@ -123,49 +123,25 @@ export const getEditAdminFormFields = ({
 }: EditAdminFormFieldsProps) => [
   <div key="name" className="md:col-span-1">
     <FormField
-      label="Name"
+      label="Name *"
       id="name"
       type="text"
       value={admin.name || ''}
       onChange={(e) => setAdmin({ ...admin, name: e.target.value })}
       placeholder="Admin Name"
+      required
     />
   </div>,
 
   <div key="email" className="md:col-span-1">
     <FormField
-      label="Email"
+      label="Email *"
       id="email"
       type="email"
       value={admin.email || ''}
       onChange={(e) => setAdmin({ ...admin, email: e.target.value })}
       placeholder="Email address"
+      required
     />
-  </div>,
-
-  <div key="password" className="md:col-span-2">
-    <div className="mt-4 gap-2 flex flex-col">
-      <Label htmlFor="password">Password (leave empty to keep current)</Label>
-      <div className="relative w-full">
-        <Input
-          id="password"
-          type="text"
-          value={admin.password || ''}
-          onChange={(e) => setAdmin({ ...admin, password: e.target.value })}
-          placeholder="Leave empty to keep current password"
-          className="w-full pr-10"
-        />
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={handleGeneratePassword}
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100"
-          title="Click to generate new password"
-        >
-          <Cog className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
   </div>,
 ];

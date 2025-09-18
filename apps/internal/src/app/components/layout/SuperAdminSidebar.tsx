@@ -6,13 +6,18 @@ import { signOut } from 'next-auth/react';
 
 const tabs = [
   {
-    sectionHeader: 'Management',
+    sectionHeader: '',
     items: [
       {
         title: 'Main Dashboard',
         href: '/admin-dashboard',
         icon: LayoutDashboard,
       },
+    ],
+  },
+  {
+    sectionHeader: 'Management',
+    items: [
       {
         title: 'Super Admin Management',
         href: '/superadmin-management',
@@ -32,6 +37,11 @@ const tabs = [
         title: 'Guest Management',
         href: '/guest-management',
         icon: ListTodo,
+      },
+      {
+        title: 'Wedding Management',
+        href: '/wedding-management',
+        icon: Users,
       },
     ],
   },

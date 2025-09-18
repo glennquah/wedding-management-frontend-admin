@@ -42,10 +42,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   if (!session?.user || session.user.role !== UserRole.SUPER_ADMIN) {
     console.log('Access denied - Session:', session);
     router.push('/login');
+    console.log('Access denied - Session:', session);
+    router.push('/login');
     return (
       <>
         <main className="flex flex-1 flex-col overflow-y-auto">{children}</main>
-        <Toaster />
+        <>
+          <main className="flex flex-1 flex-col overflow-y-auto">{children}</main>
+          <Toaster />
+        </>
       </>
     );
   }
