@@ -25,7 +25,7 @@ import {
   WeddingStyle,
   WeddingType
 } from '../api';
-import { TextInputWithAI } from './textInputWithAi';
+import { TextInputWithAI } from './textInputWithAI';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { DeleteConfirmationModal } from './ui/delete-confirmation-modal';
