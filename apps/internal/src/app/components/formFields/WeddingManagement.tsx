@@ -228,9 +228,7 @@ export const getEditWeddingFormFields = ({ wedding, setWedding }: EditWeddingFor
       <Label htmlFor="weddingType">Wedding Type</Label>
       <Select
         value={wedding.weddingType || ''}
-        onValueChange={(value: string) =>
-          setWedding({ ...wedding, weddingType: value as UpdateWeddingDto.weddingType })
-        }
+        onValueChange={(value: WeddingType) => setWedding({ ...wedding, weddingType: value })}
       >
         <SelectTrigger>
           <SelectValue placeholder="Select wedding type" />
@@ -251,15 +249,13 @@ export const getEditWeddingFormFields = ({ wedding, setWedding }: EditWeddingFor
       <Label htmlFor="budgetBucket">Budget Range</Label>
       <Select
         value={wedding.budgetBucket || ''}
-        onValueChange={(value: string) =>
-          setWedding({ ...wedding, budgetBucket: value as UpdateWeddingDto.budgetBucket })
-        }
+        onValueChange={(value: BudgetBucket) => setWedding({ ...wedding, budgetBucket: value })}
       >
         <SelectTrigger>
           <SelectValue placeholder="Select budget range" />
         </SelectTrigger>
         <SelectContent>
-          {Object.values(UpdateWeddingDto.budgetBucket).map((budget) => (
+          {Object.values(BudgetBucket).map((budget) => (
             <SelectItem key={budget} value={budget}>
               {capitalizeFirst(budget)}
             </SelectItem>
@@ -274,15 +270,15 @@ export const getEditWeddingFormFields = ({ wedding, setWedding }: EditWeddingFor
       <Label htmlFor="guestCountBucket">Guest Count</Label>
       <Select
         value={wedding.guestCountBucket || ''}
-        onValueChange={(value: string) =>
-          setWedding({ ...wedding, guestCountBucket: value as UpdateWeddingDto.guestCountBucket })
+        onValueChange={(value: GuestCountBucket) =>
+          setWedding({ ...wedding, guestCountBucket: value })
         }
       >
         <SelectTrigger>
           <SelectValue placeholder="Select guest count range" />
         </SelectTrigger>
         <SelectContent>
-          {Object.values(UpdateWeddingDto.guestCountBucket).map((count) => (
+          {Object.values(GuestCountBucket).map((count) => (
             <SelectItem key={count} value={count}>
               {capitalizeFirst(count)}
             </SelectItem>
@@ -297,15 +293,13 @@ export const getEditWeddingFormFields = ({ wedding, setWedding }: EditWeddingFor
       <Label htmlFor="preferredStyle">Preferred Style</Label>
       <Select
         value={wedding.preferredStyle || ''}
-        onValueChange={(value: string) =>
-          setWedding({ ...wedding, preferredStyle: value as UpdateWeddingDto.preferredStyle })
-        }
+        onValueChange={(value: WeddingStyle) => setWedding({ ...wedding, preferredStyle: value })}
       >
         <SelectTrigger>
           <SelectValue placeholder="Select preferred style" />
         </SelectTrigger>
         <SelectContent>
-          {Object.values(UpdateWeddingDto.preferredStyle).map((style) => (
+          {Object.values(WeddingStyle).map((style) => (
             <SelectItem key={style} value={style}>
               {capitalizeFirst(style)}
             </SelectItem>

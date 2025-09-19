@@ -2,10 +2,6 @@
 
 import { useEffect, useState } from 'react';
 
-import {
-  getEditWeddingFormFields,
-  getWeddingFormFields,
-} from '../components/formFields/WeddingManagement';
 import { Button, PageHeader } from '@shared/components';
 import { WeddingTable } from '@shared/components/WeddingTable';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
@@ -24,6 +20,10 @@ import { Plus } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import {
+  getEditWeddingFormFields,
+  getWeddingFormFields,
+} from '../components/formFields/WeddingManagement';
 
 export const dynamic = 'force-dynamic';
 
@@ -89,10 +89,10 @@ export default function WeddingManagementPage() {
       name: wedding.name,
       location: wedding.location,
       date: wedding.date,
-      weddingType: wedding.weddingType as unknown as UpdateWeddingDto.weddingType,
-      budgetBucket: wedding.budgetBucket as unknown as UpdateWeddingDto.budgetBucket,
-      guestCountBucket: wedding.guestCountBucket as unknown as UpdateWeddingDto.guestCountBucket,
-      preferredStyle: wedding.preferredStyle as unknown as UpdateWeddingDto.preferredStyle,
+      weddingType: wedding.weddingType as unknown as WeddingType,
+      budgetBucket: wedding.budgetBucket as unknown as BudgetBucket,
+      guestCountBucket: wedding.guestCountBucket as unknown as GuestCountBucket,
+      preferredStyle: wedding.preferredStyle as unknown as WeddingStyle,
       preferredServices: wedding.preferredServices as unknown as Array<WeddingService>,
     });
     setIsEditingWedding(true);
