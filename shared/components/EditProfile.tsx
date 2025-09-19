@@ -1,30 +1,19 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
-import { signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import { useEffect } from 'react';
 import {
   AdminResponseDto,
-  AdminsService,
   BudgetBucket,
   GuestCountBucket,
-  SuperAdminResponseDto,
-  SuperAdminsService,
-  UpdateAdminDto,
-  UpdateSuperAdminDto,
-  UpdateVendorDto,
-  UpdateWeddingDto,
   UserRole,
   VendorResponseDto,
-  VendorsService,
-  WeddingResponseDto,
   WeddingService,
-  WeddingsService,
   WeddingStyle,
   WeddingType
 } from '../api';
+import { useEditProfile } from '../hooks/useEditProfile';
+import { useWeddingProfile } from '../hooks/useWeddingProfile';
 import { TextInputWithAI } from './textInputWithAI';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -40,53 +29,35 @@ interface EditProfileProps {
   onProfileUpdate?: () => void;
 }
 
-type UserData = AdminResponseDto | SuperAdminResponseDto | VendorResponseDto;
-
 export default function EditProfile({ userId, userRole, onProfileUpdate }: EditProfileProps) {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isDeletingProfile, setIsDeletingProfile] = useState(false);
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [weddingData, setWeddingData] = useState<WeddingResponseDto | null>(null);
-  const [isLoadingWedding, setIsLoadingWedding] = useState(false);
+  // Use custom hooks for profile and wedding management
+  const {
+    isLoading,
+    isEditing,
+    isSaving,
+    validationErrors,
+    showDeleteModal,
+    isDeletingProfile,
+    userData,
+    formData,
+    setIsEditing,
+    setShowDeleteModal,
+    fetchUserData,
+    handleInputChange,
+    handleSubmit,
+    handleCancel,
+    handleDeleteProfile,
+    handleCancelDelete,
+  } = useEditProfile({ userId, userRole, onProfileUpdate });
 
-  // Base form data for all user types
-  const [formData, setFormData] = useState({
-    // Base User fields
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-
-    // Admin-specific fields
-    isSuspended: false,
-    mainWeddingId: null as number | null,
-
-    // Vendor-specific fields
-    vendorWebsite: '',
-    uenNumber: '',
-    bio: '',
-    serviceOffered: WeddingService.VENUE,
-    styleOffered: WeddingStyle.MODERN,
-    weddingTypes: [] as WeddingType[],
-    capacity: null as number | null,
-  });
-
-  // Wedding form data for admins
-  const [weddingFormData, setWeddingFormData] = useState({
-    name: '',
-    date: '',
-    location: '',
-    weddingType: WeddingType.WESTERN,
-    budgetBucket: BudgetBucket.MEDIUM,
-    guestCountBucket: GuestCountBucket.MEDIUM,
-    preferredStyle: WeddingStyle.MODERN,
-    preferredServices: [] as WeddingService[],
-  });
+  const {
+    weddingData,
+    weddingFormData,
+    fetchMainWedding,
+    handleWeddingInputChange,
+    updateWeddingProfile,
+    resetWeddingForm,
+  } = useWeddingProfile();
 
   // Determine the actual user ID and role to fetch
   const targetUserId = userId;
@@ -96,300 +67,39 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     if (targetUserId && targetUserRole) {
       fetchUserData();
     }
-  }, [targetUserId, targetUserRole]);
+  }, [targetUserId, targetUserRole, fetchUserData]);
 
-  const fetchUserData = async () => {
-    try {
-      setIsLoading(true);
-      let data: UserData;
-
-      if (targetUserRole === UserRole.ADMIN) {
-        data = await AdminsService.adminControllerGetAdmin(targetUserId!);
-        // Also fetch main wedding if admin has one
-        if ((data as AdminResponseDto).weddings && (data as AdminResponseDto).weddings!.length > 0) {
-          fetchMainWedding();
-        }
-      } else if (targetUserRole === UserRole.SUPER_ADMIN) {
-        data = await SuperAdminsService.superAdminControllerGetAdmin(targetUserId!);
-      } else if (targetUserRole === UserRole.VENDOR) {
-        data = await VendorsService.vendorControllerGetVendor(targetUserId!);
-      } else {
-        throw new Error('Unsupported user role for profile editing');
-      }
-
-      setUserData(data);
-      populateFormData(data);
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      toast.error('Failed to load profile data');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchMainWedding = async () => {
-    try {
-      setIsLoadingWedding(true);
-      const mainWeddingResponse = await AdminsService.adminControllerGetMyMainWedding();
-
-      if (mainWeddingResponse.mainWeddingId) {
-        const mainWedding = await WeddingsService.weddingControllerFindOne(
-          mainWeddingResponse.mainWeddingId
-        );
-
-        if (mainWedding) {
-          setWeddingData(mainWedding);
-          populateWeddingFormData(mainWedding);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching wedding data:', error);
-    } finally {
-      setIsLoadingWedding(false);
-    }
-  };
-
-  const populateFormData = (data: UserData) => {
-    setFormData({
-      name: data.name || '',
-      email: data.email || '',
-      password: '',
-      confirmPassword: '',
-
-      // Admin-specific
-      isSuspended: (data as AdminResponseDto).isSuspended || false,
-      mainWeddingId: null,
-
-      // Vendor-specific
-      vendorWebsite: (data as VendorResponseDto).vendorWebsite || '',
-      uenNumber: (data as VendorResponseDto).uenNumber || '',
-      bio: (data as VendorResponseDto).bio || '',
-      serviceOffered: (data as VendorResponseDto).serviceOffered || WeddingService.VENUE,
-      styleOffered: (data as VendorResponseDto).styleOffered || WeddingStyle.MODERN,
-      weddingTypes: (data as VendorResponseDto).weddingTypes || [],
-      capacity: (data as VendorResponseDto).capacity || null,
-    });
-  };
-
-  const populateWeddingFormData = (wedding: WeddingResponseDto) => {
-    setWeddingFormData({
-      name: wedding.name || '',
-      date: wedding.date || '',
-      location: wedding.location || '',
-      weddingType: wedding.weddingType,
-      budgetBucket: wedding.budgetBucket,
-      guestCountBucket: wedding.guestCountBucket,
-      preferredStyle: wedding.preferredStyle,
-      preferredServices: wedding.preferredServices || [],
-    });
-  };
-
-  const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => {
-      const newData = {
-        ...prev,
-        [field]: value,
-      };
-
-      // If service changes from venue to another service, clear capacity
-      if (field === 'serviceOffered' && prev.serviceOffered === WeddingService.VENUE && value !== WeddingService.VENUE) {
-        newData.capacity = null;
-      }
-
-      return newData;
-    });
-
-    // Clear validation errors for the field being changed
-    if (validationErrors[field]) {
-      setValidationErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
-  };
-
-  const handleWeddingInputChange = (field: string, value: any) => {
-    setWeddingFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const validateForm = () => {
-    const errors: { [key: string]: string } = {};
-
-    // Validate venue capacity
-    if (targetUserRole === UserRole.VENDOR && formData.serviceOffered === WeddingService.VENUE) {
-      if (!formData.capacity || formData.capacity <= 0) {
-        errors.capacity = 'Capacity is required and must be greater than 0 for venue services';
+  useEffect(() => {
+    // Fetch main wedding if admin has one
+    if (targetUserRole === UserRole.ADMIN && userData) {
+      const adminData = userData as AdminResponseDto;
+      if (adminData.weddings && adminData.weddings.length > 0) {
+        fetchMainWedding();
       }
     }
+  }, [targetUserRole, userData, fetchMainWedding]);
 
-    // Validate password confirmation
-    if (formData.password.trim() && formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
-    }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Enhanced submit handler that also updates wedding data
+  const handleEnhancedSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      toast.error('Please fix the validation errors before submitting');
-      return;
-    }
+    // First handle the profile update
+    await handleSubmit(e);
 
-    try {
-      setIsSaving(true);
-
-      // Update user profile
-      await updateUserProfile();
-
-      // Update wedding data if admin and wedding exists
-      if (targetUserRole === UserRole.ADMIN && weddingData) {
+    // Then update wedding data if admin and wedding exists
+    if (targetUserRole === UserRole.ADMIN && weddingData) {
+      try {
         await updateWeddingProfile();
-      }
-
-      setIsEditing(false);
-      setValidationErrors({});
-      toast.success('Profile updated successfully');
-      onProfileUpdate?.();
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      toast.error('Failed to update profile');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const updateUserProfile = async () => {
-    const updateData: any = {
-      role: targetUserRole!,
-    };
-
-    // Add changed fields
-    if (formData.name !== userData?.name) updateData.name = formData.name;
-    if (formData.email !== userData?.email) updateData.email = formData.email;
-    if (formData.password.trim()) updateData.password = formData.password;
-
-    // Role-specific fields
-    if (targetUserRole === UserRole.ADMIN) {
-      const adminData = userData as AdminResponseDto;
-      if (formData.isSuspended !== adminData.isSuspended) {
-        updateData.isSuspended = formData.isSuspended;
-      }
-    } else if (targetUserRole === UserRole.VENDOR) {
-      const vendorData = userData as VendorResponseDto;
-      if (formData.vendorWebsite !== vendorData.vendorWebsite) {
-        updateData.vendorWebsite = formData.vendorWebsite;
-      }
-      if (formData.uenNumber !== vendorData.uenNumber) {
-        updateData.uenNumber = formData.uenNumber;
-      }
-      if (formData.bio !== vendorData.bio) {
-        updateData.bio = formData.bio;
-      }
-      if (formData.serviceOffered !== vendorData.serviceOffered) {
-        updateData.serviceOffered = formData.serviceOffered;
-      }
-      if (formData.styleOffered !== vendorData.styleOffered) {
-        updateData.styleOffered = formData.styleOffered;
-      }
-      if (JSON.stringify(formData.weddingTypes) !== JSON.stringify(vendorData.weddingTypes)) {
-        updateData.weddingTypes = formData.weddingTypes;
-      }
-      // Only update capacity if service is venue, otherwise set to 0
-      const capacityValue = formData.serviceOffered === WeddingService.VENUE ? formData.capacity : 0;
-      if (capacityValue !== vendorData.capacity) {
-        updateData.capacity = capacityValue;
-      }
-    }
-
-    // Only update if there are changes
-    if (Object.keys(updateData).length > 1) { // More than just role
-      let updatedData;
-      if (targetUserRole === UserRole.ADMIN) {
-        updatedData = await AdminsService.adminControllerUpdate(targetUserId!, updateData as UpdateAdminDto);
-      } else if (targetUserRole === UserRole.SUPER_ADMIN) {
-        updatedData = await SuperAdminsService.superAdminControllerUpdate(targetUserId!, updateData as UpdateSuperAdminDto);
-      } else if (targetUserRole === UserRole.VENDOR) {
-        updatedData = await VendorsService.vendorControllerUpdate(targetUserId!, updateData as UpdateVendorDto);
-      }
-
-      if (updatedData) {
-        setUserData(updatedData);
-        populateFormData(updatedData);
+      } catch (error) {
+        console.error('Error updating wedding profile:', error);
       }
     }
   };
 
-  const updateWeddingProfile = async () => {
-    if (!weddingData) return;
-
-    const updateData: UpdateWeddingDto = {};
-
-    if (weddingFormData.name !== weddingData.name) updateData.name = weddingFormData.name;
-    if (weddingFormData.date !== weddingData.date) updateData.date = weddingFormData.date;
-    if (weddingFormData.location !== weddingData.location) updateData.location = weddingFormData.location;
-    if (weddingFormData.weddingType !== weddingData.weddingType) updateData.weddingType = weddingFormData.weddingType;
-    if (weddingFormData.budgetBucket !== weddingData.budgetBucket) updateData.budgetBucket = weddingFormData.budgetBucket;
-    if (weddingFormData.guestCountBucket !== weddingData.guestCountBucket) updateData.guestCountBucket = weddingFormData.guestCountBucket;
-    if (weddingFormData.preferredStyle !== weddingData.preferredStyle) updateData.preferredStyle = weddingFormData.preferredStyle;
-    if (JSON.stringify(weddingFormData.preferredServices) !== JSON.stringify(weddingData.preferredServices)) {
-      updateData.preferredServices = weddingFormData.preferredServices;
-    }
-
-    // Only update if there are changes
-    if (Object.keys(updateData).length > 0) {
-      const updatedWedding = await WeddingsService.weddingControllerUpdate(weddingData.id, updateData);
-      setWeddingData(updatedWedding);
-      populateWeddingFormData(updatedWedding);
-    }
-  };
-
-  const handleCancel = () => {
-    if (userData) populateFormData(userData);
-    if (weddingData) populateWeddingFormData(weddingData);
-    setValidationErrors({});
-    setIsEditing(false);
-  };
-
-  const handleDeleteProfile = async (password?: string) => {
-    if (!password) return;
-
-    try {
-      setIsDeletingProfile(true);
-
-      if (targetUserRole === UserRole.ADMIN) {
-        await AdminsService.adminControllerDeleteSelf({ password });
-      } else if (targetUserRole === UserRole.VENDOR) {
-        await VendorsService.vendorControllerDeleteSelf({ password });
-      }
-
-      setShowDeleteModal(false);
-      toast.success('Profile deleted successfully. Thanks for using Knotly!');
-      onProfileUpdate?.(); 
-
-      await signOut({ callbackUrl: `${window.location.origin}/login`, redirect: true });
-    } catch (error: any) {
-      console.error('Error deleting profile:', error);
-
-      if (error?.status === 401 || error?.status === 403) {
-        toast.error('Invalid password. Please try again.');
-      } else {
-        toast.error('Failed to delete profile. Please try again.');
-      }
-    } finally {
-      setIsDeletingProfile(false);
-    }
-  };
-
-  const handleCancelDelete = () => {
-    setShowDeleteModal(false);
+  // Enhanced cancel handler that also resets wedding form
+  const handleEnhancedCancel = () => {
+    handleCancel();
+    resetWeddingForm();
   };
 
   const renderUserFields = () => {
@@ -805,7 +515,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
   return (
     <div className='container mx-auto px-4 py-8 relative'>
       {isEditing ? (
-        <form onSubmit={handleSubmit} className='space-y-4'>
+        <form onSubmit={handleEnhancedSubmit} className='space-y-4'>
           {renderUserFields()}
           {renderWeddingFields()}
 
@@ -813,7 +523,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
             <Button type='submit' disabled={isSaving}>
               {isSaving ? 'Saving...' : 'Save Changes'}
             </Button>
-            <Button type='button' variant='darkOutline' onClick={handleCancel} disabled={isSaving}>
+            <Button type='button' variant='darkOutline' onClick={handleEnhancedCancel} disabled={isSaving}>
               Cancel
             </Button>
           </div>
