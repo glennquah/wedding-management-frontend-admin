@@ -1,5 +1,8 @@
 'use client';
 
+import { ChevronDown } from 'lucide-react';
+import { signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import {
@@ -25,6 +28,7 @@ import {
 import { TextInputWithAI } from './textInputWithAi';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { DeleteConfirmationModal } from './ui/delete-confirmation-modal';
 import { Input } from './ui/form/input';
 import { MultiSelectDropdown } from './ui/form/multiSelectDropdown';
 import { SingleSelectDropdown } from './ui/form/singleSelectDropdown';
@@ -39,9 +43,13 @@ interface EditProfileProps {
 type UserData = AdminResponseDto | SuperAdminResponseDto | VendorResponseDto;
 
 export default function EditProfile({ userId, userRole, onProfileUpdate }: EditProfileProps) {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeletingProfile, setIsDeletingProfile] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [weddingData, setWeddingData] = useState<WeddingResponseDto | null>(null);
   const [isLoadingWedding, setIsLoadingWedding] = useState(false);
@@ -52,6 +60,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     name: '',
     email: '',
     password: '',
+    confirmPassword: '',
 
     // Admin-specific fields
     isSuspended: false,
@@ -134,7 +143,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
         }
       }
     } catch (error) {
-      console.error("Error fetching wedding data:", error);
+      console.error('Error fetching wedding data:', error);
     } finally {
       setIsLoadingWedding(false);
     }
@@ -145,6 +154,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
       name: data.name || '',
       email: data.email || '',
       password: '',
+      confirmPassword: '',
 
       // Admin-specific
       isSuspended: (data as AdminResponseDto).isSuspended || false,
@@ -175,10 +185,28 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
   };
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [field]: value,
+      };
+
+      // If service changes from venue to another service, clear capacity
+      if (field === 'serviceOffered' && prev.serviceOffered === WeddingService.VENUE && value !== WeddingService.VENUE) {
+        newData.capacity = null;
+      }
+
+      return newData;
+    });
+
+    // Clear validation errors for the field being changed
+    if (validationErrors[field]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
   const handleWeddingInputChange = (field: string, value: any) => {
@@ -188,8 +216,32 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     }));
   };
 
+  const validateForm = () => {
+    const errors: { [key: string]: string } = {};
+
+    // Validate venue capacity
+    if (targetUserRole === UserRole.VENDOR && formData.serviceOffered === WeddingService.VENUE) {
+      if (!formData.capacity || formData.capacity <= 0) {
+        errors.capacity = 'Capacity is required and must be greater than 0 for venue services';
+      }
+    }
+
+    // Validate password confirmation
+    if (formData.password.trim() && formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      toast.error('Please fix the validation errors before submitting');
+      return;
+    }
 
     try {
       setIsSaving(true);
@@ -203,6 +255,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
       }
 
       setIsEditing(false);
+      setValidationErrors({});
       toast.success('Profile updated successfully');
       onProfileUpdate?.();
     } catch (error) {
@@ -249,8 +302,10 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
       if (JSON.stringify(formData.weddingTypes) !== JSON.stringify(vendorData.weddingTypes)) {
         updateData.weddingTypes = formData.weddingTypes;
       }
-      if (formData.capacity !== vendorData.capacity) {
-        updateData.capacity = formData.capacity;
+      // Only update capacity if service is venue, otherwise set to 0
+      const capacityValue = formData.serviceOffered === WeddingService.VENUE ? formData.capacity : 0;
+      if (capacityValue !== vendorData.capacity) {
+        updateData.capacity = capacityValue;
       }
     }
 
@@ -277,7 +332,6 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
 
     const updateData: UpdateWeddingDto = {};
 
-    // Add changed wedding fields
     if (weddingFormData.name !== weddingData.name) updateData.name = weddingFormData.name;
     if (weddingFormData.date !== weddingData.date) updateData.date = weddingFormData.date;
     if (weddingFormData.location !== weddingData.location) updateData.location = weddingFormData.location;
@@ -300,7 +354,42 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
   const handleCancel = () => {
     if (userData) populateFormData(userData);
     if (weddingData) populateWeddingFormData(weddingData);
+    setValidationErrors({});
     setIsEditing(false);
+  };
+
+  const handleDeleteProfile = async (password?: string) => {
+    if (!password) return;
+
+    try {
+      setIsDeletingProfile(true);
+
+      if (targetUserRole === UserRole.ADMIN) {
+        await AdminsService.adminControllerDeleteSelf({ password });
+      } else if (targetUserRole === UserRole.VENDOR) {
+        await VendorsService.vendorControllerDeleteSelf({ password });
+      }
+
+      setShowDeleteModal(false);
+      toast.success('Profile deleted successfully. Thanks for using Knotly!');
+      onProfileUpdate?.(); 
+
+      await signOut({ callbackUrl: `${window.location.origin}/login`, redirect: true });
+    } catch (error: any) {
+      console.error('Error deleting profile:', error);
+
+      if (error?.status === 401 || error?.status === 403) {
+        toast.error('Invalid password. Please try again.');
+      } else {
+        toast.error('Failed to delete profile. Please try again.');
+      }
+    } finally {
+      setIsDeletingProfile(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
   };
 
   const renderUserFields = () => {
@@ -309,51 +398,68 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     return (
       <>
         {/* Base User Fields */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Name</label>
+        <div className='space-y-2'>
+          <label className='text-sm font-medium'>Name</label>
           {isEditing ? (
             <Input
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
-              placeholder="Enter your name"
+              placeholder='Enter your name'
             />
           ) : (
-            <p className="p-3 bg-muted rounded-md">{userData.name}</p>
+            <p className='p-3 bg-muted rounded-md'>{userData.name}</p>
           )}
         </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Email</label>
+        <div className='space-y-2'>
+          <label className='text-sm font-medium'>Email</label>
           {isEditing ? (
             <Input
-              type="email"
+              type='email'
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
-              placeholder="Enter your email"
+              placeholder='Enter your email'
             />
           ) : (
-            <p className="p-3 bg-muted rounded-md">{userData.email}</p>
+            <p className='p-3 bg-muted rounded-md'>{userData.email}</p>
           )}
         </div>
 
         {isEditing && (
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Password</label>
-            <Input
-              type="password"
-              value={formData.password}
-              onChange={(e) => handleInputChange('password', e.target.value)}
-              placeholder="Enter new password (leave blank to keep current)"
-            />
-            <p className="text-xs text-muted-foreground">
-              Leave empty to keep your current password
-            </p>
-          </div>
+          <>
+            <div className='space-y-2'>
+              <label className='text-sm font-medium'>Password</label>
+              <Input
+                type='password'
+                value={formData.password}
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                placeholder='Enter new password (leave blank to keep current)'
+              />
+              <p className='text-xs text-muted-foreground'>
+                Leave empty to keep your current password
+              </p>
+            </div>
+
+            <div className='space-y-2'>
+              <label className='text-sm font-medium'>Confirm Password</label>
+              <Input
+                type='password'
+                value={formData.confirmPassword}
+                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                placeholder='Re-enter new password'
+                disabled={!formData.password.trim()}
+                className={validationErrors.confirmPassword ? 'border-red-500' : ''}
+              />
+              {validationErrors.confirmPassword && (
+                <p className='text-sm text-red-500'>{validationErrors.confirmPassword}</p>
+              )}
+            </div>
+          </>
         )}
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Role</label>
-          <p className="p-3 bg-muted rounded-md capitalize">
+        <div className='space-y-2'>
+          <label className='text-sm font-medium'>Role</label>
+          <p className='p-3 bg-muted rounded-md capitalize'>
             {userData.role.toLowerCase().replace('_', ' ')}
           </p>
         </div>
@@ -361,9 +467,9 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
         {/* Admin-specific Fields */}
         {targetUserRole === UserRole.ADMIN && (
           <>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Onboarded Date</label>
-              <p className="p-3 bg-muted rounded-md">
+            <div className='space-y-2'>
+              <label className='text-sm font-medium'>Onboarded Date</label>
+              <p className='p-3 bg-muted rounded-md'>
                 {new Date((userData as AdminResponseDto).onboardedDate).toLocaleDateString()}
               </p>
             </div>
@@ -373,40 +479,40 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
         {/* Vendor-specific Fields */}
         {targetUserRole === UserRole.VENDOR && (
           <>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Website</label>
+            <div className='space-y-2'>
+              <label className='text-sm font-medium'>Website</label>
               {isEditing ? (
                 <Input
                   type='url'
                   value={formData.vendorWebsite}
                   onChange={(e) => handleInputChange('vendorWebsite', e.target.value)}
-                  placeholder="Enter your website URL"
+                  placeholder='Enter your website URL'
                 />
               ) : (
-                <p className="p-3 bg-muted rounded-md">{(userData as VendorResponseDto).vendorWebsite || 'Not set'}</p>
+                <p className='p-3 bg-muted rounded-md'>{(userData as VendorResponseDto).vendorWebsite || 'Not set'}</p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">UEN Number</label>
+            <div className='space-y-2'>
+              <label className='text-sm font-medium'>UEN Number</label>
               {isEditing ? (
                 <Input
                   value={formData.uenNumber}
                   onChange={(e) => handleInputChange('uenNumber', e.target.value)}
-                  placeholder="Enter your UEN number"
+                  placeholder='Enter your UEN number'
                 />
               ) : (
-                <p className="p-3 bg-muted rounded-md">{(userData as VendorResponseDto).uenNumber || 'Not set'}</p>
+                <p className='p-3 bg-muted rounded-md'>{(userData as VendorResponseDto).uenNumber || 'Not set'}</p>
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className='space-y-2'>
               {isEditing ? (
                 <TextInputWithAI
                   value={formData.bio}
                   setValue={(value) => handleInputChange('bio', value)}
-                  placeholder="Tell us about your business"
-                  label="Bio"
+                  placeholder='Tell us about your business'
+                  label='Bio'
                   message={`Create or refine a vendor bio for a wedding platform.
                   ${formData.weddingTypes ? ` Wedding types: ${formData.weddingTypes.join(', ')}.` : ''}${
                     formData.serviceOffered ? ` Services: ${formData.serviceOffered}.` : ''
@@ -418,74 +524,105 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
                 />
               ) : (
                 <>
-                  <label className="text-sm font-medium">Bio</label>
-                  <p className="p-3 bg-muted rounded-md min-h-[80px]">{(userData as VendorResponseDto).bio || 'No bio set'}</p>
+                  <label className='text-sm font-medium'>Bio</label>
+                  <p className='p-3 bg-muted rounded-md min-h-[80px]'>{(userData as VendorResponseDto).bio || 'No bio set'}</p>
                 </>
               )}
             </div>
 
-            <div className="space-y-2">
-              <SingleSelectDropdown
-                label="Service Offered"
-                options={Object.values(WeddingService)}
-                selected={isEditing ? formData.serviceOffered : (userData as VendorResponseDto).serviceOffered}
-                setSelected={(selected) => handleInputChange('serviceOffered', selected as WeddingService)}
-                placeholder="Select Wedding Service"
-                disabled={!isEditing}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <SingleSelectDropdown
-                label="Style Offered"
-                options={Object.values(WeddingStyle)}
-                selected={isEditing ? formData.styleOffered : (userData as VendorResponseDto).styleOffered}
-                setSelected={(selected) => handleInputChange('styleOffered', selected as WeddingStyle)}
-                placeholder="Select Wedding Style"
-                disabled={!isEditing}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <MultiSelectDropdown
-                label="Wedding Types"
-                options={Object.values(WeddingType)}
-                selected={isEditing ? formData.weddingTypes : (userData as VendorResponseDto).weddingTypes ?? []}
-                setSelected={(selected) => handleInputChange('weddingTypes', selected as WeddingType[])}
-                placeholder="Select Wedding Types"
-                disabled={!isEditing}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Capacity</label>
+            <div className='space-y-2'>
+              <label className='text-sm font-medium'>Service Offered</label>
               {isEditing ? (
-                <Input
-                  type="number"
-                  value={formData.capacity || ''}
-                  onChange={(e) => handleInputChange('capacity', e.target.value ? parseInt(e.target.value) : null)}
-                  placeholder="Enter capacity"
+                <SingleSelectDropdown
+                  options={Object.values(WeddingService)}
+                  selected={formData.serviceOffered}
+                  setSelected={(selected) => handleInputChange('serviceOffered', selected as WeddingService)}
+                  placeholder='Select Wedding Service'
                 />
               ) : (
-                <p className="p-3 bg-muted rounded-md">{(userData as VendorResponseDto).capacity || 'Not set'}</p>
+                <div className='relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between'>
+                  <span>{((userData as VendorResponseDto).serviceOffered || 'Not set').charAt(0).toUpperCase() + ((userData as VendorResponseDto).serviceOffered || 'Not set').slice(1)}</span>
+                  <ChevronDown className='ml-2 w-4 h-4 text-gray-400' />
+                </div>
               )}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Rating</label>
-              <p className="p-3 bg-muted rounded-md">{(userData as VendorResponseDto).rating?.toFixed(1) || '0.0'} / 5.0</p>
+            <div className='space-y-2'>
+              <label className='text-sm font-medium'>Style Offered</label>
+              {isEditing ? (
+                <SingleSelectDropdown
+                  options={Object.values(WeddingStyle)}
+                  selected={formData.styleOffered}
+                  setSelected={(selected) => handleInputChange('styleOffered', selected as WeddingStyle)}
+                  placeholder='Select Wedding Style'
+                />
+              ) : (
+                <div className='relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between'>
+                  <span>{((userData as VendorResponseDto).styleOffered || 'Not set').charAt(0).toUpperCase() + ((userData as VendorResponseDto).styleOffered || 'Not set').slice(1)}</span>
+                  <ChevronDown className='ml-2 w-4 h-4 text-gray-400' />
+                </div>
+              )}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Onboarding Status</label>
-              <p className="p-3 bg-muted rounded-md capitalize">{(userData as VendorResponseDto).onboardingStatus}</p>
+            <div className='space-y-2'>
+              <label className='text-sm font-medium'>Wedding Types</label>
+              {isEditing ? (
+                <MultiSelectDropdown
+                  options={Object.values(WeddingType)}
+                  selected={formData.weddingTypes}
+                  setSelected={(selected) => handleInputChange('weddingTypes', selected as WeddingType[])}
+                  placeholder='Select Wedding Types'
+                />
+              ) : (
+                <div className='relative rounded-md p-3 min-h-[36px] w-full text-left bg-muted flex items-center justify-between'>
+                  <span>
+                    {((userData as VendorResponseDto).weddingTypes && (userData as VendorResponseDto).weddingTypes!.length > 0)
+                      ? (userData as VendorResponseDto).weddingTypes!.map(type => type.charAt(0).toUpperCase() + type.slice(1)).join(', ')
+                      : 'Not set'
+                    }
+                  </span>
+                  <ChevronDown className='ml-2 w-4 h-4 text-gray-400' />
+                </div>
+              )}
+            </div>
+
+            {formData.serviceOffered === WeddingService.VENUE && (
+              <div className='space-y-2'>
+                <label className='text-sm font-medium'>Capacity</label>
+                {isEditing ? (
+                  <>
+                    <Input
+                      type='number'
+                      value={formData.capacity || ''}
+                      onChange={(e) => handleInputChange('capacity', e.target.value ? parseInt(e.target.value) : null)}
+                      placeholder='Enter capacity'
+                      className={validationErrors.capacity ? 'border-red-500' : ''}
+                    />
+                    {validationErrors.capacity && (
+                      <p className='text-sm text-red-500'>{validationErrors.capacity}</p>
+                    )}
+                  </>
+                ) : (
+                  <p className='p-3 bg-muted rounded-md'>{(userData as VendorResponseDto).capacity || 'Not set'}</p>
+                )}
+              </div>
+            )}
+
+            <div className='space-y-2'>
+              <label className='text-sm font-medium'>Rating</label>
+              <p className='p-3 bg-muted rounded-md'>{(userData as VendorResponseDto).rating?.toFixed(1) || '0.0'} / 5.0</p>
+            </div>
+
+            <div className='space-y-2'>
+              <label className='text-sm font-medium'>Onboarding Status</label>
+              <p className='p-3 bg-muted rounded-md capitalize'>{(userData as VendorResponseDto).onboardingStatus}</p>
             </div>
           </>
         )}
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Member Since</label>
-          <p className="p-3 bg-muted rounded-md">
+        <div className='space-y-2'>
+          <label className='text-sm font-medium'>Member Since</label>
+          <p className='p-3 bg-muted rounded-md'>
             {new Date(userData.createdAt).toLocaleDateString()}
           </p>
         </div>
@@ -497,105 +634,140 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     if (targetUserRole !== UserRole.ADMIN || !weddingData) return null;
 
     return (
-      <Card className="mt-6 bg-outline border-primary">
+      <Card className='mt-6 bg-outline border-primary'>
         <CardHeader>
           <CardTitle>Wedding Details</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Wedding Name</label>
+        <CardContent className='space-y-4'>
+          <div className='space-y-2'>
+            <label className='text-sm font-medium'>Wedding Name</label>
             {isEditing ? (
               <Input
                 value={weddingFormData.name}
                 onChange={(e) => handleWeddingInputChange('name', e.target.value)}
-                placeholder="Enter wedding name"
+                placeholder='Enter wedding name'
               />
             ) : (
-              <p className="p-3 bg-muted rounded-md">{weddingData.name}</p>
+              <p className='p-3 bg-muted rounded-md'>{weddingData.name}</p>
             )}
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Wedding Date</label>
+          <div className='space-y-2'>
+            <label className='text-sm font-medium'>Wedding Date</label>
             {isEditing ? (
               <Input
-                type="datetime-local"
+                type='datetime-local'
                 value={weddingFormData.date}
                 onChange={(e) => handleWeddingInputChange('date', e.target.value)}
               />
             ) : (
-              <p className="p-3 bg-muted rounded-md">
+              <p className='p-3 bg-muted rounded-md'>
                 {weddingData.date ? new Date(weddingData.date).toLocaleDateString() : 'Not set'}
               </p>
             )}
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Location</label>
+          <div className='space-y-2'>
+            <label className='text-sm font-medium'>Location</label>
             {isEditing ? (
               <Input
                 value={weddingFormData.location}
                 onChange={(e) => handleWeddingInputChange('location', e.target.value)}
-                placeholder="Enter wedding location"
+                placeholder='Enter wedding location'
               />
             ) : (
-              <p className="p-3 bg-muted rounded-md">{weddingData.location || 'Not set'}</p>
+              <p className='p-3 bg-muted rounded-md'>{weddingData.location || 'Not set'}</p>
             )}
           </div>
 
-          <div className="space-y-2">
-            <SingleSelectDropdown
-              label="Wedding Type"
-              options={Object.values(WeddingType)}
-              selected={isEditing ? weddingFormData.weddingType : weddingData.weddingType}
-              setSelected={(selected) => handleWeddingInputChange('weddingType', selected as WeddingType)}
-              placeholder="Select Wedding Type"
-              disabled={!isEditing}
-            />
+          <div className='space-y-2'>
+            <label className='text-sm font-medium'>Wedding Type</label>
+            {isEditing ? (
+              <SingleSelectDropdown
+                options={Object.values(WeddingType)}
+                selected={weddingFormData.weddingType}
+                setSelected={(selected) => handleWeddingInputChange('weddingType', selected as WeddingType)}
+                placeholder='Select Wedding Type'
+              />
+            ) : (
+              <div className='relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between'>
+                <span>{(weddingData.weddingType || 'Not set').charAt(0).toUpperCase() + (weddingData.weddingType || 'Not set').slice(1)}</span>
+                <ChevronDown className='ml-2 w-4 h-4 text-gray-400' />
+              </div>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <SingleSelectDropdown
-              label="Budget Range"
-              options={Object.values(BudgetBucket)}
-              selected={isEditing ? weddingFormData.budgetBucket : weddingData.budgetBucket}
-              setSelected={(selected) => handleWeddingInputChange('budgetBucket', selected as BudgetBucket)}
-              placeholder="Select Budget Range"
-              disabled={!isEditing}
-            />
+          <div className='space-y-2'>
+            <label className='text-sm font-medium'>Budget Range</label>
+            {isEditing ? (
+              <SingleSelectDropdown
+                options={Object.values(BudgetBucket)}
+                selected={weddingFormData.budgetBucket}
+                setSelected={(selected) => handleWeddingInputChange('budgetBucket', selected as BudgetBucket)}
+                placeholder='Select Budget Range'
+              />
+            ) : (
+              <div className='relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between'>
+                <span>{(weddingData.budgetBucket || 'Not set').charAt(0).toUpperCase() + (weddingData.budgetBucket || 'Not set').slice(1)}</span>
+                <ChevronDown className='ml-2 w-4 h-4 text-gray-400' />
+              </div>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <SingleSelectDropdown
-              label="Guest Count"
-              options={Object.values(GuestCountBucket)}
-              selected={isEditing ? weddingFormData.guestCountBucket : weddingData.guestCountBucket}
-              setSelected={(selected) => handleWeddingInputChange('guestCountBucket', selected as GuestCountBucket)}
-              placeholder="Select Guest Count Range"
-              disabled={!isEditing}
-            />
+          <div className='space-y-2'>
+            <label className='text-sm font-medium'>Guest Count</label>
+            {isEditing ? (
+              <SingleSelectDropdown
+                options={Object.values(GuestCountBucket)}
+                selected={weddingFormData.guestCountBucket}
+                setSelected={(selected) => handleWeddingInputChange('guestCountBucket', selected as GuestCountBucket)}
+                placeholder='Select Guest Count Range'
+              />
+            ) : (
+              <div className='relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between'>
+                <span>{(weddingData.guestCountBucket || 'Not set').charAt(0).toUpperCase() + (weddingData.guestCountBucket || 'Not set').slice(1)}</span>
+                <ChevronDown className='ml-2 w-4 h-4 text-gray-400' />
+              </div>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <SingleSelectDropdown
-              label="Preferred Style"
-              options={Object.values(WeddingStyle)}
-              selected={isEditing ? weddingFormData.preferredStyle : weddingData.preferredStyle}
-              setSelected={(selected) => handleWeddingInputChange('preferredStyle', selected as WeddingStyle)}
-              placeholder="Select Wedding Style"
-              disabled={!isEditing}
-            />
+          <div className='space-y-2'>
+            <label className='text-sm font-medium'>Preferred Style</label>
+            {isEditing ? (
+              <SingleSelectDropdown
+                options={Object.values(WeddingStyle)}
+                selected={weddingFormData.preferredStyle}
+                setSelected={(selected) => handleWeddingInputChange('preferredStyle', selected as WeddingStyle)}
+                placeholder='Select Wedding Style'
+              />
+            ) : (
+              <div className='relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between'>
+                <span>{(weddingData.preferredStyle || 'Not set').charAt(0).toUpperCase() + (weddingData.preferredStyle || 'Not set').slice(1)}</span>
+                <ChevronDown className='ml-2 w-4 h-4 text-gray-400' />
+              </div>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <MultiSelectDropdown
-              label="Preferred Services"
-              options={Object.values(WeddingService)}
-              selected={isEditing ? weddingFormData.preferredServices : (weddingData.preferredServices ?? [])}
-              setSelected={(selected) => handleWeddingInputChange('preferredServices', selected as WeddingService[])}
-              placeholder="Select Preferred Services"
-              disabled={!isEditing}
-            />
+          <div className='space-y-2'>
+            <label className='text-sm font-medium'>Preferred Services</label>
+            {isEditing ? (
+              <MultiSelectDropdown
+                options={Object.values(WeddingService)}
+                selected={weddingFormData.preferredServices}
+                setSelected={(selected) => handleWeddingInputChange('preferredServices', selected as WeddingService[])}
+                placeholder='Select Preferred Services'
+              />
+            ) : (
+              <div className='relative rounded-md p-3 min-h-[36px] w-full text-left bg-muted flex items-center justify-between'>
+                <span>
+                  {(weddingData.preferredServices && weddingData.preferredServices.length > 0)
+                    ? weddingData.preferredServices.map(service => service.charAt(0).toUpperCase() + service.slice(1)).join(', ')
+                    : 'Not set'
+                  }
+                </span>
+                <ChevronDown className='ml-2 w-4 h-4 text-gray-400' />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -604,16 +776,16 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <Card className="w-full max-w-2xl mx-auto">
+      <div className='space-y-6'>
+        <Card className='w-full max-w-2xl mx-auto'>
           <CardHeader>
-            <Skeleton className="h-8 w-32" />
-            <Skeleton className="h-4 w-48" />
+            <Skeleton className='h-8 w-32' />
+            <Skeleton className='h-4 w-48' />
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
+          <CardContent className='space-y-4'>
+            <Skeleton className='h-10 w-full' />
+            <Skeleton className='h-10 w-full' />
+            <Skeleton className='h-10 w-full' />
           </CardContent>
         </Card>
       </div>
@@ -622,42 +794,63 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
 
   if (!userData) {
     return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardContent className="p-6">
-          <p className="text-center text-muted-foreground">Failed to load profile data</p>
+      <Card className='w-full max-w-2xl mx-auto'>
+        <CardContent className='p-6'>
+          <p className='text-center text-muted-foreground'>Failed to load profile data</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 relative">
+    <div className='container mx-auto px-4 py-8 relative'>
       {isEditing ? (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className='space-y-4'>
           {renderUserFields()}
           {renderWeddingFields()}
 
-          <div className="absolute top-0 right-4 flex gap-3">
-            <Button type="submit" disabled={isSaving}>
+          <div className='absolute top-0 right-4 flex gap-3'>
+            <Button type='submit' disabled={isSaving}>
               {isSaving ? 'Saving...' : 'Save Changes'}
             </Button>
-            <Button type="button" variant='darkOutline' onClick={handleCancel} disabled={isSaving}>
+            <Button type='button' variant='darkOutline' onClick={handleCancel} disabled={isSaving}>
               Cancel
             </Button>
           </div>
         </form>
       ) : (
-        <div className="space-y-4">
+        <div className='space-y-4'>
           {renderUserFields()}
           {renderWeddingFields()}
 
-          <div className="absolute top-0 right-4 flex gap-3">
+          <div className='absolute top-0 right-4 flex gap-3'>
             <Button onClick={() => setIsEditing(true)}>
               Edit Profile
             </Button>
+            {targetUserRole !== UserRole.SUPER_ADMIN && (
+              <Button
+                className='bg-warning-900 text-base-white'
+                onClick={() => setShowDeleteModal(true)}
+              >
+                Delete Profile
+              </Button>
+            )}
           </div>
         </div>
       )}
+
+      <DeleteConfirmationModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        title='Delete Profile'
+        itemName='your profile'
+        onConfirm={handleDeleteProfile}
+        onCancel={handleCancelDelete}
+        requirePasswordConfirmation={true}
+        confirmButtonText='Delete Profile'
+        cancelButtonText='Cancel'
+        isLoading={isDeletingProfile}
+      />
     </div>
   );
 }
