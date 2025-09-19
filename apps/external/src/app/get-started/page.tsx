@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { UserRole, WeddingService, WeddingStyle, WeddingType } from '@shared/api';
 import FormField from '@shared/components/FormField';
 import ResponsiveMenubar from '@shared/components/responsive-menubar';
-import { TextInputWithAI } from '@shared/components/textInputWithAI';
+import { TextInputWithAI } from '@shared/components/textInputWithAi';
 import { Button } from '@shared/components/ui/button';
 import { MultiSelectDropdown } from '@shared/components/ui/form/multiSelectDropdown';
 import RoleSelection from '@shared/components/ui/form/roleSelection';

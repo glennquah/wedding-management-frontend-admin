@@ -26,7 +26,7 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
     {label && <Label>{label}</Label>}
     <DropdownMenu>
           <DropdownMenuTrigger asChild disabled={disabled}>
-            <button className="relative border-gray-300 border rounded-lg p-3 w-full text-left bg-white shadow flex items-center justify-between outline-none focus-visible:border-0 focus-visible:ring-ring/50 focus-visible:ring-[2px] data-[state=open]:border-0 data-[state=open]:ring-ring/50 data-[state=open]:ring-[2px]">
+            <button className="relative border-gray-300 border rounded-lg p-3 w-full text-left bg-white flex items-center justify-between outline-none focus-visible:border-0 focus-visible:ring-ring/50 focus-visible:ring-[2px] data-[state=open]:border-0 data-[state=open]:ring-ring/50 data-[state=open]:ring-[2px]">
               {(selected?.length ?? 0) > 0
                 ? (selected ?? []).map(type => type.charAt(0).toUpperCase() + type.slice(1)).join(", ")
                 : placeholder}
