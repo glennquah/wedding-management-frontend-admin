@@ -64,13 +64,7 @@ export default function SeatingArrangementPage() {
   const totalConfirmed = confirmedGuests.length;
   const availableSeats = layout ? layout.tables.length * 10 : 0;
 
-  const {
-    guestRequests,
-    totalSeatCount,
-    orphanedAccompanyingGuests,
-    accompanyingByPrimary,
-    primaryRequestsById,
-  } = useMemo(() => {
+  const { guestRequests, orphanedAccompanyingGuests, primaryRequestsById } = useMemo(() => {
     const primaryGuestIds = new Set(confirmedPrimaryGuests.map((g) => g.id));
     const accompanyingMap = confirmedAccompanyingGuests.reduce<Record<number, string[]>>(
       (acc, guest) => {
@@ -119,9 +113,6 @@ export default function SeatingArrangementPage() {
     };
   }, [confirmedPrimaryGuests, confirmedAccompanyingGuests]);
 
-  const seatablePrimaryCount = confirmedPrimaryGuests.length;
-  const seatableAccompanyingCount = totalSeatCount - seatablePrimaryCount;
-
   // Auto-set guest count bucket from wedding data and load seating arrangement with layout
   useEffect(() => {
     if (wedding?.guestCountBucket && !guestCountBucket) {
@@ -159,13 +150,12 @@ export default function SeatingArrangementPage() {
           ...new Set(orphanedAccompanyingGuests.map((g) => g.primaryGuestId)),
         ];
         orphanedPrimaryIds.forEach((primaryId) => {
-          const primaryGuest = guests.find((g) => g.id === primaryId);
+          guests.find((g) => g.id === primaryId);
         });
       }
 
       // Also check if any primary guests have no accompanying guests when they should
       confirmedPrimaryGuests.forEach((primaryGuest) => {
-        const expectedAccompanying = accompanyingByPrimary[primaryGuest.id] || [];
         const req = primaryRequestsById[primaryGuest.id];
         if (!req) {
           return;

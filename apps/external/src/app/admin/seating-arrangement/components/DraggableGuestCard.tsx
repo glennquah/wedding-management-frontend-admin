@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { GripVertical } from 'lucide-react';
 
 interface DraggableGuestCardProps {

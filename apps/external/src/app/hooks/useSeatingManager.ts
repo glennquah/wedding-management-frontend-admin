@@ -18,13 +18,6 @@ export function useSeatingManager(weddingId?: number) {
   const [isLoadingLayout, setIsLoadingLayout] = useState(false);
   const [isLoadingArrangement, setIsLoadingArrangement] = useState(false);
 
-  // Load existing seating arrangement when weddingId is available
-  useEffect(() => {
-    if (weddingId) {
-      loadSeatingArrangement();
-    }
-  }, [weddingId]);
-
   const loadSeatingArrangement = useCallback(async () => {
     if (!weddingId) return;
 
@@ -53,6 +46,13 @@ export function useSeatingManager(weddingId?: number) {
     }
   }, [weddingId]);
 
+  // Load existing seating arrangement when weddingId is available
+  useEffect(() => {
+    if (weddingId) {
+      loadSeatingArrangement();
+    }
+  }, [weddingId, loadSeatingArrangement]);
+
   const loadLayout = useCallback(
     async (bucket: GuestCountBucket) => {
       if (!bucket) return;
@@ -67,7 +67,7 @@ export function useSeatingManager(weddingId?: number) {
         setIsLoadingLayout(false);
       }
     },
-    [weddingId],
+    [],
   );
 
   const saveGroupPriorities = useCallback(
@@ -120,7 +120,6 @@ export function useSeatingManager(weddingId?: number) {
         await saveGroupPriorities(request.group_priorities);
 
         // Then optimize seating via FastAPI, using custom layout if available
-        const customLayout = seatingArrangement?.customLayout;
         const result = await SeatingAPI.optimizeSeating(request);
         setSeatingResult(result);
 

@@ -18,7 +18,7 @@ export type SeatingArrangementResponseDto = {
     /**
      * Seating tables as array of arrays. Index 0 = Table 1, Index 1 = Table 2, etc.
      */
-    tables: Array<string>;
+    tables: Array<any[]>;
     /**
      * Creation date
      */

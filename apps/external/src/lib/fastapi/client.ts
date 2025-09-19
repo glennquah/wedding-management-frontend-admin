@@ -1,9 +1,14 @@
 // General FastAPI Client for all FastAPI services
+interface FastAPIErrorResponse {
+  detail?: string;
+  [key: string]: unknown;
+}
+
 export class FastApiError extends Error {
   constructor(
     message: string,
     public statusCode?: number,
-    public details?: any
+    public details?: FastAPIErrorResponse
   ) {
     super(message);
     this.name = 'FastApiError';
@@ -61,14 +66,14 @@ export class FastApiClient {
     return this.request<T>(endpoint, { method: 'GET' });
   }
 
-  static async post<T>(endpoint: string, data?: any): Promise<T> {
+  static async post<T>(endpoint: string, data?: object): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
-  static async put<T>(endpoint: string, data?: any): Promise<T> {
+  static async put<T>(endpoint: string, data?: object): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,

@@ -9,7 +9,12 @@ import {
   SeatingResult,
   UpdateSeatingArrangementDto,
 } from './types';
-import { ApiError, SeatingArrangementResponseDto, SeatingArrangementsService } from '@shared/api';
+import {
+  UpdateSeatingArrangementDto as APIUpdateSeatingArrangementDto,
+  ApiError,
+  SeatingArrangementResponseDto,
+  SeatingArrangementsService,
+} from '@shared/api';
 
 export class SeatingAPI {
   // Layout fetching from FastAPI
@@ -25,24 +30,21 @@ export class SeatingAPI {
   private static convertResponseToSeatingArrangement(
     response: SeatingArrangementResponseDto,
   ): SeatingArrangement {
+    // Ensure tables is an array and each table is an array
+    const rawTables = Array.isArray(response.tables) ? response.tables : [];
+    const tables: string[][] = rawTables.map((table) => {
+      // Ensure each table is an array and filter to strings only
+      const tableArray = Array.isArray(table) ? table : [];
+      return tableArray.filter((guest): guest is string => typeof guest === 'string');
+    });
+
     return {
       id: response.id,
       weddingId: response.weddingId,
       groupPriorities: response.groupPriorities,
-      // The tables are already in the correct format (string[][])
-      tables: response.tables as unknown as string[][],
+      tables: tables,
       createdAt: response.createdAt,
       updatedAt: response.updatedAt,
-    };
-  }
-
-  // Helper function to convert frontend format to backend format
-  private static convertSeatingArrangementToRequest(
-    data: CreateSeatingArrangementDto | UpdateSeatingArrangementDto,
-  ): any {
-    return {
-      groupPriorities: data.groupPriorities,
-      tables: data.tables,
     };
   }
 
@@ -67,10 +69,9 @@ export class SeatingAPI {
     weddingId: number,
     dto: CreateSeatingArrangementDto,
   ): Promise<SeatingArrangement> {
-    const requestData = this.convertSeatingArrangementToRequest(dto);
     const response = await SeatingArrangementsService.seatingArrangementControllerCreate(
       weddingId,
-      requestData,
+      dto as Parameters<typeof SeatingArrangementsService.seatingArrangementControllerCreate>[1],
     );
     return this.convertResponseToSeatingArrangement(response);
   }
@@ -79,10 +80,9 @@ export class SeatingAPI {
     weddingId: number,
     dto: UpdateSeatingArrangementDto,
   ): Promise<SeatingArrangement> {
-    const requestData = this.convertSeatingArrangementToRequest(dto);
     const response = await SeatingArrangementsService.seatingArrangementControllerUpdate(
       weddingId,
-      requestData,
+      dto as APIUpdateSeatingArrangementDto,
     );
     return this.convertResponseToSeatingArrangement(response);
   }
@@ -90,11 +90,10 @@ export class SeatingAPI {
   static async setTables(weddingId: number, tables: string[][]): Promise<SeatingArrangement> {
     const response = await SeatingArrangementsService.seatingArrangementControllerUpdate(
       weddingId,
-      this.convertSeatingArrangementToRequest({ tables }),
+      { tables },
     );
     return this.convertResponseToSeatingArrangement(response);
   }
-
 
   static async deleteSeatingArrangement(weddingId: number): Promise<void> {
     await SeatingArrangementsService.seatingArrangementControllerRemove(weddingId);
