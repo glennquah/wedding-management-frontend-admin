@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+
 import { Button } from '@shared/components';
 import {
   Dialog,
@@ -45,7 +46,9 @@ export function PriorityRankingDialog({
       if (currentPriorities) {
         // Sort groups by current priority (highest first)
         setGroupOrder(
-          [...uniqueGroups].sort((a, b) => (currentPriorities[b] || 0) - (currentPriorities[a] || 0)),
+          [...uniqueGroups].sort(
+            (a, b) => (currentPriorities[b] || 0) - (currentPriorities[a] || 0),
+          ),
         );
       } else {
         setGroupOrder([...uniqueGroups]);
@@ -154,9 +157,11 @@ export function PriorityRankingDialog({
                       <ArrowDown className="w-3 h-3" />
                     </button>
                   </div>
-                  <GripVertical className={`w-4 h-4 transition-colors ${
-                    isDragging ? 'text-brand-500' : 'text-gray-400'
-                  }`} />
+                  <GripVertical
+                    className={`w-4 h-4 transition-colors ${
+                      isDragging ? 'text-brand-500' : 'text-gray-400'
+                    }`}
+                  />
                   <div className="flex-1">
                     <span className="font-medium">{group}</span>
                     {index === 0 && (
@@ -179,7 +184,8 @@ export function PriorityRankingDialog({
         {/* Disclaimer */}
         <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
           <p className="text-yellow-800 text-sm">
-            ⚠️ <strong>Notice:</strong> Previous seating arrangement will not be saved and a new one will be generated.
+            ⚠️ <strong>Notice:</strong> Any previously generated seating arrangement will not be
+            saved and a new one will be generated.
           </p>
         </div>
 

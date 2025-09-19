@@ -279,12 +279,30 @@ export function useGuestManager() {
 
   // Form field management
   const addAccompanyingGuestField = (guest: GuestFormData, setGuest: GuestFormSetter) => {
-    // Check capacity before adding an accompanying guest field
-    if (!validateGuestCapacity(1)) {
+    const currentGuests = guest.accompanyingGuests || [];
+    const desiredAccompanyingCount = currentGuests.length + 1;
+    const capacityInfo = getGuestCapacityInfo();
+
+    let seatsNeeded: number;
+
+    if (guest.id) {
+      const existingAccompanyingCount = guests.filter((g) => g.primaryGuestId === guest.id).length;
+      const additionalAccompanying = Math.max(0, desiredAccompanyingCount - existingAccompanyingCount);
+      seatsNeeded = additionalAccompanying;
+    } else {
+      seatsNeeded = 1 + desiredAccompanyingCount;
+    }
+
+    if (seatsNeeded > capacityInfo.available) {
+      const seatLabel = capacityInfo.available === 1 ? 'seat' : 'seats';
+      toast.error(
+        capacityInfo.available > 0
+          ? `Not enough seats available. You only have ${capacityInfo.available} ${seatLabel} remaining in your plan.`
+          : 'Guest limit reached—no seats remaining in your plan.',
+      );
       return;
     }
 
-    const currentGuests = guest.accompanyingGuests || [];
     setGuest({
       ...guest,
       accompanyingGuests: [
@@ -363,7 +381,11 @@ export function useGuestManager() {
         );
       }
 
-      await addGuest(primaryGuestData, accompanyingGuestsData);
+      const createdPrimaryGuest = await addGuest(primaryGuestData, accompanyingGuestsData);
+
+      if (!createdPrimaryGuest) {
+        return;
+      }
 
       setNewGuest(getDefaultNewGuest(currentWeddingId || 1));
       setIsAddingGuest(false);

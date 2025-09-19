@@ -338,33 +338,15 @@ export default function GuestListPage() {
         <PageHeader
           title="Guest List"
           description={
-            wedding ?
-              `Manage your wedding guests and track RSVPs (${capacityInfo.current}/${capacityInfo.limit} guests)` :
-              'Manage your wedding guests and track RSVPs'
+            wedding
+              ? `Manage your wedding guests and track RSVPs (${capacityInfo.current}/${capacityInfo.limit} guests)`
+              : 'Manage your wedding guests and track RSVPs'
           }
           buttonText="Add Guest"
           onButtonClick={openAddGuestModal}
           buttonIcon={<Plus className="w-4 h-4" />}
           isButtonDisabled={isLoading || capacityInfo.isAtCapacity}
         />
-
-        {/* Capacity Warning */}
-        {wedding && capacityInfo.available <= 5 && capacityInfo.available > 0 && (
-          <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-yellow-800 text-sm">
-              ⚠️ Warning: Only {capacityInfo.available} guest slot(s) remaining in your {wedding.guestCountBucket.toLowerCase()} plan.
-            </p>
-          </div>
-        )}
-
-        {/* At Capacity Warning */}
-        {wedding && capacityInfo.isAtCapacity && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-800 text-sm">
-              🚫 Guest limit reached! Your {wedding.guestCountBucket.toLowerCase()} plan allows up to {capacityInfo.limit} guests. Please remove guests to add new ones or upgrade your plan.
-            </p>
-          </div>
-        )}
 
         {/* Add Guest Modal */}
         <FormDialog
