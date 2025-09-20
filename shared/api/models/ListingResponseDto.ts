@@ -35,5 +35,9 @@ export type ListingResponseDto = {
      * Last update timestamp
      */
     updatedAt: string;
+    /**
+     * Images for the listing
+     */
+    imageUrls: Array<string>;
 };
 

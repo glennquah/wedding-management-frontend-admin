@@ -89,7 +89,8 @@ export function useListingOperations(
         listingName: updateData.listingName.trim(),
         price: Number(updateData.price),
         availabilities: updateData.availabilities || [],
-        remarks: updateData.remarks?.trim() || ""
+        remarks: updateData.remarks?.trim() || "",
+        imageUrls: updateData.imageUrls || []
       };
 
       console.log('Updating listing with ID:', listing.id, 'and data:', updatePayload);

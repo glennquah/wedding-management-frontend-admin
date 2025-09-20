@@ -10,8 +10,8 @@ interface ListingFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   editingListing: Listing | null;
-  formData: Partial<CreateListingDto>;
-  onFormDataChange: (updates: Partial<CreateListingDto>) => void;
+  formData: Partial<CreateListingDto> & { imageUrls?: string[] };
+  onFormDataChange: (updates: Partial<CreateListingDto> & { imageUrls?: string[] }) => void;
   onSubmit: () => void;
   onCancel: () => void;
   isSubmitting: boolean;
@@ -134,6 +134,22 @@ export function ListingFormDialog({
             }}
             placeholder="0.00"
           />
+        </div>,
+
+        <div key="imageUrls" className="md:col-span-2">
+          <Label htmlFor="imageUrls">Image URL</Label>
+          <Input
+            id="imageUrls"
+            value={formData.imageUrls?.[0] || ''}
+            onChange={(e) => {
+              const imageUrl = e.target.value;
+              onFormDataChange({ imageUrls: imageUrl ? [imageUrl] : [] });
+            }}
+            placeholder="https://example.com/image.jpg"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Enter a URL for your listing image. If left empty, a default image will be used.
+          </p>
         </div>,
 
         <div key="availabilities" className="md:col-span-2">

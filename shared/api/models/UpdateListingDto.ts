@@ -19,5 +19,9 @@ export type UpdateListingDto = {
      * Additional remarks about the listing
      */
     remarks?: string;
+    /**
+     * Images for the listing
+     */
+    imageUrls?: Array<string>;
 };
 

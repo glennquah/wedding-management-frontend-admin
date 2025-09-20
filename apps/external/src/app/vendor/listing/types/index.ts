@@ -9,6 +9,7 @@ export interface Listing {
   vendorId: number;
   createdAt: string;
   updatedAt: string;
+  imageUrls: string[];
 }
 
 export interface FilterOptions {
@@ -41,12 +42,12 @@ export interface UseListingDataReturn {
 export interface UseListingFormReturn {
   isAddingListing: boolean;
   editingListing: Listing | null;
-  formData: Partial<CreateListingDto>;
+  formData: Partial<CreateListingDto> & { imageUrls?: string[] };
   isFormOpen: boolean;
   openAddForm: () => void;
   openEditForm: (listing: Listing) => void;
   closeForm: () => void;
-  updateFormData: (updates: Partial<CreateListingDto>) => void;
+  updateFormData: (updates: Partial<CreateListingDto> & { imageUrls?: string[] }) => void;
   resetForm: () => void;
 }
 

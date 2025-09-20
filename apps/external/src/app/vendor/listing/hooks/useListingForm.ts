@@ -2,18 +2,21 @@ import { useState, useCallback } from 'react';
 import { CreateListingDto } from '@shared/api';
 import { Listing, UseListingFormReturn } from '../types';
 
-const getInitialFormData = (vendorId?: number): Partial<CreateListingDto> => ({
+type FormData = Partial<CreateListingDto> & { imageUrls?: string[] };
+
+const getInitialFormData = (vendorId?: number): FormData => ({
   listingName: "",
   price: 0,
   availabilities: [],
   remarks: "",
-  vendorId: vendorId || 0
+  vendorId: vendorId || 0,
+  imageUrls: []
 });
 
 export function useListingForm(vendorId?: number): UseListingFormReturn {
   const [isAddingListing, setIsAddingListing] = useState(false);
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
-  const [formData, setFormData] = useState<Partial<CreateListingDto>>(getInitialFormData(vendorId));
+  const [formData, setFormData] = useState<FormData>(getInitialFormData(vendorId));
 
   const resetForm = useCallback(() => {
     setFormData(getInitialFormData(vendorId));
@@ -36,7 +39,8 @@ export function useListingForm(vendorId?: number): UseListingFormReturn {
       price: listing.price,
       availabilities: [...listing.availabilities],
       remarks: listing.remarks,
-      vendorId: listing.vendorId
+      vendorId: listing.vendorId,
+      imageUrls: listing.imageUrls ? [...listing.imageUrls] : []
     });
   }, []);
 
@@ -46,7 +50,7 @@ export function useListingForm(vendorId?: number): UseListingFormReturn {
     resetForm();
   }, [resetForm]);
 
-  const updateFormData = useCallback((updates: Partial<CreateListingDto>) => {
+  const updateFormData = useCallback((updates: FormData) => {
     setFormData(prev => ({ ...prev, ...updates }));
   }, []);
 

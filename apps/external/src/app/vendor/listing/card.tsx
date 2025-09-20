@@ -11,6 +11,7 @@ interface Listing {
   vendorId: number;
   createdAt: string;
   updatedAt: string;
+  imageUrls: string[];
 }
 
 interface ListingCardProps {
@@ -20,6 +21,13 @@ interface ListingCardProps {
 }
 
 export const ListingCard = ({ listing, onEdit, onDelete }: ListingCardProps) => {
+  const getImageSource = () => {
+    if (listing.imageUrls && listing.imageUrls.length > 0 && listing.imageUrls[0]) {
+      return listing.imageUrls[0];
+    }
+    return "/images/logo-single.png";
+  };
+
   const formatAvailabilities = (availabilities: string[]) => {
     if (!availabilities || availabilities.length === 0) return "No dates specified";
     const formattedDates = availabilities.slice(0, 2).map(date => {
@@ -42,7 +50,7 @@ export const ListingCard = ({ listing, onEdit, onDelete }: ListingCardProps) => 
       {/* Image Section */}
       <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
         <Image
-          src="/flaticon.svg"
+          src={getImageSource()}
           alt={listing.listingName}
           width={120}
           height={120}
