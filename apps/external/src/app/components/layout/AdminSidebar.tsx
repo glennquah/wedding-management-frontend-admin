@@ -1,8 +1,8 @@
 'use client';
 
-import { signOut } from '../../store/sessionStore';
 import AppSidebar from '@shared/components/AppSidebar';
 import { Calendar, CheckSquare, Clock, LayoutDashboard, ListTodo, Users } from 'lucide-react';
+import { signOut } from '../../store/sessionStore';
 
 const tabs = [
   {
@@ -10,12 +10,12 @@ const tabs = [
     items: [
       {
         title: 'Dashboard',
-        href: '/admin/dashboard',
+        href: '/',
         icon: LayoutDashboard,
       },
       {
         title: 'Progress Tracker',
-        href: '/admin/progress-tracker',
+        href: '/progress-tracker',
         icon: Clock,
       },
     ],
@@ -25,22 +25,22 @@ const tabs = [
     items: [
       {
         title: 'Checklist',
-        href: '/admin/checklist',
+        href: '/checklist',
         icon: CheckSquare,
       },
       {
         title: 'Guest List',
-        href: '/admin/guest-list',
+        href: '/guest-list',
         icon: Users,
       },
       {
         title: 'Timeline',
-        href: '/admin/timeline',
+        href: '/timeline',
         icon: Calendar,
       },
       {
         title: 'Tasks',
-        href: '/admin/tasks',
+        href: '/tasks',
         icon: ListTodo,
       },
     ],
@@ -48,5 +48,5 @@ const tabs = [
 ];
 
 export default function AdminSidebar() {
-  return <AppSidebar tabs={tabs} signOut={() => signOut()} />;
+  return <AppSidebar tabs={tabs} signOut={() => signOut()} basePath='admin' />;
 }
