@@ -17,13 +17,19 @@ interface AdminTableProps {
   editAdmin: Partial<UpdateAdminDto & { id?: number }>;
   setEditAdmin: React.Dispatch<React.SetStateAction<Partial<UpdateAdminDto & { id?: number }>>>;
   isSubmitting: boolean;
+  isEditFormValid?: boolean;
 
   // Delete Modal State
   deleteConfirmAdmin: AdminResponseDto | null;
 
+  // Suspended Table
+  isSuspendedTable?: boolean;
+
   // Handlers
   onEditAdmin: (admin: AdminResponseDto) => void;
   onDeleteAdmin: (admin: AdminResponseDto) => void;
+  onSuspendAdmin: (admin: AdminResponseDto) => void;
+  onUnsuspendAdmin: (admin: AdminResponseDto) => void;
   handleEditAdmin: () => Promise<void>;
   handleEditPasswordGenerate: () => void;
   closeEditAdminModal: () => void;
@@ -39,9 +45,13 @@ export const AdminTable: React.FC<AdminTableProps> = ({
   editAdmin,
   setEditAdmin,
   isSubmitting,
+  isEditFormValid = true,
+  isSuspendedTable = false,
   deleteConfirmAdmin,
   onEditAdmin,
   onDeleteAdmin,
+  onSuspendAdmin,
+  onUnsuspendAdmin,
   handleEditAdmin,
   handleEditPasswordGenerate,
   closeEditAdminModal,
@@ -51,6 +61,9 @@ export const AdminTable: React.FC<AdminTableProps> = ({
   const columns = getAdminColumns({
     onEditAdmin,
     onDeleteAdmin,
+    onSuspendAdmin,
+    onUnsuspendAdmin,
+    isSuspendedTable,
   });
 
   return (
@@ -91,6 +104,7 @@ export const AdminTable: React.FC<AdminTableProps> = ({
           handleGeneratePassword: handleEditPasswordGenerate,
         })}
         noOfColumns={2}
+        disabled={!isEditFormValid}
       />
 
       {/* Delete Confirmation Modal */}

@@ -9,9 +9,10 @@ type FieldProps = {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   placeholder?: string;
+  min?: string;
 };
 
-export default function FormField({ label, id, type, value, onChange, required, placeholder }: FieldProps) {
+export default function FormField({ label, id, type, value, onChange, required, placeholder, min }: FieldProps) {
   return (
     <div className="mt-4 gap-2 flex flex-col">
       <Label htmlFor={id}>{label}</Label>
@@ -22,6 +23,7 @@ export default function FormField({ label, id, type, value, onChange, required, 
         onChange={onChange}
         required={required}
         placeholder={placeholder}
+        min={min}
       />
     </div>
   );
