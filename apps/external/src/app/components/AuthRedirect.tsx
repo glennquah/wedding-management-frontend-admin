@@ -14,7 +14,7 @@ export function AuthRedirect() {
   useEffect(() => {
     if (session?.user) {
       // Define public paths that should not trigger role-based redirects
-      const publicPaths = ['/login', '/reset-password'];
+      const publicPaths = ['/login', '/forgot-password', '/reset-password'];
 
       if (pathname && publicPaths.includes(pathname)) {
         return;

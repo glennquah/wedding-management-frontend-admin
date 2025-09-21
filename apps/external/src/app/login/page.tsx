@@ -95,9 +95,16 @@ export default function LoginPage() {
           <Button type="submit" className="w-full mt-4" disabled={loading}>
             {loading ? 'Signing in...' : 'Sign In'}
           </Button>
+
+          <div className="text-center mt-4">
+            <a href="/forgot-password" className="text-brand-600 font-medium text-sm">
+              Forgot your password?
+            </a>
+          </div>
         </form>
+
         <p className="text-center text-sm text-gray-500 mt-4">
-          Don’t have an account?{' '}
+          Don't have an account?{' '}
           <a href="/get-started" className="text-brand-600 font-medium">
             Sign Up
           </a>
