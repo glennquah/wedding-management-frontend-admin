@@ -2,7 +2,7 @@
 
 import { signOut } from '../../store/sessionStore';
 import AppSidebar from '@shared/components/AppSidebar';
-import { Calendar, CheckSquare, Clock, LayoutDashboard, ListTodo, Users, MapPin } from 'lucide-react';
+import { Calendar, CheckSquare, Clock, LayoutDashboard, ListTodo, Users } from 'lucide-react';
 
 const tabs = [
   {
@@ -10,12 +10,12 @@ const tabs = [
     items: [
       {
         title: 'Dashboard',
-        href: '/admin/dashboard',
+        href: '/',
         icon: LayoutDashboard,
       },
       {
         title: 'Progress Tracker',
-        href: '/admin/progress-tracker',
+        href: '/progress-tracker',
         icon: Clock,
       },
     ],
@@ -25,12 +25,12 @@ const tabs = [
     items: [
       {
         title: 'Checklist',
-        href: '/admin/checklist',
+        href: '/checklist',
         icon: CheckSquare,
       },
       {
         title: 'Guest List',
-        href: '/admin/guest-list',
+        href: '/guest-list',
         icon: Users,
       },
       {
@@ -40,12 +40,12 @@ const tabs = [
       },
       {
         title: 'Timeline',
-        href: '/admin/timeline',
+        href: '/timeline',
         icon: Calendar,
       },
       {
         title: 'Tasks',
-        href: '/admin/tasks',
+        href: '/tasks',
         icon: ListTodo,
       },
     ],
