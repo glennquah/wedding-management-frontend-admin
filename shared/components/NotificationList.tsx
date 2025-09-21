@@ -1,8 +1,8 @@
 'use client';
 
 import { EmailNotificationHistoryResponseDto } from '../api/models/EmailNotificationHistoryResponseDto';
-import { DataTable } from './ui/table';
 import { notificationColumns } from '../columns/notification-columns';
+import { DataTable } from './ui/table';
 
 interface NotificationListProps {
   data: EmailNotificationHistoryResponseDto[];
@@ -27,7 +27,7 @@ export default function NotificationList({ data, isLoading = false }: Notificati
         title="Email Notification History"
         searchableColumns={[
           {
-            id: 'subject' as keyof EmailNotificationHistoryResponseDto,
+            id: 'subject',
             placeholder: 'Search by subject...',
           },
         ]}

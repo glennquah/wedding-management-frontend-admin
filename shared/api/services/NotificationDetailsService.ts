@@ -133,6 +133,23 @@ export class NotificationDetailsService {
         });
     }
     /**
+     * Get email notification history for a vendor
+     * @param vendorId
+     * @returns EmailNotificationHistoryResponseDto Email notification history retrieved successfully.
+     * @throws ApiError
+     */
+    public static notificationDetailsControllerGetEmailNotificationHistoryWithVendorId(
+        vendorId: number,
+    ): CancelablePromise<Array<EmailNotificationHistoryResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/notification-details/vendors/{vendorId}/email-notification-history',
+            path: {
+                'vendorId': vendorId,
+            },
+        });
+    }
+    /**
      * Get all email notification history (SuperAdmin only)
      * @returns EmailNotificationHistoryResponseDto All email notification history retrieved successfully.
      * @throws ApiError

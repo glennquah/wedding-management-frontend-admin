@@ -8,5 +8,6 @@ export type SendSingleEmailDto = {
     text: string;
     html: string;
     weddingId: number;
+    vendorId: number;
 };
 

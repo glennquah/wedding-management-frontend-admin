@@ -1,6 +1,6 @@
-import { ColumnDef } from '@tanstack/react-table';
-import { Badge } from '../components/ui/badge';
 import { EmailNotificationHistoryResponseDto } from '../api/models/EmailNotificationHistoryResponseDto';
+import { Badge } from '../components/ui/badge';
+import { ColumnDef } from '@tanstack/react-table';
 
 const getTypeColor = (type: EmailNotificationHistoryResponseDto.type) => {
   switch (type) {
@@ -28,47 +28,55 @@ const formatType = (type: EmailNotificationHistoryResponseDto.type) => {
 
 export const notificationColumns: ColumnDef<EmailNotificationHistoryResponseDto>[] = [
   {
-    id: 'typeAndSubject',
-    header: 'Notification',
+    id: 'type',
+    header: 'Type',
     cell: ({ row }) => {
       const notification = row.original;
       return (
-        <div className="space-y-2">
-          <div>
-            <Badge variant={getTypeColor(notification.type)} className="text-xs">
-              {formatType(notification.type)}
-            </Badge>
-          </div>
-          <div className="text-sm font-medium text-foreground truncate max-w-[300px]">
-            {notification.subject}
-          </div>
+        <Badge variant={getTypeColor(notification.type)} className="text-xs">
+          {formatType(notification.type)}
+        </Badge>
+      );
+    },
+    size: 150,
+  },
+  {
+    id: 'subject',
+    header: 'Subject',
+    cell: ({ row }) => {
+      const notification = row.original;
+      return (
+        <div className="text-sm font-medium text-foreground truncate max-w-[400px]">
+          {notification.subject}
         </div>
       );
     },
-    size: 350,
+    size: 300,
   },
   {
-    id: 'recipientsAndTiming',
-    header: 'Recipients & Timing',
+    id: 'recipients',
+    header: 'Recipients',
     cell: ({ row }) => {
       const notification = row.original;
       const emailList = notification.to.join(', ');
-      const sentAtDate = new Date(notification.sentAt);
-
       return (
-        <div className="space-y-2">
-          <div className="text-sm text-foreground">
-            <div className="font-medium mb-1">Recipients:</div>
-            <div className="text-muted-foreground text-xs break-all max-w-[400px]">
-              {emailList}
-            </div>
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {sentAtDate.toLocaleDateString()} {sentAtDate.toLocaleTimeString()}
-          </div>
+        <div className="text-muted-foreground text-xs break-all max-w-[300px]">{emailList}</div>
+      );
+    },
+    size: 300,
+  },
+  {
+    id: 'sentAt',
+    header: 'Time',
+    cell: ({ row }) => {
+      const notification = row.original;
+      const sentAtDate = new Date(notification.sentAt);
+      return (
+        <div className="text-xs text-muted-foreground">
+          {sentAtDate.toLocaleDateString()} {sentAtDate.toLocaleTimeString()}
         </div>
       );
     },
-    size: 450,
+    size: 200,
   },
 ];
