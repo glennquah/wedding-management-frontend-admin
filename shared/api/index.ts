@@ -27,6 +27,8 @@ export type { GuestResponseDto } from './models/GuestResponseDto';
 export type { ListingResponseDto } from './models/ListingResponseDto';
 export type { LoginDto } from './models/LoginDto';
 export type { NotificationDetailsDto } from './models/NotificationDetailsDto';
+export type { RequestResetPasswordDto } from './models/RequestResetPasswordDto';
+export type { ResetPasswordDto } from './models/ResetPasswordDto';
 export type { SeatingArrangementResponseDto } from './models/SeatingArrangementResponseDto';
 export type { SendBulkEmailDto } from './models/SendBulkEmailDto';
 export type { SendSingleEmailDto } from './models/SendSingleEmailDto';
