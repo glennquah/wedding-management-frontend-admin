@@ -2,7 +2,15 @@
 
 import { signOut } from '../../store/sessionStore';
 import AppSidebar from '@shared/components/AppSidebar';
-import { Calendar, CheckSquare, Clock, LayoutDashboard, ListTodo, Users } from 'lucide-react';
+import {
+  Calendar,
+  CheckSquare,
+  Clock,
+  LayoutDashboard,
+  ListTodo,
+  MapPin,
+  Users,
+} from 'lucide-react';
 
 const tabs = [
   {
@@ -53,5 +61,5 @@ const tabs = [
 ];
 
 export default function AdminSidebar() {
-  return <AppSidebar tabs={tabs} signOut={() => signOut()} />;
+  return <AppSidebar tabs={tabs} signOut={() => signOut()} basePath="admin" />;
 }
