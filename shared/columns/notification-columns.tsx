@@ -1,5 +1,6 @@
 import { EmailNotificationHistoryResponseDto } from '../api/models/EmailNotificationHistoryResponseDto';
 import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
 import { ColumnDef } from '@tanstack/react-table';
 
 const getTypeColor = (type: EmailNotificationHistoryResponseDto.type) => {
@@ -26,7 +27,9 @@ const formatType = (type: EmailNotificationHistoryResponseDto.type) => {
     .replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
-export const notificationColumns: ColumnDef<EmailNotificationHistoryResponseDto>[] = [
+export const createNotificationColumns = (
+  onViewEmail: (email: EmailNotificationHistoryResponseDto) => void,
+): ColumnDef<EmailNotificationHistoryResponseDto>[] => [
   {
     id: 'type',
     header: 'Type',
@@ -65,7 +68,7 @@ export const notificationColumns: ColumnDef<EmailNotificationHistoryResponseDto>
         <div className="text-muted-foreground text-xs break-all max-w-[300px]">{emailList}</div>
       );
     },
-    size: 300,
+    size: 200,
   },
   {
     id: 'sentAt',
@@ -80,5 +83,22 @@ export const notificationColumns: ColumnDef<EmailNotificationHistoryResponseDto>
       );
     },
     size: 200,
+  },
+  {
+    id: 'actions',
+    header: 'Actions',
+    cell: ({ row }) => {
+      const notification = row.original;
+      return (
+        <Button
+          className="flex items-center whitespace-nowrap text-xs px-1 py-1 min-w-0"
+          size="sm"
+          onClick={() => onViewEmail(notification)}
+        >
+          View
+        </Button>
+      );
+    },
+    size: 100,
   },
 ];
