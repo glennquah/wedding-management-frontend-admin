@@ -36,7 +36,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
       <VendorSidebar />
       <div className="flex w-full h-screen overflow-hidden">
         <div className="flex-1 flex flex-col min-w-0">
-          <NavigationBar session={session} />
+          <NavigationBar notificationRoute="/vendor/notifications" />
           <main className="flex-1 overflow-y-auto">{children}</main>
         </div>
       </div>

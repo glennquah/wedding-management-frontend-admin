@@ -53,7 +53,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     <SidebarProvider defaultOpen={true}>
       <SuperAdminSidebar />
       <div className="flex-1 flex flex-col">
-        <NavigationBar session={session} />
+        <NavigationBar notificationRoute="/notifications" />
         <MainContent>{children}</MainContent>
       </div>
       <Toaster />

@@ -3,15 +3,14 @@
 import { Button } from '@shared/components/ui/button';
 import { SidebarTrigger } from '@shared/components/ui/sidebar';
 import { Bell } from 'lucide-react';
-import { Session } from 'next-auth';
 import { useRouter } from 'next/navigation';
 
 interface NavigationBarProps {
-  session: Session | null;
+  notificationRoute: string;
   additionalTabs?: React.ReactNode;
 }
 
-const NavigationBar = ({ session, additionalTabs }: NavigationBarProps) => {
+const NavigationBar = ({ notificationRoute, additionalTabs }: NavigationBarProps) => {
   const router = useRouter();
 
   return (
@@ -29,7 +28,7 @@ const NavigationBar = ({ session, additionalTabs }: NavigationBarProps) => {
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0"
-            onClick={() => router.push('/notifications')}
+            onClick={() => router.push(notificationRoute)}
           >
             <Bell size={16} />
             <span className="sr-only">Notifications</span>
