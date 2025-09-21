@@ -1,22 +1,24 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import { useWeddingStore } from '../store/sessionStore';
-import {
-  AdminResponseDto,
-  AdminsService,
-  OpenAPI,
-  WeddingResponseDto,
-  WeddingsService,
-} from '@shared/api';
+import { useWeddingStore } from '@/app/store/sessionStore';
+import { OpenAPI, WeddingResponseDto, WeddingsService } from '@shared/api';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 
 export function useWeddingManager() {
-  const [loading, setLoading] = useState(false);
-  const { data: session } = useSession();
-  const setWeddings = useWeddingStore((state) => state.setWeddings);
-  const setSelectedWeddingId = useWeddingStore((state) => state.setSelectedWeddingId);
-  const setMainWeddingId = useWeddingStore((state) => state.setMainWeddingId);
+  const { data: session, status } = useSession();
+  const {
+    selectedWeddingId,
+    mainWeddingId,
+    weddings,
+    setSelectedWeddingId,
+    setMainWeddingId,
+    setWeddings
+  } = useWeddingStore();
+
+  const [wedding, setWedding] = useState<WeddingResponseDto | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Authentication setup
   const setupAuth = useCallback(() => {
@@ -25,64 +27,111 @@ export function useWeddingManager() {
     }
   }, [session]);
 
-  // Fetching admin's main wedding
-  const fetchUserMainWedding = useCallback(async (): Promise<AdminResponseDto | null> => {
+  // Fetch all user weddings
+  const fetchUserWeddings = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
+
       setupAuth();
-      const mainWedding = await AdminsService.adminControllerGetMyMainWedding();
-      if (mainWedding && mainWedding.mainWeddingId) {
-        if (setMainWeddingId) {
-          setMainWeddingId(mainWedding.mainWeddingId);
-        }
-        if (setSelectedWeddingId) {
-          setSelectedWeddingId(mainWedding.mainWeddingId);
-        }
+      const userWeddings = await WeddingsService.weddingControllerFindAll();
+      setWeddings(userWeddings);
+
+      if (userWeddings.length > 0 && !mainWeddingId) {
+        // Set first wedding as main wedding if not set
+        setMainWeddingId(userWeddings[0].id);
       }
-      return null;
     } catch (err) {
-      console.error("Error fetching user's main wedding:", err);
-      toast.error("Failed to fetch user's wedding information");
-      return null;
+      setError('Failed to fetch weddings');
+      console.error('Error fetching weddings:', err);
+      toast.error('Failed to fetch weddings');
     } finally {
       setLoading(false);
     }
-  }, [setupAuth]);
+  }, [setupAuth, setWeddings, mainWeddingId, setMainWeddingId]);
 
-  // Fetch wedding ID for the current user (use first wedding in array)
-  const fetchUserWeddings = useCallback(async (): Promise<WeddingResponseDto[] | null> => {
+  // Fetch user's main wedding and set it as selected
+  const fetchUserMainWedding = useCallback(async () => {
+    try {
+      setupAuth();
+      const userWeddings = await WeddingsService.weddingControllerFindAll();
+
+      if (userWeddings.length > 0) {
+        const mainWedding = userWeddings[0];
+        setMainWeddingId(mainWedding.id);
+        setSelectedWeddingId(mainWedding.id);
+        setWedding(mainWedding);
+      }
+    } catch (err) {
+      console.error('Error fetching main wedding:', err);
+      toast.error('Failed to fetch main wedding');
+    }
+  }, [setupAuth, setMainWeddingId, setSelectedWeddingId]);
+
+  // Select a specific wedding
+  const selectWedding = useCallback((weddingId: number) => {
+    setSelectedWeddingId(weddingId);
+    const selectedWedding = weddings.find(w => w.id === weddingId);
+    if (selectedWedding) {
+      setWedding(selectedWedding);
+    }
+  }, [setSelectedWeddingId, weddings]);
+
+  // Fetch the currently selected wedding
+  const fetchWedding = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
+
       setupAuth();
-      const weddings = await WeddingsService.weddingControllerGetAdminWeddings();
-      if (weddings.length > 0) {
-        if (setWeddings) {
-          setWeddings(weddings);
+      const userWeddings = await WeddingsService.weddingControllerFindAll();
+      setWeddings(userWeddings);
+
+      if (userWeddings.length > 0) {
+        // Use selected wedding if available, otherwise use first wedding as fallback
+        let targetWedding;
+        if (selectedWeddingId) {
+          targetWedding = userWeddings.find(w => w.id === selectedWeddingId);
         }
+
+        if (!targetWedding) {
+          targetWedding = userWeddings[0];
+          setMainWeddingId(targetWedding.id);
+          setSelectedWeddingId(targetWedding.id);
+        }
+
+        setWedding(targetWedding);
+      } else {
+        setError('No wedding found for this user');
       }
-      return null;
     } catch (err) {
-      console.error('Error fetching user wedding:', err);
+      setError('Failed to fetch wedding information');
+      console.error('Error fetching wedding:', err);
       toast.error('Failed to fetch wedding information');
-      return null;
     } finally {
       setLoading(false);
     }
-  }, [setupAuth, setWeddings]);
+  }, [setupAuth, selectedWeddingId, setMainWeddingId, setSelectedWeddingId, setWeddings]);
 
-  const selectWedding = useCallback(
-    (weddingId: number | null) => {
-      if (setSelectedWeddingId) {
-        setSelectedWeddingId(weddingId);
-      }
-    },
-    [setSelectedWeddingId],
-  );
+  // Initialize when session is available
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      fetchWedding();
+    }
+  }, [status, session, fetchWedding]);
 
   return {
+    wedding,
     loading,
-    fetchUserMainWedding,
+    error,
+    weddings,
+    selectedWeddingId,
+    mainWeddingId,
     fetchUserWeddings,
+    fetchUserMainWedding,
     selectWedding,
+    refetch: fetchWedding,
+    // Legacy props for backward compatibility
+    isLoading: loading,
   };
 }
