@@ -1,6 +1,7 @@
 'use client';
 
 import { EmailNotificationHistoryResponseDto } from '../api/models/EmailNotificationHistoryResponseDto';
+import { AllEmailNotificationHistoryResponseDto } from '../api/models/AllEmailNotificationHistoryResponseDto';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import {
@@ -13,20 +14,22 @@ import {
 } from './ui/dialog';
 import { Separator } from './ui/separator';
 
+type NotificationHistoryType = EmailNotificationHistoryResponseDto | AllEmailNotificationHistoryResponseDto;
+
 interface EmailDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  email: EmailNotificationHistoryResponseDto | null;
+  email: NotificationHistoryType | null;
 }
 
-const formatType = (type: EmailNotificationHistoryResponseDto.type) => {
+const formatType = (type: EmailNotificationHistoryResponseDto.type | AllEmailNotificationHistoryResponseDto.type) => {
   return type
     .replace(/_/g, ' ')
     .toLowerCase()
     .replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
-const getTypeColor = (type: EmailNotificationHistoryResponseDto.type) => {
+const getTypeColor = (type: EmailNotificationHistoryResponseDto.type | AllEmailNotificationHistoryResponseDto.type) => {
   switch (type) {
     case 'PASSWORD_RESET':
       return 'destructive';
@@ -79,6 +82,20 @@ export default function EmailDetailsModal({ open, onOpenChange, email }: EmailDe
                 <h4 className="text-sm font-medium text-muted-foreground mb-2">Recipients</h4>
                 <p className="text-sm break-all">{email.to.join(', ')}</p>
               </div>
+              {/* Wedding/Vendor Information */}
+              {('weddingName' in email || 'vendorName' in email) && (
+                <div className="md:col-span-2">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Related To</h4>
+                  <div className="text-sm">
+                    {('weddingName' in email && email.weddingName) && (
+                      <p><span className="font-medium">Wedding:</span> {email.weddingName}</p>
+                    )}
+                    {('vendorName' in email && email.vendorName) && (
+                      <p><span className="font-medium">Vendor:</span> {email.vendorName}</p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <Separator />

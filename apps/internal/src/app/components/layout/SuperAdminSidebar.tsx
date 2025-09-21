@@ -2,6 +2,7 @@
 
 import AppSidebar from '@shared/components/AppSidebar';
 import {
+  Bell,
   CheckSquare,
   LayoutDashboard,
   ListTodo,
@@ -50,6 +51,11 @@ const tabs = [
         title: 'Wedding Management',
         href: '/wedding-management',
         icon: Users,
+      },
+      {
+        title: 'Notifications Management',
+        href: '/notifications-management',
+        icon: Bell,
       },
     ],
   },

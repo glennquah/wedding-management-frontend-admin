@@ -8,6 +8,7 @@ export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { AdminResponseDto } from './models/AdminResponseDto';
+export { AllEmailNotificationHistoryResponseDto } from './models/AllEmailNotificationHistoryResponseDto';
 export type { AuthResponseDto } from './models/AuthResponseDto';
 export { BudgetBucket } from './models/BudgetBucket';
 export { ConfirmationStatus } from './models/ConfirmationStatus';

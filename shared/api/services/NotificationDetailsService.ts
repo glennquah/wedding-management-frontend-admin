@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AllEmailNotificationHistoryResponseDto } from '../models/AllEmailNotificationHistoryResponseDto';
 import type { CreateEmailTemplateDto } from '../models/CreateEmailTemplateDto';
 import type { EmailNotificationHistoryResponseDto } from '../models/EmailNotificationHistoryResponseDto';
 import type { EmailTemplateResponseDto } from '../models/EmailTemplateResponseDto';
@@ -151,10 +152,10 @@ export class NotificationDetailsService {
     }
     /**
      * Get all email notification history (SuperAdmin only)
-     * @returns EmailNotificationHistoryResponseDto All email notification history retrieved successfully.
+     * @returns AllEmailNotificationHistoryResponseDto All email notification history retrieved successfully.
      * @throws ApiError
      */
-    public static notificationDetailsControllerGetAllEmailNotificationHistory(): CancelablePromise<Array<EmailNotificationHistoryResponseDto>> {
+    public static notificationDetailsControllerGetAllEmailNotificationHistory(): CancelablePromise<Array<AllEmailNotificationHistoryResponseDto>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/notification-details/email-notification-history',

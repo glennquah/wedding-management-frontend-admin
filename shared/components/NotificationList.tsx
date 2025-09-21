@@ -2,26 +2,34 @@
 
 import { useState } from 'react';
 
+import { AllEmailNotificationHistoryResponseDto } from '../api/models/AllEmailNotificationHistoryResponseDto';
 import { EmailNotificationHistoryResponseDto } from '../api/models/EmailNotificationHistoryResponseDto';
 import { createNotificationColumns } from '../columns/notification-columns';
 import EmailDetailsModal from './EmailDetailsModal';
 import { DataTable } from './ui/table';
 
+type NotificationHistoryType =
+  | EmailNotificationHistoryResponseDto
+  | AllEmailNotificationHistoryResponseDto;
+
 interface NotificationListProps {
-  data: EmailNotificationHistoryResponseDto[];
+  data: NotificationHistoryType[];
   isLoading?: boolean;
 }
 
 export default function NotificationList({ data, isLoading = false }: NotificationListProps) {
-  const [selectedEmail, setSelectedEmail] = useState<EmailNotificationHistoryResponseDto | null>(
-    null,
-  );
+  const [selectedEmail, setSelectedEmail] = useState<NotificationHistoryType | null>(null);
 
-  const handleViewEmail = (email: EmailNotificationHistoryResponseDto) => {
+  const handleViewEmail = (email: NotificationHistoryType) => {
     setSelectedEmail(email);
   };
 
-  const columns = createNotificationColumns(handleViewEmail);
+  // Check if any item in the data has wedding/vendor name properties
+  const hasRelatedEntity = data.some(
+    (item) => 'weddingName' in item || 'vendorName' in item
+  );
+
+  const columns = createNotificationColumns(handleViewEmail, hasRelatedEntity);
 
   return (
     <div className="space-y-4">
