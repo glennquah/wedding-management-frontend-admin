@@ -18,7 +18,7 @@ export default function NotificationList({ data, isLoading = false }: Notificati
         isLoading={isLoading}
         loadingMessage="Loading notifications..."
         emptyMessage="No notifications found"
-        emptyDescription="No email notifications have been sent for this wedding yet."
+        emptyDescription="No email notifications have been sent yet."
         enableSelection={false}
         enableColumnVisibility={false}
         enablePagination={true}
@@ -28,7 +28,7 @@ export default function NotificationList({ data, isLoading = false }: Notificati
         searchableColumns={[
           {
             id: 'subject',
-            placeholder: 'Search by subject...',
+            placeholder: 'Search notifications by subject',
           },
         ]}
       />

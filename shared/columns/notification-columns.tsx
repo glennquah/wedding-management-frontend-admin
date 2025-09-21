@@ -30,6 +30,7 @@ export const notificationColumns: ColumnDef<EmailNotificationHistoryResponseDto>
   {
     id: 'type',
     header: 'Type',
+    accessorFn: (row) => formatType(row.type),
     cell: ({ row }) => {
       const notification = row.original;
       return (
@@ -43,6 +44,7 @@ export const notificationColumns: ColumnDef<EmailNotificationHistoryResponseDto>
   {
     id: 'subject',
     header: 'Subject',
+    accessorKey: 'subject',
     cell: ({ row }) => {
       const notification = row.original;
       return (
