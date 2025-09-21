@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+
 import { EmailNotificationHistoryResponseDto } from '../api/models/EmailNotificationHistoryResponseDto';
 import { createNotificationColumns } from '../columns/notification-columns';
-import { DataTable } from './ui/table';
 import EmailDetailsModal from './EmailDetailsModal';
+import { DataTable } from './ui/table';
 
 interface NotificationListProps {
   data: EmailNotificationHistoryResponseDto[];
@@ -12,7 +13,9 @@ interface NotificationListProps {
 }
 
 export default function NotificationList({ data, isLoading = false }: NotificationListProps) {
-  const [selectedEmail, setSelectedEmail] = useState<EmailNotificationHistoryResponseDto | null>(null);
+  const [selectedEmail, setSelectedEmail] = useState<EmailNotificationHistoryResponseDto | null>(
+    null,
+  );
 
   const handleViewEmail = (email: EmailNotificationHistoryResponseDto) => {
     setSelectedEmail(email);
@@ -34,7 +37,7 @@ export default function NotificationList({ data, isLoading = false }: Notificati
         enablePagination={true}
         defaultPageSize={10}
         pageSizeOptions={[5, 10, 25, 50]}
-        title="Email Notification History"
+        title="Email Notification Sent History"
         searchableColumns={[
           {
             id: 'subject',

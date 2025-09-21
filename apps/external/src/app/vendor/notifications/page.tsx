@@ -1,25 +1,27 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useWeddingStore } from '../../store/sessionStore';
-import NotificationList from '@shared/components/NotificationList';
+
+import { useVendorSession } from '@/contexts/VendorSessionContext';
 import { EmailNotificationHistoryResponseDto } from '@shared/api/models/EmailNotificationHistoryResponseDto';
 import { NotificationDetailsService } from '@shared/api/services/NotificationDetailsService';
+import NotificationList from '@shared/components/NotificationList';
 
 const VendorNotificationsPage = () => {
-  const currentWeddingId = useWeddingStore((state) => state.selectedWeddingId);
+  const { vendorId } = useVendorSession();
   const [notifications, setNotifications] = useState<EmailNotificationHistoryResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      if (!currentWeddingId) return;
+      if (!vendorId) return;
 
       try {
         setIsLoading(true);
-        const response = await NotificationDetailsService.notificationDetailsControllerGetEmailNotificationHistoryWithWeddingId(
-          currentWeddingId,
-        );
+        const response =
+          await NotificationDetailsService.notificationDetailsControllerGetEmailNotificationHistoryWithVendorId(
+            vendorId,
+          );
         setNotifications(response);
       } catch (error) {
         console.error('Failed to fetch notifications:', error);
@@ -30,9 +32,9 @@ const VendorNotificationsPage = () => {
     };
 
     fetchNotifications();
-  }, [currentWeddingId]);
+  }, [vendorId]);
 
-  if (!currentWeddingId) {
+  if (!vendorId) {
     return (
       <div className="p-6">
         <div className="text-center py-8">
