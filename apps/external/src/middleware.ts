@@ -11,6 +11,7 @@ export default withAuth(
     const publicPages = [
       '/',
       '/login',
+      '/reset-password',
       '/get-started',
       '/essentials',
       '/the-big-day',
