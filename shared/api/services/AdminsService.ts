@@ -60,25 +60,6 @@ export class AdminsService {
         });
     }
     /**
-     * Get the main wedding ID for the logged-in admin
-     * @returns any The main wedding ID associated with the admin
-     * @throws ApiError
-     */
-    public static adminControllerGetMyMainWedding(): CancelablePromise<{
-        /**
-         * The ID of the main wedding, or null if not set
-         */
-        mainWeddingId?: number | null;
-    }> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/admins/my-main-wedding',
-            errors: {
-                404: `Admin not found.`,
-            },
-        });
-    }
-    /**
      * Get an admin by ID
      * @param id
      * @returns AdminResponseDto The admin details
@@ -125,7 +106,7 @@ export class AdminsService {
         });
     }
     /**
-     * Delete an admin (super admin only, no password required)
+     * Delete an admin
      * @param id
      * @returns any The admin has been successfully deleted.
      * @throws ApiError
@@ -160,28 +141,6 @@ export class AdminsService {
                 'email': email,
             },
             errors: {
-                404: `Admin not found.`,
-            },
-        });
-    }
-    /**
-     * Delete own admin profile (requires password confirmation)
-     * @param requestBody
-     * @returns any The admin profile has been successfully deleted.
-     * @throws ApiError
-     */
-    public static adminControllerDeleteSelf(
-        requestBody: {
-            password: string;
-        },
-    ): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'DELETE',
-            url: '/admins/delete-self',
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                401: `Invalid password.`,
                 404: `Admin not found.`,
             },
         });

@@ -106,7 +106,7 @@ export class VendorsService {
         });
     }
     /**
-     * Delete a vendor (super admin only, no password required)
+     * Delete a vendor
      * @param id
      * @returns any The vendor has been successfully deleted.
      * @throws ApiError
@@ -141,28 +141,6 @@ export class VendorsService {
                 'email': email,
             },
             errors: {
-                404: `Vendor not found.`,
-            },
-        });
-    }
-    /**
-     * Delete own vendor profile (requires password confirmation)
-     * @param requestBody
-     * @returns any The vendor profile has been successfully deleted.
-     * @throws ApiError
-     */
-    public static vendorControllerDeleteSelf(
-        requestBody: {
-            password: string;
-        },
-    ): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'DELETE',
-            url: '/vendors/delete-self',
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                401: `Invalid password.`,
                 404: `Vendor not found.`,
             },
         });
