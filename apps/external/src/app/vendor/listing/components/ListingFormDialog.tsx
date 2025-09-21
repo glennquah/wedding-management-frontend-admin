@@ -1,10 +1,14 @@
-import * as React from 'react';
-import { DatePickerWithPeriods, DateWithPeriod } from '@shared/components';
+'use client';
+
+import { CreateListingDto } from '@shared/api';
+import { ImageUploadWidget, DatePickerWithPeriods, DateWithPeriod } from '@shared/components';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import { Input } from '@shared/components/ui/form/input';
 import { Label } from '@shared/components/ui/form/label';
-import { CreateListingDto } from '@shared/api';
+import { CldImage } from 'next-cloudinary';
+import * as React from 'react';
 import { Listing } from '../types';
+
 
 interface ListingFormDialogProps {
   open: boolean;
@@ -42,12 +46,10 @@ export function ListingFormDialog({
           const hour = date.getHours();
 
           let period: DateWithPeriod['period'] = 'full-day';
-          if (hour >= 6 && hour < 12) {
+          if (hour >= 8 && hour < 15) {
             period = 'morning';
-          } else if (hour >= 12 && hour < 18) {
+          } else if (hour >= 15 && hour < 22) {
             period = 'afternoon';
-          } else if (hour >= 18 && hour < 24) {
-            period = 'evening';
           }
 
           return {
@@ -62,14 +64,12 @@ export function ListingFormDialog({
           const hour = parseInt(startTime.split(':')[0]);
 
           let period: DateWithPeriod['period'] = 'full-day';
-          if (hour >= 6 && hour < 12) {
+          if (hour >= 8 && hour < 15) {
             period = 'morning';
-          } else if (hour >= 12 && hour < 18) {
+          } else if (hour >= 15 && hour < 22) {
             period = 'afternoon';
-          } else if (hour >= 18 && hour < 24) {
-            period = 'evening';
           }
-
+          
           return {
             date,
             period,
@@ -137,18 +137,30 @@ export function ListingFormDialog({
         </div>,
 
         <div key="imageUrls" className="md:col-span-2">
-          <Label htmlFor="imageUrls">Image URL</Label>
-          <Input
-            id="imageUrls"
-            value={formData.imageUrls?.[0] || ''}
-            onChange={(e) => {
-              const imageUrl = e.target.value;
-              onFormDataChange({ imageUrls: imageUrl ? [imageUrl] : [] });
-            }}
-            placeholder="https://example.com/image.jpg"
-          />
+          <Label htmlFor="imageUrls">Listing Image</Label>
+          <div className="space-y-4">
+            <ImageUploadWidget
+              onUpload={(url) => {
+                onFormDataChange({ imageUrls: [url] });
+              }}
+              maxImageWidth={800}
+            />
+            {formData.imageUrls?.[0] && (
+              <div className="mt-4">
+                <p className="text-sm text-gray-700 mb-2">Current image:</p>
+                <CldImage
+                  width={200}
+                  height={150}
+                  src={formData.imageUrls[0]}
+                  sizes="100vw"
+                  alt="Listing preview"
+                  className="rounded-lg shadow-sm border"
+                />
+              </div>
+            )}
+          </div>
           <p className="text-xs text-gray-500 mt-1">
-            Enter a URL for your listing image. If left empty, a default image will be used.
+            Upload an image for your listing. Recommended size: 800x600px minimum.
           </p>
         </div>,
 

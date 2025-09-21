@@ -48,13 +48,12 @@ export const ListingCard = ({ listing, onEdit, onDelete }: ListingCardProps) => 
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
       {/* Image Section */}
-      <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
+      <div className="w-full h-48 bg-gray-100 relative overflow-hidden">
         <Image
           src={getImageSource()}
           alt={listing.listingName}
-          width={120}
-          height={120}
-          className="object-contain"
+          fill
+          className="object-cover"
         />
       </div>
 

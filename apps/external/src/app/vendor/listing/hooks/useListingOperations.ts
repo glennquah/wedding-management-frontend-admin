@@ -52,7 +52,8 @@ export function useListingOperations(
         remarks: response.remarks || createData.remarks,
         vendorId: response.vendorId || createData.vendorId,
         createdAt: response.createdAt || new Date().toISOString(),
-        updatedAt: response.updatedAt || new Date().toISOString()
+        updatedAt: response.updatedAt || new Date().toISOString(),
+        imageUrls: response.imageUrls || (createData as any).imageUrls || []
       };
 
       setListings(prev => [...prev, createdListing]);
@@ -90,7 +91,7 @@ export function useListingOperations(
         price: Number(updateData.price),
         availabilities: updateData.availabilities || [],
         remarks: updateData.remarks?.trim() || "",
-        imageUrls: updateData.imageUrls || []
+        imageUrls: (updateData as any).imageUrls || []
       };
 
       console.log('Updating listing with ID:', listing.id, 'and data:', updatePayload);
