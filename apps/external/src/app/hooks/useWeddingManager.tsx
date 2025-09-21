@@ -77,7 +77,7 @@ export function useWeddingManager() {
     }
   }, [setSelectedWeddingId, weddings]);
 
-  // Legacy fetch wedding function for backward compatibility
+  // Fetch the currently selected wedding
   const fetchWedding = useCallback(async () => {
     try {
       setLoading(true);
@@ -85,9 +85,22 @@ export function useWeddingManager() {
 
       setupAuth();
       const userWeddings = await WeddingsService.weddingControllerFindAll();
+      setWeddings(userWeddings);
 
       if (userWeddings.length > 0) {
-        setWedding(userWeddings[0]);
+        // Use selected wedding if available, otherwise use first wedding as fallback
+        let targetWedding;
+        if (selectedWeddingId) {
+          targetWedding = userWeddings.find(w => w.id === selectedWeddingId);
+        }
+
+        if (!targetWedding) {
+          targetWedding = userWeddings[0];
+          setMainWeddingId(targetWedding.id);
+          setSelectedWeddingId(targetWedding.id);
+        }
+
+        setWedding(targetWedding);
       } else {
         setError('No wedding found for this user');
       }
@@ -98,7 +111,7 @@ export function useWeddingManager() {
     } finally {
       setLoading(false);
     }
-  }, [setupAuth]);
+  }, [setupAuth, selectedWeddingId, setMainWeddingId, setSelectedWeddingId, setWeddings]);
 
   // Initialize when session is available
   useEffect(() => {

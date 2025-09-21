@@ -43,7 +43,7 @@ const tabs = [
       },
       {
         title: 'Seating Arrangement',
-        href: '/admin/seating-arrangement',
+        href: '/seating-arrangement',
         icon: MapPin,
       },
       {

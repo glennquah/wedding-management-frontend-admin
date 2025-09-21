@@ -6,6 +6,7 @@ import { GuestCountBucket as SeatingGuestCountBucket } from '../../../lib/seatin
 import { useGuestManager } from '../../hooks/useGuestManager';
 import { useSeatingManager } from '../../hooks/useSeatingManager';
 import { useWeddingManager } from '../../hooks/useWeddingManager';
+import { useWeddingStore } from '../../store/sessionStore';
 import { PriorityRankingDialog } from './components/PriorityRankingDialog';
 import { SeatingVisualization } from './components/SeatingVisualization';
 import { ConfirmationStatus, GuestCountBucket } from '@shared/api';
@@ -33,6 +34,7 @@ export default function SeatingArrangementPage() {
 
   const { guests } = useGuestManager();
   const { wedding, isLoading: isLoadingWedding } = useWeddingManager();
+  const selectedWeddingId = useWeddingStore((state) => state.selectedWeddingId);
   const {
     guestCountBucket,
     setGuestCountBucket,
@@ -46,7 +48,7 @@ export default function SeatingArrangementPage() {
     loadSeatingArrangementWithLayout,
     saveGroupPriorities,
     moveGuest,
-  } = useSeatingManager(wedding?.id);
+  } = useSeatingManager(selectedWeddingId!);
 
   // Get group priorities from seating arrangement or initialize empty
   const groupPriorities = seatingArrangement?.groupPriorities || null;

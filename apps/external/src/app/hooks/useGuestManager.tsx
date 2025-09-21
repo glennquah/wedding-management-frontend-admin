@@ -80,9 +80,7 @@ export function useGuestManager() {
   }>({});
 
   // Form data
-  const [newGuest, setNewGuest] = useState<GuestFormData>(
-    getDefaultNewGuest(currentWeddingId || 1),
-  );
+  const [newGuest, setNewGuest] = useState<GuestFormData>(getDefaultNewGuest(currentWeddingId!));
 
   // Authentication setup
   const setupAuth = useCallback(() => {
@@ -91,23 +89,24 @@ export function useGuestManager() {
     }
   }, [session]);
 
-  // Fetch wedding data for the current user (use first wedding in array)
-  const fetchUserWedding = useCallback(async (): Promise<WeddingResponseDto | null> => {
-    try {
-      setupAuth();
-      const weddings = await WeddingsService.weddingControllerFindAll();
-      if (weddings.length > 0) {
-        const weddingData = weddings[0];
-        setWedding(weddingData);
-        return weddingData;
+  // Fetch specific wedding data by ID
+  const fetchUserWedding = useCallback(
+    async (weddingId?: number): Promise<WeddingResponseDto | null> => {
+      try {
+        setupAuth();
+        const weddings = await WeddingsService.weddingControllerFindAll();
+
+        const weddingData = weddings.find((w) => w.id === weddingId);
+        setWedding(weddingData || null);
+        return weddingData || null;
+      } catch (err) {
+        console.error('Error fetching user wedding:', err);
+        toast.error('Failed to fetch wedding information');
+        return null;
       }
-      return null;
-    } catch (err) {
-      console.error('Error fetching user wedding:', err);
-      toast.error('Failed to fetch wedding information');
-      return null;
-    }
-  }, [setupAuth]);
+    },
+    [setupAuth],
+  );
 
   // Core CRUD operations
   const fetchGuests = useCallback(async () => {
@@ -121,7 +120,7 @@ export function useGuestManager() {
       // Get wedding data if not already set
       let weddingId = currentWeddingId;
       if (!weddingId || !wedding) {
-        const weddingData = await fetchUserWedding();
+        const weddingData = await fetchUserWedding(currentWeddingId || undefined);
         if (weddingData) {
           setSelectedWeddingId(weddingData.id);
           weddingId = weddingData.id;
@@ -287,7 +286,10 @@ export function useGuestManager() {
 
     if (guest.id) {
       const existingAccompanyingCount = guests.filter((g) => g.primaryGuestId === guest.id).length;
-      const additionalAccompanying = Math.max(0, desiredAccompanyingCount - existingAccompanyingCount);
+      const additionalAccompanying = Math.max(
+        0,
+        desiredAccompanyingCount - existingAccompanyingCount,
+      );
       seatsNeeded = additionalAccompanying;
     } else {
       seatsNeeded = 1 + desiredAccompanyingCount;
@@ -359,7 +361,7 @@ export function useGuestManager() {
         allergies: newGuest.allergies || undefined,
         group: newGuest.group!,
         confirmationStatus: ConfirmationStatus.PENDING,
-        weddingId: currentWeddingId || 1,
+        weddingId: currentWeddingId!,
         primaryGuestId: undefined,
       };
 
@@ -375,7 +377,7 @@ export function useGuestManager() {
             allergies: guestData.allergies || undefined,
             group: newGuest.group,
             confirmationStatus: guestData.confirmationStatus,
-            weddingId: currentWeddingId || 1,
+            weddingId: currentWeddingId!,
             primaryGuestId: undefined,
           })),
         );
@@ -387,7 +389,7 @@ export function useGuestManager() {
         return;
       }
 
-      setNewGuest(getDefaultNewGuest(currentWeddingId || 1));
+      setNewGuest(getDefaultNewGuest(currentWeddingId!));
       setIsAddingGuest(false);
 
       // Show email modal for the newly added guest
@@ -449,7 +451,7 @@ export function useGuestManager() {
             allergies: guestData.allergies || undefined,
             group: editingGuest.group,
             confirmationStatus: guestData.confirmationStatus,
-            weddingId: currentWeddingId || 1,
+            weddingId: currentWeddingId!,
             primaryGuestId: undefined,
           })),
         );
