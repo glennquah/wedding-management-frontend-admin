@@ -6,7 +6,7 @@ import { Bell } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface NavigationBarProps {
-  notificationRoute: string;
+  notificationRoute?: string;
   additionalTabs?: React.ReactNode;
 }
 
@@ -22,20 +22,21 @@ const NavigationBar = ({ notificationRoute, additionalTabs }: NavigationBarProps
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-4">
-          {/* Notification */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
-            onClick={() => router.push(notificationRoute)}
-          >
-            <Bell size={16} />
-            <span className="sr-only">Notifications</span>
-          </Button>
-
-          {additionalTabs}
-        </div>
+        {notificationRoute && (
+          <div className="flex items-center gap-4">
+            {/* Notification */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => router.push(notificationRoute)}
+            >
+              <Bell size={16} />
+              <span className="sr-only">Notifications</span>
+            </Button>
+          </div>
+        )}
+        {additionalTabs}
       </div>
     </header>
   );
