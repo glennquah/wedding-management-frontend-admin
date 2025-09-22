@@ -8,7 +8,6 @@ import { NotificationDetailsService } from '@shared/api/services/NotificationDet
 
 interface NotificationTemplateListViewProps {
   weddingId?: number;
-  showAllTemplates?: boolean;
 }
 
 export interface NotificationTemplateListViewRef {
@@ -18,7 +17,7 @@ export interface NotificationTemplateListViewRef {
 export const NotificationTemplateListView = forwardRef<
   NotificationTemplateListViewRef,
   NotificationTemplateListViewProps
->(({ weddingId, showAllTemplates = false }, ref) => {
+>(({ weddingId }, ref) => {
   const [templates, setTemplates] = useState<EmailTemplateResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -27,10 +26,7 @@ export const NotificationTemplateListView = forwardRef<
     try {
       let response: EmailTemplateResponseDto[];
 
-      if (showAllTemplates) {
-        response =
-          await NotificationDetailsService.notificationDetailsControllerGetAllEmailTemplates();
-      } else if (weddingId) {
+      if (weddingId) {
         response =
           await NotificationDetailsService.notificationDetailsControllerGetEmailTemplatesForWedding(
             weddingId,
@@ -52,14 +48,14 @@ export const NotificationTemplateListView = forwardRef<
 
   useEffect(() => {
     fetchTemplates();
-  }, [weddingId, showAllTemplates]);
+  }, [weddingId]);
 
   // Expose refresh function through ref
   useImperativeHandle(ref, () => ({
     refresh: fetchTemplates,
   }));
 
-  if (!showAllTemplates && !weddingId) {
+  if (!weddingId) {
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground">

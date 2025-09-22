@@ -51,6 +51,33 @@ export class NotificationDetailsService {
         });
     }
     /**
+     * Create email template for superadmin
+     * @param requestBody
+     * @returns any The email template has been successfully created.
+     * @throws ApiError
+     */
+    public static notificationDetailsControllerCreateSuperAdminTemplate(
+        requestBody: CreateEmailTemplateDto,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/notification-details/superadmin/email-templates',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Get all email templates for superadmin
+     * @returns EmailTemplateResponseDto Email templates retrieved successfully.
+     * @throws ApiError
+     */
+    public static notificationDetailsControllerGetEmailTemplatesForSuperAdmin(): CancelablePromise<Array<EmailTemplateResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/notification-details/superadmin/email-templates',
+        });
+    }
+    /**
      * Get email template by ID
      * @param emailTemplateId
      * @returns EmailTemplateWithWeddingDto Email template retrieved successfully.

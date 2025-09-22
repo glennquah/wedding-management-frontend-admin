@@ -82,6 +82,7 @@ export {
   NotificationTemplateListView,
   AddNotificationTemplateDialog,
   SendNotificationsDialog,
+  SuperAdminNotificationTemplateListView,
   type NotificationTemplateListViewRef,
 } from './notification-templates';
 
