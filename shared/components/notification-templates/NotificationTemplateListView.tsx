@@ -71,9 +71,6 @@ export const NotificationTemplateListView = forwardRef<
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        {showAllTemplates ? 'All available templates' : `Templates for wedding ${weddingId}`}
-      </p>
       <NotificationTemplateList templates={templates} isLoading={isLoading} />
     </div>
   );

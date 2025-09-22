@@ -100,8 +100,8 @@ export const AddNotificationTemplateDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1">
-          <div className="space-y-6 py-4">
+        <div className="flex-1 overflow-y-auto">
+          <div className="space-y-6 py-4 p-1">
             {/* Basic Information */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
