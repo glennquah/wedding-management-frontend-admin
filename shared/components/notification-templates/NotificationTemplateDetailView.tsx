@@ -216,6 +216,8 @@ export const NotificationTemplateDetailView = ({
               language="html"
               placeholder="HTML content will appear here..."
               readOnly={!isEditing}
+              title={isEditing ? "Edit HTML Content" : "HTML Content (Read-only)"}
+              showCopyButton={true}
             />
           </div>
         </div>
