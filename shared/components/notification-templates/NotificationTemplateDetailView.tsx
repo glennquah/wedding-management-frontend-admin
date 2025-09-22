@@ -1,18 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { EmailTemplateWithWeddingDto, UpdateEmailTemplateDto } from '@shared/api';
+import { useEffect, useState } from 'react';
+
+import { EmailTemplateWithWeddingDto } from '@shared/api';
 import { NotificationDetailsService } from '@shared/api/services/NotificationDetailsService';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { Button } from '@shared/components/ui/button';
-import { Badge } from '@shared/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components/ui/tabs';
-import { Separator } from '@shared/components/ui/separator';
+import { CodeEditor } from '@shared/components/ui/code-editor';
+import { DeleteConfirmationModal } from '@shared/components/ui/delete-confirmation-modal';
 import { Input } from '@shared/components/ui/form/input';
 import { Label } from '@shared/components/ui/form/label';
-import { DeleteConfirmationModal } from '@shared/components/ui/delete-confirmation-modal';
-import { CodeEditor } from '@shared/components/ui/code-editor';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 interface NotificationTemplateDetailViewProps {
@@ -62,7 +59,7 @@ export const NotificationTemplateDetailView = ({
 
       await NotificationDetailsService.notificationDetailsControllerUpdateEmailTemplateInWedding(
         template.id,
-        updateData
+        updateData,
       );
 
       toast.success('Template updated successfully');
@@ -81,7 +78,9 @@ export const NotificationTemplateDetailView = ({
 
     setIsDeleting(true);
     try {
-      await NotificationDetailsService.notificationDetailsControllerDeleteEmailTemplate(template.id);
+      await NotificationDetailsService.notificationDetailsControllerDeleteEmailTemplate(
+        template.id,
+      );
       toast.success('Template deleted successfully');
       setShowDeleteModal(false);
       onTemplateDeleted?.();
@@ -129,14 +128,14 @@ export const NotificationTemplateDetailView = ({
   }
 
   return (
-    <div className="h-[calc(100vh-280px)] flex flex-col">
+    <div className="flex flex-col">
       {/* Header with editable fields */}
-      <div className="border-b p-6">
+      <div className="border-b p-4">
         <div className="space-y-4">
           {isEditing ? (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="gap-2 flex flex-col">
                   <Label htmlFor="templateName">Template Name</Label>
                   <Input
                     id="templateName"
@@ -145,7 +144,7 @@ export const NotificationTemplateDetailView = ({
                     placeholder="Enter template name"
                   />
                 </div>
-                <div>
+                <div className="gap-2 flex flex-col">
                   <Label htmlFor="templateSubject">Email Subject</Label>
                   <Input
                     id="templateSubject"
@@ -155,10 +154,7 @@ export const NotificationTemplateDetailView = ({
                   />
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary">
-                  {template?.notificationDetails?.wedding?.name || 'Template'}
-                </Badge>
+              <div>
                 <span className="text-sm text-muted-foreground">
                   Updated: {template ? new Date(template.updatedAt).toLocaleDateString() : ''}
                 </span>
@@ -174,17 +170,12 @@ export const NotificationTemplateDetailView = ({
             </div>
           ) : (
             <div className="flex items-start justify-between">
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <h2 className="text-2xl font-semibold">{template?.name}</h2>
                 <p className="text-muted-foreground">{template?.subject}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <Badge variant="secondary">
-                    {template?.notificationDetails?.wedding?.name || 'Template'}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    Updated: {template ? new Date(template.updatedAt).toLocaleDateString() : ''}
-                  </span>
-                </div>
+                <span className="text-sm text-muted-foreground">
+                  Updated: {template ? new Date(template.updatedAt).toLocaleDateString() : ''}
+                </span>
               </div>
               <div className="flex gap-2">
                 <Button variant="secondary" onClick={() => setIsEditing(true)}>
@@ -203,11 +194,9 @@ export const NotificationTemplateDetailView = ({
       <div className="flex-1 flex">
         {/* Left side - HTML Editor */}
         <div className="w-1/2 border-r">
-          <div className="p-4 border-b">
+          <div className="p-4">
             <h3 className="font-medium">HTML Content</h3>
-            <p className="text-sm text-muted-foreground">
-              Raw HTML content of the email template
-            </p>
+            <p className="text-sm text-muted-foreground">Raw HTML content of the email template</p>
           </div>
           <div className="p-4 h-[calc(100vh-350px)]">
             <CodeEditor
@@ -216,7 +205,7 @@ export const NotificationTemplateDetailView = ({
               language="html"
               placeholder="HTML content will appear here..."
               readOnly={!isEditing}
-              title={isEditing ? "Edit HTML Content" : "HTML Content (Read-only)"}
+              title={isEditing ? 'Edit HTML Content' : 'HTML Content (Read-only)'}
               showCopyButton={true}
             />
           </div>
@@ -224,11 +213,9 @@ export const NotificationTemplateDetailView = ({
 
         {/* Right side - Preview */}
         <div className="w-1/2">
-          <div className="p-4 border-b">
+          <div className="p-4">
             <h3 className="font-medium">Email Preview</h3>
-            <p className="text-sm text-muted-foreground">
-              How the email will look when rendered
-            </p>
+            <p className="text-sm text-muted-foreground">How the email will look when rendered</p>
           </div>
           <div className="p-4 h-[calc(100vh-350px)]">
             <div className="h-full border rounded-md bg-white overflow-auto">

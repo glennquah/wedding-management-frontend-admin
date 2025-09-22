@@ -73,7 +73,7 @@ const NotificationTemplateDetailPage = () => {
   return (
     <div className="p-6">
       <div>
-        <Button onClick={handleBackClick} variant="ghost" className="mb-4">
+        <Button onClick={handleBackClick} variant="ghost">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Templates
         </Button>
