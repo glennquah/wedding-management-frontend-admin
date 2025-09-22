@@ -23,7 +23,7 @@ import { toast } from 'sonner';
 interface AddNotificationTemplateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  weddingId: number;
+  weddingId?: number;
   onTemplateCreated?: () => void;
 }
 
@@ -302,10 +302,16 @@ export const AddNotificationTemplateDialog = ({
 
     setIsCreating(true);
     try {
-      await NotificationDetailsService.notificationDetailsControllerCreateEmailTemplateInWedding(
-        weddingId,
-        formData,
-      );
+      if (weddingId) {
+        await NotificationDetailsService.notificationDetailsControllerCreateEmailTemplateInWedding(
+          weddingId,
+          formData,
+        );
+      } else {
+        await NotificationDetailsService.notificationDetailsControllerCreateSuperAdminTemplate(
+          formData,
+        );
+      }
 
       toast.success('Template created successfully');
       onTemplateCreated?.();

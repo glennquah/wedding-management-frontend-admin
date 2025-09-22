@@ -13,16 +13,22 @@ import { useRouter } from 'next/navigation';
 
 interface NotificationTemplateListProps {
   templates: EmailTemplateResponseDto[];
+  isSuperAdmin: boolean;
   isLoading?: boolean;
 }
 
 export const NotificationTemplateList = ({
   templates,
+  isSuperAdmin,
   isLoading = false,
 }: NotificationTemplateListProps) => {
   const router = useRouter();
 
   const handleTemplateClick = (template: EmailTemplateResponseDto) => {
+    if (isSuperAdmin) {
+      router.push(`/notification-templates/${template.id}`);
+      return;
+    }
     router.push(`/admin/notification-templates/${template.id}`);
   };
   if (isLoading) {

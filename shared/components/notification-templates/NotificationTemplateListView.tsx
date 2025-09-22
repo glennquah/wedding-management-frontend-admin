@@ -67,7 +67,7 @@ export const NotificationTemplateListView = forwardRef<
 
   return (
     <div className="space-y-4">
-      <NotificationTemplateList templates={templates} isLoading={isLoading} />
+      <NotificationTemplateList templates={templates} isSuperAdmin={false} isLoading={isLoading} />
     </div>
   );
 });

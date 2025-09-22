@@ -68,7 +68,7 @@ export const NotificationTemplateManager = ({
           {showAllTemplates ? 'All available templates' : `Templates for wedding ${weddingId}`}
         </p>
       </div>
-      <NotificationTemplateList templates={templates} isLoading={isLoading} />
+      <NotificationTemplateList templates={templates} isSuperAdmin={true} isLoading={isLoading} />
     </div>
   );
 };
