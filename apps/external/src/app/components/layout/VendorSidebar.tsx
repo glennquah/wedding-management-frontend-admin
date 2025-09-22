@@ -22,7 +22,7 @@ const tabs = [
       },
       {
         title: 'Listings',
-        href: '/vendor/listing',
+        href: '/listing',
         icon: FileSpreadsheet,
       },
       {
