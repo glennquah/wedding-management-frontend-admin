@@ -9,12 +9,14 @@ import {
   NotificationTemplateListView,
   NotificationTemplateListViewRef,
   PageHeader,
+  SendNotificationsDialog,
 } from '@shared/components';
-import { Plus } from 'lucide-react';
+import { Bell, Plus } from 'lucide-react';
 
 const NotificationTemplatesPage = () => {
   const currentWeddingId = useWeddingStore((state) => state.selectedWeddingId);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showSendDialog, setShowSendDialog] = useState(false);
   const listViewRef = useRef<NotificationTemplateListViewRef>(null);
 
   const handleTemplateCreated = () => {
@@ -31,10 +33,16 @@ const NotificationTemplatesPage = () => {
         />
 
         {currentWeddingId && (
-          <Button onClick={() => setShowAddDialog(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Template
-          </Button>
+          <div className="flex flex-row gap-2">
+            <Button onClick={() => setShowAddDialog(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Template
+            </Button>
+            <Button variant="secondary" onClick={() => setShowSendDialog(true)}>
+              <Bell className="w-4 h-4 mr-2" />
+              Send Notifications
+            </Button>
+          </div>
         )}
       </div>
 
@@ -49,6 +57,15 @@ const NotificationTemplatesPage = () => {
           onOpenChange={setShowAddDialog}
           weddingId={currentWeddingId}
           onTemplateCreated={handleTemplateCreated}
+        />
+      )}
+
+      {/* Send Notifications Dialog */}
+      {currentWeddingId && (
+        <SendNotificationsDialog
+          open={showSendDialog}
+          onOpenChange={setShowSendDialog}
+          weddingId={currentWeddingId}
         />
       )}
     </div>

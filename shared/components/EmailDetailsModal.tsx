@@ -1,7 +1,7 @@
 'use client';
 
-import { EmailNotificationHistoryResponseDto } from '../api/models/EmailNotificationHistoryResponseDto';
 import { AllEmailNotificationHistoryResponseDto } from '../api/models/AllEmailNotificationHistoryResponseDto';
+import { EmailNotificationHistoryResponseDto } from '../api/models/EmailNotificationHistoryResponseDto';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import {
@@ -14,7 +14,9 @@ import {
 } from './ui/dialog';
 import { Separator } from './ui/separator';
 
-type NotificationHistoryType = EmailNotificationHistoryResponseDto | AllEmailNotificationHistoryResponseDto;
+type NotificationHistoryType =
+  | EmailNotificationHistoryResponseDto
+  | AllEmailNotificationHistoryResponseDto;
 
 interface EmailDetailsModalProps {
   open: boolean;
@@ -22,14 +24,18 @@ interface EmailDetailsModalProps {
   email: NotificationHistoryType | null;
 }
 
-const formatType = (type: EmailNotificationHistoryResponseDto.type | AllEmailNotificationHistoryResponseDto.type) => {
+const formatType = (
+  type: EmailNotificationHistoryResponseDto.type | AllEmailNotificationHistoryResponseDto.type,
+) => {
   return type
     .replace(/_/g, ' ')
     .toLowerCase()
     .replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
-const getTypeColor = (type: EmailNotificationHistoryResponseDto.type | AllEmailNotificationHistoryResponseDto.type) => {
+const getTypeColor = (
+  type: EmailNotificationHistoryResponseDto.type | AllEmailNotificationHistoryResponseDto.type,
+) => {
   switch (type) {
     case 'PASSWORD_RESET':
       return 'destructive';
@@ -87,11 +93,15 @@ export default function EmailDetailsModal({ open, onOpenChange, email }: EmailDe
                 <div className="md:col-span-2">
                   <h4 className="text-sm font-medium text-muted-foreground mb-2">Related To</h4>
                   <div className="text-sm">
-                    {('weddingName' in email && email.weddingName) && (
-                      <p><span className="font-medium">Wedding:</span> {email.weddingName}</p>
+                    {'weddingName' in email && email.weddingName && (
+                      <p>
+                        <span className="font-medium">Wedding:</span> {email.weddingName}
+                      </p>
                     )}
-                    {('vendorName' in email && email.vendorName) && (
-                      <p><span className="font-medium">Vendor:</span> {email.vendorName}</p>
+                    {'vendorName' in email && email.vendorName && (
+                      <p>
+                        <span className="font-medium">Vendor:</span> {email.vendorName}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -103,10 +113,33 @@ export default function EmailDetailsModal({ open, onOpenChange, email }: EmailDe
             {/* Email Content */}
             <div>
               <h4 className="text-sm font-medium text-muted-foreground mb-4">Email Content</h4>
-              <div className="border rounded-lg p-4 bg-muted/30">
-                <div
-                  className="prose prose-sm max-w-none dark:prose-invert"
-                  dangerouslySetInnerHTML={{ __html: email.body }}
+              <div className="border rounded-lg bg-white overflow-hidden">
+                {/* Email Content in Isolated Iframe */}
+                <iframe
+                  srcDoc={`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                      <meta charset="UTF-8">
+                      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                      <style>
+                        body {
+                          margin: 0;
+                          padding: 16px;
+                          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                          background: white;
+                          line-height: 1.6;
+                        }
+                      </style>
+                    </head>
+                    <body>
+                      ${email.body}
+                    </body>
+                    </html>
+                  `}
+                  className="w-full border-0"
+                  style={{ minHeight: '300px', height: '400px' }}
+                  title="Email Content Preview"
                 />
               </div>
             </div>

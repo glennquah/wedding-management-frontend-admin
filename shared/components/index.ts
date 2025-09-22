@@ -81,6 +81,7 @@ export {
   NotificationTemplateManager,
   NotificationTemplateListView,
   AddNotificationTemplateDialog,
+  SendNotificationsDialog,
   type NotificationTemplateListViewRef,
 } from './notification-templates';
 
