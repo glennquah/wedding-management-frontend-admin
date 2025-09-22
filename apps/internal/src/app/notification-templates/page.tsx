@@ -6,6 +6,7 @@ import {
   AddNotificationTemplateDialog,
   Button,
   PageHeader,
+  SendSuperAdminNotificationsDialog,
   SuperAdminNotificationTemplateListView,
 } from '@shared/components';
 import { Bell, Plus } from 'lucide-react';
@@ -50,11 +51,10 @@ const NotificationTemplatesPage = () => {
       />
 
       {/* Send Notifications Dialog */}
-      {/* <SendNotificationsDialog
+      <SendSuperAdminNotificationsDialog
         open={showSendDialog}
         onOpenChange={setShowSendDialog}
-        weddingId={currentWeddingId}
-      /> */}
+      />
     </div>
   );
 };

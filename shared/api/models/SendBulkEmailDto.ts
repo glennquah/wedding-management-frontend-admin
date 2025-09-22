@@ -10,6 +10,6 @@ export type SendBulkEmailDto = {
     subject: string;
     text: string;
     html: string;
-    weddingId: number;
+    weddingId?: number;
 };
 

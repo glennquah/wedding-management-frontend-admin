@@ -7,4 +7,5 @@ export {
 } from './NotificationTemplateListView';
 export { NotificationTemplateManager } from './NotificationTemplateManager';
 export { SendNotificationsDialog } from './SendNotificationsDialog';
+export { SendSuperAdminNotificationsDialog } from './SendSuperAdminNotificationsDialog';
 export { SuperAdminNotificationTemplateListView } from './SuperAdminNotificationTemplateListView';
