@@ -6,6 +6,7 @@ import {
   CircleDollarSign,
   FileSpreadsheet,
   LayoutDashboard,
+  Settings,
   Users,
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
@@ -15,13 +16,18 @@ const tabs = [
     sectionHeader: 'Overview',
     items: [
       {
-        title: 'Listings',
-        href: '/vendor/listing',
+        title: 'Dashboard',
+        href: '/',
         icon: LayoutDashboard,
       },
       {
+        title: 'Listings',
+        href: '/vendor/listing',
+        icon: FileSpreadsheet,
+      },
+      {
         title: 'Revenue',
-        href: '/vendor/revenue',
+        href: '/revenue',
         icon: CircleDollarSign,
       },
     ],
@@ -31,17 +37,17 @@ const tabs = [
     items: [
       {
         title: 'Customers',
-        href: '/vendor/customers',
+        href: '/customers',
         icon: Users,
       },
       {
         title: 'Services',
-        href: '/vendor/services',
-        icon: FileSpreadsheet,
+        href: '/services',
+        icon: Settings,
       },
       {
         title: 'Calendar',
-        href: '/vendor/calendar',
+        href: '/calendar',
         icon: CalendarDays,
       },
     ],
@@ -53,6 +59,7 @@ export default function VendorSidebar() {
     <AppSidebar
       tabs={tabs}
       signOut={() => signOut({ callbackUrl: window.location.origin, redirect: false })}
+      basePath='vendor'
     />
   );
 }

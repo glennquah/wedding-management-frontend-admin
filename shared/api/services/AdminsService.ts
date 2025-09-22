@@ -125,7 +125,7 @@ export class AdminsService {
         });
     }
     /**
-     * Delete an admin
+     * Delete an admin (super admin only, no password required)
      * @param id
      * @returns any The admin has been successfully deleted.
      * @throws ApiError
@@ -160,6 +160,28 @@ export class AdminsService {
                 'email': email,
             },
             errors: {
+                404: `Admin not found.`,
+            },
+        });
+    }
+    /**
+     * Delete own admin profile (requires password confirmation)
+     * @param requestBody
+     * @returns any The admin profile has been successfully deleted.
+     * @throws ApiError
+     */
+    public static adminControllerDeleteSelf(
+        requestBody: {
+            password: string;
+        },
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/admins/delete-self',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                401: `Invalid password.`,
                 404: `Admin not found.`,
             },
         });

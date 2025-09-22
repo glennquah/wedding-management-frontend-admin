@@ -34,9 +34,13 @@ export default function GuestListPage() {
   const {
     // Core data
     guests,
+    wedding,
     primaryGuests,
     existingGroups,
     isLoading,
+
+    // Capacity management
+    getGuestCapacityInfo,
 
     // Modal states
     isAddingGuest,
@@ -70,6 +74,9 @@ export default function GuestListPage() {
     closeEmailModal,
     handleSendEmail,
   } = useGuestManager();
+
+  // Get capacity information
+  const capacityInfo = getGuestCapacityInfo();
 
   // Column definitions for DataTable using shared columns
   const columns = getGuestColumns({
@@ -129,6 +136,8 @@ export default function GuestListPage() {
           size="sm"
           onClick={() => addAccompanyingGuestField(guest, setGuest)}
           className="text-brand-600 hover:text-brand-700"
+          disabled={capacityInfo.isAtCapacity}
+          title={capacityInfo.isAtCapacity ? 'Guest limit reached' : 'Add accompanying guest'}
         >
           <Plus className="w-4 h-4 mr-1" />
           Add Guest
@@ -245,6 +254,8 @@ export default function GuestListPage() {
           size="sm"
           onClick={() => addAccompanyingGuestField(guest, setGuest)}
           className="text-brand-600 hover:text-brand-700"
+          disabled={capacityInfo.isAtCapacity}
+          title={capacityInfo.isAtCapacity ? 'Guest limit reached' : 'Add accompanying guest'}
         >
           <Plus className="w-4 h-4 mr-1" />
           Add Guest
@@ -326,11 +337,15 @@ export default function GuestListPage() {
       <div className="container mx-auto px-4 pt-4 md:pt-6">
         <PageHeader
           title="Guest List"
-          description="Manage your wedding guests and track RSVPs"
+          description={
+            wedding
+              ? `Manage your wedding guests and track RSVPs (${capacityInfo.current}/${capacityInfo.limit} guests)`
+              : 'Manage your wedding guests and track RSVPs'
+          }
           buttonText="Add Guest"
           onButtonClick={openAddGuestModal}
           buttonIcon={<Plus className="w-4 h-4" />}
-          isButtonDisabled={isLoading}
+          isButtonDisabled={isLoading || capacityInfo.isAtCapacity}
         />
 
         {/* Add Guest Modal */}

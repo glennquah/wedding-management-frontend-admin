@@ -116,11 +116,7 @@ export const getAdminFormFields = ({
   </div>,
 ];
 
-export const getEditAdminFormFields = ({
-  admin,
-  setAdmin,
-  handleGeneratePassword,
-}: EditAdminFormFieldsProps) => [
+export const getEditAdminFormFields = ({ admin, setAdmin }: EditAdminFormFieldsProps) => [
   <div key="name" className="md:col-span-1">
     <FormField
       label="Name *"
