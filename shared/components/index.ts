@@ -38,6 +38,7 @@ export { PageHeader } from './ui/page-header';
 export { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 export { Rating, RatingButton } from './ui/rating';
 export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+export { Separator } from './ui/separator';
 export {
   Sheet,
   SheetContent,
@@ -70,6 +71,14 @@ export {
 // Tables
 export { AdminTable } from './AdminTable';
 export { WeddingTable } from './WeddingTable';
+
+// Notification Templates
+export {
+  NotificationTemplateList,
+  NotificationTemplateDetailView,
+  NotificationTemplateManager,
+  NotificationTemplateListView,
+} from './notification-templates';
 
 // Utilities
 export { cn } from './lib/utils';
