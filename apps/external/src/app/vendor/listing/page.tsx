@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Button, PageHeader } from "@shared/components";
-import { Calendar, Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Button, PageHeader } from '@shared/components';
+import { Calendar, Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import {
   EmptyState,
   ErrorState,
@@ -12,7 +12,7 @@ import {
   useListingData,
   useListingFilters,
   useListingOperations,
-} from "./index";
+} from './index';
 
 export default function ListingPage() {
   const router = useRouter();
@@ -24,7 +24,7 @@ export default function ListingPage() {
     router.push('/vendor/listing/add-listing');
   };
 
-  const handleEditListing = (listing: any) => {
+  const handleEditListing = (listing: { id: number }) => {
     router.push(`/vendor/listing/edit-listing/${listing.id}`);
   };
 

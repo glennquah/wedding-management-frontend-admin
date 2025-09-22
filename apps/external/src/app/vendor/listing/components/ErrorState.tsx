@@ -11,8 +11,8 @@ interface ErrorStateProps {
 export function ErrorState({
   error,
   onRetry,
-  title = "Something went wrong",
-  className = "flex-1 min-h-screen bg-gradient-to-b from-white to-brand-100"
+  title = 'Something went wrong',
+  className = 'flex-1 min-h-screen bg-gradient-to-b from-white to-brand-100'
 }: ErrorStateProps) {
   return (
     <div className={className}>

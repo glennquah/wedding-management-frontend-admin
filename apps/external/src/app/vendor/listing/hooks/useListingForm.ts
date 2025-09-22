@@ -5,10 +5,10 @@ import { Listing, UseListingFormReturn } from '../types';
 type FormData = Partial<CreateListingDto> & { imageUrls?: string[] };
 
 const getInitialFormData = (vendorId?: number): FormData => ({
-  listingName: "",
+  listingName: '',
   price: 0,
   availabilities: [],
-  remarks: "",
+  remarks: '',
   vendorId: vendorId || 0,
   imageUrls: []
 });

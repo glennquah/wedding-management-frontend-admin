@@ -5,7 +5,7 @@ import { UserRole } from '@shared/api';
 import NavigationBar from '@shared/components/NavigationBar';
 import { SidebarProvider } from '@shared/components/ui/sidebar';
 import { Toaster } from '@shared/components/ui/sonner';
-import { signOut, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 export default function VendorLayout({ children }: { children: React.ReactNode }) {

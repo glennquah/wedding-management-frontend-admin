@@ -31,7 +31,7 @@ export function useListingOperations(
         listingName: listingData.listingName.trim(),
         price: Number(listingData.price),
         availabilities: listingData.availabilities || [],
-        remarks: listingData.remarks?.trim() || "",
+        remarks: listingData.remarks?.trim() || '',
         vendorId: vendor.id,
         imageUrls: listingData.imageUrls || []
       };
@@ -91,11 +91,10 @@ export function useListingOperations(
         listingName: updateData.listingName.trim(),
         price: Number(updateData.price),
         availabilities: updateData.availabilities || [],
-        remarks: updateData.remarks?.trim() || "",
-        imageUrls: (updateData as any).imageUrls || []
+        remarks: updateData.remarks?.trim() || '',
+        imageUrls: (updateData as Partial<CreateListingDto> & { imageUrls?: string[] }).imageUrls || []
       };
 
-      console.log('Updating listing with ID:', listing.id, 'and data:', updatePayload);
       await ListingsService.listingControllerUpdate(listing.vendorId, listing.id, updatePayload);
 
       // Update the listing in the list

@@ -55,7 +55,10 @@ export function useListingFormState({
 
 
   const handleFormDataChange = useCallback((updates: Partial<CreateListingDto> & { imageUrls?: string[] }) => {
-    setFormData(prev => ({ ...prev, ...updates }));
+    setFormData(prev => {
+      const newData = { ...prev, ...updates };
+      return newData;
+    });
   }, []);
 
   const handleSubmit = useCallback(async () => {

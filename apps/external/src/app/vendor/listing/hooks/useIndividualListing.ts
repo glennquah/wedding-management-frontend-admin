@@ -42,7 +42,7 @@ export function useIndividualListing(listingId: number): UseIndividualListingRet
         listingName: listingResponse.listingName,
         price: listingResponse.price,
         availabilities: listingResponse.availabilities || [],
-        remarks: listingResponse.remarks || "",
+        remarks: listingResponse.remarks || '',
         vendorId: listingResponse.vendorId,
         createdAt: listingResponse.createdAt || new Date().toISOString(),
         updatedAt: listingResponse.updatedAt || new Date().toISOString(),

@@ -1,9 +1,9 @@
-import { Button } from "@shared/components";
-import { Input } from "@shared/components/ui/form/input";
-import { Label } from "@shared/components/ui/form/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@shared/components/ui/select";
-import { Filter, Search, X } from "lucide-react";
-import { FilterOptions } from "./types";
+import { Button } from '@shared/components';
+import { Input } from '@shared/components/ui/form/input';
+import { Label } from '@shared/components/ui/form/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/components/ui/select';
+import { Filter, X } from 'lucide-react';
+import { FilterOptions } from './types';
 
 interface ListingFiltersProps {
   filters: FilterOptions;
@@ -12,7 +12,7 @@ interface ListingFiltersProps {
 }
 
 export const ListingFilters = ({ filters, onFiltersChange, onClearFilters }: ListingFiltersProps) => {
-  const updateFilter = (key: keyof FilterOptions, value: any) => {
+  const updateFilter = (key: keyof FilterOptions, value: string | number | null | { min: number | null; max: number | null }) => {
     onFiltersChange({ ...filters, [key]: value });
   };
 

@@ -6,7 +6,7 @@ interface LoadingStateProps {
   message?: string;
 }
 
-export function LoadingState({ message = "Loading..." }: LoadingStateProps) {
+export function LoadingState({ message = 'Loading...' }: LoadingStateProps) {
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 flex items-center justify-center">
       <div className="text-center">
@@ -25,7 +25,7 @@ interface ErrorStateProps {
 }
 
 export function ErrorState({
-  title = "Error",
+  title = 'Error',
   message,
   onRetry,
   onBack

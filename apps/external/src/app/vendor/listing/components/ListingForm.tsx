@@ -1,10 +1,10 @@
 'use client';
 
 import { CreateListingDto } from '@shared/api';
-import { Button, DatePickerWithPeriods, DateWithPeriod, ImageUploadWidget } from '@shared/components';
+import { Button, DatePickerWithPeriods, DateWithPeriod } from '@shared/components';
 import { Input } from '@shared/components/ui/form/input';
 import { Label } from '@shared/components/ui/form/label';
-import { CldImage } from 'next-cloudinary';
+import { PhotoUploadManager } from './PhotoUploadManager';
 import * as React from 'react';
 
 interface ListingFormProps {
@@ -165,33 +165,17 @@ export function ListingForm({
           />
         </div>
 
-        {/* Image Upload */}
+        {/* Photo Upload */}
         <div className="md:col-span-2">
-          <Label htmlFor="imageUrls">Listing Image</Label>
-          <div className="space-y-4">
-            <ImageUploadWidget
-              onUpload={(url) => {
-                onFormDataChange({ imageUrls: [url] });
-              }}
-              maxImageWidth={800}
-            />
-            {formData.imageUrls?.[0] && (
-              <div className="mt-4">
-                <p className="text-sm text-gray-700 mb-2">Current image:</p>
-                <CldImage
-                  width={200}
-                  height={150}
-                  src={formData.imageUrls[0]}
-                  sizes="100vw"
-                  alt="Listing preview"
-                  className="rounded-lg shadow-sm border"
-                />
-              </div>
-            )}
-          </div>
-          <p className="text-xs text-gray-500 mt-1">
-            Upload an image for your listing. Recommended size: 800x600px minimum.
-          </p>
+          <Label>Listing Photos</Label>
+          <PhotoUploadManager
+            key={`photo-manager-${(formData.imageUrls || []).length}`}
+            imageUrls={formData.imageUrls || []}
+            onImageUrlsChange={(urls) => {
+              onFormDataChange({ imageUrls: urls });
+            }}
+            maxImages={7}
+          />
         </div>
 
         {/* Available Dates */}

@@ -6,8 +6,8 @@ interface LoadingStateProps {
 }
 
 export function LoadingState({
-  message = "Loading your listings...",
-  className = "flex-1 min-h-screen bg-gradient-to-b from-white to-brand-100"
+  message = 'Loading your listings...',
+  className = 'flex-1 min-h-screen bg-gradient-to-b from-white to-brand-100'
 }: LoadingStateProps) {
   return (
     <div className={className}>

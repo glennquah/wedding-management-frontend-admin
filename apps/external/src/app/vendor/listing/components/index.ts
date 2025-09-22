@@ -6,3 +6,4 @@ export { ListingPageHeader } from './ListingPageHeader';
 export { LoadingState } from './LoadingState';
 export { ListingPageLayout } from './ListingPageLayout';
 export { LoadingState as ListingLoadingState, ErrorState as ListingErrorState } from './ListingPageStates';
+export { PhotoUploadManager } from './PhotoUploadManager';

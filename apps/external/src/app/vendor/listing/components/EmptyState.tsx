@@ -14,7 +14,7 @@ export function EmptyState({
   description,
   icon: Icon,
   action,
-  className = "text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300"
+  className = 'text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300'
 }: EmptyStateProps) {
   return (
     <div className={className}>
