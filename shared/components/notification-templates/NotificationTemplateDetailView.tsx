@@ -1,29 +1,108 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { EmailTemplateWithWeddingDto } from '@shared/api';
+import { useRouter } from 'next/navigation';
+import { EmailTemplateWithWeddingDto, UpdateEmailTemplateDto } from '@shared/api';
+import { NotificationDetailsService } from '@shared/api/services/NotificationDetailsService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { Button } from '@shared/components/ui/button';
 import { Badge } from '@shared/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components/ui/tabs';
 import { Separator } from '@shared/components/ui/separator';
+import { Input } from '@shared/components/ui/form/input';
+import { Label } from '@shared/components/ui/form/label';
+import { DeleteConfirmationModal } from '@shared/components/ui/delete-confirmation-modal';
+import { CodeEditor } from '@shared/components/ui/code-editor';
+import { toast } from 'sonner';
 
 interface NotificationTemplateDetailViewProps {
   template: EmailTemplateWithWeddingDto | null;
   isLoading?: boolean;
+  onTemplateUpdated?: () => void;
+  onTemplateDeleted?: () => void;
 }
 
 export const NotificationTemplateDetailView = ({
   template,
   isLoading = false,
+  onTemplateUpdated,
+  onTemplateDeleted,
 }: NotificationTemplateDetailViewProps) => {
+  const router = useRouter();
   const [htmlContent, setHtmlContent] = useState('');
+  const [templateName, setTemplateName] = useState('');
+  const [templateSubject, setTemplateSubject] = useState('');
+  const [textContent, setTextContent] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (template) {
       setHtmlContent(template.htmlContent);
+      setTemplateName(template.name);
+      setTemplateSubject(template.subject);
+      setTextContent(template.textContent || '');
     }
   }, [template]);
+
+  const handleSave = async () => {
+    if (!template) return;
+
+    setIsSaving(true);
+    try {
+      const updateData: any = {};
+
+      // Only include fields that have changed
+      if (templateName !== template.name) updateData.name = templateName;
+      if (templateSubject !== template.subject) updateData.subject = templateSubject;
+      if (htmlContent !== template.htmlContent) updateData.htmlContent = htmlContent;
+      if (textContent !== (template.textContent || '')) updateData.textContent = textContent;
+
+      await NotificationDetailsService.notificationDetailsControllerUpdateEmailTemplateInWedding(
+        template.id,
+        updateData
+      );
+
+      toast.success('Template updated successfully');
+      setIsEditing(false);
+      onTemplateUpdated?.();
+    } catch (error) {
+      console.error('Failed to update template:', error);
+      toast.error('Failed to update template');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!template) return;
+
+    setIsDeleting(true);
+    try {
+      await NotificationDetailsService.notificationDetailsControllerDeleteEmailTemplate(template.id);
+      toast.success('Template deleted successfully');
+      setShowDeleteModal(false);
+      onTemplateDeleted?.();
+      router.push('/admin/notification-templates');
+    } catch (error) {
+      console.error('Failed to delete template:', error);
+      toast.error('Failed to delete template');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (template) {
+      setHtmlContent(template.htmlContent);
+      setTemplateName(template.name);
+      setTemplateSubject(template.subject);
+      setTextContent(template.textContent || '');
+    }
+    setIsEditing(false);
+  };
 
   if (isLoading) {
     return (
@@ -51,6 +130,75 @@ export const NotificationTemplateDetailView = ({
 
   return (
     <div className="h-[calc(100vh-280px)] flex flex-col">
+      {/* Header with editable fields */}
+      <div className="border-b p-6">
+        <div className="space-y-4">
+          {isEditing ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="templateName">Template Name</Label>
+                  <Input
+                    id="templateName"
+                    value={templateName}
+                    onChange={(e) => setTemplateName(e.target.value)}
+                    placeholder="Enter template name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="templateSubject">Email Subject</Label>
+                  <Input
+                    id="templateSubject"
+                    value={templateSubject}
+                    onChange={(e) => setTemplateSubject(e.target.value)}
+                    placeholder="Enter email subject"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">
+                  {template?.notificationDetails?.wedding?.name || 'Template'}
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  Updated: {template ? new Date(template.updatedAt).toLocaleDateString() : ''}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleSave} disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Save Changes'}
+                </Button>
+                <Button variant="secondary" onClick={handleCancel}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <h2 className="text-2xl font-semibold">{template?.name}</h2>
+                <p className="text-muted-foreground">{template?.subject}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge variant="secondary">
+                    {template?.notificationDetails?.wedding?.name || 'Template'}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">
+                    Updated: {template ? new Date(template.updatedAt).toLocaleDateString() : ''}
+                  </span>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="secondary" onClick={() => setIsEditing(true)}>
+                  Edit Template
+                </Button>
+                <Button variant="destructive" onClick={() => setShowDeleteModal(true)}>
+                  Delete
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Content */}
       <div className="flex-1 flex">
         {/* Left side - HTML Editor */}
@@ -62,15 +210,13 @@ export const NotificationTemplateDetailView = ({
             </p>
           </div>
           <div className="p-4 h-[calc(100vh-350px)]">
-            <div className="h-full">
-              <textarea
-                value={htmlContent}
-                onChange={(e) => setHtmlContent(e.target.value)}
-                className="w-full h-full p-3 border rounded-md font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="HTML content will appear here..."
-                readOnly={false}
-              />
-            </div>
+            <CodeEditor
+              value={htmlContent}
+              onChange={setHtmlContent}
+              language="html"
+              placeholder="HTML content will appear here..."
+              readOnly={!isEditing}
+            />
           </div>
         </div>
 
@@ -102,25 +248,24 @@ export const NotificationTemplateDetailView = ({
         </div>
       </div>
 
-      {/* Footer with actions */}
+      {/* Footer with template info */}
       <div className="border-t p-4">
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            Template ID: {template.id} | Created: {new Date(template.createdAt).toLocaleDateString()}
-          </div>
-          <div className="flex gap-2">
-            <Button variant="secondary" size="sm">
-              Edit Template
-            </Button>
-            <Button variant="secondary" size="sm">
-              Duplicate
-            </Button>
-            <Button variant="destructive" size="sm">
-              Delete
-            </Button>
-          </div>
+        <div className="text-sm text-muted-foreground">
+          Template ID: {template.id} | Created: {new Date(template.createdAt).toLocaleDateString()}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteModal(false)}
+        isLoading={isDeleting}
+        title="Delete Email Template"
+        itemName={template?.name || 'this template'}
+        description={`Are you sure you want to delete "${template?.name}"? This action cannot be undone.`}
+      />
     </div>
   );
 };

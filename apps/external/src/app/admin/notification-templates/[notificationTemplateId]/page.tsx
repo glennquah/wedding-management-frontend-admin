@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { EmailTemplateWithWeddingDto } from '@shared/api';
 import { NotificationDetailsService } from '@shared/api/services/NotificationDetailsService';
@@ -19,32 +19,32 @@ const NotificationTemplateDetailPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchTemplate = async () => {
-      if (!notificationTemplateId || isNaN(notificationTemplateId)) {
-        setError('Invalid template ID');
-        setIsLoading(false);
-        return;
-      }
+  const fetchTemplate = useCallback(async () => {
+    if (!notificationTemplateId || isNaN(notificationTemplateId)) {
+      setError('Invalid template ID');
+      setIsLoading(false);
+      return;
+    }
 
-      try {
-        setIsLoading(true);
-        const response = await NotificationDetailsService.notificationDetailsControllerGetEmailTemplateWithId(
-          notificationTemplateId
-        );
-        setTemplate(response);
-        setError(null);
-      } catch (error) {
-        console.error('Failed to fetch template:', error);
-        setError('Failed to load template details');
-        setTemplate(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTemplate();
+    try {
+      setIsLoading(true);
+      const response = await NotificationDetailsService.notificationDetailsControllerGetEmailTemplateWithId(
+        notificationTemplateId
+      );
+      setTemplate(response);
+      setError(null);
+    } catch (error) {
+      console.error('Failed to fetch template:', error);
+      setError('Failed to load template details');
+      setTemplate(null);
+    } finally {
+      setIsLoading(false);
+    }
   }, [notificationTemplateId]);
+
+  useEffect(() => {
+    fetchTemplate();
+  }, [notificationTemplateId, fetchTemplate]);
 
   const handleBackClick = () => {
     router.push('/admin/notification-templates');
@@ -90,6 +90,8 @@ const NotificationTemplateDetailPage = () => {
         <NotificationTemplateDetailView
           template={template}
           isLoading={isLoading}
+          onTemplateUpdated={fetchTemplate}
+          onTemplateDeleted={() => router.push('/admin/notification-templates')}
         />
       </div>
     </div>

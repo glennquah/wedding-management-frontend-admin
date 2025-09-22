@@ -73,12 +73,22 @@ export const NotificationTemplateList = ({
           </CardHeader>
           <CardContent className="pt-0">
             <div className="space-y-2">
-              <div
-                className="text-sm text-muted-foreground line-clamp-3"
-                dangerouslySetInnerHTML={{
-                  __html: template.htmlContent.replace(/<[^>]+>/g, '').substring(0, 150) + '...',
-                }}
-              />
+              <div className="text-sm text-muted-foreground line-clamp-3">
+                {(() => {
+                  // Strip HTML tags and decode HTML entities
+                  const textContent = template.htmlContent
+                    .replace(/<[^>]+>/g, '') // Remove HTML tags
+                    .replace(/&nbsp;/g, ' ') // Replace non-breaking spaces
+                    .replace(/&amp;/g, '&') // Replace encoded ampersands
+                    .replace(/&lt;/g, '<') // Replace encoded less than
+                    .replace(/&gt;/g, '>') // Replace encoded greater than
+                    .replace(/&quot;/g, '"') // Replace encoded quotes
+                    .trim(); // Remove leading/trailing whitespace
+
+                  const preview = textContent.substring(0, 150);
+                  return preview.length < textContent.length ? `${preview}...` : preview;
+                })()}
+              </div>
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>Created: {new Date(template.createdAt).toLocaleDateString()}</span>
                 <span>Updated: {new Date(template.updatedAt).toLocaleDateString()}</span>
