@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { EmailTemplateResponseDto } from '@shared/api';
 import { NotificationDetailsService } from '@shared/api/services/NotificationDetailsService';
 import { NotificationTemplateList } from './NotificationTemplateList';
@@ -10,40 +10,49 @@ interface NotificationTemplateListViewProps {
   showAllTemplates?: boolean;
 }
 
-export const NotificationTemplateListView = ({
+export interface NotificationTemplateListViewRef {
+  refresh: () => void;
+}
+
+export const NotificationTemplateListView = forwardRef<NotificationTemplateListViewRef, NotificationTemplateListViewProps>(({
   weddingId,
   showAllTemplates = false,
-}: NotificationTemplateListViewProps) => {
+}, ref) => {
   const [templates, setTemplates] = useState<EmailTemplateResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchTemplates = async () => {
-      setIsLoading(true);
-      try {
-        let response: EmailTemplateResponseDto[];
+  const fetchTemplates = async () => {
+    setIsLoading(true);
+    try {
+      let response: EmailTemplateResponseDto[];
 
-        if (showAllTemplates) {
-          response = await NotificationDetailsService.notificationDetailsControllerGetAllEmailTemplates();
-        } else if (weddingId) {
-          response = await NotificationDetailsService.notificationDetailsControllerGetEmailTemplatesForWedding(weddingId);
-        } else {
-          setTemplates([]);
-          setIsLoading(false);
-          return;
-        }
-
-        setTemplates(response as EmailTemplateResponseDto[]);
-      } catch (error) {
-        console.error('Failed to fetch templates:', error);
+      if (showAllTemplates) {
+        response = await NotificationDetailsService.notificationDetailsControllerGetAllEmailTemplates();
+      } else if (weddingId) {
+        response = await NotificationDetailsService.notificationDetailsControllerGetEmailTemplatesForWedding(weddingId);
+      } else {
         setTemplates([]);
-      } finally {
         setIsLoading(false);
+        return;
       }
-    };
 
+      setTemplates(response as EmailTemplateResponseDto[]);
+    } catch (error) {
+      console.error('Failed to fetch templates:', error);
+      setTemplates([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchTemplates();
   }, [weddingId, showAllTemplates]);
+
+  // Expose refresh function through ref
+  useImperativeHandle(ref, () => ({
+    refresh: fetchTemplates,
+  }));
 
   if (!showAllTemplates && !weddingId) {
     return (
@@ -67,4 +76,6 @@ export const NotificationTemplateListView = ({
       />
     </div>
   );
-};
+});
+
+NotificationTemplateListView.displayName = 'NotificationTemplateListView';
