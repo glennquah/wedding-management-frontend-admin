@@ -1,6 +1,6 @@
 "use client"
 
-import { Calendar as CalendarIcon, X, Clock } from "lucide-react"
+import { Calendar as CalendarIcon, Clock, X, Edit2 } from "lucide-react"
 import * as React from "react"
 import { cn } from "../lib/utils"
 import { Button } from "./button"
@@ -35,7 +35,13 @@ export function DatePicker({
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
   const [currentDate, setCurrentDate] = React.useState(new Date())
-  const [selectedDateForPeriod, setSelectedDateForPeriod] = React.useState<string | null>(null)
+  const [dragStart, setDragStart] = React.useState<string | null>(null)
+  const [dragEnd, setDragEnd] = React.useState<string | null>(null)
+  const [isDragging, setIsDragging] = React.useState(false)
+  const [tempSelectedDates, setTempSelectedDates] = React.useState<string[]>([])
+  const [selectedPeriodForRange, setSelectedPeriodForRange] = React.useState<TimePeriod | null>(null)
+  const [showPeriodSelection, setShowPeriodSelection] = React.useState(false)
+  const [editingDateRange, setEditingDateRange] = React.useState<string[] | null>(null)
 
   const timePeriods: { period: TimePeriod; label: string; timeRange: string }[] = [
     { period: 'full-day', label: 'Full Day', timeRange: '00:00 - 23:59' },
@@ -44,7 +50,10 @@ export function DatePicker({
   ]
 
   const formatDate = (date: Date): string => {
-    return date.toISOString().split('T')[0]
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
   }
 
   const parseDate = (dateString: string): Date => {
@@ -59,38 +68,100 @@ export function DatePicker({
     return selectedDates.includes(dateString)
   }
 
-  const toggleDate = (date: Date) => {
+  const isDateInTempSelection = (date: Date): boolean => {
     const dateString = formatDate(date)
-    if (enableTimePeriods) {
-      if (isDateSelected(date)) {
-        // Remove all periods for this date
-        const updatedDates = selectedDatesWithPeriods.filter(d => d.date !== dateString)
-        onChangeWithPeriods?.(updatedDates)
+    return tempSelectedDates.includes(dateString)
+  }
+
+  const getDatesBetween = (start: string, end: string): string[] => {
+    const startDate = new Date(start)
+    const endDate = new Date(end)
+    const dates: string[] = []
+
+    // Ensure start is before end
+    const actualStart = startDate <= endDate ? startDate : endDate
+    const actualEnd = startDate <= endDate ? endDate : startDate
+
+    const current = new Date(actualStart)
+    while (current <= actualEnd) {
+      dates.push(formatDate(current))
+      current.setDate(current.getDate() + 1)
+    }
+
+    return dates
+  }
+
+  const handleMouseDown = (date: Date) => {
+    const dateString = formatDate(date)
+    const isPast = date < new Date(new Date().setHours(0, 0, 0, 0))
+    if (isPast) return
+
+    setDragStart(dateString)
+    setDragEnd(dateString)
+    setIsDragging(true)
+    setTempSelectedDates([dateString])
+  }
+
+  const handleMouseEnter = (date: Date) => {
+    if (!isDragging || !dragStart) return
+
+    const dateString = formatDate(date)
+    const isPast = date < new Date(new Date().setHours(0, 0, 0, 0))
+    if (isPast) return
+
+    setDragEnd(dateString)
+    const datesBetween = getDatesBetween(dragStart, dateString)
+    setTempSelectedDates(datesBetween)
+  }
+
+  const handleMouseUp = () => {
+    if (isDragging && dragStart && dragEnd && tempSelectedDates.length > 0) {
+      if (enableTimePeriods) {
+        setShowPeriodSelection(true)
       } else {
-        // Show period selection for this date
-        setSelectedDateForPeriod(dateString)
+        // For non-period mode, just add the dates
+        const newDates = [...new Set([...selectedDates, ...tempSelectedDates])]
+        onChange(newDates)
+        resetDragState()
       }
     } else {
-      if (isDateSelected(date)) {
-        onChange(selectedDates.filter(d => d !== dateString))
-      } else {
-        onChange([...selectedDates, dateString])
-      }
+      resetDragState()
     }
   }
 
-  const addDateWithPeriod = (dateString: string, period: TimePeriod) => {
-    const periodInfo = timePeriods.find(p => p.period === period)!
-    const newDateWithPeriod: DateWithPeriod = {
-      date: dateString,
-      period,
-      timeRange: periodInfo.timeRange
+  const resetDragState = () => {
+    setDragStart(null)
+    setDragEnd(null)
+    setIsDragging(false)
+    setTempSelectedDates([])
+  }
+
+  const confirmPeriodSelection = (period: TimePeriod) => {
+    if (tempSelectedDates.length > 0) {
+      const periodInfo = timePeriods.find(p => p.period === period)!
+      const newDatesWithPeriods = tempSelectedDates.map(date => ({
+        date,
+        period,
+        timeRange: periodInfo.timeRange
+      }))
+
+      // Remove any existing dates and add new ones
+      const filteredExisting = selectedDatesWithPeriods.filter(d =>
+        !tempSelectedDates.includes(d.date)
+      )
+
+      onChangeWithPeriods?.([...filteredExisting, ...newDatesWithPeriods])
     }
 
-    // Remove existing periods for this date and add the new one
-    const updatedDates = selectedDatesWithPeriods.filter(d => d.date !== dateString)
-    onChangeWithPeriods?.([...updatedDates, newDateWithPeriod])
-    setSelectedDateForPeriod(null)
+    setShowPeriodSelection(false)
+    setSelectedPeriodForRange(null)
+    resetDragState()
+  }
+
+  const cancelPeriodSelection = () => {
+    setShowPeriodSelection(false)
+    setSelectedPeriodForRange(null)
+    resetDragState()
   }
 
   const removeDate = (dateToRemove: string) => {
@@ -102,9 +173,35 @@ export function DatePicker({
     }
   }
 
-  const removeDateWithPeriod = (dateToRemove: string, periodToRemove: TimePeriod) => {
-    const updatedDates = selectedDatesWithPeriods.filter(d => !(d.date === dateToRemove && d.period === periodToRemove))
-    onChangeWithPeriods?.(updatedDates)
+  const editDateRange = (dates: string[]) => {
+    setEditingDateRange(dates)
+    setShowPeriodSelection(true)
+  }
+
+  const confirmEditPeriod = (period: TimePeriod) => {
+    if (editingDateRange) {
+      const periodInfo = timePeriods.find(p => p.period === period)!
+      const newDatesWithPeriods = editingDateRange.map(date => ({
+        date,
+        period,
+        timeRange: periodInfo.timeRange
+      }))
+
+      // Remove existing dates and add updated ones
+      const filteredExisting = selectedDatesWithPeriods.filter(d =>
+        !editingDateRange.includes(d.date)
+      )
+
+      onChangeWithPeriods?.([...filteredExisting, ...newDatesWithPeriods])
+    }
+
+    setEditingDateRange(null)
+    setShowPeriodSelection(false)
+  }
+
+  const cancelEdit = () => {
+    setEditingDateRange(null)
+    setShowPeriodSelection(false)
   }
 
   const getDaysInMonth = (date: Date): number => {
@@ -141,19 +238,23 @@ export function DatePicker({
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
       const isSelected = isDateSelected(date)
+      const isInTempSelection = isDateInTempSelection(date)
       const isPast = date < new Date(new Date().setHours(0, 0, 0, 0))
-      
+
       days.push(
         <button
           key={day}
           type="button"
-          onClick={() => !isPast && toggleDate(date)}
+          onMouseDown={() => handleMouseDown(date)}
+          onMouseEnter={() => handleMouseEnter(date)}
+          onMouseUp={handleMouseUp}
           disabled={isPast}
           className={cn(
-            "w-8 h-8 text-sm rounded-md flex items-center justify-center transition-colors",
+            "w-8 h-8 text-sm rounded-md flex items-center justify-center transition-colors select-none",
             "hover:bg-accent hover:text-accent-foreground",
             "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
             isSelected && "bg-primary text-primary-foreground hover:bg-primary/90",
+            isInTempSelection && !isSelected && "bg-primary/50 text-primary-foreground",
             isPast && "text-muted-foreground opacity-50 cursor-not-allowed"
           )}
         >
@@ -165,23 +266,55 @@ export function DatePicker({
     return days
   }
 
+  // Add global mouse up event listener
+  React.useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (isDragging) {
+        handleMouseUp()
+      }
+    }
+
+    document.addEventListener('mouseup', handleGlobalMouseUp)
+    return () => document.removeEventListener('mouseup', handleGlobalMouseUp)
+  }, [isDragging])
+
   const monthYear = currentDate.toLocaleDateString('en-US', {
     month: 'long',
     year: 'numeric'
   })
 
   const getDisplayText = () => {
-    if (enableTimePeriods) {
-      const count = selectedDatesWithPeriods.length
-      return count > 0
-        ? `${count} period${count > 1 ? 's' : ''} selected`
-        : placeholder
-    } else {
-      const count = selectedDates.length
-      return count > 0
-        ? `${count} date${count > 1 ? 's' : ''} selected`
-        : placeholder
+    return placeholder
+  }
+
+  // Group consecutive dates with same period for display
+  const groupConsecutiveDates = (dates: DateWithPeriod[]) => {
+    const sorted = [...dates].sort((a, b) => a.date.localeCompare(b.date))
+    const groups: { dates: string[], period: TimePeriod, timeRange: string }[] = []
+
+    for (const dateWithPeriod of sorted) {
+      const lastGroup = groups[groups.length - 1]
+
+      if (lastGroup && lastGroup.period === dateWithPeriod.period) {
+        // Check if this date is consecutive to the last date in the group
+        const lastDate = new Date(lastGroup.dates[lastGroup.dates.length - 1])
+        const currentDate = new Date(dateWithPeriod.date)
+        const dayDiff = (currentDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
+
+        if (dayDiff === 1) {
+          lastGroup.dates.push(dateWithPeriod.date)
+          continue
+        }
+      }
+
+      groups.push({
+        dates: [dateWithPeriod.date],
+        period: dateWithPeriod.period,
+        timeRange: dateWithPeriod.timeRange
+      })
     }
+
+    return groups
   }
 
   return (
@@ -190,16 +323,13 @@ export function DatePicker({
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              (!selectedDates.length && !selectedDatesWithPeriods.length) && "text-muted-foreground"
-            )}
+            className="w-full justify-start text-left font-normal text-foreground"
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {getDisplayText()}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0 max-h-96 overflow-y-auto" align="start" side="bottom">
           <div className="p-3">
             {/* Calendar Header */}
             <div className="flex items-center justify-between mb-4">
@@ -224,6 +354,11 @@ export function DatePicker({
               </Button>
             </div>
 
+            {/* Instructions */}
+            <div className="text-xs text-muted-foreground mb-3 text-center">
+              {enableTimePeriods ? "Drag to select multiple dates, then choose time period" : "Drag to select multiple dates"}
+            </div>
+
             {/* Week days */}
             <div className="grid grid-cols-7 gap-1 mb-2">
               {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
@@ -237,23 +372,23 @@ export function DatePicker({
             </div>
 
             {/* Calendar days */}
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-1 select-none">
               {renderCalendar()}
             </div>
 
             {/* Period Selection */}
-            {enableTimePeriods && selectedDateForPeriod && (
+            {enableTimePeriods && showPeriodSelection && (
               <div className="mt-4 pt-4 border-t">
                 <div className="text-sm font-medium mb-2 flex items-center">
                   <Clock className="w-3 h-3 mr-1" />
-                  Select time period for {new Date(selectedDateForPeriod + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                  Select time period for {editingDateRange ? 'selected dates' : `${tempSelectedDates.length} date${tempSelectedDates.length === 1 ? '' : 's'}`}
                 </div>
                 <div className="space-y-1">
                   {timePeriods.map((period) => (
                     <button
                       key={period.period}
                       type="button"
-                      onClick={() => addDateWithPeriod(selectedDateForPeriod, period.period)}
+                      onClick={() => editingDateRange ? confirmEditPeriod(period.period) : confirmPeriodSelection(period.period)}
                       className="w-full text-left px-2 py-2 text-sm rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
                     >
                       <div className="font-medium">{period.label}</div>
@@ -263,7 +398,7 @@ export function DatePicker({
                 </div>
                 <button
                   type="button"
-                  onClick={() => setSelectedDateForPeriod(null)}
+                  onClick={editingDateRange ? cancelEdit : cancelPeriodSelection}
                   className="w-full mt-2 px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Cancel
@@ -278,26 +413,37 @@ export function DatePicker({
       {enableTimePeriods ? (
         selectedDatesWithPeriods.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
-            {selectedDatesWithPeriods
-              .sort((a, b) => a.date.localeCompare(b.date))
-              .map((dateWithPeriod, index) => (
+            {groupConsecutiveDates(selectedDatesWithPeriods).map((group, index) => {
+              const isRange = group.dates.length > 1
+              const displayText = isRange
+                ? `${new Date(group.dates[0] + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(group.dates[group.dates.length - 1] + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                : new Date(group.dates[0] + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+
+              return (
                 <div
-                  key={`${dateWithPeriod.date}-${dateWithPeriod.period}`}
+                  key={`${group.dates[0]}-${group.period}-${index}`}
                   className="flex items-center gap-1 bg-primary/10 text-primary text-xs px-2 py-1 rounded-md"
                 >
                   <div className="flex flex-col">
-                    <span>{new Date(dateWithPeriod.date + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-                    <span className="text-[10px] text-primary/70">{dateWithPeriod.timeRange}</span>
+                    <span>{displayText}</span>
+                    <span className="text-[10px] text-primary/70">{group.timeRange}</span>
                   </div>
                   <button
                     type="button"
-                    onClick={() => removeDateWithPeriod(dateWithPeriod.date, dateWithPeriod.period)}
+                    onClick={() => {
+                      const updatedDates = selectedDatesWithPeriods.filter(d =>
+                        !group.dates.includes(d.date) || d.period !== group.period
+                      )
+                      onChangeWithPeriods?.(updatedDates)
+                    }}
                     className="hover:text-primary/70 transition-colors"
+                    title="Remove dates"
                   >
                     <X className="w-3 h-3" />
                   </button>
                 </div>
-              ))}
+              )
+            })}
           </div>
         )
       ) : (

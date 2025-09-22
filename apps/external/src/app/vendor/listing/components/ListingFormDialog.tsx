@@ -36,7 +36,39 @@ export function ListingFormDialog({
   // Initialize dates with periods from availabilities on mount or when formData changes
   React.useEffect(() => {
     if (formData.availabilities) {
-      const periodsFromStrings = formData.availabilities.map(dateString => {
+      const periodsFromStrings = formData.availabilities.map(availability => {
+        // Handle new object format (AvailabilitySlotDto)
+        if (typeof availability === 'object' && availability.startTime && availability.endTime) {
+          // New object format
+          const startDateTime = availability.startTime;
+          const endDateTime = availability.endTime;
+
+          // Extract date and times
+          const [dateStr, startTimeStr] = startDateTime.split('T');
+          const [, endTimeStr] = endDateTime.split('T');
+
+          const startTime = startTimeStr.slice(0, 5); // Get HH:mm format
+          const endTime = endTimeStr.slice(0, 5); // Get HH:mm format
+
+          const hour = parseInt(startTime.split(':')[0]);
+
+          let period: DateWithPeriod['period'] = 'full-day';
+          if (hour >= 8 && hour < 15) {
+            period = 'morning';
+          } else if (hour >= 15 && hour < 22) {
+            period = 'afternoon';
+          }
+
+          return {
+            date: dateStr,
+            period,
+            timeRange: `${startTime} - ${endTime}`
+          };
+        }
+
+        // Handle legacy string formats for backward compatibility
+        const dateString = availability as unknown as string;
+
         // Parse ISO 8601 format: YYYY-MM-DDTHH:mm:ss.sssZ or legacy format: YYYY-MM-DD|HH:mm-HH:mm
         if (dateString.includes('T')) {
           // ISO 8601 format
@@ -69,7 +101,7 @@ export function ListingFormDialog({
           } else if (hour >= 15 && hour < 22) {
             period = 'afternoon';
           }
-          
+
           return {
             date,
             period,
@@ -90,11 +122,14 @@ export function ListingFormDialog({
 
   const handleDatePeriodsChange = (dates: DateWithPeriod[]) => {
     setDatesWithPeriods(dates);
-    // Convert to backend format: ISO 8601 date strings
+    // Convert to backend format: AvailabilitySlotDto objects with start and end times
     const availabilities = dates.map(d => {
       const [startTime, endTime] = d.timeRange.replace(' - ', '-').split('-');
-      const startDateTime = `${d.date}T${startTime}:00.000Z`;
-      return startDateTime;
+      return {
+        startTime: `${d.date}T${startTime}:00`,
+        endTime: `${d.date}T${endTime}:00`,
+        date: d.date
+      };
     });
     onFormDataChange({ availabilities });
   };

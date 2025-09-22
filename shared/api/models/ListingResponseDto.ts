@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AvailabilitySlotDto } from './AvailabilitySlotDto';
 export type ListingResponseDto = {
     /**
      * Listing ID
@@ -16,9 +17,9 @@ export type ListingResponseDto = {
      */
     price: number;
     /**
-     * Available dates for the listing
+     * Available time slots for the listing
      */
-    availabilities: Array<string>;
+    availabilities: Array<AvailabilitySlotDto>;
     /**
      * Additional remarks about the listing
      */
@@ -28,6 +29,10 @@ export type ListingResponseDto = {
      */
     vendorId: number;
     /**
+     * Array of image URLs for the listing
+     */
+    imageUrls: Array<string>;
+    /**
      * Creation timestamp
      */
     createdAt: string;
@@ -35,9 +40,5 @@ export type ListingResponseDto = {
      * Last update timestamp
      */
     updatedAt: string;
-    /**
-     * Images for the listing
-     */
-    imageUrls: Array<string>;
 };
 

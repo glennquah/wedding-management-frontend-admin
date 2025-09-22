@@ -33,7 +33,7 @@ export const ListingFilters = ({ filters, onFiltersChange, onClearFilters }: Lis
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-3 mb-4">
         <Filter className="w-4 h-4 text-gray-600" />
         <h3 className="text-sm font-medium text-gray-900">Filter & Sort Listings</h3>
         {hasActiveFilters && (
@@ -55,14 +55,12 @@ export const ListingFilters = ({ filters, onFiltersChange, onClearFilters }: Lis
           <Label htmlFor="search" className="text-xs font-medium text-gray-700">
             Search by name
           </Label>
-          <div className="relative mt-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <div className="mt-1">
             <Input
               id="search"
               placeholder="Search listings..."
               value={filters.searchQuery}
               onChange={(e) => updateFilter('searchQuery', e.target.value)}
-              className="pl-10"
             />
           </div>
         </div>

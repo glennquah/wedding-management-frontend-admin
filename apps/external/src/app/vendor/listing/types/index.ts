@@ -1,10 +1,10 @@
-import { CreateListingDto } from '@shared/api';
+import { CreateListingDto, AvailabilitySlotDto } from '@shared/api';
 
 export interface Listing {
   id: number;
   listingName: string;
   price: number;
-  availabilities: string[];
+  availabilities: AvailabilitySlotDto[];
   remarks: string;
   vendorId: number;
   createdAt: string;
@@ -25,7 +25,7 @@ export interface FilterOptions {
 export interface ListingFormData extends Partial<CreateListingDto> {
   listingName: string;
   price: number;
-  availabilities: string[];
+  availabilities: AvailabilitySlotDto[];
   remarks: string;
   vendorId: number;
 }

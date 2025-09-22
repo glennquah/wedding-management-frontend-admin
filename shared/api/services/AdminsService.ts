@@ -60,6 +60,25 @@ export class AdminsService {
         });
     }
     /**
+     * Get the main wedding ID for the logged-in admin
+     * @returns any The main wedding ID associated with the admin
+     * @throws ApiError
+     */
+    public static adminControllerGetMyMainWedding(): CancelablePromise<{
+        /**
+         * The ID of the main wedding, or null if not set
+         */
+        mainWeddingId?: number | null;
+    }> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/admins/my-main-wedding',
+            errors: {
+                404: `Admin not found.`,
+            },
+        });
+    }
+    /**
      * Get an admin by ID
      * @param id
      * @returns AdminResponseDto The admin details
@@ -180,25 +199,6 @@ export class AdminsService {
             path: {
                 'id': id,
             },
-            errors: {
-                404: `Admin not found.`,
-            },
-        });
-    }
-    /**
-     * Get the main wedding ID for the logged-in admin
-     * @returns any The main wedding ID associated with the admin
-     * @throws ApiError
-     */
-    public static adminControllerGetMyMainWedding(): CancelablePromise<{
-        /**
-         * The ID of the main wedding, or null if not set
-         */
-        mainWeddingId?: number | null;
-    }> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/admins/my-main-wedding',
             errors: {
                 404: `Admin not found.`,
             },

@@ -32,7 +32,8 @@ export function useListingOperations(
         price: Number(listingData.price),
         availabilities: listingData.availabilities || [],
         remarks: listingData.remarks?.trim() || "",
-        vendorId: vendor.id
+        vendorId: vendor.id,
+        imageUrls: listingData.imageUrls || []
       };
 
       const response = await ListingsService.listingControllerCreate(createData);
@@ -53,7 +54,7 @@ export function useListingOperations(
         vendorId: response.vendorId || createData.vendorId,
         createdAt: response.createdAt || new Date().toISOString(),
         updatedAt: response.updatedAt || new Date().toISOString(),
-        imageUrls: response.imageUrls || (createData as any).imageUrls || []
+        imageUrls: response.imageUrls || createData.imageUrls || []
       };
 
       setListings(prev => [...prev, createdListing]);

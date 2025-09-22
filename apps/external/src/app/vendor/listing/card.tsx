@@ -1,18 +1,7 @@
 import { Button } from "@shared/components";
 import { Calendar, Clock, DollarSign, Edit2, FileText, Trash2 } from "lucide-react";
 import Image from "next/image";
-
-interface Listing {
-  id: number;
-  listingName: string;
-  price: number;
-  availabilities: string[];
-  remarks: string;
-  vendorId: number;
-  createdAt: string;
-  updatedAt: string;
-  imageUrls: string[];
-}
+import { Listing } from "./types";
 
 interface ListingCardProps {
   listing: Listing;
@@ -28,10 +17,16 @@ export const ListingCard = ({ listing, onEdit, onDelete }: ListingCardProps) => 
     return "/images/logo-single.png";
   };
 
-  const formatAvailabilities = (availabilities: string[]) => {
+  const formatAvailabilities = (availabilities: Listing['availabilities']) => {
     if (!availabilities || availabilities.length === 0) return "No dates specified";
-    const formattedDates = availabilities.slice(0, 2).map(date => {
-      const dateObj = new Date(date);
+    const formattedDates = availabilities.slice(0, 2).map(availability => {
+      // Handle new object format (AvailabilitySlotDto)
+      if (typeof availability === 'object' && availability.startTime) {
+        const dateObj = new Date(availability.startTime);
+        return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+      // Handle legacy string format
+      const dateObj = new Date(availability as unknown as string);
       return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
     return formattedDates.join(", ") + (availabilities.length > 2 ? ` +${availabilities.length - 2} more` : "");

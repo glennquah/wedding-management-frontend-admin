@@ -2,30 +2,30 @@
 
 import { Button, PageHeader } from "@shared/components";
 import { Calendar, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   EmptyState,
   ErrorState,
   ListingCard,
   ListingFilters,
-  ListingFormDialog,
   LoadingState,
   useListingData,
   useListingFilters,
-  useListingForm,
   useListingOperations,
 } from "./index";
 
 export default function ListingPage() {
+  const router = useRouter();
   const { listings, setListings, vendor, isLoading, error, refetch } = useListingData();
   const { filters, setFilters, clearFilters, filteredListings } = useListingFilters(listings);
-  const { editingListing, formData, isFormOpen, openAddForm, openEditForm, closeForm, updateFormData } = useListingForm(vendor?.id);
-  const { handleAddListing, handleUpdateListing, handleDeleteListing, isSubmitting } = useListingOperations(vendor, setListings);
+  const { handleDeleteListing } = useListingOperations(vendor, setListings);
 
-  const onSubmit = async () => {
-    const success = editingListing
-      ? await handleUpdateListing(editingListing, formData)
-      : await handleAddListing(formData);
-    if (success) closeForm();
+  const handleAddListing = () => {
+    router.push('/vendor/listing/add-listing');
+  };
+
+  const handleEditListing = (listing: any) => {
+    router.push(`/vendor/listing/edit-listing/${listing.id}`);
   };
 
   const getEmptyState = () => {
@@ -57,7 +57,7 @@ export default function ListingPage() {
         <ListingCard
           key={listing.id}
           listing={listing}
-          onEdit={openEditForm}
+          onEdit={handleEditListing}
           onDelete={handleDeleteListing}
         />
       ))}
@@ -88,7 +88,7 @@ export default function ListingPage() {
             title="My Listings"
             description="Manage your service listings and availability"
           />
-          <Button onClick={openAddForm} className="flex items-center gap-2 self-start lg:self-auto">
+          <Button onClick={handleAddListing} className="flex items-center gap-2 self-start lg:self-auto">
             <Plus className="w-4 h-4" />
             Add New Listing
           </Button>
@@ -112,17 +112,6 @@ export default function ListingPage() {
           {emptyState || getListingGrid()}
         </div>
       </div>
-
-      <ListingFormDialog
-        open={isFormOpen}
-        onOpenChange={(open) => !open && closeForm()}
-        editingListing={editingListing}
-        formData={formData}
-        onFormDataChange={updateFormData}
-        onSubmit={onSubmit}
-        onCancel={closeForm}
-        isSubmitting={isSubmitting}
-      />
     </div>
   );
 }
