@@ -239,10 +239,31 @@ export const NotificationTemplateDetailView = ({
                   <div className="font-medium">{template.subject}</div>
                 </div>
 
-                {/* Email Content */}
-                <div
-                  className="prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: htmlContent }}
+                {/* Email Content in Isolated Iframe */}
+                <iframe
+                  srcDoc={`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                      <meta charset="UTF-8">
+                      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                      <style>
+                        body {
+                          margin: 0;
+                          padding: 0;
+                          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                          background: white;
+                        }
+                      </style>
+                    </head>
+                    <body>
+                      ${htmlContent}
+                    </body>
+                    </html>
+                  `}
+                  className="w-full h-full border-0"
+                  title="Email Preview"
+                  style={{ minHeight: '400px' }}
                 />
               </div>
             </div>

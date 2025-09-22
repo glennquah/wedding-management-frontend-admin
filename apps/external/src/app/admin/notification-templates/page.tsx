@@ -38,7 +38,7 @@ const NotificationTemplatesPage = () => {
         )}
       </div>
 
-      <div className="mt-6">
+      <div>
         <NotificationTemplateListView ref={listViewRef} weddingId={currentWeddingId || undefined} />
       </div>
 

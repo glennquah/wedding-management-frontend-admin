@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+
 import { EmailTemplateWithWeddingDto } from '@shared/api';
 import { NotificationDetailsService } from '@shared/api/services/NotificationDetailsService';
 import { NotificationTemplateDetailView, PageHeader } from '@shared/components';
 import { Button } from '@shared/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
 
 const NotificationTemplateDetailPage = () => {
   const params = useParams();
@@ -28,9 +29,10 @@ const NotificationTemplateDetailPage = () => {
 
     try {
       setIsLoading(true);
-      const response = await NotificationDetailsService.notificationDetailsControllerGetEmailTemplateWithId(
-        notificationTemplateId
-      );
+      const response =
+        await NotificationDetailsService.notificationDetailsControllerGetEmailTemplateWithId(
+          notificationTemplateId,
+        );
       setTemplate(response);
       setError(null);
     } catch (error) {
@@ -70,23 +72,14 @@ const NotificationTemplateDetailPage = () => {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <Button
-          onClick={handleBackClick}
-          variant="ghost"
-          className="mb-4"
-        >
+      <div>
+        <Button onClick={handleBackClick} variant="ghost" className="mb-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Templates
         </Button>
-
-        <PageHeader
-          title={template?.name || 'Loading...'}
-          description={template?.subject || 'Email template details'}
-        />
       </div>
 
-      <div className="mt-6">
+      <div>
         <NotificationTemplateDetailView
           template={template}
           isLoading={isLoading}

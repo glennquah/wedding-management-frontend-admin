@@ -1,8 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+
 import { CreateEmailTemplateDto } from '@shared/api';
 import { NotificationDetailsService } from '@shared/api/services/NotificationDetailsService';
+import { Button } from '@shared/components/ui/button';
+import { CodeEditor } from '@shared/components/ui/code-editor';
 import {
   Dialog,
   DialogContent,
@@ -11,11 +14,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@shared/components/ui/dialog';
-import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/form/input';
 import { Label } from '@shared/components/ui/form/label';
 import { Textarea } from '@shared/components/ui/textarea';
-import { CodeEditor } from '@shared/components/ui/code-editor';
 import { toast } from 'sonner';
 
 interface AddNotificationTemplateDialogProps {
@@ -40,7 +41,7 @@ export const AddNotificationTemplateDialog = ({
   const [isCreating, setIsCreating] = useState(false);
 
   const handleInputChange = (field: keyof CreateEmailTemplateDto, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -56,7 +57,7 @@ export const AddNotificationTemplateDialog = ({
     try {
       await NotificationDetailsService.notificationDetailsControllerCreateEmailTemplateInWedding(
         weddingId,
-        formData
+        formData,
       );
 
       toast.success('Template created successfully');
@@ -99,7 +100,7 @@ export const AddNotificationTemplateDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1">
           <div className="space-y-6 py-4">
             {/* Basic Information */}
             <div className="grid grid-cols-2 gap-4">
