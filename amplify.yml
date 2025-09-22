@@ -5,13 +5,14 @@ applications:
       phases:
         preBuild:
           commands:
-            - echo "Installing dependencies for monorepo..."
+            - echo "🚀 Installing dependencies for monorepo..."
             - npm ci
-            - echo "Building shared packages..."
+            - echo "📦 Dependencies installed successfully"
         build:
           commands:
-            - echo "Building external app (knotly.app)..."
+            - echo "🏗️ Building external app (knotly.app)..."
             - npm run build:external
+            - echo "✅ External app build completed"
       artifacts:
         baseDirectory: apps/external/.next
         files:
@@ -20,22 +21,20 @@ applications:
         paths:
           - node_modules/**/*
           - apps/external/.next/cache/**/*
-      buildSettings:
-        commands: []
-        baseDirectory: apps/external
 
   - appRoot: apps/internal
     frontend:
       phases:
         preBuild:
           commands:
-            - echo "Installing dependencies for monorepo..."
+            - echo "🚀 Installing dependencies for monorepo..."
             - npm ci
-            - echo "Building shared packages..."
+            - echo "📦 Dependencies installed successfully"
         build:
           commands:
-            - echo "Building internal app (core.knotly.app)..."
+            - echo "🏗️ Building internal app (core.knotly.app)..."
             - npm run build:internal
+            - echo "✅ Internal app build completed"
       artifacts:
         baseDirectory: apps/internal/.next
         files:
@@ -44,6 +43,3 @@ applications:
         paths:
           - node_modules/**/*
           - apps/internal/.next/cache/**/*
-      buildSettings:
-        commands: []
-        baseDirectory: apps/internal
