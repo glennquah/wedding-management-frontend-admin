@@ -2,7 +2,7 @@
 
 A monorepo containing both external (customer-facing) and internal (admin) Next.js applications with shared UI components.
 
-## Structuree
+## Structure
 
 ```
 ├── apps/
