@@ -39,7 +39,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     );
   }
 
-  if (!session?.user || session.user.role !== UserRole.SUPER_ADMIN) {
+  if (!session?.user || session.user.role !== UserRole.SUPERADMIN) {
     router.push('/login');
     return (
       <>

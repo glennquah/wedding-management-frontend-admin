@@ -622,7 +622,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
 
           <div className="absolute top-0 right-4 flex gap-3">
             <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
-            {targetUserRole !== UserRole.SUPER_ADMIN && (
+            {targetUserRole !== UserRole.SUPERADMIN && (
               <>
                 <Button
                   className="bg-warning-900 text-base-white"

@@ -8,7 +8,7 @@ const getRoleVariant = (role: UserRole): 'default' | 'secondary' | 'destructive'
   switch (role) {
     case UserRole.ADMIN:
       return 'destructive';
-    case UserRole.SUPER_ADMIN:
+    case UserRole.SUPERADMIN:
       return 'default';
     case UserRole.VENDOR:
       return 'secondary';

@@ -42,7 +42,7 @@ export default function LoginPage() {
       }
 
       // Check if user has admin or vendor role (NOT super admin)
-      if (session.user.role === UserRole.SUPER_ADMIN) {
+      if (session.user.role === UserRole.SUPERADMIN) {
         toast.error('Access denied. Super admins must use the super admin portal.');
         await signOut({ redirect: false });
         return;
