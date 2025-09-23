@@ -67,9 +67,9 @@ export default function VendorListPage() {
     status: VendorOnboardingStatus,
   ): 'default' | 'secondary' | 'destructive' | 'outline' => {
     switch (status) {
-      case 'onboarded':
+      case VendorOnboardingStatus.ONBOARDED:
         return 'default';
-      case 'rejected':
+      case VendorOnboardingStatus.REJECTED:
         return 'destructive';
       default:
         return 'outline';
@@ -78,9 +78,9 @@ export default function VendorListPage() {
 
   const getOnboardingStatusLabel = (status: VendorOnboardingStatus) => {
     switch (status) {
-      case 'onboarded':
+      case VendorOnboardingStatus.ONBOARDED:
         return 'Onboarded';
-      case 'rejected':
+      case VendorOnboardingStatus.REJECTED:
         return 'Rejected';
       default:
         return 'Pending';
@@ -89,9 +89,9 @@ export default function VendorListPage() {
 
   const getOnboardingStatusIcon = (status: VendorOnboardingStatus) => {
     switch (status) {
-      case 'onboarded':
+      case VendorOnboardingStatus.ONBOARDED:
         return '✓';
-      case 'rejected':
+      case VendorOnboardingStatus.REJECTED:
         return '✗';
       default:
         return '?';

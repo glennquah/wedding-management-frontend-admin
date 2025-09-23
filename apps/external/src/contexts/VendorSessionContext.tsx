@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
 import { VendorResponseDto, VendorsService, UserRole } from '@shared/api';
 
@@ -24,7 +24,7 @@ export function VendorSessionProvider({ children }: VendorSessionProviderProps) 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchVendorData = async () => {
+  const fetchVendorData = useCallback(async () => {
     if (!session?.user?.id || session.user.role !== UserRole.VENDOR) {
       setIsLoading(false);
       return;
@@ -44,7 +44,7 @@ export function VendorSessionProvider({ children }: VendorSessionProviderProps) 
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [session?.user?.id, session?.user?.role]);
 
   const refetchVendorData = async () => {
     await fetchVendorData();
@@ -52,7 +52,7 @@ export function VendorSessionProvider({ children }: VendorSessionProviderProps) 
 
   useEffect(() => {
     fetchVendorData();
-  }, [session?.user?.id, session?.user?.role]);
+  }, [fetchVendorData]);
 
   const contextValue: VendorSessionContextType = {
     vendorData,
