@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { CheckoutSessionResponseDto } from '../models/CheckoutSessionResponseDto';
 import type { ConfirmPaymentDto } from '../models/ConfirmPaymentDto';
-import type { CreatePaymentIntentDto } from '../models/CreatePaymentIntentDto';
-import type { PaymentIntentResponseDto } from '../models/PaymentIntentResponseDto';
+import type { CreateCheckoutSessionDto } from '../models/CreateCheckoutSessionDto';
 import type { PaymentResponseDto } from '../models/PaymentResponseDto';
 import type { RefundPaymentDto } from '../models/RefundPaymentDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -12,17 +12,17 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class PaymentsService {
     /**
-     * Create a payment intent for an order
+     * Create a Stripe Checkout session for an order
      * @param requestBody
-     * @returns PaymentIntentResponseDto Payment intent created successfully.
+     * @returns CheckoutSessionResponseDto Checkout session created successfully.
      * @throws ApiError
      */
-    public static paymentControllerCreatePaymentIntent(
-        requestBody: CreatePaymentIntentDto,
-    ): CancelablePromise<PaymentIntentResponseDto> {
+    public static paymentControllerCreateCheckoutSession(
+        requestBody: CreateCheckoutSessionDto,
+    ): CancelablePromise<CheckoutSessionResponseDto> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/payments/create-intent',
+            url: '/payments/create-checkout-session',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -108,6 +108,27 @@ export class PaymentsService {
             },
             errors: {
                 400: `Invalid webhook signature.`,
+            },
+        });
+    }
+    /**
+     * Verify a Stripe Checkout session
+     * @param sessionId
+     * @returns any Session verified successfully.
+     * @throws ApiError
+     */
+    public static paymentControllerVerifyCheckoutSession(
+        sessionId: string,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/payments/verify-session/{sessionId}',
+            path: {
+                'sessionId': sessionId,
+            },
+            errors: {
+                400: `Invalid session or payment failed.`,
+                404: `Session not found.`,
             },
         });
     }

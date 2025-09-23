@@ -1,96 +1,21 @@
 'use client';
 
-import { ListingsService, OrdersService, PaymentMethod, PaymentsService, VendorsService, WeddingsService } from '@shared/api';
-import { CardElement, Elements, useElements, useStripe } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
+import { ListingsService, OrdersService, PaymentsService, VendorsService, WeddingsService } from '@shared/api';
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_...');
 
 interface CartItem {
   listing: any; // Will be ListingResponseDto with vendor info
   selectedDates: string[];
 }
 
-function PaymentForm({
-  clientSecret,
-  onPaymentSuccess,
-  onPaymentError
-}: {
-  clientSecret: string;
-  onPaymentSuccess: () => void;
-  onPaymentError: (error: string) => void;
-}) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
-    if (!stripe || !elements) {
-      return;
-    }
-
-    setIsProcessing(true);
-
-    const card = elements.getElement(CardElement);
-    if (!card) {
-      setIsProcessing(false);
-      return;
-    }
-
-    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: card,
-      }
-    });
-
-    setIsProcessing(false);
-
-    if (error) {
-      onPaymentError(error.message || 'Payment failed');
-    } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-      onPaymentSuccess();
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="p-4 border rounded-md">
-        <CardElement
-          options={{
-            style: {
-              base: {
-                fontSize: '16px',
-                color: '#424770',
-                '::placeholder': {
-                  color: '#aab7c4',
-                },
-              },
-            },
-          }}
-        />
-      </div>
-      <button
-        type="submit"
-        disabled={!stripe || isProcessing}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400"
-      >
-        {isProcessing ? 'Processing...' : 'Complete Payment'}
-      </button>
-    </form>
-  );
-}
 
 export default function PaymentPage() {
   const { data: session, status } = useSession();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
   const [currentOrder, setCurrentOrder] = useState<any>(null);
-  const [clientSecret, setClientSecret] = useState<string>('');
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'creating-order' | 'ready-to-pay' | 'processing' | 'success' | 'error'>('idle');
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'creating-order' | 'redirecting' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [weddings, setWeddings] = useState<any[]>([]);
   const [selectedWedding, setSelectedWedding] = useState<any>(null);
@@ -210,14 +135,17 @@ export default function PaymentPage() {
 
       setCurrentOrder(order);
 
-      // Create payment intent using generated API service
-      const paymentData = await PaymentsService.paymentControllerCreatePaymentIntent({
+      // Create checkout session and redirect to Stripe
+      const checkoutData = await PaymentsService.paymentControllerCreateCheckoutSession({
         orderId: order.id,
-        paymentMethod: PaymentMethod.CARD
+        successUrl: `${window.location.origin}/admin/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${window.location.origin}/admin/payment/cancel`
       });
 
-      setClientSecret(paymentData.clientSecret);
-      setPaymentStatus('ready-to-pay');
+      setPaymentStatus('redirecting');
+
+      // Redirect to Stripe Checkout
+      window.location.href = checkoutData.url;
 
     } catch (error) {
       console.error('Error creating order:', error);
@@ -226,17 +154,6 @@ export default function PaymentPage() {
     }
   };
 
-  const handlePaymentSuccess = () => {
-    setPaymentStatus('success');
-    setCart([]);
-    setCurrentOrder(null);
-    setClientSecret('');
-  };
-
-  const handlePaymentError = (error: string) => {
-    setErrorMessage(error);
-    setPaymentStatus('error');
-  };
 
   const toggleDateSelection = (date: string) => {
     setSelectedDates(prev =>
@@ -366,19 +283,9 @@ export default function PaymentPage() {
                   </div>
                 )}
 
-                {paymentStatus === 'ready-to-pay' && clientSecret && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">Complete Your Payment</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Order #{currentOrder?.id} - Expires at: {new Date(currentOrder?.expiresAt).toLocaleString()}
-                    </p>
-                    <Elements stripe={stripePromise}>
-                      <PaymentForm
-                        clientSecret={clientSecret}
-                        onPaymentSuccess={handlePaymentSuccess}
-                        onPaymentError={handlePaymentError}
-                      />
-                    </Elements>
+                {paymentStatus === 'redirecting' && (
+                  <div className="text-center py-4">
+                    <p>Redirecting to Stripe Checkout...</p>
                   </div>
                 )}
 
@@ -398,7 +305,6 @@ export default function PaymentPage() {
                         setPaymentStatus('idle');
                         setErrorMessage('');
                         setCurrentOrder(null);
-                        setClientSecret('');
                       }}
                       className="mt-3 bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700"
                     >
