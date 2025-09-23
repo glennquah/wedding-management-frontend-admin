@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PaymentMethod } from './PaymentMethod';
 import type { PaymentStatus } from './PaymentStatus';
 export type PaymentResponseDto = {
     /**
@@ -10,9 +9,13 @@ export type PaymentResponseDto = {
      */
     id: number;
     /**
-     * Stripe payment intent ID
+     * Stripe checkout session ID
      */
-    stripePaymentIntentId: string;
+    stripeCheckoutSessionId: string;
+    /**
+     * Stripe payment intent ID (populated after payment)
+     */
+    stripePaymentIntentId?: string;
     /**
      * Payment amount
      */
@@ -21,24 +24,7 @@ export type PaymentResponseDto = {
      * Currency code
      */
     currency: string;
-    paymentMethod: PaymentMethod;
     paymentStatus: PaymentStatus;
-    /**
-     * Stripe charge ID
-     */
-    stripeChargeId?: string;
-    /**
-     * Receipt URL from Stripe
-     */
-    receiptUrl?: string;
-    /**
-     * Failure reason if payment failed
-     */
-    failureReason?: string;
-    /**
-     * Amount refunded
-     */
-    refundedAmount?: number;
     /**
      * Order ID this payment belongs to
      */

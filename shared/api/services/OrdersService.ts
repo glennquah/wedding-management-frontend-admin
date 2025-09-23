@@ -146,15 +146,4 @@ export class OrdersService {
             },
         });
     }
-    /**
-     * Manually trigger cleanup of expired orders
-     * @returns any Cleanup completed successfully.
-     * @throws ApiError
-     */
-    public static orderControllerManualCleanup(): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/orders/cleanup',
-        });
-    }
 }
