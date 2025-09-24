@@ -1,11 +1,11 @@
+import dotenv from 'dotenv';
 import type { NextConfig } from 'next';
 import path from 'path';
 
-// Load .env for development (Amplify provides env vars in production)
 if (process.env.NODE_ENV === 'development') {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { config } = require('dotenv');
-  config({ path: path.resolve(__dirname, '.env') });
+  dotenv.config({ path: path.resolve(__dirname, '.env') });
+} else {
+  dotenv.config({ path: path.resolve(__dirname, '.env.production') });
 }
 
 // Debug: Log environment variables to verify they're loaded

@@ -89,3 +89,23 @@ export default function MyPage() {
 - Tailwind CSS
 - Turbo (monorepo build system)
 - Direct imports (no build step for UI components)
+
+version: 1
+applications:
+
+- appRoot: apps/external
+  frontend:
+  phases:
+  preBuild:
+  commands: - npm install
+  build:
+  commands: - echo "🔧 Exporting environment variables..." - export NEXTAUTH_SECRET=$NEXTAUTH_SECRET
+            - export NEXT_PUBLIC_NEXTAUTH_URL=$NEXT_PUBLIC_NEXTAUTH_URL - export GITHUB_ID=$GITHUB_ID
+            - export GITHUB_SECRET=$GITHUB_SECRET - export OPENAI_API_KEY=$OPENAI_API_KEY
+            - export NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=$NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME - export NEXT_PUBLIC_CLOUDINARY_PRESET_NAME=$NEXT_PUBLIC_CLOUDINARY_PRESET_NAME - npm run build:external
+  artifacts:
+  baseDirectory: apps/external/.next
+  files: - "**/\*"
+  cache:
+  paths: - node_modules/**/\*
+  buildPath: /
