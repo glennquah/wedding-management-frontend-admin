@@ -434,6 +434,7 @@ export function useGuestManager() {
 
       const updateData: UpdateGuestDto = {
         name: editingGuest.name,
+        email: editingGuest.email,
         allergies: editingGuest.allergies || undefined,
         group: editingGuest.group,
         confirmationStatus: editingGuest.confirmationStatus || undefined,

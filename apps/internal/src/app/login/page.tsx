@@ -41,7 +41,7 @@ export default function LoginPage() {
       }
 
       // Check if user has super admin role
-      if (session.user.role !== UserRole.SUPER_ADMIN) {
+      if (session.user.role !== UserRole.SUPERADMIN) {
         toast.error('Access denied. Super admin privileges required.');
         // Sign out the user since they don't have the right role
         await signOut({ redirect: false });

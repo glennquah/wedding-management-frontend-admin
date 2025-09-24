@@ -384,9 +384,9 @@ export default function GuestListPage() {
           guests={guests.map((guest) => ({
             ...guest,
             confirmationStatus:
-              guest.confirmationStatus === 'pending'
+              guest.confirmationStatus === ConfirmationStatus.PENDING
                 ? ConfirmationStatus.PENDING
-                : guest.confirmationStatus === 'confirmed'
+                : guest.confirmationStatus === ConfirmationStatus.CONFIRMED
                   ? ConfirmationStatus.CONFIRMED
                   : ConfirmationStatus.REJECTED,
           }))}

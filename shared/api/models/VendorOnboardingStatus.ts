@@ -6,7 +6,7 @@
  * Onboarding status of the vendor
  */
 export enum VendorOnboardingStatus {
-    PENDING = 'pending',
-    REJECTED = 'rejected',
-    ONBOARDED = 'onboarded',
+    PENDING = 'PENDING',
+    REJECTED = 'REJECTED',
+    ONBOARDED = 'ONBOARDED',
 }

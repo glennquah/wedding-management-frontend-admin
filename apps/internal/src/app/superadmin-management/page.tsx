@@ -73,7 +73,7 @@ export default function SuperAdminManagementPage() {
   const openAddSuperAdminModal = () => {
     const generatedPassword = generateRandomPassword();
     setNewSuperAdmin({
-      role: UserRole.SUPER_ADMIN,
+      role: UserRole.SUPERADMIN,
       password: generatedPassword,
     });
     setIsAddingSuperAdmin(true);
@@ -105,7 +105,7 @@ export default function SuperAdminManagementPage() {
         name: newSuperAdmin.name,
         email: newSuperAdmin.email,
         password: newSuperAdmin.password,
-        role: UserRole.SUPER_ADMIN,
+        role: UserRole.SUPERADMIN,
       };
 
       await SuperAdminsService.superAdminControllerCreate(superAdminData);

@@ -18,7 +18,7 @@ export default withAuth(
     }
 
     // Check if user has super admin role
-    if (token.role !== UserRole.SUPER_ADMIN) {
+    if (token.role !== UserRole.SUPERADMIN) {
       return NextResponse.redirect(new URL('/login', req.url));
     }
 
