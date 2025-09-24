@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Guest count bucket
+ * Guest count bucket determining layout selection
  */
 export enum GuestCountBucket {
     SMALL = 'SMALL',

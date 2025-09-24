@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { useWeddingStore } from '@/app/store/sessionStore';
-import { OpenAPI, WeddingResponseDto, WeddingsService } from '@shared/api';
+import { AdminsService, OpenAPI, WeddingResponseDto, WeddingsService } from '@shared/api';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 
@@ -13,7 +13,7 @@ export function useWeddingManager() {
     weddings,
     setSelectedWeddingId,
     setMainWeddingId,
-    setWeddings
+    setWeddings,
   } = useWeddingStore();
 
   const [wedding, setWedding] = useState<WeddingResponseDto | null>(null);
@@ -34,13 +34,8 @@ export function useWeddingManager() {
       setError(null);
 
       setupAuth();
-      const userWeddings = await WeddingsService.weddingControllerFindAll();
+      const userWeddings = await AdminsService.adminControllerGetMyWeddings();
       setWeddings(userWeddings);
-
-      if (userWeddings.length > 0 && !mainWeddingId) {
-        // Set first wedding as main wedding if not set
-        setMainWeddingId(userWeddings[0].id);
-      }
     } catch (err) {
       setError('Failed to fetch weddings');
       console.error('Error fetching weddings:', err);
@@ -48,18 +43,21 @@ export function useWeddingManager() {
     } finally {
       setLoading(false);
     }
-  }, [setupAuth, setWeddings, mainWeddingId, setMainWeddingId]);
+  }, [setupAuth, setWeddings]);
 
   // Fetch user's main wedding and set it as selected
   const fetchUserMainWedding = useCallback(async () => {
     try {
       setupAuth();
-      const userWeddings = await WeddingsService.weddingControllerFindAll();
+      const { mainWeddingId: fetchedMainWeddingId } =
+        await AdminsService.adminControllerGetMyMainWedding();
 
-      if (userWeddings.length > 0) {
-        const mainWedding = userWeddings[0];
-        setMainWeddingId(mainWedding.id);
-        setSelectedWeddingId(mainWedding.id);
+      if (fetchedMainWeddingId) {
+        setMainWeddingId(fetchedMainWeddingId);
+        setSelectedWeddingId(fetchedMainWeddingId);
+
+        // Fetch the wedding details using the main wedding ID
+        const mainWedding = await WeddingsService.weddingControllerFindOne(fetchedMainWeddingId);
         setWedding(mainWedding);
       }
     } catch (err) {
@@ -69,13 +67,16 @@ export function useWeddingManager() {
   }, [setupAuth, setMainWeddingId, setSelectedWeddingId]);
 
   // Select a specific wedding
-  const selectWedding = useCallback((weddingId: number) => {
-    setSelectedWeddingId(weddingId);
-    const selectedWedding = weddings.find(w => w.id === weddingId);
-    if (selectedWedding) {
-      setWedding(selectedWedding);
-    }
-  }, [setSelectedWeddingId, weddings]);
+  const selectWedding = useCallback(
+    (weddingId: number) => {
+      setSelectedWeddingId(weddingId);
+      const selectedWedding = weddings.find((w) => w.id === weddingId);
+      if (selectedWedding) {
+        setWedding(selectedWedding);
+      }
+    },
+    [setSelectedWeddingId, weddings],
+  );
 
   // Fetch the currently selected wedding
   const fetchWedding = useCallback(async () => {
@@ -84,20 +85,39 @@ export function useWeddingManager() {
       setError(null);
 
       setupAuth();
-      const userWeddings = await WeddingsService.weddingControllerFindAll();
+
+      // First, get the main wedding ID from the API
+      const { mainWeddingId: fetchedMainWeddingId } =
+        await AdminsService.adminControllerGetMyMainWedding();
+
+      // Fetch all weddings
+      const userWeddings = await AdminsService.adminControllerGetMyWeddings();
       setWeddings(userWeddings);
 
       if (userWeddings.length > 0) {
-        // Use selected wedding if available, otherwise use first wedding as fallback
+        // Set the main wedding ID if we got one from the API
+        if (fetchedMainWeddingId) {
+          setMainWeddingId(fetchedMainWeddingId);
+        }
+
+        // Use selected wedding if available, otherwise use main wedding, otherwise use first wedding as fallback
         let targetWedding;
         if (selectedWeddingId) {
-          targetWedding = userWeddings.find(w => w.id === selectedWeddingId);
+          targetWedding = userWeddings.find((w) => w.id === selectedWeddingId);
+        }
+
+        if (!targetWedding && fetchedMainWeddingId) {
+          targetWedding = userWeddings.find((w) => w.id === fetchedMainWeddingId);
+          setSelectedWeddingId(fetchedMainWeddingId);
         }
 
         if (!targetWedding) {
           targetWedding = userWeddings[0];
-          setMainWeddingId(targetWedding.id);
           setSelectedWeddingId(targetWedding.id);
+          // Only set as main wedding if we didn't get one from API
+          if (!fetchedMainWeddingId) {
+            setMainWeddingId(targetWedding.id);
+          }
         }
 
         setWedding(targetWedding);

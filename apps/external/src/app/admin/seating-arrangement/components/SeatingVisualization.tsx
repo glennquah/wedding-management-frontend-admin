@@ -1,12 +1,12 @@
 import { useState } from 'react';
 
-import { HallLayout, SeatingResult } from '../../../../lib/seating';
+import { HallLayoutDto, SeatingResultDto } from '@shared/api';
 import { Skeleton } from '@shared/components/ui/skeleton';
 import { TableDropZone } from './TableDropZone';
 
 interface SeatingVisualizationProps {
-  layout: HallLayout;
-  seatingResult?: SeatingResult | null;
+  layout: HallLayoutDto;
+  seatingResult?: SeatingResultDto | null;
   isLoading?: boolean;
   onGuestMove?: (guestName: string, fromTable: string, toTable: string) => void;
 }
@@ -65,10 +65,11 @@ export function SeatingVisualization({
 
   // Calculate responsive canvas dimensions
   const padding = 8;
-  const maxX = Math.max(...layout.tables.map((t) => t.x)) + padding;
-  const maxY = Math.max(...layout.tables.map((t) => t.y)) + padding;
-  const minX = Math.min(...layout.tables.map((t) => t.x)) - padding;
-  const minY = Math.min(...layout.tables.map((t) => t.y)) - padding;
+  const tables = layout.layout?.tables || [];
+  const maxX = Math.max(...tables.map((t) => t.x)) + padding;
+  const maxY = Math.max(...tables.map((t) => t.y)) + padding;
+  const minX = Math.min(...tables.map((t) => t.x)) - padding;
+  const minY = Math.min(...tables.map((t) => t.y)) - padding;
 
   const width = maxX - minX;
   const height = maxY - minY;
@@ -171,7 +172,7 @@ export function SeatingVisualization({
             </g>
 
             {/* Tables */}
-            {layout.tables.map((table) => {
+            {tables.map((table) => {
               const assignedGuests = seatingResult?.seating_arrangement?.[table.id] || [];
               const isOccupied = assignedGuests.length > 0;
               const isOverCapacity = assignedGuests.length > table.capacity;
@@ -316,7 +317,7 @@ export function SeatingVisualization({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {layout.tables
+            {tables
               .sort((a, b) => a.id - b.id)
               .map((table) => {
                 const tableId = table.id.toString();

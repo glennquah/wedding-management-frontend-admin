@@ -1,35 +1,40 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { useWeddingStore } from '../store/sessionStore';
 import {
+  ApiError,
   GuestCountBucket,
-  HallLayout,
-  SeatingAPI,
-  SeatingArrangement,
-  SeatingRequest,
-  SeatingResult,
-} from '../../lib/seating';
+  HallLayoutDto,
+  SeatingArrangementResponseDto,
+  SeatingArrangementsService,
+  SeatingRequestDto,
+  SeatingResultDto,
+} from '@shared/api';
 
-export function useSeatingManager(weddingId?: number) {
+export function useSeatingManager() {
+  const currentWeddingId = useWeddingStore((state) => state.selectedWeddingId);
   const [guestCountBucket, setGuestCountBucket] = useState<GuestCountBucket | null>(null);
-  const [layout, setLayout] = useState<HallLayout | null>(null);
-  const [seatingResult, setSeatingResult] = useState<SeatingResult | null>(null);
-  const [seatingArrangement, setSeatingArrangement] = useState<SeatingArrangement | null>(null);
+  const [layout, setLayout] = useState<HallLayoutDto | null>(null);
+  const [seatingResult, setSeatingResult] = useState<SeatingResultDto | null>(null);
+  const [seatingArrangement, setSeatingArrangement] =
+    useState<SeatingArrangementResponseDto | null>(null);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [isLoadingLayout, setIsLoadingLayout] = useState(false);
   const [isLoadingArrangement, setIsLoadingArrangement] = useState(false);
 
   const loadSeatingArrangement = useCallback(async () => {
-    if (!weddingId) return;
+    if (!currentWeddingId) return;
 
     setIsLoadingArrangement(true);
     try {
-      const arrangement = await SeatingAPI.getSeatingArrangement(weddingId);
+      const arrangement =
+        await SeatingArrangementsService.seatingArrangementControllerFindOne(currentWeddingId);
       setSeatingArrangement(arrangement);
 
       // If arrangement exists and has tables, create seating result for visualization
       if (arrangement?.tables && arrangement.tables.length > 0) {
         const seatingMap: Record<number, string[]> = {};
-        arrangement.tables.forEach((tableGuests, index) => {
+        arrangement.tables.forEach((tableGuests: string[], index: number) => {
           seatingMap[index + 1] = tableGuests; // index 0 = table 1, index 1 = table 2, etc.
         });
 
@@ -40,26 +45,34 @@ export function useSeatingManager(weddingId?: number) {
         });
       }
     } catch (error) {
-      console.error('Error loading seating arrangement:', error);
+      if (error instanceof ApiError && error.status === 404) {
+        setSeatingArrangement(null);
+      } else {
+        console.error('Error loading seating arrangement:', error);
+      }
     } finally {
       setIsLoadingArrangement(false);
     }
-  }, [weddingId]);
+  }, [currentWeddingId]);
 
-  // Load existing seating arrangement when weddingId is available
+  // Load existing seating arrangement when currentWeddingId is available
   useEffect(() => {
-    if (weddingId) {
+    if (currentWeddingId) {
       loadSeatingArrangement();
     }
-  }, [weddingId, loadSeatingArrangement]);
+  }, [currentWeddingId, loadSeatingArrangement]);
 
   const loadLayout = useCallback(
     async (bucket: GuestCountBucket) => {
-      if (!bucket) return;
+      if (!bucket || !currentWeddingId) return;
 
       setIsLoadingLayout(true);
       try {
-        const layoutData = await SeatingAPI.getHallLayout(bucket);
+        const layoutData =
+          await SeatingArrangementsService.seatingArrangementControllerGetHallLayout(
+            currentWeddingId,
+            bucket,
+          );
         setLayout(layoutData);
       } catch (error) {
         console.error('Error loading layout:', error);
@@ -67,33 +80,62 @@ export function useSeatingManager(weddingId?: number) {
         setIsLoadingLayout(false);
       }
     },
-    [],
+    [currentWeddingId],
   );
 
   const saveGroupPriorities = useCallback(
     async (priorities: Record<string, number>) => {
-      if (!weddingId) return;
+      if (!currentWeddingId) return;
 
       try {
         if (seatingArrangement) {
           // Update existing arrangement
-          const updated = await SeatingAPI.updateSeatingArrangement(weddingId, {
-            groupPriorities: priorities,
-          });
+          const updated = await SeatingArrangementsService.seatingArrangementControllerUpdate(
+            currentWeddingId,
+            {
+              groupPriorities: priorities,
+            },
+          );
           setSeatingArrangement(updated);
         } else {
           // Try to create new arrangement, but handle case where one already exists
           try {
-            const created = await SeatingAPI.createSeatingArrangement(weddingId, {
-              groupPriorities: priorities,
-            });
+            const response = await SeatingArrangementsService.seatingArrangementControllerCreate(
+              currentWeddingId,
+              {
+                groupPriorities: priorities,
+              },
+            );
+
+            // Convert response to local format
+            const created: SeatingArrangementResponseDto = {
+              id: response.id,
+              weddingId: response.weddingId,
+              groupPriorities: response.groupPriorities,
+              tables: response.tables as string[][],
+              createdAt: response.createdAt,
+              updatedAt: response.updatedAt,
+            };
             setSeatingArrangement(created);
           } catch (createError) {
             // If creation fails due to existing arrangement (409), try to update instead
-            if (createError instanceof Error && createError.message.includes('already exists')) {
-              const updated = await SeatingAPI.updateSeatingArrangement(weddingId, {
-                groupPriorities: priorities,
-              });
+            if (createError instanceof ApiError && createError.status === 409) {
+              const response = await SeatingArrangementsService.seatingArrangementControllerUpdate(
+                currentWeddingId,
+                {
+                  groupPriorities: priorities,
+                },
+              );
+
+              // Convert response to local format
+              const updated: SeatingArrangementResponseDto = {
+                id: response.id,
+                weddingId: response.weddingId,
+                groupPriorities: response.groupPriorities,
+                tables: response.tables as string[][],
+                createdAt: response.createdAt,
+                updatedAt: response.updatedAt,
+              };
               setSeatingArrangement(updated);
             } else {
               throw createError;
@@ -105,12 +147,12 @@ export function useSeatingManager(weddingId?: number) {
         throw error;
       }
     },
-    [weddingId, seatingArrangement],
+    [currentWeddingId, seatingArrangement],
   );
 
   const optimizeSeating = useCallback(
-    async (request: SeatingRequest) => {
-      if (!weddingId) return;
+    async (request: SeatingRequestDto) => {
+      if (!currentWeddingId) return;
 
       setIsOptimizing(true);
       setSeatingResult(null);
@@ -119,8 +161,14 @@ export function useSeatingManager(weddingId?: number) {
         // First, save/update group priorities
         await saveGroupPriorities(request.group_priorities);
 
-        // Then optimize seating via FastAPI, using custom layout if available
-        const result = await SeatingAPI.optimizeSeating(request);
+        const response: SeatingResultDto =
+          await SeatingArrangementsService.seatingArrangementControllerOptimizeSeating(
+            currentWeddingId,
+            request,
+          );
+
+        // Convert response to local format
+        const result: SeatingResultDto = response as unknown as SeatingResultDto;
         setSeatingResult(result);
 
         // If optimization was successful, save the tables
@@ -137,7 +185,20 @@ export function useSeatingManager(weddingId?: number) {
           });
 
           // Save tables to database
-          const updatedArrangement = await SeatingAPI.setTables(weddingId, tables);
+          const updatedResponse =
+            await SeatingArrangementsService.seatingArrangementControllerUpdate(currentWeddingId, {
+              tables,
+            });
+
+          // Convert response to local format
+          const updatedArrangement: SeatingArrangementResponseDto = {
+            id: updatedResponse.id,
+            weddingId: updatedResponse.weddingId,
+            groupPriorities: updatedResponse.groupPriorities,
+            tables: updatedResponse.tables as string[][],
+            createdAt: updatedResponse.createdAt,
+            updatedAt: updatedResponse.updatedAt,
+          };
           setSeatingArrangement(updatedArrangement);
         }
       } catch (error) {
@@ -150,13 +211,13 @@ export function useSeatingManager(weddingId?: number) {
         setIsOptimizing(false);
       }
     },
-    [weddingId, saveGroupPriorities],
+    [currentWeddingId, saveGroupPriorities],
   );
 
   // Function to load seating arrangement and ensure layout is loaded for visualization
   const loadSeatingArrangementWithLayout = useCallback(
     async (bucket: GuestCountBucket) => {
-      if (!weddingId || !bucket) return;
+      if (!currentWeddingId || !bucket) return;
 
       setIsLoadingArrangement(true);
       setIsLoadingLayout(true);
@@ -164,8 +225,11 @@ export function useSeatingManager(weddingId?: number) {
       try {
         // Load both the arrangement and layout in parallel
         const [arrangement, layoutData] = await Promise.all([
-          SeatingAPI.getSeatingArrangement(weddingId),
-          SeatingAPI.getHallLayout(bucket),
+          SeatingArrangementsService.seatingArrangementControllerFindOne(currentWeddingId),
+          SeatingArrangementsService.seatingArrangementControllerGetHallLayout(
+            currentWeddingId,
+            bucket,
+          ),
         ]);
 
         setSeatingArrangement(arrangement);
@@ -191,7 +255,7 @@ export function useSeatingManager(weddingId?: number) {
         setIsLoadingLayout(false);
       }
     },
-    [weddingId],
+    [currentWeddingId],
   );
 
   // Function to move a guest between tables
@@ -208,7 +272,7 @@ export function useSeatingManager(weddingId?: number) {
 
       if (updatedArrangement[fromTableId]) {
         updatedArrangement[fromTableId] = updatedArrangement[fromTableId].filter(
-          (guest) => guest !== guestName
+          (guest: string) => guest !== guestName,
         );
       }
 
@@ -233,21 +297,22 @@ export function useSeatingManager(weddingId?: number) {
           tables[i - 1] = updatedArrangement[i] || [];
         }
 
-        if (weddingId) {
-          const updatedSeatingArrangement = await SeatingAPI.setTables(weddingId, tables);
-          setSeatingArrangement(updatedSeatingArrangement);
+        if (currentWeddingId) {
+          const updatedSeatingArrangementResponseDto =
+            await SeatingArrangementsService.seatingArrangementControllerUpdate(currentWeddingId, {
+              tables,
+            });
+          setSeatingArrangement(updatedSeatingArrangementResponseDto);
         }
       } catch (error) {
         console.error('Error saving guest move:', error);
-        // Revert the optimistic update on error
-        // You might want to show a toast notification here
         const revertedArrangement = { ...seatingResult.seating_arrangement };
         if (!revertedArrangement[fromTableId]) {
           revertedArrangement[fromTableId] = [];
         }
         revertedArrangement[fromTableId].push(guestName);
         revertedArrangement[toTableId] = revertedArrangement[toTableId].filter(
-          (guest) => guest !== guestName
+          (guest: string) => guest !== guestName,
         );
 
         setSeatingResult({
@@ -256,7 +321,7 @@ export function useSeatingManager(weddingId?: number) {
         });
       }
     },
-    [seatingResult, weddingId],
+    [seatingResult, currentWeddingId],
   );
 
   return {
