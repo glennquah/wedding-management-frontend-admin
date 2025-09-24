@@ -103,9 +103,9 @@ export default function GuestManagementPage() {
         group: editingGuest.group,
         allergies: editingGuest.allergies || '',
         confirmationStatus:
-          editingGuest.confirmationStatus === 'pending'
+          editingGuest.confirmationStatus === ConfirmationStatus.PENDING
             ? ConfirmationStatus.PENDING
-            : editingGuest.confirmationStatus === 'confirmed'
+            : editingGuest.confirmationStatus === ConfirmationStatus.CONFIRMED
               ? ConfirmationStatus.CONFIRMED
               : ConfirmationStatus.REJECTED,
       };
@@ -320,9 +320,9 @@ export default function GuestManagementPage() {
             {
               ...editingGuest!,
               confirmationStatus:
-                editingGuest!.confirmationStatus === 'pending'
+                editingGuest!.confirmationStatus === ConfirmationStatus.PENDING
                   ? ConfirmationStatus.PENDING
-                  : editingGuest!.confirmationStatus === 'confirmed'
+                  : editingGuest!.confirmationStatus === ConfirmationStatus.CONFIRMED
                     ? ConfirmationStatus.CONFIRMED
                     : ConfirmationStatus.REJECTED,
               accompanyingGuestNames: editingGuest!.accompanyingGuests?.map((ag) => ag.name) || [
@@ -344,9 +344,9 @@ export default function GuestManagementPage() {
           guests={guests.map((guest) => ({
             ...guest,
             confirmationStatus:
-              guest.confirmationStatus === 'pending'
+              guest.confirmationStatus === ConfirmationStatus.PENDING
                 ? ConfirmationStatus.PENDING
-                : guest.confirmationStatus === 'confirmed'
+                : guest.confirmationStatus === ConfirmationStatus.CONFIRMED
                   ? ConfirmationStatus.CONFIRMED
                   : ConfirmationStatus.REJECTED,
           }))}

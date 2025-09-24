@@ -6,9 +6,9 @@
  * Wedding type
  */
 export enum WeddingType {
-    CHINESE = 'chinese',
-    MALAY = 'malay',
-    INDIAN = 'indian',
-    WESTERN = 'western',
-    OTHERS = 'others',
+    CHINESE = 'CHINESE',
+    MALAY = 'MALAY',
+    INDIAN = 'INDIAN',
+    WESTERN = 'WESTERN',
+    OTHERS = 'OTHERS',
 }

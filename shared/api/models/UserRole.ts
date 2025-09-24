@@ -6,7 +6,7 @@
  * Role of the user
  */
 export enum UserRole {
-    ADMIN = 'admin',
-    SUPER_ADMIN = 'superAdmin',
-    VENDOR = 'vendor',
+    ADMIN = 'ADMIN',
+    SUPERADMIN = 'SUPERADMIN',
+    VENDOR = 'VENDOR',
 }

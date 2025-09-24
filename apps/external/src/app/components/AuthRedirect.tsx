@@ -13,7 +13,10 @@ export function AuthRedirect() {
 
   useEffect(() => {
     if (session?.user) {
-      if (pathname === '/login') {
+      // Define public paths that should not trigger role-based redirects
+      const publicPaths = ['/login', '/forgot-password', '/reset-password'];
+
+      if (pathname && publicPaths.includes(pathname)) {
         return;
       }
 

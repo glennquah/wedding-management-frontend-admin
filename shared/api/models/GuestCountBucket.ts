@@ -6,7 +6,7 @@
  * Guest count bucket
  */
 export enum GuestCountBucket {
-    SMALL = 'small',
-    MEDIUM = 'medium',
-    LARGE = 'large',
+    SMALL = 'SMALL',
+    MEDIUM = 'MEDIUM',
+    LARGE = 'LARGE',
 }

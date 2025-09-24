@@ -6,7 +6,7 @@
  * Confirmation status of the guest
  */
 export enum ConfirmationStatus {
-    PENDING = 'pending',
-    CONFIRMED = 'confirmed',
-    REJECTED = 'rejected',
+    PENDING = 'PENDING',
+    CONFIRMED = 'CONFIRMED',
+    REJECTED = 'REJECTED',
 }
