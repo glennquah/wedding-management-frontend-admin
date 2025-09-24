@@ -143,7 +143,7 @@ The application is deployed using **OpenNext** on **AWS** with **SST (Serverless
 | **Queue**              | AWS SQS         | Background processing                     |
 | **CI/CD**              | GitHub Actions  | Automated deployments                     |
 
-### 📦 Deployment Process
+### Deployment Process
 
 1. **Build Phase**: Turbo builds both Next.js applications
 2. **Bundle Phase**: OpenNext converts Next.js apps to AWS-compatible bundles
@@ -151,17 +151,16 @@ The application is deployed using **OpenNext** on **AWS** with **SST (Serverless
 4. **Deploy Phase**: Applications deployed to Lambda + CloudFront
 5. **DNS Phase**: Route53 records updated automatically
 
-### 🔧 Key AWS Resources Created
+### Key AWS Resources Created
 
 - **2x CloudFront Distributions** (one per app)
 - **2x S3 Buckets** for static assets
 - **6+ Lambda Functions** (SSR, image optimization, revalidation)
 - **2x DynamoDB Tables** for caching
 - **2x SQS Queues** for background jobs
-- **SSL Certificates** via ACM
 - **Route53 Records** for DNS
 
-## 🔄 CI/CD Pipeline
+## CI/CD Pipeline
 
 ### GitHub Actions Workflow
 
@@ -169,7 +168,7 @@ The application is deployed using **OpenNext** on **AWS** with **SST (Serverless
 - **Steps**: Install → Build → Deploy to AWS
 - **Secrets**: Managed via GitHub Secrets
 
-### 📝 Adding New Environment Variables
+### Adding New Environment Variables
 
 When you need to add new environment variables, follow these **3 steps**:
 
@@ -211,19 +210,7 @@ env:
 
 Push to `main` branch or manually trigger the workflow. The new environment variables will be automatically deployed.
 
-### 🔐 Current Environment Variables
-
-| Variable                             | Purpose                | App      |
-| ------------------------------------ | ---------------------- | -------- |
-| `NEXT_PUBLIC_API_URL`                | Backend API endpoint   | Both     |
-| `NEXTAUTH_SECRET`                    | NextAuth.js secret     | Internal |
-| `GITHUB_ID`                          | GitHub OAuth client ID | Internal |
-| `GITHUB_SECRET`                      | GitHub OAuth secret    | Internal |
-| `OPENAI_API_KEY`                     | OpenAI API access      | Internal |
-| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`  | Cloudinary config      | Both     |
-| `NEXT_PUBLIC_CLOUDINARY_PRESET_NAME` | Cloudinary preset      | Both     |
-
-### 🎯 Deployment Commands
+### Deployment Commands
 
 ```bash
 # Deploy to production
@@ -231,13 +218,5 @@ npm run deploy
 
 # Remove all resources
 npm run remove
-
-# Open SST console
-npm run sst:console
+# "remove": "sst remove --stage production"
 ```
-
-### 🌍 Production Monitoring
-
-- **SST Console**: https://sst.dev/u/c6a30763
-- **AWS CloudWatch**: Monitor logs and metrics
-- **CloudFront**: Global CDN performance
