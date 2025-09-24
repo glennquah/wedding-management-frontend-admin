@@ -2,14 +2,15 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AvailabilitySlotDto } from './AvailabilitySlotDto';
 export type OrderListingDto = {
     /**
      * Listing ID to include in the order
      */
     listingId: number;
     /**
-     * Array of booked dates for this listing
+     * Array of booked availability slots for this listing
      */
-    bookedDates: Array<string>;
+    bookedSlots: Array<AvailabilitySlotDto>;
 };
 

@@ -3,15 +3,16 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { PaymentsService } from '@shared/api';
+
+interface PaymentDetails {
+  sessionId: string;
+}
 
 function PaymentSuccessContent() {
-  const { data: session } = useSession();
   const searchParams = useSearchParams();
   const sessionId = searchParams?.get('session_id') ?? null;
   const [loading, setLoading] = useState(true);
-  const [paymentDetails, setPaymentDetails] = useState<any>(null);
+  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

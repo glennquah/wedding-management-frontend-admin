@@ -1,26 +1,27 @@
 'use client';
 
+import type { AvailabilitySlotDto, ListingResponseDto, OrderResponseDto, VendorResponseDto, WeddingResponseDto } from '@shared/api';
 import { ListingsService, OrdersService, PaymentsService, VendorsService, WeddingsService } from '@shared/api';
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 
 interface CartItem {
-  listing: any; // Will be ListingResponseDto with vendor info
-  selectedDates: string[];
+  listing: ListingResponseDto & { vendor: VendorResponseDto };
+  selectedSlots: AvailabilitySlotDto[];
 }
 
 
 export default function PaymentPage() {
   const { data: session, status } = useSession();
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [selectedDates, setSelectedDates] = useState<string[]>([]);
-  const [currentOrder, setCurrentOrder] = useState<any>(null);
+  const [selectedSlots, setSelectedSlots] = useState<AvailabilitySlotDto[]>([]);
+  const [, setCurrentOrder] = useState<OrderResponseDto | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'creating-order' | 'redirecting' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const [weddings, setWeddings] = useState<any[]>([]);
-  const [selectedWedding, setSelectedWedding] = useState<any>(null);
-  const [listings, setListings] = useState<any[]>([]);
-  const [selectedListing, setSelectedListing] = useState<any>(null);
+  const [, setWeddings] = useState<WeddingResponseDto[]>([]);
+  const [selectedWedding, setSelectedWedding] = useState<WeddingResponseDto | null>(null);
+  const [, setListings] = useState<(ListingResponseDto & { vendor: VendorResponseDto })[]>([]);
+  const [selectedListing, setSelectedListing] = useState<(ListingResponseDto & { vendor: VendorResponseDto }) | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,7 +52,7 @@ export default function PaymentPage() {
               vendor: vendor
             }));
             allListings.push(...listingsWithVendor);
-          } catch (error) {
+          } catch {
             console.log(`No listings found for vendor ${vendor.name}`);
           }
         }
@@ -66,10 +67,15 @@ export default function PaymentPage() {
             id: 1,
             listingName: 'Sample Listing',
             price: 15000,
-            availabilities: ['2024-12-15', '2024-11-08', '2025-01-25'],
+            availabilities: [
+              { startTime: '2024-12-15T08:00:00Z', endTime: '2024-12-15T17:00:00Z', date: '2024-12-15' },
+              { startTime: '2024-11-08T08:00:00Z', endTime: '2024-11-08T17:00:00Z', date: '2024-11-08' },
+              { startTime: '2025-01-25T08:00:00Z', endTime: '2025-01-25T17:00:00Z', date: '2025-01-25' }
+            ],
             remarks: 'Sample listing for testing',
             vendorId: vendors[0]?.id || 1,
             vendor: vendors[0] || { name: 'Sample Vendor', bio: 'Sample vendor for testing' },
+            imageUrls: [],
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
           };
@@ -89,8 +95,8 @@ export default function PaymentPage() {
   }, [session]);
 
   const addToCart = () => {
-    if (selectedDates.length === 0) {
-      alert('Please select at least one date');
+    if (selectedSlots.length === 0) {
+      alert('Please select at least one time slot');
       return;
     }
 
@@ -101,11 +107,11 @@ export default function PaymentPage() {
 
     const cartItem: CartItem = {
       listing: selectedListing,
-      selectedDates: [...selectedDates]
+      selectedSlots: [...selectedSlots]
     };
 
     setCart([cartItem]);
-    setSelectedDates([]);
+    setSelectedSlots([]);
     alert('Added to cart!');
   };
 
@@ -124,12 +130,19 @@ export default function PaymentPage() {
 
     try {
       // Create order using generated API service
+      if (!selectedWedding) {
+        throw new Error('No wedding selected');
+      }
+
       const order = await OrdersService.orderControllerCreate({
         weddingId: selectedWedding.id,
-        listings: cart.map(item => ({
-          listingId: item.listing.id,
-          bookedDates: item.selectedDates
-        })),
+        listings: cart.map(item => {
+          console.log('Selected slots for listing', item.listing.id, ':', item.selectedSlots);
+          return {
+            listingId: item.listing.id,
+            bookedSlots: item.selectedSlots
+          };
+        }),
         remark: 'Test order from frontend'
       });
 
@@ -155,12 +168,22 @@ export default function PaymentPage() {
   };
 
 
-  const toggleDateSelection = (date: string) => {
-    setSelectedDates(prev =>
-      prev.includes(date)
-        ? prev.filter(d => d !== date)
-        : [...prev, date]
-    );
+  const toggleSlotSelection = (slot: AvailabilitySlotDto) => {
+    setSelectedSlots(prev => {
+      const isSelected = prev.some(s =>
+        s.startTime === slot.startTime &&
+        s.endTime === slot.endTime &&
+        s.date === slot.date
+      );
+
+      return isSelected
+        ? prev.filter(s =>
+            !(s.startTime === slot.startTime &&
+              s.endTime === slot.endTime &&
+              s.date === slot.date)
+          )
+        : [...prev, slot];
+    });
   };
 
   if (status === 'loading' || loading) {
@@ -200,19 +223,62 @@ export default function PaymentPage() {
             </div>
 
             <div>
-              <h4 className="font-medium mb-2">Available Dates</h4>
+              <h4 className="font-medium mb-2">Available Time Slots</h4>
               <div className="space-y-2">
-                {selectedListing.availabilities.map((date: string) => (
-                  <label key={date} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedDates.includes(date)}
-                      onChange={() => toggleDateSelection(date)}
-                      className="rounded"
-                    />
-                    <span className="text-sm">{new Date(date).toLocaleDateString()}</span>
-                  </label>
-                ))}
+                {selectedListing.availabilities.map((slot: AvailabilitySlotDto, index: number) => {
+                  const slotId = `${slot.date || slot.startTime}-${index}`;
+                  const isSelected = selectedSlots.some(s =>
+                    s.startTime === slot.startTime &&
+                    s.endTime === slot.endTime &&
+                    s.date === slot.date
+                  );
+                  return (
+                    <label key={slotId} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSlotSelection(slot)}
+                        className="rounded"
+                      />
+                      <span className="text-sm">
+                        {(() => {
+                          // Try to get date from slot.date first
+                          if (slot.date) {
+                            return slot.date;
+                          }
+                          // Try to parse date from startTime
+                          if (slot.startTime) {
+                            try {
+                              const date = new Date(slot.startTime);
+                              return isNaN(date.getTime()) ? 'Invalid date format' : date.toLocaleDateString();
+                            } catch {
+                              return `Raw: ${slot.startTime}`;
+                            }
+                          }
+                          return 'No date available';
+                        })()}
+                        {slot.startTime && slot.endTime && (
+                          <>
+                            {' ('}
+                            {(() => {
+                              try {
+                                const start = new Date(slot.startTime);
+                                const end = new Date(slot.endTime);
+                                if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                                  return `${slot.startTime} - ${slot.endTime}`;
+                                }
+                                return `${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                              } catch {
+                                return `${slot.startTime} - ${slot.endTime}`;
+                              }
+                            })()}
+                            {')'}
+                          </>
+                        )}
+                      </span>
+                    </label>
+                  );
+                })}
               </div>
             </div>
 
@@ -248,11 +314,20 @@ export default function PaymentPage() {
                     SGD ${item.listing.price.toLocaleString()}
                   </p>
                   <div className="mt-2">
-                    <p className="text-sm font-medium">Selected Dates:</p>
+                    <p className="text-sm font-medium">Selected Time Slots:</p>
                     <div className="flex flex-wrap gap-2 mt-1">
-                      {item.selectedDates.map(date => (
-                        <span key={date} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                          {new Date(date).toLocaleDateString()}
+                      {item.selectedSlots.map((slot, index) => (
+                        <span key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                          {slot.date ? slot.date : slot.startTime ? new Date(slot.startTime).toLocaleDateString() : 'No date'}
+                          {slot.startTime && slot.endTime && (
+                            <>
+                              {' ('}
+                              {new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              {' - '}
+                              {new Date(slot.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              {')'}
+                            </>
+                          )}
                         </span>
                       ))}
                     </div>
@@ -321,8 +396,8 @@ export default function PaymentPage() {
       {/* Current Wedding Info */}
       <div className="bg-gray-50 rounded-lg p-4">
         <h3 className="font-semibold mb-2">Current Wedding:</h3>
-        <p>{selectedWedding.weddingName} - {new Date(selectedWedding.date).toLocaleDateString()}</p>
-        <p className="text-sm text-gray-600">Budget: SGD ${selectedWedding.budget?.toLocaleString() || 'Not set'}</p>
+        <p>{selectedWedding.name} - {new Date(selectedWedding.date).toLocaleDateString()}</p>
+        <p className="text-sm text-gray-600">Budget: {selectedWedding.budgetBucket}</p>
       </div>
     </div>
   );

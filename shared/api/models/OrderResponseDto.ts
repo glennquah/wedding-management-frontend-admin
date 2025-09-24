@@ -22,10 +22,6 @@ export type OrderResponseDto = {
      */
     purchaseDate: string;
     /**
-     * Expiration time for pending orders
-     */
-    expiresAt?: string;
-    /**
      * Additional remarks about the order
      */
     remark?: string;
