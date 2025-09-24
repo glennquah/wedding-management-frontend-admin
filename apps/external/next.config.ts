@@ -9,7 +9,19 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Enable for better compatibility with OpenNext
+    esmExternals: 'loose',
+  },
+  images: {
+    // Configure for CloudFront/S3 compatibility
+    unoptimized: process.env.NODE_ENV === 'production',
+  },
+  // Ensure static assets work with CloudFront
+  assetPrefix: process.env.NODE_ENV === 'production' ? undefined : '',
   trailingSlash: false,
+  // Output configuration for OpenNext
+  output: 'standalone',
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,

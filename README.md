@@ -90,22 +90,154 @@ export default function MyPage() {
 - Turbo (monorepo build system)
 - Direct imports (no build step for UI components)
 
-version: 1
-applications:
+## Production Deployment Architecture
 
-- appRoot: apps/external
-  frontend:
-  phases:
-  preBuild:
-  commands: - npm install
-  build:
-  commands: - echo "🔧 Exporting environment variables..." - export NEXTAUTH_SECRET=$NEXTAUTH_SECRET
-            - export NEXT_PUBLIC_NEXTAUTH_URL=$NEXT_PUBLIC_NEXTAUTH_URL - export GITHUB_ID=$GITHUB_ID
-            - export GITHUB_SECRET=$GITHUB_SECRET - export OPENAI_API_KEY=$OPENAI_API_KEY
-            - export NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=$NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME - export NEXT_PUBLIC_CLOUDINARY_PRESET_NAME=$NEXT_PUBLIC_CLOUDINARY_PRESET_NAME - npm run build:external
-  artifacts:
-  baseDirectory: apps/external/.next
-  files: - "**/\*"
-  cache:
-  paths: - node_modules/**/\*
-  buildPath: /
+The application is deployed using **OpenNext** on **AWS** with **SST (Serverless Stack)** for infrastructure management.
+
+### Live URLs
+
+- **External App (Public)**: https://knotly.app
+- **Internal App (Admin)**: https://core.knotly.app
+
+### Infrastructure Overview
+
+```
+┌─────────────────────┐    ┌─────────────────────┐
+│   Route 53 (DNS)    │    │   CloudFront CDN    │
+│   - knotly.app      │───▶│   - Global Edge     │
+│   - core.knotly.app │    │   - SSL/TLS Certs   │
+└─────────────────────┘    └─────────────────────┘
+                                      │
+                           ┌─────────────────────┐
+                           │    S3 Buckets       │
+                           │   - Static Assets   │
+                           │   - Build Artifacts │
+                           └─────────────────────┘
+                                      │
+                           ┌─────────────────────┐
+                           │  Lambda Functions   │
+                           │   - SSR Rendering   │
+                           │   - API Routes      │
+                           │   - Image Optimize  │
+                           └─────────────────────┘
+                                      │
+                           ┌─────────────────────┐
+                           │     DynamoDB        │
+                           │  - Revalidation     │
+                           │  - Cache Control    │
+                           └─────────────────────┘
+```
+
+### Technology Stack
+
+| Component              | Technology      | Purpose                                   |
+| ---------------------- | --------------- | ----------------------------------------- |
+| **Frontend Framework** | Next.js 15.4.6  | Server-side rendering & static generation |
+| **Deployment**         | OpenNext v3.6.6 | Next.js to AWS adapter                    |
+| **Infrastructure**     | SST v3.17.14    | Infrastructure as Code                    |
+| **CDN**                | AWS CloudFront  | Global content delivery                   |
+| **DNS**                | AWS Route53     | Domain management                         |
+| **Storage**            | AWS S3          | Static assets & build artifacts           |
+| **Compute**            | AWS Lambda      | Serverless functions                      |
+| **Database**           | AWS DynamoDB    | Caching & revalidation                    |
+| **Queue**              | AWS SQS         | Background processing                     |
+| **CI/CD**              | GitHub Actions  | Automated deployments                     |
+
+### 📦 Deployment Process
+
+1. **Build Phase**: Turbo builds both Next.js applications
+2. **Bundle Phase**: OpenNext converts Next.js apps to AWS-compatible bundles
+3. **Infrastructure Phase**: SST provisions/updates AWS resources
+4. **Deploy Phase**: Applications deployed to Lambda + CloudFront
+5. **DNS Phase**: Route53 records updated automatically
+
+### 🔧 Key AWS Resources Created
+
+- **2x CloudFront Distributions** (one per app)
+- **2x S3 Buckets** for static assets
+- **6+ Lambda Functions** (SSR, image optimization, revalidation)
+- **2x DynamoDB Tables** for caching
+- **2x SQS Queues** for background jobs
+- **SSL Certificates** via ACM
+- **Route53 Records** for DNS
+
+## 🔄 CI/CD Pipeline
+
+### GitHub Actions Workflow
+
+- **Trigger**: Push to `main` branch
+- **Steps**: Install → Build → Deploy to AWS
+- **Secrets**: Managed via GitHub Secrets
+
+### 📝 Adding New Environment Variables
+
+When you need to add new environment variables, follow these **3 steps**:
+
+#### Step 1: Update SST Configuration
+
+Edit `sst.config.ts` and add to the `environment` section:
+
+```typescript
+// In sst.config.ts
+environment: {
+  // Existing variables...
+  NEW_ENV_VAR: process.env.NEW_ENV_VAR || "fallback-value",
+  ANOTHER_SECRET: process.env.ANOTHER_SECRET || "",
+},
+```
+
+#### Step 2: Update GitHub Workflow
+
+Edit `.github/workflows/deploy.yml` and add to the `env` section:
+
+```yaml
+# In .github/workflows/deploy.yml
+env:
+  # Existing variables...
+  NEW_ENV_VAR: ${{ secrets.NEW_ENV_VAR }}
+  ANOTHER_SECRET: ${{ secrets.ANOTHER_SECRET }}
+```
+
+#### Step 3: Add GitHub Secrets
+
+1. Go to your GitHub repository
+2. Navigate to **Settings** → **Secrets and variables** → **Actions**
+3. Click **New repository secret**
+4. Add your secrets:
+   - Name: `NEW_ENV_VAR`
+   - Value: `your-actual-production-value`
+
+#### Step 4: Deploy
+
+Push to `main` branch or manually trigger the workflow. The new environment variables will be automatically deployed.
+
+### 🔐 Current Environment Variables
+
+| Variable                             | Purpose                | App      |
+| ------------------------------------ | ---------------------- | -------- |
+| `NEXT_PUBLIC_API_URL`                | Backend API endpoint   | Both     |
+| `NEXTAUTH_SECRET`                    | NextAuth.js secret     | Internal |
+| `GITHUB_ID`                          | GitHub OAuth client ID | Internal |
+| `GITHUB_SECRET`                      | GitHub OAuth secret    | Internal |
+| `OPENAI_API_KEY`                     | OpenAI API access      | Internal |
+| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`  | Cloudinary config      | Both     |
+| `NEXT_PUBLIC_CLOUDINARY_PRESET_NAME` | Cloudinary preset      | Both     |
+
+### 🎯 Deployment Commands
+
+```bash
+# Deploy to production
+npm run deploy
+
+# Remove all resources
+npm run remove
+
+# Open SST console
+npm run sst:console
+```
+
+### 🌍 Production Monitoring
+
+- **SST Console**: https://sst.dev/u/c6a30763
+- **AWS CloudWatch**: Monitor logs and metrics
+- **CloudFront**: Global CDN performance
