@@ -55,7 +55,7 @@ export default function LoginPage() {
       }
 
       toast.success('Successfully logged in!');
-      router.push(`/${session.user.role}`);
+      router.push(`/${session.user.role.toLowerCase()}`);
     } catch (err) {
       console.error('Unexpected error:', err);
       toast.error('Something went wrong. Please try again.');

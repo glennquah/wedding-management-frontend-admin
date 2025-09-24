@@ -2,15 +2,15 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CancelablePromise } from '../core/CancelablePromise';
-import { OpenAPI } from '../core/OpenAPI';
-import { request as __request } from '../core/request';
 import type { CreateSeatingArrangementDto } from '../models/CreateSeatingArrangementDto';
 import type { HallLayoutDto } from '../models/HallLayoutDto';
 import type { SeatingArrangementResponseDto } from '../models/SeatingArrangementResponseDto';
 import type { SeatingRequestDto } from '../models/SeatingRequestDto';
 import type { SeatingResultDto } from '../models/SeatingResultDto';
 import type { UpdateSeatingArrangementDto } from '../models/UpdateSeatingArrangementDto';
+import type { CancelablePromise } from '../core/CancelablePromise';
+import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from '../core/request';
 export class SeatingArrangementsService {
     /**
      * Create seating arrangement for a wedding

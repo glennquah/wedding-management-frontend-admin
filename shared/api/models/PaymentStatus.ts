@@ -6,11 +6,11 @@
  * Current payment status
  */
 export enum PaymentStatus {
-    PENDING = 'pending',
-    PROCESSING = 'processing',
-    SUCCEEDED = 'succeeded',
-    FAILED = 'failed',
-    CANCELLED = 'cancelled',
-    REFUNDED = 'refunded',
-    PARTIALLY_REFUNDED = 'partiallyRefunded',
+    PENDING = 'PENDING',
+    PROCESSING = 'PROCESSING',
+    SUCCEEDED = 'SUCCEEDED',
+    FAILED = 'FAILED',
+    CANCELLED = 'CANCELLED',
+    REFUNDED = 'REFUNDED',
+    PARTIALLY_REFUNDED = 'PARTIALLY_REFUNDED',
 }

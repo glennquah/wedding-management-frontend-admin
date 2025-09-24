@@ -10,6 +10,7 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 export type { AdminResponseDto } from './models/AdminResponseDto';
 export { AllEmailNotificationHistoryResponseDto } from './models/AllEmailNotificationHistoryResponseDto';
 export type { AuthResponseDto } from './models/AuthResponseDto';
+export type { AvailabilitySlotDto } from './models/AvailabilitySlotDto';
 export { BudgetBucket } from './models/BudgetBucket';
 export type { CheckoutSessionResponseDto } from './models/CheckoutSessionResponseDto';
 export { ConfirmationStatus } from './models/ConfirmationStatus';
@@ -82,4 +83,3 @@ export { SuperAdminsService } from './services/SuperAdminsService';
 export { UsersService } from './services/UsersService';
 export { VendorsService } from './services/VendorsService';
 export { WeddingsService } from './services/WeddingsService';
-
