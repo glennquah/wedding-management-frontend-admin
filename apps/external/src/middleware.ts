@@ -1,29 +1,31 @@
 import { UserRole } from '@shared/api';
+import type { NextRequestWithAuth } from 'next-auth/middleware';
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
 
+// Define public pages that don't require authentication
+const publicPages = [
+  '/',
+  '/login',
+  '/forgot-password',
+  '/reset-password',
+  '/get-started',
+  '/essentials',
+  '/the-big-day',
+  '/for-businesses',
+  '/guest-&-vendor',
+];
+
 export default withAuth(
-  function middleware(req) {
+  function middleware(req: NextRequestWithAuth) {
     const { pathname } = req.nextUrl;
-    const token = req.nextauth.token;
 
-    // Define public pages that don't require authentication
-    const publicPages = [
-      '/',
-      '/login',
-      '/forgot-password',
-      '/reset-password',
-      '/get-started',
-      '/essentials',
-      '/the-big-day',
-      '/for-businesses',
-      '/guest-&-vendor',
-    ];
-
-    // Allow access to public pages
+    // For public pages, bypass NextAuth authentication check
     if (publicPages.some((page) => pathname.startsWith(page))) {
       return NextResponse.next();
     }
+
+    const token = req.nextauth.token;
 
     // Check if user is authenticated for protected pages
     if (!token) {
@@ -39,7 +41,11 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: () => true,
+      authorized: ({ req }) => {
+        const { pathname } = req.nextUrl;
+        // Always authorize public pages to prevent auth errors when backend is down
+        return publicPages.some((page) => pathname.startsWith(page)) || true;
+      },
     },
     cookies: {
       sessionToken: {
