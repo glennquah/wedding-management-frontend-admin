@@ -16,21 +16,25 @@ A monorepo containing both external (customer-facing) and internal (admin) Next.
 ## Getting Started
 
 Install dependencies:
+
 ```bash
 npm install
 ```
 
 Build all packages:
+
 ```bash
 npm run build
 ```
 
 Start development servers:
+
 ```bash
 npm run dev
 ```
 
 This will start:
+
 - External app on http://localhost:3000
 - Internal app on http://localhost:3001
 
@@ -41,8 +45,8 @@ The `shared/components/` folder provides shared React components that can be imp
 ### Usage
 
 ```tsx
-import { Button } from "@shared/components/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@shared/components/card";
+import { Button } from '@shared/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/card';
 
 export default function MyPage() {
   return (
@@ -63,16 +67,18 @@ export default function MyPage() {
 ### Adding UI Components
 
 **Add New Components:**
+
 1. Create component in `shared/components/ui/`
 2. Import directly in your apps using relative paths
 
 **Add shadcn/ui Components:**
+
 - Copy them manually from the shadcn website & add it into the `shared/components/ui` path.
 
 ### Development Commands
 
 - **Start development**: `npm run dev`
-- **Build all apps**: `npm run build` 
+- **Build all apps**: `npm run build`
 - **Lint all packages**: `npm run lint`
 
 ## Tech Stack

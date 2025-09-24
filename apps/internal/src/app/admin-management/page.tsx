@@ -125,7 +125,6 @@ export default function AdminManagementPage() {
     setDeleteConfirmAdmin(null);
   };
 
-  const openEmailModal = (admin: { name: string; email: string }) => setEmailModalAdmin(admin);
   const closeEmailModal = () => setEmailModalAdmin(null);
 
   const fetchAdmins = async () => {

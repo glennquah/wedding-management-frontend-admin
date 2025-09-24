@@ -2,12 +2,15 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CreateSeatingArrangementDto } from '../models/CreateSeatingArrangementDto';
-import type { SeatingArrangementResponseDto } from '../models/SeatingArrangementResponseDto';
-import type { UpdateSeatingArrangementDto } from '../models/UpdateSeatingArrangementDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
+import type { CreateSeatingArrangementDto } from '../models/CreateSeatingArrangementDto';
+import type { HallLayoutDto } from '../models/HallLayoutDto';
+import type { SeatingArrangementResponseDto } from '../models/SeatingArrangementResponseDto';
+import type { SeatingRequestDto } from '../models/SeatingRequestDto';
+import type { SeatingResultDto } from '../models/SeatingResultDto';
+import type { UpdateSeatingArrangementDto } from '../models/UpdateSeatingArrangementDto';
 export class SeatingArrangementsService {
     /**
      * Create seating arrangement for a wedding
@@ -95,6 +98,53 @@ export class SeatingArrangementsService {
             },
             errors: {
                 404: `Seating arrangement not found.`,
+            },
+        });
+    }
+    /**
+     * Get hall layout for guest count bucket
+     * @param weddingId Wedding ID
+     * @param guestCountBucket Guest count bucket (e.g., SMALL, MEDIUM, LARGE)
+     * @returns HallLayoutDto Hall layout retrieved successfully.
+     * @throws ApiError
+     */
+    public static seatingArrangementControllerGetHallLayout(
+        weddingId: number,
+        guestCountBucket: string,
+    ): CancelablePromise<HallLayoutDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/weddings/{weddingId}/seating-arrangement/layout/{guestCountBucket}',
+            path: {
+                'weddingId': weddingId,
+                'guestCountBucket': guestCountBucket,
+            },
+            errors: {
+                404: `Hall layout not found for the specified bucket.`,
+            },
+        });
+    }
+    /**
+     * Optimize seating arrangement
+     * @param weddingId Wedding ID
+     * @param requestBody
+     * @returns SeatingResultDto Seating optimization completed successfully.
+     * @throws ApiError
+     */
+    public static seatingArrangementControllerOptimizeSeating(
+        weddingId: number,
+        requestBody: SeatingRequestDto,
+    ): CancelablePromise<SeatingResultDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/weddings/{weddingId}/seating-arrangement/optimize',
+            path: {
+                'weddingId': weddingId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                400: `Invalid seating request data.`,
             },
         });
     }

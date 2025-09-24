@@ -5,6 +5,7 @@
 import type { AdminResponseDto } from '../models/AdminResponseDto';
 import type { CreateAdminDto } from '../models/CreateAdminDto';
 import type { UpdateAdminDto } from '../models/UpdateAdminDto';
+import type { WeddingResponseDto } from '../models/WeddingResponseDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -73,6 +74,20 @@ export class AdminsService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/admins/my-main-wedding',
+            errors: {
+                404: `Admin not found.`,
+            },
+        });
+    }
+    /**
+     * Get all weddings associated with the logged-in admin
+     * @returns WeddingResponseDto List of weddings associated with the admin
+     * @throws ApiError
+     */
+    public static adminControllerGetMyWeddings(): CancelablePromise<Array<WeddingResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/admins/my-weddings',
             errors: {
                 404: `Admin not found.`,
             },

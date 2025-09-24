@@ -6,12 +6,12 @@
  * Preferred wedding services
  */
 export enum WeddingService {
-    VENUE = 'venue',
-    CATERING = 'catering',
-    PHOTOGRAPHY = 'photography',
-    DECORATION = 'decoration',
-    MUSIC = 'music',
-    ATTIRE = 'attire',
-    MAKEUP = 'makeup',
-    TRANSPORTATION = 'transportation',
+    VENUE = 'VENUE',
+    CATERING = 'CATERING',
+    PHOTOGRAPHY = 'PHOTOGRAPHY',
+    DECORATION = 'DECORATION',
+    MUSIC = 'MUSIC',
+    ATTIRE = 'ATTIRE',
+    MAKEUP = 'MAKEUP',
+    TRANSPORTATION = 'TRANSPORTATION',
 }

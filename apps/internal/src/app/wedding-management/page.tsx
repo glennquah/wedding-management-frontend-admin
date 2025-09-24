@@ -185,6 +185,12 @@ export default function WeddingManagementPage() {
   const handleEditWedding = async () => {
     if (!editWedding.id) return;
 
+    // Validate required fields for edit
+    if (!editWedding.name?.trim()) {
+      toast.error('Wedding name is required');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const updateData: UpdateWeddingDto = {
