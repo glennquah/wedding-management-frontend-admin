@@ -2,11 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { GuestCountBucket as SeatingGuestCountBucket } from '../../../lib/seating';
+import { GuestCountBucket as SeatingGuestCountBucket } from '@shared/api';
 import { useGuestManager } from '../../hooks/useGuestManager';
 import { useSeatingManager } from '../../hooks/useSeatingManager';
 import { useWeddingManager } from '../../hooks/useWeddingManager';
-import { useWeddingStore } from '../../store/sessionStore';
 import { PriorityRankingDialog } from './components/PriorityRankingDialog';
 import { SeatingVisualization } from './components/SeatingVisualization';
 import { ConfirmationStatus, GuestCountBucket } from '@shared/api';
@@ -34,7 +33,6 @@ export default function SeatingArrangementPage() {
 
   const { guests } = useGuestManager();
   const { wedding, isLoading: isLoadingWedding } = useWeddingManager();
-  const selectedWeddingId = useWeddingStore((state) => state.selectedWeddingId);
   const {
     guestCountBucket,
     setGuestCountBucket,
@@ -45,10 +43,9 @@ export default function SeatingArrangementPage() {
     isLoadingLayout,
     optimizeSeating,
     loadLayout,
-    loadSeatingArrangementWithLayout,
     saveGroupPriorities,
     moveGuest,
-  } = useSeatingManager(selectedWeddingId!);
+  } = useSeatingManager();
 
   // Get group priorities from seating arrangement or initialize empty
   const groupPriorities = seatingArrangement?.groupPriorities || null;
@@ -64,7 +61,7 @@ export default function SeatingArrangementPage() {
 
   // Calculate stats
   const totalConfirmed = confirmedGuests.length;
-  const availableSeats = layout ? layout.tables.length * 10 : 0;
+  const availableSeats = layout ? layout.layout.tables.length * 10 : 0;
 
   const { guestRequests, orphanedAccompanyingGuests, primaryRequestsById } = useMemo(() => {
     const primaryGuestIds = new Set(confirmedPrimaryGuests.map((g) => g.id));
@@ -121,9 +118,9 @@ export default function SeatingArrangementPage() {
       const mappedBucket = mapGuestCountBucket(wedding.guestCountBucket);
       setGuestCountBucket(mappedBucket);
       // Load both seating arrangement and layout together to ensure proper visualization
-      loadSeatingArrangementWithLayout(mappedBucket);
+      loadLayout(mappedBucket);
     }
-  }, [wedding, guestCountBucket, setGuestCountBucket, loadSeatingArrangementWithLayout]);
+  }, [wedding, guestCountBucket, setGuestCountBucket, loadLayout]);
 
   // Auto-load layout when guest count bucket is available (fallback for when no seating arrangement exists)
   useEffect(() => {
