@@ -1,9 +1,17 @@
+import { config } from 'dotenv';
 import type { NextConfig } from 'next';
 import path from 'path';
-import { config } from 'dotenv';
 
 // Load .env from app's root directory
-config({ path: path.resolve(__dirname, '.env') });
+const envPath = path.resolve(__dirname, '.env');
+console.log('🔍 Loading .env from:', envPath);
+const result = config({ path: envPath });
+if (result.error) {
+  console.error('❌ Failed to load .env:', result.error);
+} else {
+  console.log('✅ .env loaded successfully');
+  console.log('🔑 NEXTAUTH_SECRET present:', !!process.env.NEXTAUTH_SECRET);
+}
 
 const nextConfig: NextConfig = {
   trailingSlash: false,
