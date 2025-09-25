@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
 import { EmailModal } from '../../../../../shared/components/EmailModal';
 import GuestSummaryStats from '../../../../../shared/components/guest-management/GuestSummaryStats';
+import { useGuestManager } from '../hooks/useGuestManager';
 import { getGuestColumns } from '@shared/columns/guest-columns';
 import {
   Button,
@@ -16,172 +15,45 @@ import FormField from '@shared/components/FormField';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import { Input } from '@shared/components/ui/form/input';
 import { SingleSelectDropdown } from '@shared/components/ui/form/singleSelectDropdown';
-import {
-  ConfirmationStatus,
-  CreateGuestDto,
-  GuestResponseDto,
-  GuestsService,
-  UpdateGuestDto,
-} from '@wedding/api-types';
+import { ConfirmationStatus, CreateGuestDto } from '@wedding/api-types';
 import { Plus, Trash2 } from 'lucide-react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
 
 export const dynamic = 'force-dynamic';
 
 export default function GuestManagementPage() {
-  const router = useRouter();
-  const { data: session } = useSession();
+  const {
+    // Core data
+    guests,
+    primaryGuests,
+    existingGroups,
+    isLoading,
 
-  // Core data
-  const [guests, setGuests] = useState<GuestResponseDto[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+    // Modal states
+    editingGuest,
+    deleteConfirmGuest,
+    isSubmitting,
+    emailModalGuest,
 
-  // Modal states
-  const [editingGuest, setEditingGuest] = useState<GuestResponseDto | null>(null);
-  const [deleteConfirmGuest, setDeleteConfirmGuest] = useState<GuestResponseDto | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [emailModalGuest, setEmailModalGuest] = useState<GuestResponseDto | null>(null);
+    // Form data
+    setEditingGuest,
 
+    // Form field management
+    addAccompanyingGuestField,
+    removeAccompanyingGuestField,
+    updateAccompanyingGuestName,
 
-  // Mock existing groups (you can replace this with actual API call)
-  const [existingGroups] = useState<string[]>(['Family', 'Friends', 'Colleagues', 'Relatives']);
+    // Handlers
+    handleUpdateGuest,
+    confirmDeleteGuest,
+    handleEditGuest,
+    handleSendEmail,
 
-  // Fetch guests data
-  useEffect(() => {
-    const fetchGuests = async () => {
-      try {
-        setIsLoading(true);
-        const guestsData = await GuestsService.guestControllerGetAllGuests();
-        setGuests(guestsData);
-      } catch (error) {
-        console.error('Failed to fetch guests:', error);
-        toast.error('Failed to load guests');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchGuests();
-  }, [session?.user, router]);
-
-  // Get primary guests (guests who are not accompanying someone else)
-  const primaryGuests = guests.filter((guest) => !guest.primaryGuestId);
-
-  const closeEditGuestModal = () => {
-    setEditingGuest(null);
-  };
-
-  const openDeleteConfirmModal = (guest: GuestResponseDto) => {
-    setDeleteConfirmGuest(guest);
-  };
-
-  const closeDeleteConfirmModal = () => {
-    setDeleteConfirmGuest(null);
-  };
-
-  const closeEmailModal = () => {
-    setEmailModalGuest(null);
-  };
-
-  // Handlers
-
-  const handleUpdateGuest = async () => {
-    if (!editingGuest?.id) return;
-
-    setIsSubmitting(true);
-    try {
-      if (!editingGuest.name || !editingGuest.email || !editingGuest.group) {
-        toast.error('Please fill in all required fields');
-        return;
-      }
-
-      const updateData: UpdateGuestDto = {
-        name: editingGuest.name,
-        email: editingGuest.email,
-        group: editingGuest.group,
-        allergies: editingGuest.allergies || '',
-        confirmationStatus:
-          editingGuest.confirmationStatus === ConfirmationStatus.PENDING
-            ? ConfirmationStatus.PENDING
-            : editingGuest.confirmationStatus === ConfirmationStatus.CONFIRMED
-              ? ConfirmationStatus.CONFIRMED
-              : ConfirmationStatus.REJECTED,
-      };
-
-      await GuestsService.guestControllerUpdate(editingGuest.id, updateData);
-      toast.success('Guest updated successfully!');
-      closeEditGuestModal();
-      // Refresh guests list
-      const guestsData = await GuestsService.guestControllerGetAllGuests();
-      setGuests(guestsData);
-    } catch (error) {
-      console.error('Failed to update guest:', error);
-      toast.error('Failed to update guest');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const confirmDeleteGuest = async () => {
-    if (!deleteConfirmGuest?.id) return;
-
-    setIsSubmitting(true);
-    try {
-      await GuestsService.guestControllerDelete(deleteConfirmGuest.id);
-      toast.success('Guest deleted successfully!');
-      closeDeleteConfirmModal();
-      // Refresh guests list
-      const guestsData = await GuestsService.guestControllerGetAllGuests();
-      setGuests(guestsData);
-    } catch (error) {
-      console.error('Failed to delete guest:', error);
-      toast.error('Failed to delete guest');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleEditGuest = (guest: GuestResponseDto) => {
-    setEditingGuest(guest);
-  };
-
-  const handleSendEmail = () => {
-    toast.info('Email functionality coming soon!');
-    closeEmailModal();
-  };
-
-  // Form field management functions
-  const addAccompanyingGuestField = (
-    guest: Partial<CreateGuestDto & { id?: number }>,
-    setGuest: React.Dispatch<React.SetStateAction<Partial<CreateGuestDto & { id?: number }>>>,
-  ) => {
-    const currentNames = guest.accompanyingGuestNames || [''];
-    setGuest({ ...guest, accompanyingGuestNames: [...currentNames, ''] });
-  };
-
-  const removeAccompanyingGuestField = (
-    index: number,
-    guest: Partial<CreateGuestDto & { id?: number }>,
-    setGuest: React.Dispatch<React.SetStateAction<Partial<CreateGuestDto & { id?: number }>>>,
-  ) => {
-    const currentNames = guest.accompanyingGuestNames || [];
-    const updatedNames = currentNames.filter((_, i) => i !== index);
-    setGuest({ ...guest, accompanyingGuestNames: updatedNames });
-  };
-
-  const updateAccompanyingGuestName = (
-    index: number,
-    value: string,
-    guest: Partial<CreateGuestDto & { id?: number }>,
-    setGuest: React.Dispatch<React.SetStateAction<Partial<CreateGuestDto & { id?: number }>>>,
-  ) => {
-    const currentNames = guest.accompanyingGuestNames || [];
-    const updatedNames = [...currentNames];
-    updatedNames[index] = value;
-    setGuest({ ...guest, accompanyingGuestNames: updatedNames });
-  };
+    // Modal controls
+    closeEditGuestModal,
+    openDeleteConfirmModal,
+    closeDeleteConfirmModal,
+    closeEmailModal,
+  } = useGuestManager();
 
   // Column definitions for DataTable using shared columns
   const columns = getGuestColumns({
