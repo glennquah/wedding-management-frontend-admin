@@ -117,20 +117,22 @@ export default function SeatingArrangementPage() {
     };
   }, [confirmedPrimaryGuests, confirmedAccompanyingGuests]);
 
-  // Auto-set guest count bucket from wedding data and load seating arrangement with layout
+  // Auto-set guest count bucket from wedding data
   useEffect(() => {
     if (wedding?.guestCountBucket && !guestCountBucket) {
       const mappedBucket = mapGuestCountBucket(wedding.guestCountBucket);
       setGuestCountBucket(mappedBucket);
-      // Load both seating arrangement and layout together to ensure proper visualization
-      loadLayout(mappedBucket, tablesPerRow ?? undefined);
     }
-  }, [wedding, guestCountBucket, setGuestCountBucket, loadLayout, tablesPerRow]);
+  }, [wedding, guestCountBucket, setGuestCountBucket]);
 
-  // Auto-load layout when guest count bucket or tables per row changes
+  // Auto-load layout when guest count bucket or tables per row changes, with guards.
   useEffect(() => {
     if (guestCountBucket) {
-      loadLayout(guestCountBucket, tablesPerRow ?? undefined);
+      const isLargeBucket = guestCountBucket === SeatingGuestCountBucket.LARGE;
+
+      if (!isLargeBucket || (isLargeBucket && tablesPerRow)) {
+        loadLayout(guestCountBucket, tablesPerRow ?? undefined);
+      }
     }
   }, [guestCountBucket, tablesPerRow, loadLayout]);
 
@@ -152,32 +154,35 @@ export default function SeatingArrangementPage() {
 
       if (!guestCountBucket) return;
 
-      if (orphanedAccompanyingGuests.length > 0) {
-        // Check what happened to their primary guests
-        const orphanedPrimaryIds = [
-          ...new Set(orphanedAccompanyingGuests.map((g) => g.primaryGuestId)),
-        ];
-        orphanedPrimaryIds.forEach((primaryId) => {
-          guests.find((g) => g.id === primaryId);
-        });
-      }
-
-      // Also check if any primary guests have no accompanying guests when they should
-      confirmedPrimaryGuests.forEach((primaryGuest) => {
-        const req = primaryRequestsById[primaryGuest.id];
-        if (!req) {
-          return;
+      // Only proceed to optimize seating if a valid number of tables per row has been selected.
+      if (newTablesPerRow !== null) {
+        if (orphanedAccompanyingGuests.length > 0) {
+          // Check what happened to their primary guests
+          const orphanedPrimaryIds = [
+            ...new Set(orphanedAccompanyingGuests.map((g) => g.primaryGuestId)),
+          ];
+          orphanedPrimaryIds.forEach((primaryId) => {
+            guests.find((g) => g.id === primaryId);
+          });
         }
-      });
 
-      const request = {
-        guests: guestRequests,
-        guest_count_bucket: guestCountBucket,
-        group_priorities: priorities,
-        tables_per_row: newTablesPerRow || undefined,
-      };
+        // Also check if any primary guests have no accompanying guests when they should
+        confirmedPrimaryGuests.forEach((primaryGuest) => {
+          const req = primaryRequestsById[primaryGuest.id];
+          if (!req) {
+            return;
+          }
+        });
 
-      await optimizeSeating(request);
+        const request = {
+          guests: guestRequests,
+          guest_count_bucket: guestCountBucket,
+          group_priorities: priorities,
+          tables_per_row: newTablesPerRow,
+        };
+
+        await optimizeSeating(request);
+      }
     } catch (error) {
       console.error('Error saving priorities:', error);
     }

@@ -9,6 +9,7 @@ import {
   SeatingArrangementsService,
   SeatingRequestDto,
   SeatingResultDto,
+  UpdateSeatingArrangementDto,
 } from '@shared/api';
 
 export function useSeatingManager() {
@@ -96,8 +97,8 @@ export function useSeatingManager() {
       if (!currentWeddingId) return;
 
       try {
-        const updateData: any = { groupPriorities: priorities };
-        if (tablesPerRowValue !== undefined) {
+        const updateData: UpdateSeatingArrangementDto = { groupPriorities: priorities };
+        if (tablesPerRowValue != null) {
           updateData.tablesPerRow = tablesPerRowValue;
         }
 
@@ -188,7 +189,7 @@ export function useSeatingManager() {
             tables[tableIndex] = result.seating_arrangement![tableNumber];
           });
 
-          // Save tables to database
+          // Save tables to database. The { tables } object conforms to the UpdateSeatingArrangementDto
           const updatedResponse =
             await SeatingArrangementsService.seatingArrangementControllerUpdate(currentWeddingId, {
               tables,
@@ -343,8 +344,8 @@ export function useSeatingManager() {
       const targetTableIdNum = parseInt(targetTableId);
 
       // Find table capacities from layout
-      const sourceTable = layout.layout?.tables.find(t => t.id === sourceTableIdNum);
-      const targetTable = layout.layout?.tables.find(t => t.id === targetTableIdNum);
+      const sourceTable = layout.layout?.tables.find((t) => t.id === sourceTableIdNum);
+      const targetTable = layout.layout?.tables.find((t) => t.id === targetTableIdNum);
 
       if (!sourceTable || !targetTable) {
         console.error('Table not found in layout');
@@ -356,8 +357,13 @@ export function useSeatingManager() {
       const targetGuests = [...(seatingResult.seating_arrangement[targetTableIdNum] || [])];
 
       // Validate capacity limits
-      if (sourceGuests.length > targetTable.capacity || targetGuests.length > sourceTable.capacity) {
-        console.warn(`Swap would exceed capacity limits. Source: ${sourceGuests.length}/${sourceTable.capacity}, Target: ${targetGuests.length}/${targetTable.capacity}`);
+      if (
+        sourceGuests.length > targetTable.capacity ||
+        targetGuests.length > sourceTable.capacity
+      ) {
+        console.warn(
+          `Swap would exceed capacity limits. Source: ${sourceGuests.length}/${sourceTable.capacity}, Target: ${targetGuests.length}/${targetTable.capacity}`,
+        );
         // Still allow the swap but log a warning - the user might want to do this intentionally
       }
 
@@ -391,8 +397,6 @@ export function useSeatingManager() {
 
         // Update the seating arrangement state
         setSeatingArrangement(updatedSeatingArrangementResponseDto);
-
-        console.log(`Successfully swapped tables ${sourceTableId} and ${targetTableId}`);
       } catch (error) {
         console.error('Error swapping tables:', error);
 

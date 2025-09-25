@@ -244,3 +244,5 @@ export const TableDropZone = forwardRef<TableDropZoneRef, TableDropZoneProps>(
     );
   },
 );
+
+TableDropZone.displayName = 'TableDropZone';
