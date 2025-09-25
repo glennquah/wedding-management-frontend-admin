@@ -26,13 +26,17 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: () => true,
+      authorized: ({ token, req }) => {
+        // Allow the middleware to run - we'll handle auth logic in the middleware function
+        return true;
+      },
     },
     cookies: {
       sessionToken: {
         name: 'next-auth.session-token-internal',
       },
     },
+    secret: process.env.NEXTAUTH_SECRET,
   },
 );
 
