@@ -80,6 +80,26 @@ export class ListingsService {
         });
     }
     /**
+     * Get a listing by ID
+     * @param id
+     * @returns ListingResponseDto The listing details.
+     * @throws ApiError
+     */
+    public static listingControllerFindById(
+        id: number,
+    ): CancelablePromise<ListingResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/listings/{id}',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Listing not found.`,
+            },
+        });
+    }
+    /**
      * Search listings by vendor name
      * @param vendorId
      * @param listingName

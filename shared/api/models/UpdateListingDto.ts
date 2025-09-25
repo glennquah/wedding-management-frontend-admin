@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AvailabilitySlotDto } from './AvailabilitySlotDto';
 export type UpdateListingDto = {
     /**
      * The name of the listing
@@ -12,12 +13,16 @@ export type UpdateListingDto = {
      */
     price?: number;
     /**
-     * Available dates for the listing
+     * Available time slots for the listing
      */
-    availabilities?: Array<string>;
+    availabilities?: Array<AvailabilitySlotDto>;
     /**
      * Additional remarks about the listing
      */
     remarks?: string;
+    /**
+     * Array of image URLs for the listing
+     */
+    imageUrls?: Array<string>;
 };
 

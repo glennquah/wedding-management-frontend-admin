@@ -11,13 +11,13 @@
   "dependencies": {
     "@radix-ui/react-slot": "^1.0.2",
     "@tailwindcss/postcss": "^4.1.12",
+    "@wedding/api-types": "*",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "next": "15.4.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "tailwind-merge": "^2.0.0",
-    "@wedding/api-types": "*"
+    "tailwind-merge": "^2.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
