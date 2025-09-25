@@ -2,14 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { GuestCountBucket as SeatingGuestCountBucket } from '../../../lib/seating';
 import { useGuestManager } from '../../hooks/useGuestManager';
 import { useSeatingManager } from '../../hooks/useSeatingManager';
 import { useWeddingManager } from '../../hooks/useWeddingManager';
-import { useWeddingStore } from '../../store/sessionStore';
 import { PriorityRankingDialog } from './components/PriorityRankingDialog';
 import { SeatingVisualization } from './components/SeatingVisualization';
-import { ConfirmationStatus, GuestCountBucket } from '@shared/api';
+import {
+  ConfirmationStatus,
+  GuestCountBucket,
+  GuestCountBucket as SeatingGuestCountBucket,
+} from '@shared/api';
 import { PageHeader } from '@shared/components';
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
 import { Settings2 } from 'lucide-react';
@@ -34,10 +36,10 @@ export default function SeatingArrangementPage() {
 
   const { guests } = useGuestManager();
   const { wedding, isLoading: isLoadingWedding } = useWeddingManager();
-  const selectedWeddingId = useWeddingStore((state) => state.selectedWeddingId);
   const {
     guestCountBucket,
     setGuestCountBucket,
+    tablesPerRow,
     layout,
     seatingResult,
     seatingArrangement,
@@ -45,10 +47,10 @@ export default function SeatingArrangementPage() {
     isLoadingLayout,
     optimizeSeating,
     loadLayout,
-    loadSeatingArrangementWithLayout,
     saveGroupPriorities,
     moveGuest,
-  } = useSeatingManager(selectedWeddingId!);
+    swapTables,
+  } = useSeatingManager();
 
   // Get group priorities from seating arrangement or initialize empty
   const groupPriorities = seatingArrangement?.groupPriorities || null;
@@ -64,7 +66,7 @@ export default function SeatingArrangementPage() {
 
   // Calculate stats
   const totalConfirmed = confirmedGuests.length;
-  const availableSeats = layout ? layout.tables.length * 10 : 0;
+  const availableSeats = layout ? layout.layout.tables.length * 10 : 0;
 
   const { guestRequests, orphanedAccompanyingGuests, primaryRequestsById } = useMemo(() => {
     const primaryGuestIds = new Set(confirmedPrimaryGuests.map((g) => g.id));
@@ -115,22 +117,24 @@ export default function SeatingArrangementPage() {
     };
   }, [confirmedPrimaryGuests, confirmedAccompanyingGuests]);
 
-  // Auto-set guest count bucket from wedding data and load seating arrangement with layout
+  // Auto-set guest count bucket from wedding data
   useEffect(() => {
     if (wedding?.guestCountBucket && !guestCountBucket) {
       const mappedBucket = mapGuestCountBucket(wedding.guestCountBucket);
       setGuestCountBucket(mappedBucket);
-      // Load both seating arrangement and layout together to ensure proper visualization
-      loadSeatingArrangementWithLayout(mappedBucket);
     }
-  }, [wedding, guestCountBucket, setGuestCountBucket, loadSeatingArrangementWithLayout]);
+  }, [wedding, guestCountBucket, setGuestCountBucket]);
 
-  // Auto-load layout when guest count bucket is available (fallback for when no seating arrangement exists)
+  // Auto-load layout when guest count bucket or tables per row changes, with guards.
   useEffect(() => {
-    if (guestCountBucket && !seatingArrangement) {
-      loadLayout(guestCountBucket);
+    if (guestCountBucket) {
+      const isLargeBucket = guestCountBucket === SeatingGuestCountBucket.LARGE;
+
+      if (!isLargeBucket || (isLargeBucket && tablesPerRow)) {
+        loadLayout(guestCountBucket, tablesPerRow ?? undefined);
+      }
     }
-  }, [guestCountBucket, loadLayout, seatingArrangement]);
+  }, [guestCountBucket, tablesPerRow, loadLayout]);
 
   const handleOptimizeSeating = async () => {
     if (!guestCountBucket || confirmedPrimaryGuests.length === 0) return;
@@ -139,41 +143,56 @@ export default function SeatingArrangementPage() {
     setShowPriorityDialog(true);
   };
 
-  const handlePrioritySet = async (priorities: Record<string, number>) => {
+  const handlePrioritySet = async (
+    priorities: Record<string, number>,
+    newTablesPerRow: number | null,
+  ) => {
     try {
-      await saveGroupPriorities(priorities);
+      await saveGroupPriorities(priorities, newTablesPerRow);
+
       setShowPriorityDialog(false);
 
       if (!guestCountBucket) return;
 
-      if (orphanedAccompanyingGuests.length > 0) {
-        // Check what happened to their primary guests
-        const orphanedPrimaryIds = [
-          ...new Set(orphanedAccompanyingGuests.map((g) => g.primaryGuestId)),
-        ];
-        orphanedPrimaryIds.forEach((primaryId) => {
-          guests.find((g) => g.id === primaryId);
-        });
-      }
-
-      // Also check if any primary guests have no accompanying guests when they should
-      confirmedPrimaryGuests.forEach((primaryGuest) => {
-        const req = primaryRequestsById[primaryGuest.id];
-        if (!req) {
-          return;
+      // Only proceed to optimize seating if a valid number of tables per row has been selected.
+      if (newTablesPerRow !== null) {
+        if (orphanedAccompanyingGuests.length > 0) {
+          // Check what happened to their primary guests
+          const orphanedPrimaryIds = [
+            ...new Set(orphanedAccompanyingGuests.map((g) => g.primaryGuestId)),
+          ];
+          orphanedPrimaryIds.forEach((primaryId) => {
+            guests.find((g) => g.id === primaryId);
+          });
         }
-      });
 
-      const request = {
-        guests: guestRequests,
-        guest_count_bucket: guestCountBucket,
-        group_priorities: priorities,
-      };
+        // Also check if any primary guests have no accompanying guests when they should
+        confirmedPrimaryGuests.forEach((primaryGuest) => {
+          const req = primaryRequestsById[primaryGuest.id];
+          if (!req) {
+            return;
+          }
+        });
 
-      await optimizeSeating(request);
+        const request = {
+          guests: guestRequests,
+          guest_count_bucket: guestCountBucket,
+          group_priorities: priorities,
+          tables_per_row: newTablesPerRow,
+        };
+
+        await optimizeSeating(request);
+      }
     } catch (error) {
       console.error('Error saving priorities:', error);
-      // You might want to show a toast notification here
+    }
+  };
+
+  const handleTableSwap = async (sourceTableId: string, targetTableId: string) => {
+    try {
+      await swapTables(sourceTableId, targetTableId);
+    } catch (error) {
+      console.error('Error in table swap:', error);
     }
   };
 
@@ -204,6 +223,7 @@ export default function SeatingArrangementPage() {
             seatingResult={seatingResult}
             isLoading={isOptimizing || isLoadingLayout}
             onGuestMove={moveGuest}
+            onTableSwap={handleTableSwap}
           />
         )}
 
@@ -232,6 +252,8 @@ export default function SeatingArrangementPage() {
           open={showPriorityDialog}
           guests={confirmedGuests}
           currentPriorities={groupPriorities}
+          guestCountBucket={guestCountBucket}
+          tablesPerRow={tablesPerRow}
           onSave={handlePrioritySet}
           onClose={() => setShowPriorityDialog(false)}
         />

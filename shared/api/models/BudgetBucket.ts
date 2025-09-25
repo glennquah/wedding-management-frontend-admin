@@ -6,8 +6,8 @@
  * Budget bucket
  */
 export enum BudgetBucket {
-    LOW = 'low',
-    MEDIUM = 'medium',
-    HIGH = 'high',
-    LUXURY = 'luxury',
+    LOW = 'LOW',
+    MEDIUM = 'MEDIUM',
+    HIGH = 'HIGH',
+    LUXURY = 'LUXURY',
 }

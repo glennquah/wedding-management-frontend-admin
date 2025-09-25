@@ -100,7 +100,7 @@ export default function GetStartedPage() {
           {/* Role selection */}
           <RoleSelection role={role} setRole={setRole} />
           {/* Vendor fields */}
-          {role === 'vendor' && (
+          {role === UserRole.VENDOR && (
             <>
             {/* Wedding Type (multi select) */}
             <MultiSelectDropdown
@@ -161,7 +161,7 @@ export default function GetStartedPage() {
             />            
             </>
           )}
-          {role === 'admin' ? (
+          {role === UserRole.ADMIN ? (
             <Button
               type='button'
               className='w-full mt-4'

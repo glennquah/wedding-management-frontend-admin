@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
-import { HallLayout, SeatingResult } from '../../../../lib/seating';
+import { HallLayoutDto, SeatingResultDto } from '@shared/api';
 import { Skeleton } from '@shared/components/ui/skeleton';
-import { TableDropZone } from './TableDropZone';
+import { TableDropZone, TableDropZoneRef } from './TableDropZone';
 
 interface SeatingVisualizationProps {
-  layout: HallLayout;
-  seatingResult?: SeatingResult | null;
+  layout: HallLayoutDto;
+  seatingResult?: SeatingResultDto | null;
   isLoading?: boolean;
   onGuestMove?: (guestName: string, fromTable: string, toTable: string) => void;
+  onTableClick?: (tableId: number) => void;
+  onTableSwap?: (sourceTableId: string, targetTableId: string) => void;
 }
 
 export function SeatingVisualization({
@@ -16,10 +18,14 @@ export function SeatingVisualization({
   seatingResult,
   isLoading,
   onGuestMove,
+  onTableClick,
+  onTableSwap,
 }: SeatingVisualizationProps) {
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [draggedGuest, setDraggedGuest] = useState<{ name: string; fromTable: string } | null>(null);
   const [dragOverTable, setDragOverTable] = useState<string | null>(null);
+  const [swapSourceTable, setSwapSourceTable] = useState<string | null>(null);
+  const tableRefs = useRef<Record<string, TableDropZoneRef | null>>({});
 
   // Drag and drop handlers
   const handleGuestDragStart = (guestName: string, fromTable: string) => {
@@ -54,6 +60,35 @@ export function SeatingVisualization({
     setDragOverTable(null);
   };
 
+  const handleSVGTableClick = (tableId: number) => {
+    const tableIdStr = tableId.toString();
+    const tableRef = tableRefs.current[tableIdStr];
+
+    if (tableRef) {
+      // First expand the accordion
+      tableRef.expand();
+
+      // Then scroll to show the full expanded component after a brief delay
+      setTimeout(() => {
+        tableRef.scrollIntoView();
+      }, 100);
+    }
+  };
+
+  // Swap table handlers
+  const handleInitiateSwap = (tableId: string) => {
+    setSwapSourceTable(tableId);
+  };
+
+  const handleSwapWith = (sourceTableId: string, targetTableId: string) => {
+    onTableSwap?.(sourceTableId, targetTableId);
+    setSwapSourceTable(null);
+  };
+
+  const handleCancelSwap = () => {
+    setSwapSourceTable(null);
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -65,10 +100,11 @@ export function SeatingVisualization({
 
   // Calculate responsive canvas dimensions
   const padding = 8;
-  const maxX = Math.max(...layout.tables.map((t) => t.x)) + padding;
-  const maxY = Math.max(...layout.tables.map((t) => t.y)) + padding;
-  const minX = Math.min(...layout.tables.map((t) => t.x)) - padding;
-  const minY = Math.min(...layout.tables.map((t) => t.y)) - padding;
+  const tables = layout.layout?.tables || [];
+  const maxX = Math.max(...tables.map((t) => t.x)) + padding;
+  const maxY = Math.max(...tables.map((t) => t.y)) + padding;
+  const minX = Math.min(...tables.map((t) => t.x)) - padding;
+  const minY = Math.min(...tables.map((t) => t.y)) - padding;
 
   const width = maxX - minX;
   const height = maxY - minY;
@@ -171,7 +207,7 @@ export function SeatingVisualization({
             </g>
 
             {/* Tables */}
-            {layout.tables.map((table) => {
+            {tables.map((table) => {
               const assignedGuests = seatingResult?.seating_arrangement?.[table.id] || [];
               const isOccupied = assignedGuests.length > 0;
               const isOverCapacity = assignedGuests.length > table.capacity;
@@ -181,7 +217,11 @@ export function SeatingVisualization({
                 <g
                   key={table.id}
                   className="cursor-pointer transition-all duration-200 hover:opacity-80"
-                  onClick={() => setSelectedTable(isSelected ? null : table.id)}
+                  onClick={() => {
+                    setSelectedTable(isSelected ? null : table.id);
+                    onTableClick?.(table.id);
+                    handleSVGTableClick(table.id);
+                  }}
                 >
                   {/* Table Shadow */}
                   <circle
@@ -316,7 +356,7 @@ export function SeatingVisualization({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {layout.tables
+            {tables
               .sort((a, b) => a.id - b.id)
               .map((table) => {
                 const tableId = table.id.toString();
@@ -324,6 +364,9 @@ export function SeatingVisualization({
                 return (
                   <TableDropZone
                     key={tableId}
+                    ref={(ref) => {
+                      tableRefs.current[tableId] = ref;
+                    }}
                     tableId={tableId}
                     guests={guests}
                     capacity={table.capacity}
@@ -334,6 +377,12 @@ export function SeatingVisualization({
                     onDrop={handleTableDrop}
                     onGuestDragStart={handleGuestDragStart}
                     onGuestDragEnd={handleGuestDragEnd}
+                    isSwapMode={!!swapSourceTable}
+                    isSelectedForSwap={swapSourceTable === tableId}
+                    swapSourceTableId={swapSourceTable}
+                    onInitiateSwap={handleInitiateSwap}
+                    onSwapWith={handleSwapWith}
+                    onCancelSwap={handleCancelSwap}
                   />
                 );
               })}

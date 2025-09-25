@@ -25,6 +25,7 @@ async function refreshToken(token: JWT): Promise<JWT> {
 }
 
 export const authOptions: NextAuthOptions = {
+  secret: 'hardcoded-nextauth-secret-for-development-12345',
   providers: [
     CredentialsProvider({
       name: 'Credentials',

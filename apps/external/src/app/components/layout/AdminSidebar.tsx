@@ -3,6 +3,7 @@
 import { signOut } from '../../store/sessionStore';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
+  BellDot,
   Calendar,
   CheckSquare,
   Clock,
@@ -25,6 +26,11 @@ const tabs = [
         title: 'Progress Tracker',
         href: '/progress-tracker',
         icon: Clock,
+      },
+      {
+        title: 'Notification Templates',
+        href: '/notification-templates',
+        icon: BellDot,
       },
     ],
   },

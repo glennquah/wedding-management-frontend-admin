@@ -1,22 +1,23 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { toast } from 'sonner';
+import { useCallback, useState } from 'react';
+
 import {
   AdminResponseDto,
   AdminsService,
   SuperAdminResponseDto,
   SuperAdminsService,
-  VendorResponseDto,
-  VendorsService,
   UpdateAdminDto,
   UpdateSuperAdminDto,
   UpdateVendorDto,
   UserRole,
+  VendorResponseDto,
+  VendorsService,
   WeddingService,
   WeddingStyle,
   WeddingType,
 } from '../api';
+import { toast } from 'sonner';
 
 type UserData = AdminResponseDto | SuperAdminResponseDto | VendorResponseDto;
 
@@ -86,7 +87,7 @@ export const useEditProfile = ({ userId, userRole, onProfileUpdate }: UseEditPro
 
       if (userRole === UserRole.ADMIN) {
         data = await AdminsService.adminControllerGetAdmin(userId);
-      } else if (userRole === UserRole.SUPER_ADMIN) {
+      } else if (userRole === UserRole.SUPERADMIN) {
         data = await SuperAdminsService.superAdminControllerGetAdmin(userId);
       } else if (userRole === UserRole.VENDOR) {
         data = await VendorsService.vendorControllerGetVendor(userId);
@@ -126,30 +127,37 @@ export const useEditProfile = ({ userId, userRole, onProfileUpdate }: UseEditPro
     });
   }, []);
 
-  const handleInputChange = useCallback((field: string, value: any) => {
-    setFormData(prev => {
-      const newData = {
-        ...prev,
-        [field]: value,
-      };
+  const handleInputChange = useCallback(
+    (field: string, value: any) => {
+      setFormData((prev) => {
+        const newData = {
+          ...prev,
+          [field]: value,
+        };
 
-      // If service changes from venue to another service, clear capacity
-      if (field === 'serviceOffered' && prev.serviceOffered === WeddingService.VENUE && value !== WeddingService.VENUE) {
-        newData.capacity = null;
-      }
+        // If service changes from venue to another service, clear capacity
+        if (
+          field === 'serviceOffered' &&
+          prev.serviceOffered === WeddingService.VENUE &&
+          value !== WeddingService.VENUE
+        ) {
+          newData.capacity = null;
+        }
 
-      return newData;
-    });
-
-    // Clear validation errors for the field being changed
-    if (validationErrors[field]) {
-      setValidationErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
+        return newData;
       });
-    }
-  }, [validationErrors]);
+
+      // Clear validation errors for the field being changed
+      if (validationErrors[field]) {
+        setValidationErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
+      }
+    },
+    [validationErrors],
+  );
 
   const validateForm = useCallback(() => {
     const errors: { [key: string]: string } = {};
@@ -209,21 +217,32 @@ export const useEditProfile = ({ userId, userRole, onProfileUpdate }: UseEditPro
         updateData.weddingTypes = formData.weddingTypes;
       }
       // Only update capacity if service is venue, otherwise set to 0
-      const capacityValue = formData.serviceOffered === WeddingService.VENUE ? formData.capacity : 0;
+      const capacityValue =
+        formData.serviceOffered === WeddingService.VENUE ? formData.capacity : 0;
       if (capacityValue !== vendorData.capacity) {
         updateData.capacity = capacityValue;
       }
     }
 
     // Only update if there are changes
-    if (Object.keys(updateData).length > 1) { // More than just role
+    if (Object.keys(updateData).length > 1) {
+      // More than just role
       let updatedData;
       if (userRole === UserRole.ADMIN) {
-        updatedData = await AdminsService.adminControllerUpdate(userId, updateData as UpdateAdminDto);
-      } else if (userRole === UserRole.SUPER_ADMIN) {
-        updatedData = await SuperAdminsService.superAdminControllerUpdate(userId, updateData as UpdateSuperAdminDto);
+        updatedData = await AdminsService.adminControllerUpdate(
+          userId,
+          updateData as UpdateAdminDto,
+        );
+      } else if (userRole === UserRole.SUPERADMIN) {
+        updatedData = await SuperAdminsService.superAdminControllerUpdate(
+          userId,
+          updateData as UpdateSuperAdminDto,
+        );
       } else if (userRole === UserRole.VENDOR) {
-        updatedData = await VendorsService.vendorControllerUpdate(userId, updateData as UpdateVendorDto);
+        updatedData = await VendorsService.vendorControllerUpdate(
+          userId,
+          updateData as UpdateVendorDto,
+        );
       }
 
       if (updatedData) {
@@ -233,28 +252,31 @@ export const useEditProfile = ({ userId, userRole, onProfileUpdate }: UseEditPro
     }
   }, [userId, userRole, userData, formData, populateFormData]);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (!validateForm()) {
-      toast.error('Please fix the validation errors before submitting');
-      return;
-    }
+      if (!validateForm()) {
+        toast.error('Please fix the validation errors before submitting');
+        return;
+      }
 
-    try {
-      setIsSaving(true);
-      await updateUserProfile();
-      setIsEditing(false);
-      setValidationErrors({});
-      toast.success('Profile updated successfully');
-      onProfileUpdate?.();
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      toast.error('Failed to update profile');
-    } finally {
-      setIsSaving(false);
-    }
-  }, [validateForm, updateUserProfile, onProfileUpdate]);
+      try {
+        setIsSaving(true);
+        await updateUserProfile();
+        setIsEditing(false);
+        setValidationErrors({});
+        toast.success('Profile updated successfully');
+        onProfileUpdate?.();
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        toast.error('Failed to update profile');
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [validateForm, updateUserProfile, onProfileUpdate],
+  );
 
   const handleCancel = useCallback(() => {
     if (userData) populateFormData(userData);
@@ -262,36 +284,39 @@ export const useEditProfile = ({ userId, userRole, onProfileUpdate }: UseEditPro
     setIsEditing(false);
   }, [userData, populateFormData]);
 
-  const handleDeleteProfile = useCallback(async (password?: string) => {
-    if (!password || !userId || !userRole) return;
+  const handleDeleteProfile = useCallback(
+    async (password?: string) => {
+      if (!password || !userId || !userRole) return;
 
-    try {
-      setIsDeletingProfile(true);
+      try {
+        setIsDeletingProfile(true);
 
-      if (userRole === UserRole.ADMIN) {
-        await AdminsService.adminControllerDeleteSelf({ password });
-      } else if (userRole === UserRole.VENDOR) {
-        await VendorsService.vendorControllerDeleteSelf({ password });
+        if (userRole === UserRole.ADMIN) {
+          await AdminsService.adminControllerDeleteSelf({ password });
+        } else if (userRole === UserRole.VENDOR) {
+          await VendorsService.vendorControllerDeleteSelf({ password });
+        }
+
+        setShowDeleteModal(false);
+        toast.success('Profile deleted successfully. Thanks for using Knotly!');
+        onProfileUpdate?.();
+
+        const { signOut } = await import('next-auth/react');
+        await signOut({ callbackUrl: `${window.location.origin}/login`, redirect: true });
+      } catch (error: any) {
+        console.error('Error deleting profile:', error);
+
+        if (error?.status === 401 || error?.status === 403) {
+          toast.error('Invalid password. Please try again.');
+        } else {
+          toast.error('Failed to delete profile. Please try again.');
+        }
+      } finally {
+        setIsDeletingProfile(false);
       }
-
-      setShowDeleteModal(false);
-      toast.success('Profile deleted successfully. Thanks for using Knotly!');
-      onProfileUpdate?.();
-
-      const { signOut } = await import('next-auth/react');
-      await signOut({ callbackUrl: `${window.location.origin}/login`, redirect: true });
-    } catch (error: any) {
-      console.error('Error deleting profile:', error);
-
-      if (error?.status === 401 || error?.status === 403) {
-        toast.error('Invalid password. Please try again.');
-      } else {
-        toast.error('Failed to delete profile. Please try again.');
-      }
-    } finally {
-      setIsDeletingProfile(false);
-    }
-  }, [userId, userRole, onProfileUpdate]);
+    },
+    [userId, userRole, onProfileUpdate],
+  );
 
   const handleCancelDelete = useCallback(() => {
     setShowDeleteModal(false);

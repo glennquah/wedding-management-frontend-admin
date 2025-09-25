@@ -1,6 +1,7 @@
 'use client';
 
 import VendorSidebar from '../components/layout/VendorSidebar';
+import { VendorSessionProvider } from '../../contexts/VendorSessionContext';
 import { UserRole } from '@shared/api';
 import NavigationBar from '@shared/components/NavigationBar';
 import { SidebarProvider } from '@shared/components/ui/sidebar';
@@ -32,15 +33,17 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
   }
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <VendorSidebar />
-      <div className="flex w-full h-screen overflow-hidden">
-        <div className="flex-1 flex flex-col min-w-0">
-          <NavigationBar session={session} />
-          <main className="flex-1 overflow-y-auto">{children}</main>
+    <VendorSessionProvider>
+      <SidebarProvider defaultOpen={true}>
+        <VendorSidebar />
+        <div className="flex w-full h-screen overflow-hidden">
+          <div className="flex-1 flex flex-col min-w-0">
+            <NavigationBar notificationRoute="/vendor/notifications" />
+            <main className="flex-1 overflow-y-auto">{children}</main>
+          </div>
         </div>
-      </div>
-      <Toaster />
-    </SidebarProvider>
+        <Toaster />
+      </SidebarProvider>
+    </VendorSessionProvider>
   );
 }

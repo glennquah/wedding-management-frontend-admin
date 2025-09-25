@@ -20,6 +20,10 @@ export type SeatingArrangementResponseDto = {
      */
     tables: Array<any[]>;
     /**
+     * Number of tables per row in the layout
+     */
+    tablesPerRow?: number;
+    /**
      * Creation date
      */
     createdAt: string;
