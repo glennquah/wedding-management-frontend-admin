@@ -33,83 +33,30 @@ export function ListingForm({
     if (availabilities.length === 0) return [];
 
     return availabilities.map(availability => {
-      // Handle new object format (AvailabilitySlotDto)
-      if (typeof availability === 'object' && availability.startTime && availability.endTime) {
-        // New object format
-        const startDateTime = availability.startTime;
-        const endDateTime = availability.endTime;
+      const startDateTime = availability.startTime;
+      const endDateTime = availability.endTime;
 
-        // Extract date and times
-        const [dateStr, startTimeStr] = startDateTime.split('T');
-        const [, endTimeStr] = endDateTime.split('T');
+      // Extract date and times
+      const [dateStr, startTimeStr] = startDateTime.split('T');
+      const [, endTimeStr] = endDateTime.split('T');
 
-        const startTime = startTimeStr.slice(0, 5); // Get HH:mm format
-        const endTime = endTimeStr.slice(0, 5); // Get HH:mm format
+      const startTime = startTimeStr.slice(0, 5); // Get HH:mm format
+      const endTime = endTimeStr.slice(0, 5); // Get HH:mm format
 
-        const hour = parseInt(startTime.split(':')[0]);
+      const hour = parseInt(startTime.split(':')[0]);
 
-        let period: DateWithPeriod['period'] = 'full-day';
-        if (hour >= 8 && hour < 15) {
-          period = 'morning';
-        } else if (hour >= 15 && hour < 22) {
-          period = 'afternoon';
-        }
-
-        return {
-          date: dateStr,
-          period,
-          timeRange: `${startTime} - ${endTime}`
-        };
+      let period: DateWithPeriod['period'] = 'full-day';
+      if (hour >= 8 && hour < 15) {
+        period = 'morning';
+      } else if (hour >= 15 && hour < 22) {
+        period = 'afternoon';
       }
 
-      // Handle legacy string formats for backward compatibility
-      const dateString = availability as unknown as string;
-
-      if (dateString.includes('T')) {
-        // Local timezone or ISO 8601 format
-        const [dateStr, timeStr] = dateString.split('T');
-        const hour = parseInt(timeStr.split(':')[0]);
-
-        let period: DateWithPeriod['period'] = 'full-day';
-        if (hour >= 8 && hour < 15) {
-          period = 'morning';
-        } else if (hour >= 15 && hour < 22) {
-          period = 'afternoon';
-        }
-
-        const displayTime = timeStr.slice(0, 5); // Get HH:mm format
-
-        return {
-          date: dateStr,
-          period,
-          timeRange: `${displayTime} - ${displayTime}` // For display purposes
-        };
-      } else if (dateString.includes('|')) {
-        // Legacy format: YYYY-MM-DD|HH:mm-HH:mm
-        const [date, timeRange] = dateString.split('|');
-        const [startTime] = timeRange.split('-');
-        const hour = parseInt(startTime.split(':')[0]);
-
-        let period: DateWithPeriod['period'] = 'full-day';
-        if (hour >= 8 && hour < 15) {
-          period = 'morning';
-        } else if (hour >= 15 && hour < 22) {
-          period = 'afternoon';
-        }
-
-        return {
-          date,
-          period,
-          timeRange: timeRange.replace('-', ' - ')
-        };
-      } else {
-        // Legacy format - treat as full day
-        return {
-          date: dateString,
-          period: 'full-day' as const,
-          timeRange: '00:00 - 23:59'
-        };
-      }
+      return {
+        date: dateStr,
+        period,
+        timeRange: `${startTime} - ${endTime}`
+      };
     });
   }, [formData.availabilities]);
 
