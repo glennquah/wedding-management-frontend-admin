@@ -18,7 +18,7 @@ type GuestFormData = Partial<CreateGuestDto> & {
 
 export function useGuestManager() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   // Core data
   const [guests, setGuests] = useState<GuestResponseDto[]>([]);
@@ -182,10 +182,12 @@ export function useGuestManager() {
     setGuest({ ...guest, accompanyingGuestNames: updatedNames });
   };
 
-  // Initialize data
+  // Initialize data - only fetch if user is authenticated and authorized
   useEffect(() => {
-    fetchGuests();
-  }, [fetchGuests, session?.user, router]);
+    if (status === 'authenticated' && session?.user?.role === 'SUPERADMIN') {
+      fetchGuests();
+    }
+  }, [fetchGuests, session?.user?.role, status]);
 
   return {
     // Core data

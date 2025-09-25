@@ -7,7 +7,8 @@ import { cn } from '@shared/components/lib/utils';
 import { SidebarProvider, useSidebar } from '@shared/components/ui/sidebar';
 import { Toaster } from '@shared/components/ui/sonner';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 
 function MainContent({ children }: { children: React.ReactNode }) {
   const sidebar = useSidebar();
@@ -27,6 +28,25 @@ function MainContent({ children }: { children: React.ReactNode }) {
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
+
+  const isLoginPage = pathname === '/login';
+
+  useEffect(() => {
+    if (status !== 'loading' && !isLoginPage && (!session?.user || session.user.role !== UserRole.SUPERADMIN)) {
+      router.push('/login');
+    }
+  }, [session, status, router, isLoginPage]);
+
+  // If it's the login page, render it without authentication checks
+  if (isLoginPage) {
+    return (
+      <>
+        <main className="flex flex-1 flex-col overflow-y-auto">{children}</main>
+        <Toaster />
+      </>
+    );
+  }
 
   if (status === 'loading') {
     return (
@@ -40,13 +60,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   }
 
   if (!session?.user || session.user.role !== UserRole.SUPERADMIN) {
-    router.push('/login');
-    return (
-      <>
-        <main className="flex flex-1 flex-col overflow-y-auto">{children}</main>
-        <Toaster />
-      </>
-    );
+    return null;
   }
 
   return (
