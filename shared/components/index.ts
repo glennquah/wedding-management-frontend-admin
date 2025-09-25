@@ -1,4 +1,5 @@
 // UI Components
+export { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 export { Badge, badgeVariants } from './ui/badge';
 export { Button } from './ui/button';
 export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';

@@ -105,12 +105,14 @@ export class SeatingArrangementsService {
      * Get hall layout for guest count bucket
      * @param weddingId Wedding ID
      * @param guestCountBucket Guest count bucket (e.g., SMALL, MEDIUM, LARGE)
+     * @param tablesPerRow Number of tables per row for layout selection (optional)
      * @returns HallLayoutDto Hall layout retrieved successfully.
      * @throws ApiError
      */
     public static seatingArrangementControllerGetHallLayout(
         weddingId: number,
         guestCountBucket: string,
+        tablesPerRow?: number,
     ): CancelablePromise<HallLayoutDto> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -118,6 +120,9 @@ export class SeatingArrangementsService {
             path: {
                 'weddingId': weddingId,
                 'guestCountBucket': guestCountBucket,
+            },
+            query: {
+                'tables_per_row': tablesPerRow,
             },
             errors: {
                 404: `Hall layout not found for the specified bucket.`,

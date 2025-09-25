@@ -9,6 +9,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@shared/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@shared/components/ui/select';
 import { ArrowDown, ArrowUp, GripVertical } from 'lucide-react';
 
 interface Guest {
@@ -19,7 +26,9 @@ interface PriorityRankingDialogProps {
   open: boolean;
   guests: Guest[];
   currentPriorities: Record<string, number> | null;
-  onSave: (priorities: Record<string, number>) => void;
+  guestCountBucket: string | null;
+  tablesPerRow: number | null;
+  onSave: (priorities: Record<string, number>, tablesPerRow: number) => void;
   onClose: () => void;
 }
 
@@ -27,24 +36,27 @@ export function PriorityRankingDialog({
   open,
   guests,
   currentPriorities,
+  guestCountBucket,
+  tablesPerRow,
   onSave,
   onClose,
 }: PriorityRankingDialogProps) {
-  // Get unique groups from guests - memoized to prevent infinite re-renders
   const uniqueGroups = useMemo(() => {
     return Array.from(new Set(guests.map((guest) => guest.group || 'Others')));
   }, [guests]);
 
-  // Initialize priorities - either from current or auto-assigned values
   const [groupOrder, setGroupOrder] = useState<string[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
-  // Update groupOrder when uniqueGroups changes
+  // Define default tables per row based on guest count. This will always be a number.
+  const defaultTables = guestCountBucket === 'MEDIUM' ? 4 : 6;
+  const [selectedTablesPerRow, setSelectedTablesPerRow] = useState(tablesPerRow ?? defaultTables);
+
   React.useEffect(() => {
-    if (uniqueGroups.length > 0) {
+    if (open) {
+      // Re-initialize state when the dialog opens to ensure it's fresh
       if (currentPriorities) {
-        // Sort groups by current priority (highest first)
         setGroupOrder(
           [...uniqueGroups].sort(
             (a, b) => (currentPriorities[b] || 0) - (currentPriorities[a] || 0),
@@ -53,21 +65,23 @@ export function PriorityRankingDialog({
       } else {
         setGroupOrder([...uniqueGroups]);
       }
+      // Reset tables per row based on props every time the dialog is opened
+      setSelectedTablesPerRow(tablesPerRow ?? (guestCountBucket === 'MEDIUM' ? 4 : 6));
     }
-  }, [uniqueGroups, currentPriorities]);
+  }, [open, uniqueGroups, currentPriorities, tablesPerRow, guestCountBucket]);
 
-  // Generate priorities based on order: highest priority gets highest number
   const generatePriorities = (order: string[]): Record<string, number> => {
     const priorities: Record<string, number> = {};
     order.forEach((group, index) => {
-      priorities[group] = (order.length - index) * 2; // Start from highest and go down by 2
+      priorities[group] = (order.length - index) * 2;
     });
     return priorities;
   };
 
   const handleSave = () => {
     const finalPriorities = generatePriorities(groupOrder);
-    onSave(finalPriorities);
+    // The state is always a number, so we can pass it directly.
+    onSave(finalPriorities, selectedTablesPerRow);
   };
 
   const moveGroup = (fromIndex: number, toIndex: number) => {
@@ -123,7 +137,6 @@ export function PriorityRankingDialog({
 
             return (
               <div key={group} className="relative">
-                {/* Drop indicator above */}
                 {isDropTarget && draggedIndex !== null && draggedIndex > index && (
                   <div className="absolute -top-1 left-0 right-0 h-0.5 bg-brand-500 rounded-full z-10" />
                 )}
@@ -172,7 +185,6 @@ export function PriorityRankingDialog({
                   </div>
                 </div>
 
-                {/* Drop indicator below */}
                 {isDropTarget && draggedIndex !== null && draggedIndex < index && (
                   <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-brand-500 rounded-full z-10" />
                 )}
@@ -181,7 +193,43 @@ export function PriorityRankingDialog({
           })}
         </div>
 
-        {/* Disclaimer */}
+        {guestCountBucket && (guestCountBucket === 'MEDIUM' || guestCountBucket === 'LARGE') && (
+          <div className="mt-6 p-4 border rounded-lg bg-gray-50">
+            <div className="flex flex-col gap-3">
+              <label htmlFor="tables-per-row" className="text-sm font-medium text-gray-700">
+                Tables per Row
+              </label>
+              <Select
+                value={selectedTablesPerRow.toString()}
+                onValueChange={(value) => {
+                  setSelectedTablesPerRow(parseInt(value, 10));
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select tables per row" />
+                </SelectTrigger>
+                <SelectContent>
+                  {guestCountBucket === 'MEDIUM' ? (
+                    <>
+                      <SelectItem value="4">4 tables per row</SelectItem>
+                      <SelectItem value="6">6 tables per row</SelectItem>
+                    </>
+                  ) : (
+                    <>
+                      <SelectItem value="4">4 tables per row</SelectItem>
+                      <SelectItem value="6">6 tables per row</SelectItem>
+                      <SelectItem value="8">8 tables per row</SelectItem>
+                    </>
+                  )}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-600">
+                Choose how many tables to display per row in your seating layout
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
           <p className="text-yellow-800 text-sm">
             ⚠️ <strong>Notice:</strong> Any previously generated seating arrangement will not be
