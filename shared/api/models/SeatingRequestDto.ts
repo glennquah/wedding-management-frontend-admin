@@ -14,5 +14,9 @@ export type SeatingRequestDto = {
      * Mapping of groups to their priorities
      */
     group_priorities: Record<string, any>;
+    /**
+     * Number of tables per row for layout selection
+     */
+    tables_per_row?: number;
 };
 

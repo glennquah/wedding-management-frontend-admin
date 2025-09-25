@@ -14,6 +14,8 @@ import {
 export function useSeatingManager() {
   const currentWeddingId = useWeddingStore((state) => state.selectedWeddingId);
   const [guestCountBucket, setGuestCountBucket] = useState<GuestCountBucket | null>(null);
+
+  const [tablesPerRow, setTablesPerRow] = useState<number | null>(null);
   const [layout, setLayout] = useState<HallLayoutDto | null>(null);
   const [seatingResult, setSeatingResult] = useState<SeatingResultDto | null>(null);
   const [seatingArrangement, setSeatingArrangement] =
@@ -30,6 +32,11 @@ export function useSeatingManager() {
       const arrangement =
         await SeatingArrangementsService.seatingArrangementControllerFindOne(currentWeddingId);
       setSeatingArrangement(arrangement);
+
+      // Load tablesPerRow from the seating arrangement
+      if (arrangement?.tablesPerRow) {
+        setTablesPerRow(arrangement.tablesPerRow);
+      }
 
       // If arrangement exists and has tables, create seating result for visualization
       if (arrangement?.tables && arrangement.tables.length > 0) {
@@ -63,7 +70,7 @@ export function useSeatingManager() {
   }, [currentWeddingId, loadSeatingArrangement]);
 
   const loadLayout = useCallback(
-    async (bucket: GuestCountBucket) => {
+    async (bucket: GuestCountBucket, tablesPerRowParam?: number) => {
       if (!bucket || !currentWeddingId) return;
 
       setIsLoadingLayout(true);
@@ -72,6 +79,7 @@ export function useSeatingManager() {
           await SeatingArrangementsService.seatingArrangementControllerGetHallLayout(
             currentWeddingId,
             bucket,
+            typeof tablesPerRowParam === 'number' ? tablesPerRowParam : undefined,
           );
         setLayout(layoutData);
       } catch (error) {
@@ -84,59 +92,55 @@ export function useSeatingManager() {
   );
 
   const saveGroupPriorities = useCallback(
-    async (priorities: Record<string, number>) => {
+    async (priorities: Record<string, number>, tablesPerRowValue?: number | null) => {
       if (!currentWeddingId) return;
 
       try {
+        const updateData: any = { groupPriorities: priorities };
+        if (tablesPerRowValue !== undefined) {
+          updateData.tablesPerRow = tablesPerRowValue;
+        }
+
         if (seatingArrangement) {
           // Update existing arrangement
           const updated = await SeatingArrangementsService.seatingArrangementControllerUpdate(
             currentWeddingId,
-            {
-              groupPriorities: priorities,
-            },
+            updateData,
           );
           setSeatingArrangement(updated);
+
+          // Update local tablesPerRow state
+          if (tablesPerRowValue !== undefined) {
+            setTablesPerRow(tablesPerRowValue);
+          }
         } else {
           // Try to create new arrangement, but handle case where one already exists
           try {
             const response = await SeatingArrangementsService.seatingArrangementControllerCreate(
               currentWeddingId,
-              {
-                groupPriorities: priorities,
-              },
+              updateData,
             );
 
-            // Convert response to local format
-            const created: SeatingArrangementResponseDto = {
-              id: response.id,
-              weddingId: response.weddingId,
-              groupPriorities: response.groupPriorities,
-              tables: response.tables as string[][],
-              createdAt: response.createdAt,
-              updatedAt: response.updatedAt,
-            };
-            setSeatingArrangement(created);
+            setSeatingArrangement(response);
+
+            // Update local tablesPerRow state
+            if (tablesPerRowValue !== undefined) {
+              setTablesPerRow(tablesPerRowValue);
+            }
           } catch (createError) {
             // If creation fails due to existing arrangement (409), try to update instead
             if (createError instanceof ApiError && createError.status === 409) {
               const response = await SeatingArrangementsService.seatingArrangementControllerUpdate(
                 currentWeddingId,
-                {
-                  groupPriorities: priorities,
-                },
+                updateData,
               );
 
-              // Convert response to local format
-              const updated: SeatingArrangementResponseDto = {
-                id: response.id,
-                weddingId: response.weddingId,
-                groupPriorities: response.groupPriorities,
-                tables: response.tables as string[][],
-                createdAt: response.createdAt,
-                updatedAt: response.updatedAt,
-              };
-              setSeatingArrangement(updated);
+              setSeatingArrangement(response);
+
+              // Update local tablesPerRow state
+              if (tablesPerRowValue !== undefined) {
+                setTablesPerRow(tablesPerRowValue);
+              }
             } else {
               throw createError;
             }
@@ -158,8 +162,8 @@ export function useSeatingManager() {
       setSeatingResult(null);
 
       try {
-        // First, save/update group priorities
-        await saveGroupPriorities(request.group_priorities);
+        // First, save/update group priorities and tablesPerRow
+        await saveGroupPriorities(request.group_priorities, request.tables_per_row);
 
         const response: SeatingResultDto =
           await SeatingArrangementsService.seatingArrangementControllerOptimizeSeating(
@@ -216,7 +220,7 @@ export function useSeatingManager() {
 
   // Function to load seating arrangement and ensure layout is loaded for visualization
   const loadSeatingArrangementWithLayout = useCallback(
-    async (bucket: GuestCountBucket) => {
+    async (bucket: GuestCountBucket, tablesPerRowParam?: number) => {
       if (!currentWeddingId || !bucket) return;
 
       setIsLoadingArrangement(true);
@@ -229,11 +233,17 @@ export function useSeatingManager() {
           SeatingArrangementsService.seatingArrangementControllerGetHallLayout(
             currentWeddingId,
             bucket,
+            typeof tablesPerRowParam === 'number' ? tablesPerRowParam : undefined,
           ),
         ]);
 
         setSeatingArrangement(arrangement);
         setLayout(layoutData);
+
+        // Load tablesPerRow from the seating arrangement
+        if (arrangement?.tablesPerRow) {
+          setTablesPerRow(arrangement.tablesPerRow);
+        }
 
         // If arrangement exists and has tables, create seating result for visualization
         if (arrangement?.tables && arrangement.tables.length > 0) {
@@ -324,9 +334,88 @@ export function useSeatingManager() {
     [seatingResult, currentWeddingId],
   );
 
+  // Function to swap all guests between two tables
+  const swapTables = useCallback(
+    async (sourceTableId: string, targetTableId: string) => {
+      if (!seatingResult?.seating_arrangement || !currentWeddingId || !layout) return;
+
+      const sourceTableIdNum = parseInt(sourceTableId);
+      const targetTableIdNum = parseInt(targetTableId);
+
+      // Find table capacities from layout
+      const sourceTable = layout.layout?.tables.find(t => t.id === sourceTableIdNum);
+      const targetTable = layout.layout?.tables.find(t => t.id === targetTableIdNum);
+
+      if (!sourceTable || !targetTable) {
+        console.error('Table not found in layout');
+        return;
+      }
+
+      // Get current guests for both tables
+      const sourceGuests = [...(seatingResult.seating_arrangement[sourceTableIdNum] || [])];
+      const targetGuests = [...(seatingResult.seating_arrangement[targetTableIdNum] || [])];
+
+      // Validate capacity limits
+      if (sourceGuests.length > targetTable.capacity || targetGuests.length > sourceTable.capacity) {
+        console.warn(`Swap would exceed capacity limits. Source: ${sourceGuests.length}/${sourceTable.capacity}, Target: ${targetGuests.length}/${targetTable.capacity}`);
+        // Still allow the swap but log a warning - the user might want to do this intentionally
+      }
+
+      try {
+        // Update the local seating result immediately for optimistic UI
+        const updatedArrangement = { ...seatingResult.seating_arrangement };
+
+        // Swap the guests directly
+        updatedArrangement[sourceTableIdNum] = targetGuests;
+        updatedArrangement[targetTableIdNum] = sourceGuests;
+
+        // Update the seating result state immediately
+        setSeatingResult({
+          ...seatingResult,
+          seating_arrangement: updatedArrangement,
+        });
+
+        // Convert to tables array format for database persistence
+        const tables: string[][] = [];
+        const maxTableId = Math.max(...Object.keys(updatedArrangement).map(Number));
+
+        for (let i = 1; i <= maxTableId; i++) {
+          tables[i - 1] = updatedArrangement[i] || [];
+        }
+
+        // Save to database
+        const updatedSeatingArrangementResponseDto =
+          await SeatingArrangementsService.seatingArrangementControllerUpdate(currentWeddingId, {
+            tables,
+          });
+
+        // Update the seating arrangement state
+        setSeatingArrangement(updatedSeatingArrangementResponseDto);
+
+        console.log(`Successfully swapped tables ${sourceTableId} and ${targetTableId}`);
+      } catch (error) {
+        console.error('Error swapping tables:', error);
+
+        // Revert the optimistic update on error
+        const revertedArrangement = { ...seatingResult.seating_arrangement };
+        revertedArrangement[sourceTableIdNum] = sourceGuests;
+        revertedArrangement[targetTableIdNum] = targetGuests;
+
+        setSeatingResult({
+          ...seatingResult,
+          seating_arrangement: revertedArrangement,
+        });
+        throw error;
+      }
+    },
+    [seatingResult, currentWeddingId, layout],
+  );
+
   return {
     guestCountBucket,
     setGuestCountBucket,
+    tablesPerRow,
+    setTablesPerRow,
     layout,
     seatingResult,
     seatingArrangement,
@@ -339,5 +428,6 @@ export function useSeatingManager() {
     loadSeatingArrangementWithLayout,
     saveGroupPriorities,
     moveGuest,
+    swapTables,
   };
 }

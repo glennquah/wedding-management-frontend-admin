@@ -2,13 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { GuestCountBucket as SeatingGuestCountBucket } from '@shared/api';
 import { useGuestManager } from '../../hooks/useGuestManager';
 import { useSeatingManager } from '../../hooks/useSeatingManager';
 import { useWeddingManager } from '../../hooks/useWeddingManager';
 import { PriorityRankingDialog } from './components/PriorityRankingDialog';
 import { SeatingVisualization } from './components/SeatingVisualization';
-import { ConfirmationStatus, GuestCountBucket } from '@shared/api';
+import {
+  ConfirmationStatus,
+  GuestCountBucket,
+  GuestCountBucket as SeatingGuestCountBucket,
+} from '@shared/api';
 import { PageHeader } from '@shared/components';
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
 import { Settings2 } from 'lucide-react';
@@ -36,6 +39,7 @@ export default function SeatingArrangementPage() {
   const {
     guestCountBucket,
     setGuestCountBucket,
+    tablesPerRow,
     layout,
     seatingResult,
     seatingArrangement,
@@ -45,6 +49,7 @@ export default function SeatingArrangementPage() {
     loadLayout,
     saveGroupPriorities,
     moveGuest,
+    swapTables,
   } = useSeatingManager();
 
   // Get group priorities from seating arrangement or initialize empty
@@ -118,16 +123,16 @@ export default function SeatingArrangementPage() {
       const mappedBucket = mapGuestCountBucket(wedding.guestCountBucket);
       setGuestCountBucket(mappedBucket);
       // Load both seating arrangement and layout together to ensure proper visualization
-      loadLayout(mappedBucket);
+      loadLayout(mappedBucket, tablesPerRow ?? undefined);
     }
-  }, [wedding, guestCountBucket, setGuestCountBucket, loadLayout]);
+  }, [wedding, guestCountBucket, setGuestCountBucket, loadLayout, tablesPerRow]);
 
-  // Auto-load layout when guest count bucket is available (fallback for when no seating arrangement exists)
+  // Auto-load layout when guest count bucket or tables per row changes
   useEffect(() => {
-    if (guestCountBucket && !seatingArrangement) {
-      loadLayout(guestCountBucket);
+    if (guestCountBucket) {
+      loadLayout(guestCountBucket, tablesPerRow ?? undefined);
     }
-  }, [guestCountBucket, loadLayout, seatingArrangement]);
+  }, [guestCountBucket, tablesPerRow, loadLayout]);
 
   const handleOptimizeSeating = async () => {
     if (!guestCountBucket || confirmedPrimaryGuests.length === 0) return;
@@ -136,9 +141,13 @@ export default function SeatingArrangementPage() {
     setShowPriorityDialog(true);
   };
 
-  const handlePrioritySet = async (priorities: Record<string, number>) => {
+  const handlePrioritySet = async (
+    priorities: Record<string, number>,
+    newTablesPerRow: number | null,
+  ) => {
     try {
-      await saveGroupPriorities(priorities);
+      await saveGroupPriorities(priorities, newTablesPerRow);
+
       setShowPriorityDialog(false);
 
       if (!guestCountBucket) return;
@@ -165,12 +174,20 @@ export default function SeatingArrangementPage() {
         guests: guestRequests,
         guest_count_bucket: guestCountBucket,
         group_priorities: priorities,
+        tables_per_row: newTablesPerRow || undefined,
       };
 
       await optimizeSeating(request);
     } catch (error) {
       console.error('Error saving priorities:', error);
-      // You might want to show a toast notification here
+    }
+  };
+
+  const handleTableSwap = async (sourceTableId: string, targetTableId: string) => {
+    try {
+      await swapTables(sourceTableId, targetTableId);
+    } catch (error) {
+      console.error('Error in table swap:', error);
     }
   };
 
@@ -201,6 +218,7 @@ export default function SeatingArrangementPage() {
             seatingResult={seatingResult}
             isLoading={isOptimizing || isLoadingLayout}
             onGuestMove={moveGuest}
+            onTableSwap={handleTableSwap}
           />
         )}
 
@@ -229,6 +247,8 @@ export default function SeatingArrangementPage() {
           open={showPriorityDialog}
           guests={confirmedGuests}
           currentPriorities={groupPriorities}
+          guestCountBucket={guestCountBucket}
+          tablesPerRow={tablesPerRow}
           onSave={handlePrioritySet}
           onClose={() => setShowPriorityDialog(false)}
         />

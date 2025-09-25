@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 import { HallLayoutDto, SeatingResultDto } from '@shared/api';
 import { Skeleton } from '@shared/components/ui/skeleton';
-import { TableDropZone } from './TableDropZone';
+import { TableDropZone, TableDropZoneRef } from './TableDropZone';
 
 interface SeatingVisualizationProps {
   layout: HallLayoutDto;
   seatingResult?: SeatingResultDto | null;
   isLoading?: boolean;
   onGuestMove?: (guestName: string, fromTable: string, toTable: string) => void;
+  onTableClick?: (tableId: number) => void;
+  onTableSwap?: (sourceTableId: string, targetTableId: string) => void;
 }
 
 export function SeatingVisualization({
@@ -16,10 +18,14 @@ export function SeatingVisualization({
   seatingResult,
   isLoading,
   onGuestMove,
+  onTableClick,
+  onTableSwap,
 }: SeatingVisualizationProps) {
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [draggedGuest, setDraggedGuest] = useState<{ name: string; fromTable: string } | null>(null);
   const [dragOverTable, setDragOverTable] = useState<string | null>(null);
+  const [swapSourceTable, setSwapSourceTable] = useState<string | null>(null);
+  const tableRefs = useRef<Record<string, TableDropZoneRef | null>>({});
 
   // Drag and drop handlers
   const handleGuestDragStart = (guestName: string, fromTable: string) => {
@@ -52,6 +58,35 @@ export function SeatingVisualization({
     }
     setDraggedGuest(null);
     setDragOverTable(null);
+  };
+
+  const handleSVGTableClick = (tableId: number) => {
+    const tableIdStr = tableId.toString();
+    const tableRef = tableRefs.current[tableIdStr];
+
+    if (tableRef) {
+      // First expand the accordion
+      tableRef.expand();
+
+      // Then scroll to show the full expanded component after a brief delay
+      setTimeout(() => {
+        tableRef.scrollIntoView();
+      }, 100);
+    }
+  };
+
+  // Swap table handlers
+  const handleInitiateSwap = (tableId: string) => {
+    setSwapSourceTable(tableId);
+  };
+
+  const handleSwapWith = (sourceTableId: string, targetTableId: string) => {
+    onTableSwap?.(sourceTableId, targetTableId);
+    setSwapSourceTable(null);
+  };
+
+  const handleCancelSwap = () => {
+    setSwapSourceTable(null);
   };
 
   if (isLoading) {
@@ -182,7 +217,11 @@ export function SeatingVisualization({
                 <g
                   key={table.id}
                   className="cursor-pointer transition-all duration-200 hover:opacity-80"
-                  onClick={() => setSelectedTable(isSelected ? null : table.id)}
+                  onClick={() => {
+                    setSelectedTable(isSelected ? null : table.id);
+                    onTableClick?.(table.id);
+                    handleSVGTableClick(table.id);
+                  }}
                 >
                   {/* Table Shadow */}
                   <circle
@@ -325,6 +364,9 @@ export function SeatingVisualization({
                 return (
                   <TableDropZone
                     key={tableId}
+                    ref={(ref) => {
+                      tableRefs.current[tableId] = ref;
+                    }}
                     tableId={tableId}
                     guests={guests}
                     capacity={table.capacity}
@@ -335,6 +377,12 @@ export function SeatingVisualization({
                     onDrop={handleTableDrop}
                     onGuestDragStart={handleGuestDragStart}
                     onGuestDragEnd={handleGuestDragEnd}
+                    isSwapMode={!!swapSourceTable}
+                    isSelectedForSwap={swapSourceTable === tableId}
+                    swapSourceTableId={swapSourceTable}
+                    onInitiateSwap={handleInitiateSwap}
+                    onSwapWith={handleSwapWith}
+                    onCancelSwap={handleCancelSwap}
                   />
                 );
               })}
