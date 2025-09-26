@@ -51,7 +51,7 @@ function Table({ className, ...props }: React.ComponentProps<'table'>) {
     <div className="relative w-full overflow-auto">
       <table
         data-slot="table"
-        className={cn('w-full caption-bottom text-sm', className)}
+        className={cn('w-full min-w-full caption-bottom text-sm', className)}
         {...props}
       />
     </div>
@@ -334,18 +334,14 @@ function DataTable<TData>({
         /* Table */
         <>
           <div className="overflow-x-auto rounded-md border">
-            <Table style={{ tableLayout: 'fixed' }}>
-              <TableHeader>
+            <Table style={{ tableLayout: 'auto' }} className="w-full">
+                <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-transparent">
                     {headerGroup.headers.map((header) => (
                       <TableHead
                         key={header.id}
                         className="h-11"
-                        style={{
-                          width: header.getSize(),
-                          minWidth: header.getSize(),
-                        }}
                       >
                         {header.isPlaceholder ? null : header.column.getCanSort() ? (
                           <div
@@ -392,10 +388,6 @@ function DataTable<TData>({
                       {row.getVisibleCells().map((cell) => (
                         <TableCell
                           key={cell.id}
-                          style={{
-                            width: cell.column.getSize(),
-                            minWidth: cell.column.getSize(),
-                          }}
                         >
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>

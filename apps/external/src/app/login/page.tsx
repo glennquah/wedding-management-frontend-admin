@@ -29,7 +29,12 @@ export default function LoginPage() {
       });
 
       if (res?.error) {
-        toast.error('Invalid username or password');
+        // Check if the error is about account suspension
+        if (res.error === 'ACCOUNT_SUSPENDED') {
+          toast.error('Account suspended. Cannot log in. Please contact support.');
+        } else {
+          toast.error('Invalid username or password');
+        }
         return;
       }
 
@@ -38,6 +43,13 @@ export default function LoginPage() {
 
       if (!session?.user) {
         toast.error('Authentication failed. Please try again.');
+        return;
+      }
+
+      // Check if user is suspended
+      if (session.user.isSuspended) {
+        toast.error('Account suspended. Cannot log in. Please contact support.');
+        await signOut({ redirect: false });
         return;
       }
 
