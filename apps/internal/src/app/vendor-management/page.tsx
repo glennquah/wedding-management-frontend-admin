@@ -5,14 +5,12 @@ import { VendorDetailsModal } from './components/VendorDetailsModal';
 import {
   UpdateVendorDto,
   VendorOnboardingStatus,
-  VendorResponseDto,
   WeddingService,
   WeddingStyle,
   WeddingType,
 } from '@shared/api';
+import { getVendorColumns } from '@shared/columns/vendor-columns';
 import {
-  Badge,
-  Button,
   DataTable,
   DeleteConfirmationModal,
   PageHeader,
@@ -26,7 +24,6 @@ import FormField from '@shared/components/FormField';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import { MultiSelectDropdown } from '@shared/components/ui/form/multiSelectDropdown';
 import { SingleSelectDropdown } from '@shared/components/ui/form/singleSelectDropdown';
-import { ColumnDef } from '@tanstack/react-table';
 
 export default function VendorListPage() {
   const {
@@ -62,152 +59,17 @@ export default function VendorListPage() {
     handleSendEmail,
   } = useVendorManager();
 
-  // Helper functions for confirmation status
-  const getVendorOnboardingStatusVariant = (
-    status: VendorOnboardingStatus,
-  ): 'default' | 'secondary' | 'destructive' | 'outline' => {
-    switch (status) {
-      case VendorOnboardingStatus.ONBOARDED:
-        return 'default';
-      case VendorOnboardingStatus.REJECTED:
-        return 'destructive';
-      default:
-        return 'outline';
-    }
-  };
-
-  const getOnboardingStatusLabel = (status: VendorOnboardingStatus) => {
-    switch (status) {
-      case VendorOnboardingStatus.ONBOARDED:
-        return 'Onboarded';
-      case VendorOnboardingStatus.REJECTED:
-        return 'Rejected';
-      default:
-        return 'Pending';
-    }
-  };
-
-  const getOnboardingStatusIcon = (status: VendorOnboardingStatus) => {
-    switch (status) {
-      case VendorOnboardingStatus.ONBOARDED:
-        return '✓';
-      case VendorOnboardingStatus.REJECTED:
-        return '✗';
-      default:
-        return '?';
-    }
-  };
-
   // Column definitions for Live Vendor DataTable
-  const columns: ColumnDef<VendorResponseDto>[] = [
-    {
-      accessorKey: 'name',
-      header: 'Name',
-      cell: ({ row }) => <div className="font-medium text-foreground">{row.getValue('name')}</div>,
-    },
-    {
-      accessorKey: 'email',
-      header: 'Email',
-      cell: ({ row }) => (
-        <div className="text-sm text-foreground">{row.getValue('email') || '-'}</div>
-      ),
-    },
-    {
-      accessorKey: 'uenNumber',
-      header: 'UEN Number',
-      cell: ({ row }) => (
-        <div className="text-sm text-foreground">{row.getValue('uenNumber') || '-'}</div>
-      ),
-    },
-    {
-      accessorKey: 'vendorWebsite',
-      header: 'Website',
-      cell: ({ row }) => {
-        const website = row.getValue('vendorWebsite') as string | null;
+  const columns = getVendorColumns({
+    onSelectVendor: setSelectedVendor,
+    includeOnboardingStatus: false,
+  });
 
-        return website ? (
-          <a
-            href={website.startsWith('http') ? website : `https://${website}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-blue-600 hover:underline"
-          >
-            {website}
-          </a>
-        ) : (
-          <span className="text-sm text-foreground">-</span>
-        );
-      },
-    },
-    {
-      id: 'actions',
-      header: 'Actions',
-      cell: ({ row }) => {
-        const vendor = row.original;
-        return (
-          <Button
-            className="flex items-center whitespace-nowrap text-xs px-1 py-1 min-w-0"
-            size="sm"
-            onClick={() => setSelectedVendor(vendor)}
-          >
-            View
-          </Button>
-        );
-      },
-    },
-  ];
-
-  // Column definitions for Live Vendor DataTable
-  const onboardingColumns: ColumnDef<VendorResponseDto>[] = [
-    {
-      accessorKey: 'name',
-      header: 'Name',
-      cell: ({ row }) => <div className="font-medium text-foreground">{row.getValue('name')}</div>,
-    },
-    {
-      accessorKey: 'email',
-      header: 'Email',
-      cell: ({ row }) => (
-        <div className="text-sm text-foreground">{row.getValue('email') || '-'}</div>
-      ),
-    },
-    {
-      accessorKey: 'uenNumber',
-      header: 'UEN Number',
-      cell: ({ row }) => (
-        <div className="text-sm text-foreground">{row.getValue('uenNumber') || '-'}</div>
-      ),
-    },
-    {
-      accessorKey: 'onboardingStatus',
-      header: 'Onboarding Status',
-      cell: ({ row }) => {
-        const status = row.getValue('onboardingStatus') as VendorOnboardingStatus;
-        return (
-          <Badge variant={getVendorOnboardingStatusVariant(status)} className="gap-1">
-            {getOnboardingStatusLabel(status)}
-            <span className="ml-1">{getOnboardingStatusIcon(status)}</span>
-          </Badge>
-        );
-      },
-    },
-    {
-      id: 'actions',
-      header: 'Actions',
-      cell: ({ row }) => {
-        const vendor = row.original;
-        return (
-          <Button
-            className="flex items-center whitespace-nowrap text-xs px-1 py-1 min-w-0"
-            size="sm"
-            onClick={() => setSelectedVendor(vendor)}
-          >
-            View
-          </Button>
-        );
-      },
-    },
-  ];
+  // Column definitions for Onboarding Vendor DataTable
+  const onboardingColumns = getVendorColumns({
+    onSelectVendor: setSelectedVendor,
+    includeOnboardingStatus: true,
+  });
 
   // Edit Vendor Form Fields
   const vendorFormFields = (
@@ -323,7 +185,7 @@ export default function VendorListPage() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="w-full max-w-full px-4 py-8 min-w-0 overflow-x-hidden">
       <div className="flex items-center justify-between">
         <PageHeader title="Vendor Management" description="Manage vendors in Knotly" />
       </div>
@@ -392,24 +254,27 @@ export default function VendorListPage() {
       )}
 
       <Tabs defaultValue="live">
-        <TabsList className="bg-muted/50 rounded-lg p-1 flex space-x-2">
+        <TabsList className="bg-muted/50 rounded-lg p-1 grid w-full grid-cols-3 md:flex md:space-x-2 md:w-fit">
           <TabsTrigger
             value="live"
-            className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+            className="px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
           >
-            Live vendors
+            <span className="md:hidden">Live</span>
+            <span className="hidden md:block">Live vendors</span>
           </TabsTrigger>
           <TabsTrigger
             value="suspended"
-            className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+            className="px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
           >
-            Suspended vendors
+            <span className="md:hidden">Suspended</span>
+            <span className="hidden md:block">Suspended vendors</span>
           </TabsTrigger>
           <TabsTrigger
             value="onboarding"
-            className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+            className="px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
           >
-            Onboarding vendors
+            <span className="md:hidden">Onboarding</span>
+            <span className="hidden md:block">Onboarding vendors</span>
           </TabsTrigger>
         </TabsList>
 
