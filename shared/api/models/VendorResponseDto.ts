@@ -30,10 +30,6 @@ export type VendorResponseDto = {
      */
     updatedAt: string;
     /**
-     * Is the vendor suspended?
-     */
-    isSuspended?: boolean;
-    /**
      * Vendor website URL
      */
     vendorWebsite?: string;
@@ -61,5 +57,9 @@ export type VendorResponseDto = {
      */
     capacity?: number;
     onboardingStatus: VendorOnboardingStatus;
+    /**
+     * Is the vendor suspended?
+     */
+    isSuspended?: boolean;
 };
 

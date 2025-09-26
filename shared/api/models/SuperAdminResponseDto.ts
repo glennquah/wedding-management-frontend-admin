@@ -25,9 +25,5 @@ export type SuperAdminResponseDto = {
      * Last update timestamp
      */
     updatedAt: string;
-    /**
-     * Is the user suspended?
-     */
-    isSuspended?: boolean;
 };
 
