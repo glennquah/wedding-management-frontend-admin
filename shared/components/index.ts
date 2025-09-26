@@ -1,4 +1,5 @@
 // UI Components
+export { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 export { Badge, badgeVariants } from './ui/badge';
 export { Button } from './ui/button';
 export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
@@ -11,6 +12,7 @@ export {
   type CarouselApi,
 } from './ui/carousel';
 export { Checkbox } from './ui/checkbox';
+export { CodeEditor } from './ui/code-editor';
 export { DeleteConfirmationModal } from './ui/delete-confirmation-modal';
 export {
   Dialog,
@@ -38,6 +40,7 @@ export { PageHeader } from './ui/page-header';
 export { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 export { Rating, RatingButton } from './ui/rating';
 export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+export { Separator } from './ui/separator';
 export {
   Sheet,
   SheetContent,
@@ -60,6 +63,7 @@ export {
 } from './ui/table';
 export type { DataTableProps } from './ui/table';
 export { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+export { Textarea } from './ui/textarea';
 
 // Form Fields
 export {
@@ -70,6 +74,19 @@ export {
 // Tables
 export { AdminTable } from './AdminTable';
 export { WeddingTable } from './WeddingTable';
+
+// Notification Templates
+export {
+  NotificationTemplateList,
+  NotificationTemplateDetailView,
+  NotificationTemplateManager,
+  NotificationTemplateListView,
+  AddNotificationTemplateDialog,
+  SendNotificationsDialog,
+  SendSuperAdminNotificationsDialog,
+  SuperAdminNotificationTemplateListView,
+  type NotificationTemplateListViewRef,
+} from './notification-templates';
 
 // Utilities
 export { cn } from './lib/utils';

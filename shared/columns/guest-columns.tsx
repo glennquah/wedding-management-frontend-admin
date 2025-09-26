@@ -15,9 +15,9 @@ const getConfirmationStatusVariant = (
   status: ConfirmationStatus,
 ): 'default' | 'secondary' | 'destructive' | 'outline' => {
   switch (status) {
-    case 'confirmed':
+    case ConfirmationStatus.CONFIRMED:
       return 'default';
-    case 'rejected':
+    case ConfirmationStatus.REJECTED:
       return 'destructive';
     default:
       return 'outline';
@@ -26,9 +26,9 @@ const getConfirmationStatusVariant = (
 
 const getConfirmationLabel = (status: ConfirmationStatus) => {
   switch (status) {
-    case 'confirmed':
+    case ConfirmationStatus.CONFIRMED:
       return 'Confirmed';
-    case 'rejected':
+    case ConfirmationStatus.REJECTED:
       return 'Declined';
     default:
       return 'Pending';
@@ -37,9 +37,9 @@ const getConfirmationLabel = (status: ConfirmationStatus) => {
 
 const getConfirmationIcon = (status: ConfirmationStatus) => {
   switch (status) {
-    case 'confirmed':
+    case ConfirmationStatus.CONFIRMED:
       return '✓';
-    case 'rejected':
+    case ConfirmationStatus.REJECTED:
       return '✗';
     default:
       return '?';

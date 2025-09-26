@@ -14,14 +14,20 @@ export const getSuperAdminColumns = ({
     {
       accessorKey: 'name',
       header: 'Name',
-      cell: ({ row }) => <div className='font-medium text-foreground'>{row.getValue('name')}</div>,
+      cell: ({ row }) => <div className="font-medium text-foreground">{row.getValue('name')}</div>,
     },
     {
       accessorKey: 'email',
       header: 'Email',
-      cell: ({ row }) => (
-        <div className='text-sm text-foreground'>{row.getValue('email') || '-'}</div>
-      ),
+      cell: ({ row }) => {
+        let email = row.getValue('email') as string;
+        const truncatedEmail = email && email.length > 12 ? email.substring(0, 12) + '...' : email;
+        return (
+          <div className="text-sm text-foreground" title={email}>
+            {truncatedEmail || '-'}
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'createdAt',
@@ -29,7 +35,7 @@ export const getSuperAdminColumns = ({
       cell: ({ row }) => {
         const date = new Date(row.getValue('createdAt'));
         return (
-          <div className='text-sm text-foreground'>
+          <div className="text-sm text-foreground">
             {date.toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'short',
@@ -45,7 +51,7 @@ export const getSuperAdminColumns = ({
       cell: ({ row }) => {
         const date = new Date(row.getValue('updatedAt'));
         return (
-          <div className='text-sm text-foreground'>
+          <div className="text-sm text-foreground">
             {date.toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'short',
@@ -61,14 +67,14 @@ export const getSuperAdminColumns = ({
       cell: ({ row }) => {
         const superAdmin = row.original;
         return (
-          <div className='flex items-center gap-2'>
+          <div className="flex items-center gap-2">
             <Button
-              size='sm'
-              variant='ghost'
+              size="sm"
+              variant="ghost"
               onClick={() => onDeleteSuperAdmin(superAdmin)}
-              className='text-red-600 hover:text-red-700 hover:bg-red-50'
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
             >
-              <Trash2 className='w-4 h-4' />
+              <Trash2 className="w-4 h-4" />
             </Button>
           </div>
         );

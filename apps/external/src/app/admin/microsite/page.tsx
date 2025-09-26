@@ -1,0 +1,343 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+
+import { createEmptyMicrositeForm, useMicrositeFormStore } from '../../store/micrositeStore';
+import { useWeddingStore } from '../../store/sessionStore';
+import { BasicInformation, Faq, HeroImages, ImageGallery, WeddingSchedule } from './components';
+import { useMicrositeAdminManager } from '@/app/hooks/useMicrositeAdminManager';
+import { CreateMicrositeDto, FaqItemDto, MicrositeService, ScheduleItemDto } from '@shared/api';
+import { Button } from '@shared/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@shared/components/ui/dialog';
+import { PageHeader } from '@shared/components/ui/page-header';
+
+export default function CreateMicrositePage() {
+  const selectedWeddingId = useWeddingStore((state) => state.selectedWeddingId);
+  const weddings = useWeddingStore((state) => state.weddings);
+
+  const {
+    ensureDraft,
+    patchFormData,
+    updateFormData,
+    resetFormData,
+    ingestServerData,
+    hasHydrated,
+  } = useMicrositeFormStore();
+
+  const formData = useMicrositeFormStore((s) =>
+    typeof selectedWeddingId === 'number'
+      ? (s.drafts[selectedWeddingId]?.formData ?? createEmptyMicrositeForm(selectedWeddingId))
+      : createEmptyMicrositeForm(0),
+  );
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUpdateMode, setIsUpdateMode] = useState(false);
+  const [existingMicrositeId, setExistingMicrositeId] = useState<number | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const { handlePreview, handleSubmit, handleDelete } = useMicrositeAdminManager({
+    formData,
+    selectedWeddingId: typeof selectedWeddingId === 'number' ? selectedWeddingId : null,
+    weddings,
+    isUpdateMode,
+    existingMicrositeId,
+    resetFormData,
+    setIsSubmitting,
+    setIsDeleting,
+    setIsDeleteDialogOpen,
+    setIsUpdateMode,
+    setExistingMicrositeId,
+  });
+
+  // Keep weddingId in formData in sync with selection
+  useEffect(() => {
+    if (!hasHydrated) return;
+    if (typeof selectedWeddingId === 'number') {
+      ensureDraft(selectedWeddingId);
+      patchFormData(selectedWeddingId, { weddingId: selectedWeddingId });
+    }
+  }, [selectedWeddingId, ensureDraft, patchFormData, hasHydrated]);
+
+  useEffect(() => {
+    if (!hasHydrated) return;
+    const fetchExistingMicrosite = async () => {
+      if (!selectedWeddingId || typeof selectedWeddingId !== 'number') {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const response =
+          await MicrositeService.micrositeControllerGetMicrositeByWeddingId(selectedWeddingId);
+
+        if (response) {
+          setIsUpdateMode(true);
+          setExistingMicrositeId(response.id);
+          console.log(response.id);
+          ingestServerData(selectedWeddingId, {
+            templateNumber: response.templateNumber,
+            slug: response.slug,
+            coupleName: response.coupleName,
+            heroImages: response.heroImages || [],
+            imageGallery: response.imageGallery || [],
+            schedule:
+              response.schedule && response.schedule.length > 0
+                ? response.schedule
+                : [{ time: '', title: '', description: '' }],
+            faqs: response.faqs && response.faqs.length > 0 ? response.faqs : [{ q: '', a: '' }],
+            password: '',
+            weddingId: selectedWeddingId,
+          });
+        } else {
+          setIsUpdateMode(false);
+          setExistingMicrositeId(null);
+        }
+      } catch (error) {
+        console.error('Error fetching existing microsite:', error);
+        setIsUpdateMode(false);
+        setExistingMicrositeId(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchExistingMicrosite();
+  }, [selectedWeddingId, hasHydrated, ingestServerData]);
+
+  const handleInputChange = <K extends keyof CreateMicrositeDto>(
+    field: K,
+    value: CreateMicrositeDto[K],
+  ) => {
+    if (typeof selectedWeddingId !== 'number') return;
+    patchFormData(selectedWeddingId, { [field]: value } as Partial<CreateMicrositeDto>);
+  };
+
+  const handleScheduleFieldChange = (
+    index: number,
+    field: keyof ScheduleItemDto,
+    value: string,
+  ) => {
+    if (typeof selectedWeddingId !== 'number') return;
+    updateFormData(selectedWeddingId, (prev) => ({
+      ...prev,
+      schedule: (prev.schedule ?? []).map((item, i) =>
+        i === index ? { ...item, [field]: value } : item,
+      ),
+    }));
+  };
+
+  const handleFaqFieldChange = (index: number, field: keyof FaqItemDto, value: string) => {
+    if (typeof selectedWeddingId !== 'number') return;
+    updateFormData(selectedWeddingId, (prev) => ({
+      ...prev,
+      faqs: (prev.faqs ?? []).map((item, i) => (i === index ? { ...item, [field]: value } : item)),
+    }));
+  };
+
+  const addScheduleItem = () => {
+    if (typeof selectedWeddingId !== 'number') return;
+    updateFormData(selectedWeddingId, (prev) => ({
+      ...prev,
+      schedule: [...(prev.schedule ?? []), { time: '', title: '', description: '' }],
+    }));
+  };
+
+  const addFaqItem = () => {
+    if (typeof selectedWeddingId !== 'number') return;
+    updateFormData(selectedWeddingId, (prev) => ({
+      ...prev,
+      faqs: [...(prev.faqs ?? []), { q: '', a: '' }],
+    }));
+  };
+
+  const removeScheduleItem = (index: number) => {
+    if (typeof selectedWeddingId !== 'number') return;
+    updateFormData(selectedWeddingId, (prev) => ({
+      ...prev,
+      schedule: (prev.schedule ?? []).filter((_, i) => i !== index),
+    }));
+  };
+
+  const removeFaqItem = (index: number) => {
+    if (typeof selectedWeddingId !== 'number') return;
+    updateFormData(selectedWeddingId, (prev) => ({
+      ...prev,
+      faqs: (prev.faqs ?? []).filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleImageUpload = (field: 'heroImages' | 'imageGallery', url: string) => {
+    if (typeof selectedWeddingId !== 'number') return;
+    if (field === 'heroImages') {
+      updateFormData(selectedWeddingId, (prev) => ({
+        ...prev,
+        heroImages: [...((prev.heroImages as string[] | undefined) ?? []), url],
+      }));
+    } else {
+      updateFormData(selectedWeddingId, (prev) => ({
+        ...prev,
+        imageGallery: [...((prev.imageGallery as string[] | undefined) ?? []), url],
+      }));
+    }
+  };
+
+  const removeImage = (field: 'heroImages' | 'imageGallery', index: number) => {
+    if (typeof selectedWeddingId !== 'number') return;
+    if (field === 'heroImages') {
+      updateFormData(selectedWeddingId, (prev) => ({
+        ...prev,
+        heroImages: ((prev.heroImages as string[] | undefined) ?? []).filter((_, i) => i !== index),
+      }));
+    } else {
+      updateFormData(selectedWeddingId, (prev) => ({
+        ...prev,
+        imageGallery: ((prev.imageGallery as string[] | undefined) ?? []).filter(
+          (_, i) => i !== index,
+        ),
+      }));
+    }
+  };
+
+  // handlers are provided by useMicrositeAdminManager
+
+  if (!selectedWeddingId) {
+    return (
+      <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground py-6">
+        <div className="container mx-auto px-4 pt-4 md:pt-6">
+          <PageHeader
+            title="Create Microsite"
+            description="Please select a wedding first from the sidebar."
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground py-6">
+        <div className="container mx-auto px-4 pt-4 md:pt-6">
+          <PageHeader title="Loading..." description="Checking for existing microsite..." />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground py-6">
+      <div className="relative container mx-auto px-4 pt-4 md:pt-6">
+        <PageHeader
+          title={isUpdateMode ? 'Edit Microsite' : 'Create Microsite'}
+          description={
+            isUpdateMode
+              ? 'Update your existing microsite for this wedding'
+              : 'Design and configure a wedding microsite for your guests'
+          }
+        />
+        <Button type="button" onClick={handlePreview} className="absolute top-4 right-4">
+          Preview Microsite
+        </Button>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <BasicInformation formData={formData} handleInputChange={handleInputChange} />
+
+          <HeroImages
+            formData={formData}
+            handleImageUpload={handleImageUpload}
+            removeImage={removeImage}
+          />
+
+          <ImageGallery
+            formData={formData}
+            handleImageUpload={handleImageUpload}
+            removeImage={removeImage}
+          />
+
+          <WeddingSchedule
+            formData={formData}
+            handleScheduleFieldChange={handleScheduleFieldChange}
+            addScheduleItem={addScheduleItem}
+            removeScheduleItem={removeScheduleItem}
+          />
+
+          <Faq
+            formData={formData}
+            handleFaqFieldChange={handleFaqFieldChange}
+            addFaqItem={addFaqItem}
+            removeFaqItem={removeFaqItem}
+          />
+
+          {/* Action Buttons */}
+          <div className="flex justify-between items-center">
+            {/* Delete Button - Only show in update mode */}
+            <div>
+              {isUpdateMode && (
+                <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      disabled={isSubmitting || isDeleting}
+                      className="px-6 text-white"
+                    >
+                      Delete Microsite
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Delete Microsite</DialogTitle>
+                      <DialogDescription>
+                        Are you sure you want to delete this microsite? This action is irreversible
+                        and will permanently remove all microsite data including images, schedule,
+                        and FAQs.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsDeleteDialogOpen(false)}
+                        disabled={isDeleting}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        className="text-white"
+                      >
+                        {isDeleting ? 'Deleting...' : 'Delete Microsite'}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
+
+            {/* Create/Update Button */}
+            <Button type="submit" disabled={isSubmitting || isDeleting} className="px-8">
+              {isSubmitting
+                ? isUpdateMode
+                  ? 'Updating...'
+                  : 'Creating...'
+                : isUpdateMode
+                  ? 'Update Microsite'
+                  : 'Create Microsite'}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

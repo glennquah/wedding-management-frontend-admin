@@ -2,9 +2,11 @@
 
 import AppSidebar from '@shared/components/AppSidebar';
 import {
+  Bell,
   CheckSquare,
   LayoutDashboard,
   ListTodo,
+  MailCheckIcon,
   Timer,
   User2,
   UserStar,
@@ -20,6 +22,11 @@ const tabs = [
         title: 'Main Dashboard',
         href: '/admin-dashboard',
         icon: LayoutDashboard,
+      },
+      {
+        title: 'Notification Templates',
+        href: '/notification-templates',
+        icon: MailCheckIcon,
       },
     ],
   },
@@ -50,6 +57,11 @@ const tabs = [
         title: 'Wedding Management',
         href: '/wedding-management',
         icon: Users,
+      },
+      {
+        title: 'Notifications Management',
+        href: '/notifications-management',
+        icon: Bell,
       },
     ],
   },

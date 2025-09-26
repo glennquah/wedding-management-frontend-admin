@@ -26,6 +26,7 @@ async function refreshToken(token: JWT): Promise<JWT> {
 }
 
 export const authOptions: NextAuthOptions = {
+  secret: 'hardcoded-nextauth-secret-for-development-12345',
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -56,7 +57,18 @@ export const authOptions: NextAuthOptions = {
           } as ExtendedUser;
         } catch (error: unknown) {
           if (error && typeof error === 'object' && 'status' in error && error.status === 401) {
-            console.log('Unauthorized login attempt');
+            // Check if it's a suspension error
+            if (
+              'body' in error &&
+              error.body &&
+              typeof error.body === 'object' &&
+              'message' in error.body
+            ) {
+              if (error.body.message === 'ACCOUNT_SUSPENDED') {
+                throw new Error('ACCOUNT_SUSPENDED');
+              }
+            }
+
             return null;
           }
           throw error;

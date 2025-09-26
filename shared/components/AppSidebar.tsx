@@ -1,5 +1,9 @@
 'use client';
 
+import { ChevronUp, LogOut, Settings, User, UserCircle } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { Button } from './ui/button';
 import {
   DropdownMenu,
@@ -20,21 +24,17 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from './ui/sidebar';
-import { ChevronUp, LogOut, Settings, User, UserCircle } from 'lucide-react';
-import { useSession } from 'next-auth/react';
-import Image from 'next/image';
-import Link from 'next/link';
 
 // Profile dropdown items
 const profileItems = [
   {
     title: 'Account',
-    href: '/admin/account',
+    href: '/account',
     icon: User,
   },
   {
     title: 'Billing',
-    href: '/admin/billing',
+    href: '/billing',
     icon: Settings,
   },
 ];
@@ -42,6 +42,7 @@ const profileItems = [
 export default function AppSidebar({
   tabs,
   signOut,
+  basePath = "",
 }: {
   tabs: Array<{
     sectionHeader: string;
@@ -52,6 +53,7 @@ export default function AppSidebar({
     }>;
   }>;
   signOut?: () => void;
+  basePath?: string;
 }) {
   const { data: session } = useSession();
   return (
@@ -78,7 +80,7 @@ export default function AppSidebar({
                 {section.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <Link href={item.href}>
+                      <Link href={basePath ? `/${basePath}${item.href}` : item.href}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
                       </Link>
@@ -109,7 +111,7 @@ export default function AppSidebar({
             <DropdownMenuItem disabled>Role: {session?.user.role}</DropdownMenuItem>
             {profileItems.map((item) => (
               <DropdownMenuItem key={item.title} asChild>
-                <Link href={item.href} className="flex items-center">
+                <Link href={basePath ? `/${basePath}${item.href}` : item.href} className="flex items-center">
                   <item.icon className="mr-2 h-4 w-4" />
                   {item.title}
                 </Link>

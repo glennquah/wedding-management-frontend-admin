@@ -18,7 +18,7 @@ export default withAuth(
     }
 
     // Check if user has super admin role
-    if (token.role !== UserRole.SUPER_ADMIN) {
+    if (token.role !== UserRole.SUPERADMIN) {
       return NextResponse.redirect(new URL('/login', req.url));
     }
 
@@ -26,13 +26,17 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: () => true,
+      authorized: ({ token, req }) => {
+        // Allow the middleware to run - we'll handle auth logic in the middleware function
+        return true;
+      },
     },
     cookies: {
       sessionToken: {
         name: 'next-auth.session-token-internal',
       },
     },
+    secret: process.env.NEXTAUTH_SECRET,
   },
 );
 

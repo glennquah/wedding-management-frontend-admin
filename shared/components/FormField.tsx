@@ -1,5 +1,5 @@
-import { Input } from "./ui/form/input";
-import { Label } from "./ui/form/label";
+import { Input } from './ui/form/input';
+import { Label } from './ui/form/label';
 
 type FieldProps = {
   label: string;
@@ -12,7 +12,16 @@ type FieldProps = {
   min?: string;
 };
 
-export default function FormField({ label, id, type, value, onChange, required, placeholder, min }: FieldProps) {
+export default function FormField({
+  label,
+  id,
+  type,
+  value,
+  onChange,
+  required,
+  placeholder,
+  min,
+}: FieldProps) {
   return (
     <div className="mt-4 gap-2 flex flex-col">
       <Label htmlFor={id}>{label}</Label>

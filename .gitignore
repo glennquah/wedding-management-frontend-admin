@@ -11,3 +11,6 @@
 /apps/external/.turbo
 /shared/node_modules
 
+/.sst
+/apps/external/.open-next
+/apps/internal/.open-next

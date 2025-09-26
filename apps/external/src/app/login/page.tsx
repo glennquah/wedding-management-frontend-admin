@@ -29,7 +29,12 @@ export default function LoginPage() {
       });
 
       if (res?.error) {
-        toast.error('Invalid username or password');
+        // Check if the error is about account suspension
+        if (res.error === 'ACCOUNT_SUSPENDED') {
+          toast.error('Account suspended. Cannot log in. Please contact support.');
+        } else {
+          toast.error('Invalid username or password');
+        }
         return;
       }
 
@@ -41,8 +46,15 @@ export default function LoginPage() {
         return;
       }
 
+      // Check if user is suspended
+      if (session.user.isSuspended) {
+        toast.error('Account suspended. Cannot log in. Please contact support.');
+        await signOut({ redirect: false });
+        return;
+      }
+
       // Check if user has admin or vendor role (NOT super admin)
-      if (session.user.role === UserRole.SUPER_ADMIN) {
+      if (session.user.role === UserRole.SUPERADMIN) {
         toast.error('Access denied. Super admins must use the super admin portal.');
         await signOut({ redirect: false });
         return;
@@ -55,7 +67,7 @@ export default function LoginPage() {
       }
 
       toast.success('Successfully logged in!');
-      router.push(`/${session.user.role}`);
+      router.push(`/${session.user.role.toLowerCase()}`);
     } catch (err) {
       console.error('Unexpected error:', err);
       toast.error('Something went wrong. Please try again.');
@@ -95,9 +107,16 @@ export default function LoginPage() {
           <Button type="submit" className="w-full mt-4" disabled={loading}>
             {loading ? 'Signing in...' : 'Sign In'}
           </Button>
+
+          <div className="text-center mt-4">
+            <a href="/forgot-password" className="text-brand-600 font-medium text-sm">
+              Forgot your password?
+            </a>
+          </div>
         </form>
+
         <p className="text-center text-sm text-gray-500 mt-4">
-          Don’t have an account?{' '}
+          Don&apos;t have an account?{' '}
           <a href="/get-started" className="text-brand-600 font-medium">
             Sign Up
           </a>

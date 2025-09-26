@@ -3,15 +3,14 @@
 import { Button } from '@shared/components/ui/button';
 import { SidebarTrigger } from '@shared/components/ui/sidebar';
 import { Bell } from 'lucide-react';
-import { Session } from 'next-auth';
 import { useRouter } from 'next/navigation';
 
 interface NavigationBarProps {
-  session: Session | null;
+  notificationRoute?: string;
   additionalTabs?: React.ReactNode;
 }
 
-const NavigationBar = ({ session, additionalTabs }: NavigationBarProps) => {
+const NavigationBar = ({ notificationRoute, additionalTabs }: NavigationBarProps) => {
   const router = useRouter();
 
   return (
@@ -23,18 +22,21 @@ const NavigationBar = ({ session, additionalTabs }: NavigationBarProps) => {
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-4">
-          {/* Notification */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
-            onClick={() => router.push('/notifications')}
-          >
-            <Bell size={16} />
-            <span className="sr-only">Notifications</span>
-          </Button>
-
+        <div className="flex gap-2">
+          {notificationRoute && (
+            <div className="flex items-center gap-4">
+              {/* Notification */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={() => router.push(notificationRoute)}
+              >
+                <Bell size={16} />
+                <span className="sr-only">Notifications</span>
+              </Button>
+            </div>
+          )}
           {additionalTabs}
         </div>
       </div>

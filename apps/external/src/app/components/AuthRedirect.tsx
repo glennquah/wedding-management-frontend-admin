@@ -13,7 +13,10 @@ export function AuthRedirect() {
 
   useEffect(() => {
     if (session?.user) {
-      if (pathname === '/login') {
+      // Define public paths that should not trigger role-based redirects
+      const publicPaths = ['/login', '/forgot-password', '/reset-password'];
+
+      if (pathname && publicPaths.includes(pathname)) {
         return;
       }
 
@@ -21,8 +24,8 @@ export function AuthRedirect() {
         return router.push('/login');
       }
 
-      if (pathname && !pathname.startsWith(`/${session.user.role}`)) {
-        return router.push(`/${session.user.role}`);
+      if (pathname && !pathname.startsWith(`/${session.user.role.toLowerCase()}`)) {
+        return router.push(`/${session.user.role.toLowerCase()}`);
       }
     }
   }, [session, status, pathname, router]);
