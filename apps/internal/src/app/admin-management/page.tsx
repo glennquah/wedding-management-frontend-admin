@@ -282,7 +282,7 @@ export default function AdminManagementPage() {
   const handleEditPasswordGenerate = () => handleGeneratePassword(true);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="w-full max-w-full px-4 py-8 min-w-0 overflow-x-hidden">
       <div className="flex items-center justify-between">
         <PageHeader
           title="Admin Management"
@@ -341,7 +341,7 @@ export default function AdminManagementPage() {
 
         {/* Live Admins with Edit Modal */}
         <TabsContent value="live">
-          <div className="w-full">
+          <div className="w-full min-w-0">
             <AdminTable
               admins={admins.filter((admin) => admin.isSuspended == false)}
               weddings={weddings}
@@ -367,7 +367,7 @@ export default function AdminManagementPage() {
 
         {/* Suspended Admins with Edit/Suspend Modal */}
         <TabsContent value="suspended">
-          <div className="w-full">
+          <div className="w-full min-w-0">
             <AdminTable
               admins={admins.filter((admin) => admin.isSuspended == true)}
               weddings={weddings}

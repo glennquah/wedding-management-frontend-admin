@@ -185,7 +185,7 @@ export default function VendorListPage() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="w-full max-w-full px-4 py-8 min-w-0 overflow-x-hidden">
       <div className="flex items-center justify-between">
         <PageHeader title="Vendor Management" description="Manage vendors in Knotly" />
       </div>
