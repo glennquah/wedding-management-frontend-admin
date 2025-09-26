@@ -67,9 +67,9 @@ export const AdminTable: React.FC<AdminTableProps> = ({
   });
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col min-w-0">
       {/* Admin List Table */}
-      <div className="w-full">
+      <div className="w-full min-w-0">
         <DataTable
           data={admins}
           columns={columns}

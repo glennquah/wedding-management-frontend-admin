@@ -51,7 +51,7 @@ function Table({ className, ...props }: React.ComponentProps<'table'>) {
     <div className="relative w-full overflow-auto">
       <table
         data-slot="table"
-        className={cn('w-full caption-bottom text-sm', className)}
+        className={cn('w-full min-w-full caption-bottom text-sm', className)}
         {...props}
       />
     </div>
@@ -251,11 +251,11 @@ function DataTable<TData>({
   };
 
   const tableContent = (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn('space-y-4 w-full max-w-full overflow-x-hidden', className)}>
       {/* Filters and controls */}
       {!isLoading && (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto min-w-0">
             {/* Search input for searchable columns */}
             {searchableColumns.length > 0 && (
               <div className="relative w-full sm:w-auto">
@@ -333,19 +333,15 @@ function DataTable<TData>({
       ) : (
         /* Table */
         <>
-          <div className="overflow-x-auto rounded-md border">
-            <Table style={{ tableLayout: 'fixed' }}>
-              <TableHeader>
+          <div className="overflow-x-auto rounded-md border max-w-full">
+            <Table style={{ tableLayout: 'auto' }} className="min-w-full">
+                <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-transparent">
                     {headerGroup.headers.map((header) => (
                       <TableHead
                         key={header.id}
                         className="h-11"
-                        style={{
-                          width: header.getSize(),
-                          minWidth: header.getSize(),
-                        }}
                       >
                         {header.isPlaceholder ? null : header.column.getCanSort() ? (
                           <div
@@ -392,10 +388,6 @@ function DataTable<TData>({
                       {row.getVisibleCells().map((cell) => (
                         <TableCell
                           key={cell.id}
-                          style={{
-                            width: cell.column.getSize(),
-                            minWidth: cell.column.getSize(),
-                          }}
                         >
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>

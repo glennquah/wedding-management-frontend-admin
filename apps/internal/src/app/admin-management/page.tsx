@@ -282,7 +282,7 @@ export default function AdminManagementPage() {
   const handleEditPasswordGenerate = () => handleGeneratePassword(true);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="w-full max-w-full px-4 py-8 min-w-0 overflow-x-hidden">
       <div className="flex items-center justify-between">
         <PageHeader
           title="Admin Management"
@@ -324,24 +324,26 @@ export default function AdminManagementPage() {
       )}
 
       <Tabs defaultValue="live">
-        <TabsList className="bg-muted/50 rounded-lg p-1 flex space-x-2">
+        <TabsList className="bg-muted/50 rounded-lg p-1 grid w-full grid-cols-2 md:flex md:space-x-2 md:w-fit">
           <TabsTrigger
             value="live"
-            className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+            className="px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
           >
-            Live admins
+            <span className="md:hidden">Live</span>
+            <span className="hidden md:block">Live admins</span>
           </TabsTrigger>
           <TabsTrigger
             value="suspended"
-            className="px-4 py-2 rounded-lg text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+            className="px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
           >
-            Suspended admins
+            <span className="md:hidden">Suspended</span>
+            <span className="hidden md:block">Suspended admins</span>
           </TabsTrigger>
         </TabsList>
 
         {/* Live Admins with Edit Modal */}
         <TabsContent value="live">
-          <div className="w-full">
+          <div className="w-full min-w-0">
             <AdminTable
               admins={admins.filter((admin) => admin.isSuspended == false)}
               weddings={weddings}
@@ -367,7 +369,7 @@ export default function AdminManagementPage() {
 
         {/* Suspended Admins with Edit/Suspend Modal */}
         <TabsContent value="suspended">
-          <div className="w-full">
+          <div className="w-full min-w-0">
             <AdminTable
               admins={admins.filter((admin) => admin.isSuspended == true)}
               weddings={weddings}
