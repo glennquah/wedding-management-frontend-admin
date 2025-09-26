@@ -22,21 +22,23 @@ const NavigationBar = ({ notificationRoute, additionalTabs }: NavigationBarProps
         </div>
 
         {/* Right side */}
-        {notificationRoute && (
-          <div className="flex items-center gap-4">
-            {/* Notification */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-              onClick={() => router.push(notificationRoute)}
-            >
-              <Bell size={16} />
-              <span className="sr-only">Notifications</span>
-            </Button>
-          </div>
-        )}
-        {additionalTabs}
+        <div className="flex gap-2">
+          {notificationRoute && (
+            <div className="flex items-center gap-4">
+              {/* Notification */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={() => router.push(notificationRoute)}
+              >
+                <Bell size={16} />
+                <span className="sr-only">Notifications</span>
+              </Button>
+            </div>
+          )}
+          {additionalTabs}
+        </div>
       </div>
     </header>
   );
