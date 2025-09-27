@@ -8,28 +8,16 @@ export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { AdminResponseDto } from './models/AdminResponseDto';
-export {
-  AllEmailNotificationHistoryResponseDto,
-  AllEmailNotificationHistoryResponseDto,
-} from './models/AllEmailNotificationHistoryResponseDto';
+export { AllEmailNotificationHistoryResponseDto } from './models/AllEmailNotificationHistoryResponseDto';
 export type { AuthResponseDto } from './models/AuthResponseDto';
-export type { AvailabilitySlotDto, AvailabilitySlotDto } from './models/AvailabilitySlotDto';
+export type { AvailabilitySlotDto } from './models/AvailabilitySlotDto';
 export { BudgetBucket } from './models/BudgetBucket';
-export type {
-  CheckoutSessionResponseDto,
-  CheckoutSessionResponseDto,
-} from './models/CheckoutSessionResponseDto';
+export type { CheckoutSessionResponseDto } from './models/CheckoutSessionResponseDto';
 export { ConfirmationStatus } from './models/ConfirmationStatus';
 export type { ConfirmGuestDto } from './models/ConfirmGuestDto';
 export type { CreateAdminDto } from './models/CreateAdminDto';
-export type {
-  CreateCheckoutSessionDto,
-  CreateCheckoutSessionDto,
-} from './models/CreateCheckoutSessionDto';
-export type {
-  CreateEmailTemplateDto,
-  CreateEmailTemplateDto,
-} from './models/CreateEmailTemplateDto';
+export type { CreateCheckoutSessionDto } from './models/CreateCheckoutSessionDto';
+export type { CreateEmailTemplateDto } from './models/CreateEmailTemplateDto';
 export type { CreateGuestDto } from './models/CreateGuestDto';
 export type { CreateListingDto } from './models/CreateListingDto';
 export type { CreateMicrositeDto } from './models/CreateMicrositeDto';
@@ -45,8 +33,8 @@ export type { FaqItemDto } from './models/FaqItemDto';
 export { GuestCountBucket } from './models/GuestCountBucket';
 export type { GuestLookupDto } from './models/GuestLookupDto';
 export type { GuestResponseDto } from './models/GuestResponseDto';
-export type { HallLayoutDto, HallLayoutDto } from './models/HallLayoutDto';
-export type { LayoutConfigDto, LayoutConfigDto } from './models/LayoutConfigDto';
+export type { HallLayoutDto } from './models/HallLayoutDto';
+export type { LayoutConfigDto } from './models/LayoutConfigDto';
 export type { ListingResponseDto } from './models/ListingResponseDto';
 export type { LoginDto } from './models/LoginDto';
 export type { MicrositeLoginDto } from './models/MicrositeLoginDto';
@@ -67,13 +55,10 @@ export type { SeatingResultDto } from './models/SeatingResultDto';
 export type { SendBulkEmailDto } from './models/SendBulkEmailDto';
 export type { SendSingleEmailDto } from './models/SendSingleEmailDto';
 export type { SuperAdminResponseDto } from './models/SuperAdminResponseDto';
-export type { TableDto, TableDto } from './models/TableDto';
+export type { TableDto } from './models/TableDto';
 export type { TokensDto } from './models/TokensDto';
 export type { UpdateAdminDto } from './models/UpdateAdminDto';
-export type {
-  UpdateEmailTemplateDto,
-  UpdateEmailTemplateDto,
-} from './models/UpdateEmailTemplateDto';
+export type { UpdateEmailTemplateDto } from './models/UpdateEmailTemplateDto';
 export type { UpdateGuestDto } from './models/UpdateGuestDto';
 export type { UpdateListingDto } from './models/UpdateListingDto';
 export type { UpdateMicrositeDto } from './models/UpdateMicrositeDto';
@@ -81,13 +66,13 @@ export type { UpdateOrderDto } from './models/UpdateOrderDto';
 export type { UpdateSeatingArrangementDto } from './models/UpdateSeatingArrangementDto';
 export type { UpdateSuperAdminDto } from './models/UpdateSuperAdminDto';
 export type { UpdateVendorDto } from './models/UpdateVendorDto';
-export type { UpdateWeddingDto, UpdateWeddingDto } from './models/UpdateWeddingDto';
+export type { UpdateWeddingDto } from './models/UpdateWeddingDto';
 export type { UserResponseDto } from './models/UserResponseDto';
 export { UserRole } from './models/UserRole';
 export { VendorOnboardingStatus } from './models/VendorOnboardingStatus';
 export type { VendorResponseDto } from './models/VendorResponseDto';
 export type { WeddingDetailsDto } from './models/WeddingDetailsDto';
-export type { WeddingInfoDto, WeddingInfoDto } from './models/WeddingInfoDto';
+export type { WeddingInfoDto } from './models/WeddingInfoDto';
 export type { WeddingResponseDto } from './models/WeddingResponseDto';
 export { WeddingService } from './models/WeddingService';
 export { WeddingStyle } from './models/WeddingStyle';
@@ -95,10 +80,7 @@ export { WeddingType } from './models/WeddingType';
 
 export { AdminsService } from './services/AdminsService';
 export { AuthService } from './services/AuthService';
-export {
-  EmailNotificationService,
-  EmailNotificationService,
-} from './services/EmailNotificationService';
+export { EmailNotificationService } from './services/EmailNotificationService';
 export { GuestsService } from './services/GuestsService';
 export { ListingsService } from './services/ListingsService';
 export { MicrositeService } from './services/MicrositeService';
