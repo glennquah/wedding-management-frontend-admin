@@ -16,6 +16,14 @@ const nextConfig: NextConfig = {
   images: {
     // Configure for CloudFront/S3 compatibility
     unoptimized: process.env.NODE_ENV === 'production',
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+        pathname: '/**', // allow all paths from this host
+      },
+    ],
   },
   // Ensure static assets work with CloudFront
   assetPrefix: process.env.NODE_ENV === 'production' ? undefined : '',

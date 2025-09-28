@@ -1,4 +1,4 @@
-import { WeddingResponseDto } from '@shared/api';
+import { CartItemResponseDto, CartService, WeddingResponseDto } from '@shared/api';
 import { getCookie, setCookie } from 'cookies-next';
 import { signOut as nextAuthSignOut } from 'next-auth/react';
 import type { StateCreator } from 'zustand';
@@ -89,6 +89,73 @@ export const useWeddingStore = create<WeddingState>()(
     }),
     {
       name: 'wedding-store',
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+    },
+  ),
+);
+
+export interface CartItem {
+  category: string;
+  id: string;
+  image: string;
+  name: string;
+  price: number;
+}
+
+interface CartState {
+  cartItems: CartItemResponseDto[];
+  hasHydrated: boolean;
+  fetchCart: (adminId: number) => Promise<void>;
+  addItem: (adminId: number, item: CartItem) => Promise<void>;
+  removeItem: (adminId: number, listingId: number) => Promise<void>;
+  clearCart: (adminId: number) => Promise<void>;
+  deleteCart: (adminId: number) => Promise<void>;
+  setHasHydrated: (v: boolean) => void;
+  reset: () => void;
+}
+
+export const useCartStore = create<CartState>()(
+  persist(
+    (set, get, store) => ({
+      cartItems: [],
+      hasHydrated: false,
+
+      fetchCart: async (adminId: number) => {
+        const res = await CartService.cartControllerGetCart(adminId);
+        set({ cartItems: res.items });
+      },
+
+      addItem: async (adminId: number, item: CartItem) => {
+        const res = await CartService.cartControllerAddToCart({
+          adminId,
+          listingId: parseInt(item.id),
+        });
+        set({ cartItems: res.items });
+      },
+
+      removeItem: async (adminId: number, listingId: number) => {
+        const res = await CartService.cartControllerRemoveItem(adminId, listingId);
+        set({ cartItems: res.items });
+      },
+
+      clearCart: async (adminId: number) => {
+        const res = await CartService.cartControllerClearCart(adminId);
+        set({ cartItems: res.items });
+      },
+
+      deleteCart: async (adminId: number) => {
+        await CartService.cartControllerDeleteCart(adminId);
+        set({ cartItems: [] });
+      },
+
+      setHasHydrated: (v: boolean) => set({ hasHydrated: v }),
+
+      reset: () => set(store.getInitialState()),
+    }),
+    {
+      name: 'cart-store',
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },

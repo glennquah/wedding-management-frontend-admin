@@ -7,11 +7,14 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export type { AddToCartDto } from './models/AddToCartDto';
 export type { AdminResponseDto } from './models/AdminResponseDto';
 export { AllEmailNotificationHistoryResponseDto } from './models/AllEmailNotificationHistoryResponseDto';
 export type { AuthResponseDto } from './models/AuthResponseDto';
 export type { AvailabilitySlotDto } from './models/AvailabilitySlotDto';
 export { BudgetBucket } from './models/BudgetBucket';
+export type { CartItemResponseDto } from './models/CartItemResponseDto';
+export type { CartResponseDto } from './models/CartResponseDto';
 export type { CheckoutSessionResponseDto } from './models/CheckoutSessionResponseDto';
 export { ConfirmationStatus } from './models/ConfirmationStatus';
 export type { CreateAdminDto } from './models/CreateAdminDto';
@@ -72,6 +75,7 @@ export { WeddingType } from './models/WeddingType';
 
 export { AdminsService } from './services/AdminsService';
 export { AuthService } from './services/AuthService';
+export { CartService } from './services/CartService';
 export { EmailNotificationService } from './services/EmailNotificationService';
 export { GuestsService } from './services/GuestsService';
 export { ListingsService } from './services/ListingsService';
