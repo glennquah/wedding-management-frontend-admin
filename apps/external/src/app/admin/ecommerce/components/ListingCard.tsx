@@ -31,7 +31,7 @@ export function ListingCard({ listing, vendor }: ListingCardProps) {
   };
 
   return (
-    <Card className="w-[300px] hover:shadow-xl transition-all duration-300 cursor-pointer group" onClick={handleClick}>
+    <Card className="w-full max-w-[300px] hover:shadow-xl transition-all duration-300 cursor-pointer group" onClick={handleClick}>
       <div className="relative overflow-hidden rounded-t-lg">
         <div className="aspect-[4/3] relative bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
           {displayImage ? (

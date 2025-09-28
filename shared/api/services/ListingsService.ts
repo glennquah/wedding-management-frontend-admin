@@ -136,6 +136,61 @@ export class ListingsService {
         });
     }
     /**
+     * Browse venue listings with filtering
+     * @param minPrice
+     * @param maxPrice
+     * @param availableDate
+     * @param style
+     * @param weddingType
+     * @param minRating
+     * @param minCapacity
+     * @param search
+     * @param sortBy
+     * @param sortOrder
+     * @param limit
+     * @param offset
+     * @returns any Filtered venue listings with pagination.
+     * @throws ApiError
+     */
+    public static listingControllerBrowseVenues(
+        minPrice: number,
+        maxPrice: number,
+        availableDate: string,
+        style: string,
+        weddingType: string,
+        minRating: number,
+        minCapacity: number,
+        search: string,
+        sortBy: string,
+        sortOrder: string,
+        limit: number,
+        offset: number,
+    ): CancelablePromise<{
+        listings?: Array<ListingResponseDto>;
+        total?: number;
+        page?: number;
+        totalPages?: number;
+    }> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/listings/venue/browse',
+            query: {
+                'minPrice': minPrice,
+                'maxPrice': maxPrice,
+                'availableDate': availableDate,
+                'style': style,
+                'weddingType': weddingType,
+                'minRating': minRating,
+                'minCapacity': minCapacity,
+                'search': search,
+                'sortBy': sortBy,
+                'sortOrder': sortOrder,
+                'limit': limit,
+                'offset': offset,
+            },
+        });
+    }
+    /**
      * Get all catering listings
      * @returns ListingResponseDto All catering listings.
      * @throws ApiError
@@ -210,6 +265,122 @@ export class ListingsService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/listings/transportation/all',
+        });
+    }
+    /**
+     * Browse listings with comprehensive filtering
+     * @param service
+     * @param minPrice
+     * @param maxPrice
+     * @param availableDate
+     * @param style
+     * @param weddingType
+     * @param minRating
+     * @param minCapacity
+     * @param search
+     * @param sortBy
+     * @param sortOrder
+     * @param limit
+     * @param offset
+     * @returns any Filtered listings with pagination.
+     * @throws ApiError
+     */
+    public static listingControllerBrowseListings(
+        service: string,
+        minPrice: number,
+        maxPrice: number,
+        availableDate: string,
+        style: string,
+        weddingType: string,
+        minRating: number,
+        minCapacity: number,
+        search: string,
+        sortBy: string,
+        sortOrder: string,
+        limit: number,
+        offset: number,
+    ): CancelablePromise<{
+        listings?: Array<ListingResponseDto>;
+        total?: number;
+        page?: number;
+        totalPages?: number;
+    }> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/listings/browse',
+            query: {
+                'service': service,
+                'minPrice': minPrice,
+                'maxPrice': maxPrice,
+                'availableDate': availableDate,
+                'style': style,
+                'weddingType': weddingType,
+                'minRating': minRating,
+                'minCapacity': minCapacity,
+                'search': search,
+                'sortBy': sortBy,
+                'sortOrder': sortOrder,
+                'limit': limit,
+                'offset': offset,
+            },
+        });
+    }
+    /**
+     * Advanced search listings with enhanced text search
+     * @param search
+     * @param service
+     * @param minPrice
+     * @param maxPrice
+     * @param availableDate
+     * @param style
+     * @param weddingType
+     * @param minRating
+     * @param minCapacity
+     * @param sortBy
+     * @param sortOrder
+     * @param limit
+     * @param offset
+     * @returns any Advanced search results with pagination.
+     * @throws ApiError
+     */
+    public static listingControllerSearchListingsAdvanced(
+        search: string,
+        service: string,
+        minPrice: number,
+        maxPrice: number,
+        availableDate: string,
+        style: string,
+        weddingType: string,
+        minRating: number,
+        minCapacity: number,
+        sortBy: string,
+        sortOrder: string,
+        limit: number,
+        offset: number,
+    ): CancelablePromise<{
+        listings?: Array<ListingResponseDto>;
+        total?: number;
+        page?: number;
+        totalPages?: number;
+    }> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/listings/search/advanced',
+            query: {
+                'search': search,
+                'service': service,
+                'minPrice': minPrice,
+                'maxPrice': maxPrice,
+                'availableDate': availableDate,
+                'style': style,
+                'weddingType': weddingType,
+                'minRating': minRating,
+                'minCapacity': minCapacity,
+                'sortBy': sortBy,
+                'sortOrder': sortOrder,
+                'limit': limit,
+                'offset': offset,
+            },
         });
     }
 }
