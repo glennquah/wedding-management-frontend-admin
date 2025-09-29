@@ -124,4 +124,263 @@ export class ListingsService {
             },
         });
     }
+    /**
+     * Get all venue listings
+     * @returns ListingResponseDto All venue listings.
+     * @throws ApiError
+     */
+    public static listingControllerGetAllVenues(): CancelablePromise<Array<ListingResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/listings/venue/all',
+        });
+    }
+    /**
+     * Browse venue listings with filtering
+     * @param minPrice
+     * @param maxPrice
+     * @param availableDate
+     * @param style
+     * @param weddingType
+     * @param minRating
+     * @param minCapacity
+     * @param search
+     * @param sortBy
+     * @param sortOrder
+     * @param limit
+     * @param offset
+     * @returns any Filtered venue listings with pagination.
+     * @throws ApiError
+     */
+    public static listingControllerBrowseVenues(
+        minPrice: number,
+        maxPrice: number,
+        availableDate: string,
+        style: string,
+        weddingType: string,
+        minRating: number,
+        minCapacity: number,
+        search: string,
+        sortBy: string,
+        sortOrder: string,
+        limit: number,
+        offset: number,
+    ): CancelablePromise<{
+        listings?: Array<ListingResponseDto>;
+        total?: number;
+        page?: number;
+        totalPages?: number;
+    }> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/listings/venue/browse',
+            query: {
+                'minPrice': minPrice,
+                'maxPrice': maxPrice,
+                'availableDate': availableDate,
+                'style': style,
+                'weddingType': weddingType,
+                'minRating': minRating,
+                'minCapacity': minCapacity,
+                'search': search,
+                'sortBy': sortBy,
+                'sortOrder': sortOrder,
+                'limit': limit,
+                'offset': offset,
+            },
+        });
+    }
+    /**
+     * Get all catering listings
+     * @returns ListingResponseDto All catering listings.
+     * @throws ApiError
+     */
+    public static listingControllerGetAllCatering(): CancelablePromise<Array<ListingResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/listings/catering/all',
+        });
+    }
+    /**
+     * Get all photography listings
+     * @returns ListingResponseDto All photography listings.
+     * @throws ApiError
+     */
+    public static listingControllerGetAllPhotography(): CancelablePromise<Array<ListingResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/listings/photography/all',
+        });
+    }
+    /**
+     * Get all decoration listings
+     * @returns ListingResponseDto All decoration listings.
+     * @throws ApiError
+     */
+    public static listingControllerGetAllDecoration(): CancelablePromise<Array<ListingResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/listings/decoration/all',
+        });
+    }
+    /**
+     * Get all music listings
+     * @returns ListingResponseDto All music listings.
+     * @throws ApiError
+     */
+    public static listingControllerGetAllMusic(): CancelablePromise<Array<ListingResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/listings/music/all',
+        });
+    }
+    /**
+     * Get all attire listings
+     * @returns ListingResponseDto All attire listings.
+     * @throws ApiError
+     */
+    public static listingControllerGetAllAttire(): CancelablePromise<Array<ListingResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/listings/attire/all',
+        });
+    }
+    /**
+     * Get all makeup listings
+     * @returns ListingResponseDto All makeup listings.
+     * @throws ApiError
+     */
+    public static listingControllerGetAllMakeup(): CancelablePromise<Array<ListingResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/listings/makeup/all',
+        });
+    }
+    /**
+     * Get all transportation listings
+     * @returns ListingResponseDto All transportation listings.
+     * @throws ApiError
+     */
+    public static listingControllerGetAllTransportation(): CancelablePromise<Array<ListingResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/listings/transportation/all',
+        });
+    }
+    /**
+     * Browse listings with comprehensive filtering
+     * @param service
+     * @param minPrice
+     * @param maxPrice
+     * @param availableDate
+     * @param style
+     * @param weddingType
+     * @param minRating
+     * @param minCapacity
+     * @param search
+     * @param sortBy
+     * @param sortOrder
+     * @param limit
+     * @param offset
+     * @returns any Filtered listings with pagination.
+     * @throws ApiError
+     */
+    public static listingControllerBrowseListings(
+        service: string,
+        minPrice: number,
+        maxPrice: number,
+        availableDate: string,
+        style: string,
+        weddingType: string,
+        minRating: number,
+        minCapacity: number,
+        search: string,
+        sortBy: string,
+        sortOrder: string,
+        limit: number,
+        offset: number,
+    ): CancelablePromise<{
+        listings?: Array<ListingResponseDto>;
+        total?: number;
+        page?: number;
+        totalPages?: number;
+    }> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/listings/browse',
+            query: {
+                'service': service,
+                'minPrice': minPrice,
+                'maxPrice': maxPrice,
+                'availableDate': availableDate,
+                'style': style,
+                'weddingType': weddingType,
+                'minRating': minRating,
+                'minCapacity': minCapacity,
+                'search': search,
+                'sortBy': sortBy,
+                'sortOrder': sortOrder,
+                'limit': limit,
+                'offset': offset,
+            },
+        });
+    }
+    /**
+     * Advanced search listings with enhanced text search
+     * @param search
+     * @param service
+     * @param minPrice
+     * @param maxPrice
+     * @param availableDate
+     * @param style
+     * @param weddingType
+     * @param minRating
+     * @param minCapacity
+     * @param sortBy
+     * @param sortOrder
+     * @param limit
+     * @param offset
+     * @returns any Advanced search results with pagination.
+     * @throws ApiError
+     */
+    public static listingControllerSearchListingsAdvanced(
+        search: string,
+        service: string,
+        minPrice: number,
+        maxPrice: number,
+        availableDate: string,
+        style: string,
+        weddingType: string,
+        minRating: number,
+        minCapacity: number,
+        sortBy: string,
+        sortOrder: string,
+        limit: number,
+        offset: number,
+    ): CancelablePromise<{
+        listings?: Array<ListingResponseDto>;
+        total?: number;
+        page?: number;
+        totalPages?: number;
+    }> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/listings/search/advanced',
+            query: {
+                'search': search,
+                'service': service,
+                'minPrice': minPrice,
+                'maxPrice': maxPrice,
+                'availableDate': availableDate,
+                'style': style,
+                'weddingType': weddingType,
+                'minRating': minRating,
+                'minCapacity': minCapacity,
+                'sortBy': sortBy,
+                'sortOrder': sortOrder,
+                'limit': limit,
+                'offset': offset,
+            },
+        });
+    }
 }
