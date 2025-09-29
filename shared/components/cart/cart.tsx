@@ -8,7 +8,7 @@ import { Button } from '../ui/button';
 import { Drawer, DrawerClose, DrawerContent, DrawerTrigger } from '../ui/drawer';
 import { Separator } from '../ui/separator';
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '../ui/sheet';
-import { useCartStore } from '@/app/store/sessionStore';
+import { useCartStore, useWeddingStore } from '@/app/store/sessionStore';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ShoppingCart, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
@@ -21,7 +21,8 @@ TODO:
 2) define href for link to indiv listing 
 */
 export function Cart() {
-  const { cartItems, removeItem, clearCart, fetchCart } = useCartStore();
+  const { cartItems, removeItem, clearCart, fetchCart, createOrder } = useCartStore();
+  const { selectedWeddingId } = useWeddingStore();
   const { data: session, status } = useSession();
 
   const [isOpen, setIsOpen] = React.useState(false);
@@ -39,6 +40,7 @@ export function Cart() {
 
   React.useEffect(() => {
     if (!session?.user.id) return;
+
     setIsMounted(true);
     fetchCart(session?.user.id);
   }, [fetchCart, session?.user.id]);
@@ -201,15 +203,13 @@ export function Cart() {
                 <span className="text-base font-semibold">Total</span>
                 <span className="text-base font-semibold">${subtotal.toFixed(2)}</span>
               </div>
-              <Link
-                href="/admin/payment"
-                className="block w-full mt-4"
-                onClick={() => setIsOpen(false)}
+              <Button
+                className="w-full"
+                variant="default"
+                onClick={() => createOrder(selectedWeddingId || 0)}
               >
-                <Button className="w-full" variant="default">
-                  Checkout
-                </Button>
-              </Link>
+                Checkout
+              </Button>
               <div className="flex items-center justify-between">
                 {isDesktop ? (
                   <SheetClose asChild>
