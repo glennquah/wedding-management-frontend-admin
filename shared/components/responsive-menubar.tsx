@@ -36,7 +36,7 @@ const MobileMenubar = () => {
           alt="Logo"
           width={25}
           height={25}
-          className="w-auto object-contain"
+          className="w-[25px] h-[25px] object-contain"
           priority
         />
       </div>
@@ -138,7 +138,7 @@ const DesktopMenubar = () => {
             alt="Logo"
             width={100}
             height={80}
-            className="w-auto object-contain"
+            className="w-[100px] h-[80px] object-contain"
             priority
           />
         </div>
