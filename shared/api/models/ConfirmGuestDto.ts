@@ -11,5 +11,9 @@ export type ConfirmGuestDto = {
      * Wedding ID to confirm guest for
      */
     weddingId: number;
+    /**
+     * Food allergies to store for the guest
+     */
+    allergies?: string;
 };
 

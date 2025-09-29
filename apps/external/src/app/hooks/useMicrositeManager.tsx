@@ -25,7 +25,7 @@ interface UseMicrositeManagerReturn {
     setPasswordError: (error: string | null) => void,
     setNameError: (error: string | null) => void,
   ) => Promise<void>;
-  handleConfirmGuestAttendance: () => Promise<void>;
+  handleConfirmGuestAttendance: (allergies?: string[]) => Promise<void>;
 
   // State setters
   setMicrositeData: (data: MicrositeResponseDto | null) => void;
@@ -164,21 +164,27 @@ export const useMicrositeManager = (): UseMicrositeManagerReturn => {
     [],
   );
 
-  const handleConfirmGuestAttendance = useCallback(async () => {
-    if (!guestDetails || !micrositeData) return;
+  const handleConfirmGuestAttendance = useCallback(
+    async (allergies?: string[]) => {
+      if (!guestDetails || !micrositeData) return;
 
-    try {
-      await MicrositeService.micrositeControllerConfirmGuest({
-        guestId: guestDetails.id,
-        weddingId: micrositeData.weddingId!,
-      });
+      try {
+        await MicrositeService.micrositeControllerConfirmGuest({
+          guestId: guestDetails.id,
+          weddingId: micrositeData.weddingId!,
+          allergies: allergies && allergies.length > 0 ? allergies.join(',') : undefined,
+        });
 
-      toast.success('Thanks for confirming your attendance!');
-    } catch (err: unknown) {
-      console.error('Error confirming attendance:', err);
-      toast.error('Failed to confirm attendance. Please try again.');
-    }
-  }, [guestDetails, micrositeData]);
+        toast.success('Thanks for confirming your attendance!');
+      } catch (err: unknown) {
+        console.error('Error confirming attendance:', err);
+        toast.error(
+          typeof err === 'string' ? err : err instanceof Error ? err.message : 'An error occurred',
+        );
+      }
+    },
+    [guestDetails, micrositeData],
+  );
 
   return {
     // State

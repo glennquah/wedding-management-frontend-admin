@@ -112,6 +112,7 @@ export class MicrositeService {
             mediaType: 'application/json',
             errors: {
                 404: `Guest not found for the specified wedding.`,
+                409: `Guest has already confirmed attendance.`,
             },
         });
     }

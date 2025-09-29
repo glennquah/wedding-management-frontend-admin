@@ -3,6 +3,7 @@ import { RefObject, useEffect, useMemo, useState } from 'react';
 import FaqAccordion from '../FaqAccordion';
 import GalleryDialog from '../GalleryDialog';
 import { Button } from '@shared/components/ui/button';
+import { MultiSelectDropdown } from '@shared/components/ui/form/multiSelectDropdown';
 import { Switch } from '@shared/components/ui/switch';
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
 import { GuestResponseDto, MicrositeResponseDto } from '@wedding/api-types';
@@ -17,7 +18,7 @@ interface TemplateThreeProps {
   micrositeData: MicrositeResponseDto;
   rsvpRef: RefObject<HTMLDivElement | null>;
   guestDetails: GuestResponseDto | null;
-  handleConfirmGuestAttendance: () => Promise<void>;
+  handleConfirmGuestAttendance: (allergies?: string[]) => Promise<void>;
 }
 
 // Predefined collage slots (deterministic to avoid hydration mismatch)
@@ -39,6 +40,25 @@ export default function TemplateThree({
   handleConfirmGuestAttendance,
 }: TemplateThreeProps) {
   const isMobile = useIsMobileScreen();
+  // Food allergies state
+  const [selectedAllergies, setSelectedAllergies] = useState<string[]>([]);
+
+  // Common allergen options
+  const allergenOptions = [
+    'None',
+    'Shellfish',
+    'Dairy',
+    'Gluten',
+    'Peanuts',
+    'Beef',
+    'Tree Nuts',
+    'Eggs',
+    'Soy',
+    'Fish',
+    'Pork',
+    'Chicken',
+    'Sesame',
+  ];
   const [isDark, setIsDark] = useState(false);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   // Provide dummy guest details if none are supplied (useful for preview)
@@ -67,10 +87,6 @@ export default function TemplateThree({
 
   // Gallery sources
   const heroImages = useMemo(() => micrositeData?.heroImages ?? [], [micrositeData?.heroImages]);
-  const allGalleryImages = useMemo(
-    () => [...heroImages, ...(micrositeData?.imageGallery ?? [])],
-    [heroImages, micrositeData?.imageGallery],
-  );
   const firstHero = heroImages[0];
 
   // A gentle pulse for the center badge
@@ -207,42 +223,39 @@ export default function TemplateThree({
           <ul className="space-y-10">
             {micrositeData?.schedule?.map((item, idx) => (
               <li key={idx} className="relative grid grid-cols-1 md:grid-cols-2 items-center">
-                {/* left card */}
-                <div
-                  className={`md:pr-10 ${idx % 2 === 0 ? 'md:col-start-1' : 'md:col-start-1 md:opacity-60'} ${idx % 2 === 0 ? '' : ''}`}
-                >
-                  <div
-                    className={`inline-block max-w-xl rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white/90 dark:bg-zinc-900/90 px-5 py-4 shadow-sm ${idx % 2 === 0 ? '-rotate-2' : 'rotate-2'}`}
-                  >
-                    <div className="text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
-                      {item.time}
+                {/* Show item on left side for even indices (0, 2, 4...) */}
+                {idx % 2 === 0 && (
+                  <div className="md:pr-10 md:col-start-1">
+                    <div className="inline-block max-w-xl rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white/90 dark:bg-zinc-900/90 px-5 py-4 shadow-sm -rotate-2">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
+                        {item.time}
+                      </div>
+                      <div className="mt-1 font-semibold text-lg">{item.title}</div>
+                      {item.description ? (
+                        <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">
+                          {item.description}
+                        </p>
+                      ) : null}
                     </div>
-                    <div className="mt-1 font-semibold text-lg">{item.title}</div>
-                    {item.description ? (
-                      <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">
-                        {item.description}
-                      </p>
-                    ) : null}
                   </div>
-                </div>
-                {/* right card */}
-                <div
-                  className={`md:pl-10 ${idx % 2 === 0 ? 'md:col-start-2 md:opacity-60' : 'md:col-start-2'}`}
-                >
-                  <div
-                    className={`inline-block max-w-xl rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white/90 dark:bg-zinc-900/90 px-5 py-4 shadow-sm ${idx % 2 === 0 ? 'rotate-2' : '-rotate-2'}`}
-                  >
-                    <div className="text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
-                      {item.time}
+                )}
+
+                {/* Show item on right side for odd indices (1, 3, 5...) */}
+                {idx % 2 === 1 && (
+                  <div className="md:pl-10 md:col-start-2">
+                    <div className="inline-block max-w-xl rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white/90 dark:bg-zinc-900/90 px-5 py-4 shadow-sm rotate-2">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
+                        {item.time}
+                      </div>
+                      <div className="mt-1 font-semibold text-lg">{item.title}</div>
+                      {item.description ? (
+                        <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">
+                          {item.description}
+                        </p>
+                      ) : null}
                     </div>
-                    <div className="mt-1 font-semibold text-lg">{item.title}</div>
-                    {item.description ? (
-                      <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">
-                        {item.description}
-                      </p>
-                    ) : null}
                   </div>
-                </div>
+                )}
               </li>
             ))}
           </ul>
@@ -271,7 +284,7 @@ export default function TemplateThree({
           Snapshots from the lovefest.
         </p>
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {allGalleryImages.slice(0, 9).map((src, idx) => (
+          {micrositeData?.imageGallery?.slice(0, 9).map((src, idx) => (
             <div
               key={idx}
               className={`relative aspect-[3/4] bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl p-2 shadow hover:scale-[1.02] transition-transform ${
@@ -296,7 +309,7 @@ export default function TemplateThree({
         <GalleryDialog
           open={isGalleryOpen}
           onOpenChange={setIsGalleryOpen}
-          images={allGalleryImages}
+          images={micrositeData?.imageGallery ?? []}
         />
       </section>
 
@@ -334,12 +347,16 @@ export default function TemplateThree({
                     {guest.name}
                   </div>
                 </div>
-                <div className="bg-zinc-50 dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 p-4">
-                  <div className="text-xs font-medium text-zinc-600 dark:text-zinc-300">Email</div>
-                  <div className="mt-1 font-semibold text-zinc-900 dark:text-zinc-100 text-sm">
-                    {guest.email}
+                {guest.email && guest.email.length > 0 && (
+                  <div className="bg-zinc-50 dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 p-4">
+                    <div className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
+                      Email
+                    </div>
+                    <div className="mt-1 font-semibold text-zinc-900 dark:text-zinc-100 text-sm">
+                      {guest.email}
+                    </div>
                   </div>
-                </div>
+                )}
                 <div className="bg-zinc-50 dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 p-4">
                   <div className="text-xs font-medium text-zinc-600 dark:text-zinc-300">Group</div>
                   <div className="mt-1 font-semibold text-zinc-900 dark:text-zinc-100 text-sm">
@@ -362,10 +379,18 @@ export default function TemplateThree({
                     </div>
                   </div>
                 )}
+                <MultiSelectDropdown
+                  label="Food Allergies"
+                  options={allergenOptions}
+                  selected={selectedAllergies}
+                  setSelected={setSelectedAllergies}
+                  placeholder="Select any food allergies"
+                  className="w-full"
+                />
               </div>
               <div className="flex justify-end pt-2">
                 <Button
-                  onClick={handleConfirmGuestAttendance}
+                  onClick={() => handleConfirmGuestAttendance(selectedAllergies)}
                   className="w-full sm:w-auto rounded-full bg-[#EADBC8] hover:bg-[#E5D4BE] text-stone-900 border border-stone-300"
                 >
                   Confirm Attendance

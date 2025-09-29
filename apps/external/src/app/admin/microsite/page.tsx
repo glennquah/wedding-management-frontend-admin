@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { createEmptyMicrositeForm, useMicrositeFormStore } from '../../store/micrositeStore';
 import { useWeddingStore } from '../../store/sessionStore';
-import { BasicInformation, Faq, HeroImages, ImageGallery, WeddingSchedule } from './components';
+import { BasicInformation, Faq, ImageGallery, WeddingSchedule } from './components';
 import { useMicrositeAdminManager } from '@/app/hooks/useMicrositeAdminManager';
 import { CreateMicrositeDto, FaqItemDto, MicrositeService, ScheduleItemDto } from '@shared/api';
 import { Button } from '@shared/components/ui/button';
@@ -18,6 +18,7 @@ import {
   DialogTrigger,
 } from '@shared/components/ui/dialog';
 import { PageHeader } from '@shared/components/ui/page-header';
+import { toast } from 'sonner';
 
 export default function CreateMicrositePage() {
   const selectedWeddingId = useWeddingStore((state) => state.selectedWeddingId);
@@ -209,6 +210,50 @@ export default function CreateMicrositePage() {
     }
   };
 
+  const toggleHeroImage = (imageUrl: string) => {
+    if (typeof selectedWeddingId !== 'number') return;
+
+    updateFormData(selectedWeddingId, (prev) => {
+      const currentHeroImages = (prev.heroImages as string[] | undefined) ?? [];
+      const isCurrentlyHero = currentHeroImages.includes(imageUrl);
+
+      if (isCurrentlyHero) {
+        // Remove from hero images
+        return {
+          ...prev,
+          heroImages: currentHeroImages.filter((url) => url !== imageUrl),
+        };
+      } else {
+        // Add to hero images (max 5)
+        if (currentHeroImages.length >= 5) {
+          return prev; // Don't add if already at max
+        }
+        return {
+          ...prev,
+          heroImages: [...currentHeroImages, imageUrl],
+        };
+      }
+    });
+  };
+
+  const validateForm = () => {
+    const heroImages = formData.heroImages ?? [];
+    if (heroImages.length === 0) {
+      return 'Please select at least one hero image before saving your microsite.';
+    }
+    return null;
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const validationError = validateForm();
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+    handleSubmit(e);
+  };
+
   // handlers are provided by useMicrositeAdminManager
 
   if (!selectedWeddingId) {
@@ -249,19 +294,14 @@ export default function CreateMicrositePage() {
           Preview Microsite
         </Button>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleFormSubmit} className="space-y-8">
           <BasicInformation formData={formData} handleInputChange={handleInputChange} />
-
-          <HeroImages
-            formData={formData}
-            handleImageUpload={handleImageUpload}
-            removeImage={removeImage}
-          />
 
           <ImageGallery
             formData={formData}
             handleImageUpload={handleImageUpload}
             removeImage={removeImage}
+            toggleHeroImage={toggleHeroImage}
           />
 
           <WeddingSchedule

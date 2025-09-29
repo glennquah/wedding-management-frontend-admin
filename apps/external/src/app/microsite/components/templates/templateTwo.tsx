@@ -3,6 +3,7 @@ import { RefObject, useEffect, useState } from 'react';
 import FaqAccordion from '../FaqAccordion';
 import GalleryDialog from '../GalleryDialog';
 import { Button } from '@shared/components/ui/button';
+import { MultiSelectDropdown } from '@shared/components/ui/form/multiSelectDropdown';
 import { Switch } from '@shared/components/ui/switch';
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
 import { GuestResponseDto, MicrositeResponseDto } from '@wedding/api-types';
@@ -17,7 +18,7 @@ interface TemplateTwoProps {
   micrositeData: MicrositeResponseDto;
   rsvpRef: RefObject<HTMLDivElement | null>;
   guestDetails: GuestResponseDto | null;
-  handleConfirmGuestAttendance: () => Promise<void>;
+  handleConfirmGuestAttendance: (allergies?: string[]) => Promise<void>;
 }
 
 export default function TemplateTwo({
@@ -27,6 +28,26 @@ export default function TemplateTwo({
   handleConfirmGuestAttendance,
 }: TemplateTwoProps) {
   const isMobile = useIsMobileScreen();
+
+  // Food allergies state
+  const [selectedAllergies, setSelectedAllergies] = useState<string[]>([]);
+
+  // Common allergen options
+  const allergenOptions = [
+    'None',
+    'Shellfish',
+    'Dairy',
+    'Gluten',
+    'Peanuts',
+    'Beef',
+    'Tree Nuts',
+    'Eggs',
+    'Soy',
+    'Fish',
+    'Pork',
+    'Chicken',
+    'Sesame',
+  ];
   // Provide dummy guest details if none are supplied (useful for preview)
   type BasicGuest = {
     name: string;
@@ -70,10 +91,6 @@ export default function TemplateTwo({
   const [isHeroPortrait, setIsHeroPortrait] = useState<boolean | null>(null);
 
   // Images
-  const allGalleryImages = [
-    ...(micrositeData?.heroImages ?? []),
-    ...(micrositeData?.imageGallery ?? []),
-  ];
   const firstHero = micrositeData?.heroImages?.[0];
   const schedImage = micrositeData?.imageGallery?.[0] || micrositeData?.heroImages?.[0];
   const faqImage = micrositeData?.imageGallery?.[1] || micrositeData?.heroImages?.[1] || firstHero;
@@ -257,7 +274,7 @@ export default function TemplateTwo({
           A few moments we love.
         </p>
         <div className="mt-8 columns-1 sm:columns-2 md:columns-3 gap-3 space-y-3">
-          {allGalleryImages?.slice(0, 6).map((src, idx) => (
+          {micrositeData?.imageGallery?.slice(0, 6).map((src, idx) => (
             <div key={idx} className="break-inside-avoid mb-3 group">
               <div className="relative overflow-hidden">
                 <Image
@@ -282,7 +299,7 @@ export default function TemplateTwo({
         <GalleryDialog
           open={isGalleryOpen}
           onOpenChange={setIsGalleryOpen}
-          images={allGalleryImages ?? []}
+          images={micrositeData?.imageGallery ?? []}
         />
       </section>
 
@@ -326,7 +343,7 @@ export default function TemplateTwo({
                         >
                           Your Details
                         </h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1  gap-3">
                           <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
                             <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                               Guest
@@ -335,14 +352,16 @@ export default function TemplateTwo({
                               {guest.name}
                             </div>
                           </div>
-                          <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
-                            <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
-                              Email
+                          {guest.email && guest.email.length > 0 && (
+                            <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                              <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
+                                Email
+                              </div>
+                              <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                                {guest.email}
+                              </div>
                             </div>
-                            <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
-                              {guest.email}
-                            </div>
-                          </div>
+                          )}
                           <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
                             <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                               Group
@@ -367,11 +386,19 @@ export default function TemplateTwo({
                               </div>
                             </div>
                           )}
+                          <MultiSelectDropdown
+                            label="Food Allergies"
+                            options={allergenOptions}
+                            selected={selectedAllergies}
+                            setSelected={setSelectedAllergies}
+                            placeholder="Select any food allergies"
+                            className="w-full"
+                          />
                         </div>
                       </div>
                       <div className="flex justify-end pt-2">
                         <Button
-                          onClick={handleConfirmGuestAttendance}
+                          onClick={() => handleConfirmGuestAttendance(selectedAllergies)}
                           className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
                         >
                           Confirm Attendance
@@ -437,7 +464,7 @@ export default function TemplateTwo({
                 >
                   Your Details
                 </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3">
                   <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
                     <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                       Guest
@@ -446,14 +473,16 @@ export default function TemplateTwo({
                       {guest.name}
                     </div>
                   </div>
-                  <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
-                    <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
-                      Email
+                  {guest.email && guest.email.length > 0 && (
+                    <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                      <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
+                        Email
+                      </div>
+                      <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                        {guest.email}
+                      </div>
                     </div>
-                    <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
-                      {guest.email}
-                    </div>
-                  </div>
+                  )}
                   <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
                     <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                       Group
@@ -478,11 +507,19 @@ export default function TemplateTwo({
                       </div>
                     </div>
                   )}
+                  <MultiSelectDropdown
+                    label="Food Allergies"
+                    options={allergenOptions}
+                    selected={selectedAllergies}
+                    setSelected={setSelectedAllergies}
+                    placeholder="Select any food allergies"
+                    className="w-full"
+                  />
                 </div>
               </div>
               <div className="flex justify-end pt-2">
                 <Button
-                  onClick={handleConfirmGuestAttendance}
+                  onClick={() => handleConfirmGuestAttendance(selectedAllergies)}
                   className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
                 >
                   Confirm Attendance

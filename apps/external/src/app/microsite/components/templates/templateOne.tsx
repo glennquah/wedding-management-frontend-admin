@@ -3,6 +3,7 @@ import { RefObject, useEffect, useState } from 'react';
 import FaqAccordion from '../FaqAccordion';
 import GalleryDialog from '../GalleryDialog';
 import { Button } from '@shared/components/ui/button';
+import { MultiSelectDropdown } from '@shared/components/ui/form/multiSelectDropdown';
 import { Switch } from '@shared/components/ui/switch';
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
 import { GuestResponseDto, MicrositeResponseDto } from '@wedding/api-types';
@@ -18,7 +19,7 @@ interface TemplateOneProps {
   micrositeData?: MicrositeResponseDto;
   rsvpRef: RefObject<HTMLDivElement | null>;
   guestDetails?: GuestResponseDto | null;
-  handleConfirmGuestAttendance?: () => Promise<void>;
+  handleConfirmGuestAttendance?: (allergies?: string[]) => Promise<void>;
 }
 
 export default function TemplateOne({
@@ -28,6 +29,27 @@ export default function TemplateOne({
   handleConfirmGuestAttendance,
 }: TemplateOneProps) {
   const isMobile = useIsMobileScreen();
+
+  // Food allergies state
+  const [selectedAllergies, setSelectedAllergies] = useState<string[]>([]);
+
+  // Common allergen options
+  const allergenOptions = [
+    'None',
+    'Shellfish',
+    'Dairy',
+    'Gluten',
+    'Peanuts',
+    'Beef',
+    'Tree Nuts',
+    'Eggs',
+    'Soy',
+    'Fish',
+    'Pork',
+    'Chicken',
+    'Sesame',
+  ];
+
   // Carousel state
   const [current, setCurrent] = useState(0);
   const [fade, setFade] = useState(true);
@@ -71,11 +93,6 @@ export default function TemplateOne({
       }
     : fallbackGuest;
 
-  // Combine hero images and gallery images for the full gallery
-  const allGalleryImages = [
-    ...(micrositeData?.heroImages ?? []),
-    ...(micrositeData?.imageGallery ?? []),
-  ];
   const firstHero = micrositeData?.heroImages?.[0];
 
   return (
@@ -206,7 +223,7 @@ export default function TemplateOne({
             A few moments we love.
           </p>
           <div className="mt-8 columns-1 sm:columns-2 md:columns-3 gap-3 space-y-3">
-            {allGalleryImages?.slice(0, 6).map((src, idx) => (
+            {micrositeData?.imageGallery?.slice(0, 6).map((src, idx) => (
               <div key={idx} className="break-inside-avoid mb-3 group">
                 <div className="relative overflow-hidden">
                   <Image
@@ -231,7 +248,7 @@ export default function TemplateOne({
           <GalleryDialog
             open={isGalleryOpen}
             onOpenChange={setIsGalleryOpen}
-            images={allGalleryImages ?? []}
+            images={micrositeData?.imageGallery ?? []}
           />
         </section>
         {/* RSVP: portrait image on the left, content on the right */}
@@ -276,9 +293,7 @@ export default function TemplateOne({
                           >
                             Your Details
                           </h4>
-                          <div
-                            className={`grid grid-cols-1 sm:grid-cols-2 gap-3  ${montserrat.className} `}
-                          >
+                          <div className={`grid grid-cols-1 gap-3  ${montserrat.className} `}>
                             <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
                               <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                                 Guest
@@ -287,14 +302,16 @@ export default function TemplateOne({
                                 {guest.name}
                               </div>
                             </div>
-                            <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
-                              <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
-                                Email
+                            {guest.email && guest.email.length > 0 && (
+                              <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                                <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
+                                  Email
+                                </div>
+                                <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                                  {guest.email}
+                                </div>
                               </div>
-                              <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
-                                {guest.email}
-                              </div>
-                            </div>
+                            )}
                             <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
                               <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                                 Group
@@ -319,11 +336,19 @@ export default function TemplateOne({
                                 </div>
                               </div>
                             )}
+                            <MultiSelectDropdown
+                              label="Food Allergies"
+                              options={allergenOptions}
+                              selected={selectedAllergies}
+                              setSelected={setSelectedAllergies}
+                              placeholder="Select any food allergies"
+                              className="w-full"
+                            />
                           </div>
                         </div>
                         <div className="flex justify-end pt-2">
                           <Button
-                            onClick={handleConfirmGuestAttendance}
+                            onClick={() => handleConfirmGuestAttendance?.(selectedAllergies)}
                             className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
                           >
                             Confirm Attendance
@@ -389,7 +414,7 @@ export default function TemplateOne({
                   >
                     Your Details
                   </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3">
                     <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
                       <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                         Guest
@@ -398,14 +423,16 @@ export default function TemplateOne({
                         {guest.name}
                       </div>
                     </div>
-                    <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
-                      <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
-                        Email
+                    {guest.email && guest.email.length > 0 && (
+                      <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                        <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
+                          Email
+                        </div>
+                        <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                          {guest.email}
+                        </div>
                       </div>
-                      <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
-                        {guest.email}
-                      </div>
-                    </div>
+                    )}
                     <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
                       <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                         Group
@@ -430,11 +457,20 @@ export default function TemplateOne({
                         </div>
                       </div>
                     )}
+
+                    <MultiSelectDropdown
+                      label="Food Allergies"
+                      options={allergenOptions}
+                      selected={selectedAllergies}
+                      setSelected={setSelectedAllergies}
+                      placeholder="Select any food allergies"
+                      className="w-full"
+                    />
                   </div>
                 </div>
                 <div className="flex justify-end pt-2">
                   <Button
-                    onClick={handleConfirmGuestAttendance}
+                    onClick={() => handleConfirmGuestAttendance?.(selectedAllergies)}
                     className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
                   >
                     Confirm Attendance
