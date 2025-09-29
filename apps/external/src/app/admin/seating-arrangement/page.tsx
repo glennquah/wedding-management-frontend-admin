@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useGuestManager } from '../../hooks/useGuestManager';
 import { useSeatingManager } from '../../hooks/useSeatingManager';
 import { useWeddingManager } from '../../hooks/useWeddingManager';
+import { useSeatingExport } from './hooks/useSeatingExport';
 import { PriorityRankingDialog } from './components/PriorityRankingDialog';
 import { SeatingVisualization } from './components/SeatingVisualization';
 import {
@@ -13,8 +14,9 @@ import {
   GuestCountBucket as SeatingGuestCountBucket,
 } from '@shared/api';
 import { PageHeader } from '@shared/components';
+import { Button } from '@shared/components/ui/button';
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
-import { Settings2 } from 'lucide-react';
+import { Settings2, FileDown, Loader2 } from 'lucide-react';
 
 // Mapping from API GuestCountBucket to Seating GuestCountBucket
 const mapGuestCountBucket = (bucket: GuestCountBucket): SeatingGuestCountBucket => {
@@ -51,6 +53,33 @@ export default function SeatingArrangementPage() {
     moveGuest,
     swapTables,
   } = useSeatingManager();
+
+  // Initialize export functionality
+  const { exportToPDF, isExporting, canExport } = useSeatingExport({
+    layout,
+    seatingResult,
+    weddingDetails: {
+      coupleName: wedding?.name,
+      date: wedding?.date ? new Date(wedding.date).toLocaleDateString() : undefined,
+    },
+  });
+
+  const additionalActionsComponent = canExport && (
+    <Button
+      onClick={exportToPDF}
+      disabled={isExporting}
+      variant="default"
+      className="flex items-center gap-2"
+      data-testid="export-pdf-button"
+    >
+      {isExporting ? (
+        <Loader2 className="w-4 h-4 animate-spin" />
+      ) : (
+        <FileDown className="w-4 h-4" />
+      )}
+      {isExporting ? 'Exporting...' : 'Export PDF'}
+    </Button>
+  );
 
   // Get group priorities from seating arrangement or initialize empty
   const groupPriorities = seatingArrangement?.groupPriorities || null;
@@ -214,6 +243,7 @@ export default function SeatingArrangementPage() {
             isLoadingLayout ||
             isLoadingWedding
           }
+          additionalActions={additionalActionsComponent}
         />
 
         {/* Seating Visualization */}
