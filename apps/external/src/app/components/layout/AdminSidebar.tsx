@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   ListTodo,
   MapPin,
+  ShoppingCart,
   Users,
 } from 'lucide-react';
 
@@ -21,6 +22,11 @@ const tabs = [
         title: 'Dashboard',
         href: '/',
         icon: LayoutDashboard,
+      },
+      {
+        title: 'Shop',
+        href: '/ecommerce',
+        icon: ShoppingCart,
       },
       {
         title: 'Progress Tracker',

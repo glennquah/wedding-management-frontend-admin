@@ -6,13 +6,15 @@ import { Filter, X } from 'lucide-react';
 import { FilterOptions } from './types';
 
 interface ListingFiltersProps {
-  filters: FilterOptions;
-  onFiltersChange: (filters: FilterOptions) => void;
+  filters: FilterOptions & { rating?: number | null; vendorSearchQuery?: string };
+  onFiltersChange: (filters: FilterOptions & { rating?: number | null; vendorSearchQuery?: string }) => void;
   onClearFilters: () => void;
+  showRatingFilter?: boolean;
+  showVendorSearch?: boolean;
 }
 
-export const ListingFilters = ({ filters, onFiltersChange, onClearFilters }: ListingFiltersProps) => {
-  const updateFilter = (key: keyof FilterOptions, value: string | number | null | { min: number | null; max: number | null }) => {
+export const ListingFilters = ({ filters, onFiltersChange, onClearFilters, showRatingFilter = false, showVendorSearch = false }: ListingFiltersProps) => {
+  const updateFilter = (key: string, value: string | number | null | { min: number | null; max: number | null }) => {
     onFiltersChange({ ...filters, [key]: value });
   };
 
@@ -29,7 +31,9 @@ export const ListingFilters = ({ filters, onFiltersChange, onClearFilters }: Lis
     filters.priceRange.min !== null ||
     filters.priceRange.max !== null ||
     filters.sortBy !== 'name' ||
-    filters.sortOrder !== 'asc';
+    filters.sortOrder !== 'asc' ||
+    (showRatingFilter && (filters as any).rating !== null) ||
+    (showVendorSearch && (filters as any).vendorSearchQuery !== '');
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
@@ -49,11 +53,11 @@ export const ListingFilters = ({ filters, onFiltersChange, onClearFilters }: Lis
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Search by name */}
+      <div className={`grid grid-cols-1 md:grid-cols-2 ${showRatingFilter && showVendorSearch ? 'lg:grid-cols-6' : showRatingFilter || showVendorSearch ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-4`}>
+        {/* Search by listing name */}
         <div>
           <Label htmlFor="search" className="text-xs font-medium text-gray-700">
-            Search by name
+            Search by listing name
           </Label>
           <div className="mt-1">
             <Input
@@ -64,6 +68,23 @@ export const ListingFilters = ({ filters, onFiltersChange, onClearFilters }: Lis
             />
           </div>
         </div>
+
+        {/* Search by vendor name - only shown when showVendorSearch is true */}
+        {showVendorSearch && (
+          <div>
+            <Label htmlFor="vendor-search" className="text-xs font-medium text-gray-700">
+              Search by vendor name
+            </Label>
+            <div className="mt-1">
+              <Input
+                id="vendor-search"
+                placeholder="Search vendors..."
+                value={(filters as any).vendorSearchQuery ?? ''}
+                onChange={(e) => updateFilter('vendorSearchQuery', e.target.value)}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Price range */}
         <div>
@@ -89,6 +110,29 @@ export const ListingFilters = ({ filters, onFiltersChange, onClearFilters }: Lis
             />
           </div>
         </div>
+
+        {/* Rating filter - only shown when showRatingFilter is true */}
+        {showRatingFilter && (
+          <div>
+            <Label className="text-xs font-medium text-gray-700">Minimum rating</Label>
+            <Select
+              value={(filters as any).rating?.toString() ?? 'all'}
+              onValueChange={(value: string) => updateFilter('rating', value === 'all' ? null : parseFloat(value))}
+            >
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="Any rating" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Any rating</SelectItem>
+                <SelectItem value="5">5 stars</SelectItem>
+                <SelectItem value="4">4+ stars</SelectItem>
+                <SelectItem value="3">3+ stars</SelectItem>
+                <SelectItem value="2">2+ stars</SelectItem>
+                <SelectItem value="1">1+ stars</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Sort by */}
         <div>
