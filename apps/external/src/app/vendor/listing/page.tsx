@@ -1,7 +1,7 @@
 'use client';
 
-import { Button, PageHeader } from '@shared/components';
-import { Calendar, Plus } from 'lucide-react';
+import { Button } from '@shared/components';
+import { Calendar, Plus, ListChecks } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
   EmptyState,
@@ -52,13 +52,14 @@ export default function ListingPage() {
   };
 
   const getListingGrid = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 lg:gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 auto-rows-fr">
       {filteredListings.map((listing) => (
         <ListingCard
           key={listing.id}
           listing={listing}
           onEdit={handleEditListing}
           onDelete={handleDeleteListing}
+          serviceType={vendor?.serviceOffered}
         />
       ))}
     </div>
@@ -81,36 +82,39 @@ export default function ListingPage() {
     : `${filteredListings.length} of ${listings.length} listings match your filters`;
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100">
-      <div className="w-full p-4 lg:p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-          <PageHeader
-            title="My Listings"
-            description="Manage your service listings and availability"
-          />
-          <Button onClick={handleAddListing} className="flex items-center gap-2 self-start lg:self-auto">
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-12">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <ListChecks className="h-8 w-8 text-primary" />
+              <h1 className="text-4xl font-bold text-gray-900">My Listings</h1>
+            </div>
+            <p className="text-lg text-muted-foreground max-w-3xl mb-4">
+              Manage your service listings and availability. Create, edit, and monitor your wedding service offerings to attract more clients.
+            </p>
+            <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+              <span className="font-medium text-gray-700">{vendor.serviceOffered}</span>
+              <span>{listingCount}</span>
+            </div>
+          </div>
+          <Button onClick={handleAddListing} className="flex items-center gap-2 self-start lg:self-auto mt-4 lg:mt-0">
             <Plus className="w-4 h-4" />
             Add New Listing
           </Button>
         </div>
+      </div>
 
-        <div className="mb-6">
-          <ListingFilters
-            filters={filters}
-            onFiltersChange={setFilters}
-            onClearFilters={clearFilters}
-          />
-        </div>
+      <div className="mb-6">
+        <ListingFilters
+          filters={filters}
+          onFiltersChange={setFilters}
+          onClearFilters={clearFilters}
+        />
+      </div>
 
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">Your Listings</h2>
-              <p className="text-sm text-gray-600 mt-1">{listingCount}</p>
-            </div>
-          </div>
-          {emptyState || getListingGrid()}
-        </div>
+      <div className="mb-6">
+        {emptyState || getListingGrid()}
       </div>
     </div>
   );

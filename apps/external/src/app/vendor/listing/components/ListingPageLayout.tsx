@@ -29,33 +29,31 @@ export function ListingPageLayout({
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100">
-      <div className="w-full p-4 lg:p-6">
-        {/* Breadcrumb and Header */}
-        <div className="mb-6">
-          <nav className="flex items-center gap-2 mb-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBack}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Listings
-            </Button>
-          </nav>
+    <div className="container mx-auto px-4 py-8">
+      {/* Breadcrumb and Header */}
+      <div className="mb-6">
+        <nav className="flex items-center gap-2 mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBack}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Listings
+          </Button>
+        </nav>
 
-          <PageHeader
-            title={title}
-            description={description}
-          />
-        </div>
+        <PageHeader
+          title={title}
+          description={description}
+        />
+      </div>
 
-        {/* Form Container */}
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            {children}
-          </div>
+      {/* Form Container */}
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          {children}
         </div>
       </div>
     </div>

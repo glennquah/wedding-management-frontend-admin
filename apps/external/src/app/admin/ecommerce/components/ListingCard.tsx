@@ -3,6 +3,7 @@
 import { ListingResponseDto, VendorResponseDto } from '@shared/api';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { Badge } from '@shared/components/ui/badge';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@shared/components/ui/carousel';
 import { Star } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -22,32 +23,59 @@ export function ListingCard({ listing, vendor }: ListingCardProps) {
     }).format(price);
   };
 
-  const displayImage = listing.imageUrls && listing.imageUrls.length > 0
-    ? listing.imageUrls[0]
-    : null;
+  const hasImages = listing.imageUrls && listing.imageUrls.length > 0;
+  const hasMultipleImages = listing.imageUrls && listing.imageUrls.length > 1;
 
   const handleClick = () => {
     router.push(`/admin/ecommerce/listing/${listing.id}`);
   };
 
   return (
-    <Card className="w-full max-w-[300px] hover:shadow-xl transition-all duration-300 cursor-pointer group" onClick={handleClick}>
+    <Card className="w-full h-full hover:shadow-xl transition-all duration-300 cursor-pointer group" onClick={handleClick}>
       <div className="relative overflow-hidden rounded-t-lg">
-        <div className="aspect-[4/3] relative bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-          {displayImage ? (
-            <Image
-              src={displayImage}
-              alt={listing.listingName}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="300px"
-            />
+        <div className="aspect-[4/3] relative bg-gradient-to-br from-gray-100 to-gray-200">
+          {hasImages ? (
+            <Carousel className="w-full h-full">
+              <CarouselContent>
+                {listing.imageUrls!.map((imageUrl, index) => (
+                  <CarouselItem key={index}>
+                    <div className="aspect-[4/3] relative">
+                      <Image
+                        src={imageUrl}
+                        alt={`${listing.listingName} - Image ${index + 1}`}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="300px"
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {hasMultipleImages && (
+                <>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <CarouselPrevious
+                      className="left-2 bg-white hover:bg-gray-50 border border-gray-200 shadow-lg text-gray-700 hover:text-gray-900"
+                      size="sm"
+                    />
+                  </div>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <CarouselNext
+                      className="right-2 bg-white hover:bg-gray-50 border border-gray-200 shadow-lg text-gray-700 hover:text-gray-900"
+                      size="sm"
+                    />
+                  </div>
+                </>
+              )}
+            </Carousel>
           ) : (
-            <div className="text-gray-400 text-center">
-              <div className="w-12 h-12 mx-auto mb-2 bg-gray-300 rounded-lg flex items-center justify-center">
-                📷
+            <div className="text-gray-400 text-center flex items-center justify-center h-full">
+              <div>
+                <div className="w-12 h-12 mx-auto mb-2 bg-gray-300 rounded-lg flex items-center justify-center">
+                  📷
+                </div>
+                <span className="text-xs">No image available</span>
               </div>
-              <span className="text-xs">No image available</span>
             </div>
           )}
         </div>

@@ -51,7 +51,7 @@ export function CategoryCarousel({ category, listings, vendors }: CategoryCarous
           }}
           className="w-full"
         >
-          <CarouselContent className="-ml-3 md:-ml-4">
+          <CarouselContent className="-ml-2 md:-ml-3">
             {listings.map((listing) => {
               const vendor = vendors.find(v => v.id === listing.vendorId);
               if (!vendor) return null;
@@ -59,7 +59,7 @@ export function CategoryCarousel({ category, listings, vendors }: CategoryCarous
               return (
                 <CarouselItem
                   key={listing.id}
-                  className="pl-3 md:pl-4 !basis-[280px] sm:!basis-[300px] md:!basis-[280px] lg:!basis-[300px] xl:!basis-[280px]"
+                  className="pl-2 md:pl-3 !basis-[calc(100%-1rem)] xs:!basis-[calc(50%-0.75rem)] sm:!basis-[calc(33.333%-0.67rem)] md:!basis-[calc(25%-0.75rem)] lg:!basis-[calc(20%-0.8rem)] xl:!basis-[calc(16.666%-0.83rem)]"
                 >
                   <ListingCard listing={listing} vendor={vendor} />
                 </CarouselItem>
