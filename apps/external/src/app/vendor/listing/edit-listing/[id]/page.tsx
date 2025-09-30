@@ -62,7 +62,6 @@ export default function EditListingPage() {
         onCancel={handleCancel}
         isSubmitting={isSubmitting}
         submitButtonText="Update Listing"
-        isEditMode={true}
       />
     </ListingPageLayout>
   );
