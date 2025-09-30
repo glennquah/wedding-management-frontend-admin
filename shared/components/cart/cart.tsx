@@ -13,17 +13,18 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ShoppingCart, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-/* 
+/*
 TODO:
 1) define href for Continue Shopping button
-2) define href for link to indiv listing 
+2) define href for link to indiv listing
 */
 export function Cart() {
   const { cartItems, removeItem, clearCart, fetchCart, createOrder } = useCartStore();
   const { selectedWeddingId } = useWeddingStore();
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   const [isOpen, setIsOpen] = React.useState(false);
   const [isMounted, setIsMounted] = React.useState(false);
@@ -110,15 +111,11 @@ export function Cart() {
                 </p>
                 {isDesktop ? (
                   <SheetClose asChild>
-                    <Link href="/products">
-                      <Button>Browse Products</Button>
-                    </Link>
+                    <Button onClick={() => router.push('/admin/ecommerce')}>Browse Products</Button>
                   </SheetClose>
                 ) : (
                   <DrawerClose asChild>
-                    <Link href="/products">
-                      <Button>Browse Products</Button>
-                    </Link>
+                    <Button onClick={() => router.push('/admin/ecommerce')}>Browse Products</Button>
                   </DrawerClose>
                 )}
               </motion.div>
@@ -149,16 +146,18 @@ export function Cart() {
                     <div className="ml-4 flex flex-1 flex-col justify-between">
                       <div>
                         <div className="flex items-start justify-between">
-                          <Link
+                          <button
                             className={`
-                              line-clamp-2 text-sm font-medium
+                              line-clamp-2 text-sm font-medium text-left
                               group-hover:text-primary
                             `}
-                            href={`/products/${item.id}`}
-                            onClick={() => setIsOpen(false)}
+                            onClick={() => {
+                              router.push(`/admin/ecommerce/listing/${item.listingId}`);
+                              setIsOpen(false);
+                            }}
                           >
                             {item.listingName}
-                          </Link>
+                          </button>
                           <button
                             className={`
                               -mt-1 -mr-1 ml-2 rounded-full p-1
@@ -213,11 +212,11 @@ export function Cart() {
               <div className="flex items-center justify-between">
                 {isDesktop ? (
                   <SheetClose asChild>
-                    <Button variant="secondary">Continue Shopping</Button>
+                    <Button variant="secondary" onClick={() => router.push('/admin/ecommerce')}>Continue Shopping</Button>
                   </SheetClose>
                 ) : (
                   <DrawerClose asChild>
-                    <Button variant="secondary">Continue Shopping</Button>
+                    <Button variant="secondary" onClick={() => router.push('/admin/ecommerce')}>Continue Shopping</Button>
                   </DrawerClose>
                 )}
                 <Button
