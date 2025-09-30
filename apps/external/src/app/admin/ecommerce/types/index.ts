@@ -52,7 +52,7 @@ export interface DescriptionCardProps {
 }
 
 export interface AvailabilityCardProps {
-  availabilities: Array<{ date: string; status: string }>;
+  availabilities: Array<{ date: string; status: string; startTime: string; endTime: string }>;
   currentPage: number;
   onPreviousPage: () => void;
   onNextPage: () => void;
