@@ -169,7 +169,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         <BackButton onBack={() => router.push('/admin/ecommerce')} />
         <div className="text-center py-12">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Invalid Category</h1>
-          <p className="text-muted-foreground">The category you're looking for doesn't exist.</p>
+          <p className="text-muted-foreground">The category you&apos;re looking for doesn&apos;t exist.</p>
         </div>
       </div>
     );

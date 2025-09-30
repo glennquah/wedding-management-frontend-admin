@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
 import { PaginationState } from '../types';
 
-interface UsePaginationProps {
-  items: any[];
+interface UsePaginationProps<T> {
+  items: T[];
   itemsPerPage: number;
 }
 
@@ -12,7 +12,7 @@ interface UsePaginationReturn extends PaginationState {
   setCurrentPage: (page: number) => void;
 }
 
-export function usePagination({ items, itemsPerPage }: UsePaginationProps): UsePaginationReturn {
+export function usePagination<T>({ items, itemsPerPage }: UsePaginationProps<T>): UsePaginationReturn {
   const [currentPage, setCurrentPage] = useState(1);
 
   const paginationData = useMemo(() => {

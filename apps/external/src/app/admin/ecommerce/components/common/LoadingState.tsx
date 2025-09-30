@@ -1,4 +1,3 @@
-import { WeddingService } from '@shared/api';
 import { Skeleton } from '@shared/components/ui/skeleton';
 import { LoadingStateProps } from '../../types';
 

@@ -26,12 +26,13 @@ export function useListingData(listingId: string): UseListingDataReturn {
 
         setListing(listingData);
         setVendor(vendorData);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error fetching listing:', err);
 
-        if (err?.status === 404) {
+        const error = err as { status?: number };
+        if (error?.status === 404) {
           setError('Listing not found. It may have been removed or the ID is incorrect.');
-        } else if (err?.status === 401) {
+        } else if (error?.status === 401) {
           setError('Authentication required. Please ensure you are logged in with admin privileges.');
         } else {
           setError('Failed to load listing details. Please try again later.');

@@ -2,7 +2,7 @@ import { Button } from '@shared/components';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { Badge } from '@shared/components/ui/badge';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@shared/components/ui/carousel';
-import { Calendar, Clock, DollarSign, Edit2, FileText, Trash2 } from 'lucide-react';
+import { Calendar, Edit2, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { Listing } from './types';
 

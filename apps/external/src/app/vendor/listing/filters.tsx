@@ -32,8 +32,8 @@ export const ListingFilters = ({ filters, onFiltersChange, onClearFilters, showR
     filters.priceRange.max !== null ||
     filters.sortBy !== 'name' ||
     filters.sortOrder !== 'asc' ||
-    (showRatingFilter && (filters as any).rating !== null) ||
-    (showVendorSearch && (filters as any).vendorSearchQuery !== '');
+    (showRatingFilter && filters.rating !== null) ||
+    (showVendorSearch && filters.vendorSearchQuery !== '');
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
@@ -79,7 +79,7 @@ export const ListingFilters = ({ filters, onFiltersChange, onClearFilters, showR
               <Input
                 id="vendor-search"
                 placeholder="Search vendors..."
-                value={(filters as any).vendorSearchQuery ?? ''}
+                value={filters.vendorSearchQuery ?? ''}
                 onChange={(e) => updateFilter('vendorSearchQuery', e.target.value)}
               />
             </div>
@@ -116,7 +116,7 @@ export const ListingFilters = ({ filters, onFiltersChange, onClearFilters, showR
           <div>
             <Label className="text-xs font-medium text-gray-700">Minimum rating</Label>
             <Select
-              value={(filters as any).rating?.toString() ?? 'all'}
+              value={filters.rating?.toString() ?? 'all'}
               onValueChange={(value: string) => updateFilter('rating', value === 'all' ? null : parseFloat(value))}
             >
               <SelectTrigger className="mt-1">

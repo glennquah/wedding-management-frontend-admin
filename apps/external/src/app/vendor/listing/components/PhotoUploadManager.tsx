@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, ImageUploadWidget } from '@shared/components';
+import { ImageUploadWidget } from '@shared/components';
 import { CldImage } from 'next-cloudinary';
 import { X, Plus } from 'lucide-react';
 import * as React from 'react';

@@ -3,8 +3,6 @@ import { Skeleton } from '@shared/components/ui/skeleton';
 import { AlertTriangle } from 'lucide-react';
 import { BackButton } from '../ui';
 
-interface ListingLoadingStateProps {}
-
 interface ListingErrorStateProps {
   error: string;
   onBack: () => void;
@@ -14,7 +12,7 @@ interface ListingNotFoundStateProps {
   onBack: () => void;
 }
 
-export function ListingLoadingState({}: ListingLoadingStateProps) {
+export function ListingLoadingState() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">

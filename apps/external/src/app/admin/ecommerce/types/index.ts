@@ -52,7 +52,7 @@ export interface DescriptionCardProps {
 }
 
 export interface AvailabilityCardProps {
-  availabilities: any[];
+  availabilities: Array<{ date: string; status: string }>;
   currentPage: number;
   onPreviousPage: () => void;
   onNextPage: () => void;
@@ -72,5 +72,5 @@ export interface PaginationState {
   totalPages: number;
   startIndex: number;
   endIndex: number;
-  currentItems: any[];
+  currentItems: unknown[];
 }

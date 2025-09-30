@@ -28,12 +28,13 @@ export function useEcommerceData(): UseEcommerceDataReturn {
 
       setVendors(vendorsResult);
       setListings(listingsResult);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching data:', err);
 
-      if (err?.status === 401 || err?.message?.includes('Unauthorized')) {
+      const error = err as { status?: number; message?: string; code?: string };
+      if (error?.status === 401 || error?.message?.includes('Unauthorized')) {
         setError('Authentication required. Please ensure you are logged in with admin privileges.');
-      } else if (err?.message?.includes('Failed to fetch') || err?.code === 'ECONNREFUSED') {
+      } else if (error?.message?.includes('Failed to fetch') || error?.code === 'ECONNREFUSED') {
         setError('Unable to connect to the backend server. Please ensure the API server is running.');
       } else {
         setError('Failed to load listings. Please try again later.');
@@ -45,7 +46,8 @@ export function useEcommerceData(): UseEcommerceDataReturn {
 
   useEffect(() => {
     fetchAllData();
-  }, [categories]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     listings,

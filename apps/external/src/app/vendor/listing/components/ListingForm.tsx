@@ -14,7 +14,6 @@ interface ListingFormProps {
   onCancel: () => void;
   isSubmitting: boolean;
   submitButtonText: string;
-  isEditMode: boolean;
 }
 
 export function ListingForm({
@@ -23,8 +22,7 @@ export function ListingForm({
   onSubmit,
   onCancel,
   isSubmitting,
-  submitButtonText,
-  isEditMode
+  submitButtonText
 }: ListingFormProps) {
   // Convert availabilities to DateWithPeriod format using useMemo to avoid re-renders
   const datesWithPeriods = React.useMemo(() => {
