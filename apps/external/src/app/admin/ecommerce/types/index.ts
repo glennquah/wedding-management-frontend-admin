@@ -1,4 +1,4 @@
-import { ListingResponseDto, VendorResponseDto, WeddingService } from '@shared/api';
+import { ListingResponseDto, VendorResponseDto, WeddingService, AvailabilitySlotDto } from '@shared/api';
 
 export interface ListingsByCategory {
   [key: string]: ListingResponseDto[];
@@ -52,7 +52,7 @@ export interface DescriptionCardProps {
 }
 
 export interface AvailabilityCardProps {
-  availabilities: Array<{ date: string; status: string; startTime: string; endTime: string }>;
+  availabilities: AvailabilitySlotDto[];
   currentPage: number;
   onPreviousPage: () => void;
   onNextPage: () => void;
