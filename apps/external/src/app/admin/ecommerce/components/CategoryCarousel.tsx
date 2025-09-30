@@ -12,6 +12,7 @@ import { Button } from '@shared/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ListingCard } from './ListingCard';
+import { useState, useEffect } from 'react';
 
 interface CategoryCarouselProps {
   category: WeddingService;
@@ -32,6 +33,26 @@ const categoryDisplayNames: Record<WeddingService, string> = {
 
 export function CategoryCarousel({ category, listings, vendors }: CategoryCarouselProps) {
   const router = useRouter();
+  const [maxCards, setMaxCards] = useState(2);
+
+  useEffect(() => {
+    const calculateMaxCards = () => {
+      const width = window.innerWidth;
+      // Desktop: 5 cards, Tablet/smaller: 3 cards, Mobile: 2 cards
+      if (width >= 1024) return 5; // lg and up - desktop
+      if (width >= 640) return 3;  // sm to lg - tablet/smaller screens
+      return 2; // mobile
+    };
+
+    setMaxCards(calculateMaxCards());
+
+    const handleResize = () => {
+      setMaxCards(calculateMaxCards());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (listings.length === 0) {
     return null;
@@ -41,9 +62,11 @@ export function CategoryCarousel({ category, listings, vendors }: CategoryCarous
     router.push(`/admin/ecommerce/category/${category.toLowerCase()}`);
   };
 
-  // Limit to 4 listings for desktop, 2 for mobile
-  const maxListings = 4;
-  const displayedListings = listings.slice(0, maxListings);
+  // Limit listings to maxCards
+  const displayedListings = listings.slice(0, maxCards);
+
+  // Only show "See More" if there are more listings than displayed
+  const showSeeMore = listings.length > maxCards;
 
   return (
     <section className="mb-12">
@@ -79,17 +102,19 @@ export function CategoryCarousel({ category, listings, vendors }: CategoryCarous
               );
             })}
 
-            <CarouselItem className="pl-2 md:pl-3 !basis-[calc(100%-1rem)] xs:!basis-[calc(50%-0.75rem)] sm:!basis-[calc(33.333%-0.67rem)] md:!basis-[calc(25%-0.75rem)] lg:!basis-[calc(20%-0.8rem)] xl:!basis-[calc(16.666%-0.83rem)] flex items-center justify-center">
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={handleSeeMore}
-                className="h-full min-h-[300px] w-full flex flex-col items-center justify-center gap-3 border-2 border-gray-300 bg-gray-50 text-black hover:bg-primary hover:text-white hover:border-primary transition-all shadow-md"
-              >
-                <span className="text-lg font-semibold">See More</span>
-                <ArrowRight className="w-6 h-6" />
-              </Button>
-            </CarouselItem>
+            {showSeeMore && (
+              <CarouselItem className="pl-2 md:pl-3 !basis-[calc(100%-1rem)] xs:!basis-[calc(50%-0.75rem)] sm:!basis-[calc(33.333%-0.67rem)] md:!basis-[calc(25%-0.75rem)] lg:!basis-[calc(20%-0.8rem)] xl:!basis-[calc(16.666%-0.83rem)] flex items-center justify-center">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={handleSeeMore}
+                  className="h-full min-h-[300px] w-full flex flex-col items-center justify-center gap-3 border-2 border-gray-300 bg-gray-50 text-black hover:bg-primary hover:text-white hover:border-primary transition-all shadow-md"
+                >
+                  <span className="text-lg font-semibold">See More</span>
+                  <ArrowRight className="w-6 h-6" />
+                </Button>
+              </CarouselItem>
+            )}
           </CarouselContent>
 
           {displayedListings.length > 1 && (
