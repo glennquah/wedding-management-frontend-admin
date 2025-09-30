@@ -57,6 +57,8 @@ export interface AvailabilityCardProps {
   onPreviousPage: () => void;
   onNextPage: () => void;
   itemsPerPage: number;
+  selectedSlots?: AvailabilitySlotDto[];
+  onSlotToggle?: (slot: AvailabilitySlotDto) => void;
 }
 
 export interface VendorCardProps {

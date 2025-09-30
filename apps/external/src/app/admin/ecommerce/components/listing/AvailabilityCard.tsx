@@ -8,7 +8,9 @@ export function AvailabilityCard({
   currentPage,
   onPreviousPage,
   onNextPage,
-  itemsPerPage
+  itemsPerPage,
+  selectedSlots = [],
+  onSlotToggle
 }: AvailabilityCardProps) {
   if (availabilities.length === 0) return null;
 
@@ -16,6 +18,14 @@ export function AvailabilityCard({
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentAvailabilities = availabilities.slice(startIndex, endIndex);
+
+  const isSlotSelected = (slot: typeof availabilities[0]) => {
+    return selectedSlots.some(s =>
+      s.startTime === slot.startTime &&
+      s.endTime === slot.endTime &&
+      s.date === slot.date
+    );
+  };
 
   return (
     <Card>
@@ -25,32 +35,49 @@ export function AvailabilityCard({
           Availability
         </CardTitle>
         <CardDescription>
-          Available time slots for this listing ({availabilities.length} total)
+          {onSlotToggle
+            ? `Select time slots for this listing (${selectedSlots.length} selected)`
+            : `Available time slots for this listing (${availabilities.length} total)`
+          }
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          {currentAvailabilities.map((slot, index) => (
-            <div key={startIndex + index} className="p-3 border rounded-lg bg-gray-50">
-              <div className="text-sm text-muted-foreground">
-                {slot.date && new Date(slot.date).toLocaleDateString('en-SG', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
+          {currentAvailabilities.map((slot, index) => {
+            const selected = isSlotSelected(slot);
+            return (
+              <div
+                key={startIndex + index}
+                className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                  selected
+                    ? 'bg-blue-100 border-blue-500'
+                    : 'bg-gray-50 hover:bg-gray-100'
+                }`}
+                onClick={() => onSlotToggle?.(slot)}
+              >
+                <div className="text-sm text-muted-foreground">
+                  {slot.date && new Date(slot.date).toLocaleDateString('en-SG', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </div>
+                <div className="font-medium">
+                  {new Date(slot.startTime).toLocaleTimeString('en-SG', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })} - {new Date(slot.endTime).toLocaleTimeString('en-SG', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </div>
+                {selected && (
+                  <div className="text-xs text-blue-600 font-medium mt-1">✓ Selected</div>
+                )}
               </div>
-              <div className="font-medium">
-                {new Date(slot.startTime).toLocaleTimeString('en-SG', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })} - {new Date(slot.endTime).toLocaleTimeString('en-SG', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {totalPages > 1 && (
