@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   ListTodo,
   MapPin,
+  PaintRoller,
   Users,
 } from 'lucide-react';
 
@@ -56,6 +57,11 @@ const tabs = [
         title: 'Timeline',
         href: '/timeline',
         icon: Calendar,
+      },
+      {
+        title: 'Microsite',
+        href: '/microsite',
+        icon: PaintRoller,
       },
       {
         title: 'Tasks',

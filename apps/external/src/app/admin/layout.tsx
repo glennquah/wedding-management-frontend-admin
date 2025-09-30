@@ -37,8 +37,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (hasHydrated) {
       if (!selectedWeddingId) {
         fetchUserMainWedding();
+        fetchUserWeddings();
       }
-      fetchUserWeddings();
     }
   }, [hasHydrated, selectedWeddingId, fetchUserMainWedding, fetchUserWeddings]);
 

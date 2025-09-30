@@ -1,3 +1,4 @@
+import { useMicrositeFormStore } from './micrositeStore';
 import {
   AvailabilitySlotDto,
   CartItemResponseDto,
@@ -238,6 +239,12 @@ export const signOut = async (options?: Parameters<typeof nextAuthSignOut>[0]) =
     ...useWeddingStore.getState().reset,
     hasHydrated,
   });
+
+  // Also clear microsite drafts on sign out
+  try {
+    const msHasHydrated = useMicrositeFormStore.getState().hasHydrated;
+    useMicrositeFormStore.setState({ drafts: {}, hasHydrated: msHasHydrated });
+  } catch {}
 
   if (data?.url) {
     window.location.href = data.url;
