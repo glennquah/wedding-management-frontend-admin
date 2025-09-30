@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 export default function GetStartedPage() {
-  const BACKEND_URL = process.env.BACKEND_URL;
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
   const router = useRouter();
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
