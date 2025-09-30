@@ -1,16 +1,17 @@
 'use client';
 
+import { useState } from 'react';
+
 import ResponsiveMenubar from '@shared/components/responsive-menubar';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/form/input';
 import { Label } from '@shared/components/ui/form/label';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { toast } from 'sonner';
 
 export default function GetStartedPage() {
-  const NEXTAUTH_URL = process.env.NEXT_PUBLIC_NEXTAUTH_URL;
+  const BACKEND_URL = process.env.BACKEND_URL;
   const router = useRouter();
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
@@ -23,17 +24,17 @@ export default function GetStartedPage() {
     setLoading(true);
 
     try {
-      const register_res = await fetch(NEXTAUTH_URL + '/auth/register', {
+      const register_res = await fetch(BACKEND_URL + '/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password  }),
+        body: JSON.stringify({ name, email, password }),
       });
       if (!register_res.ok) throw new Error('Signup failed');
 
-      toast.success('Signup Successful.')
+      toast.success('Signup Successful.');
 
       const signin_res = await signIn('credentials', {
-        username: email, 
+        username: email,
         password,
         redirect: false,
       });
@@ -44,8 +45,8 @@ export default function GetStartedPage() {
         router.push('/user');
       }
     } catch (err) {
-      console.log(err)
-      toast.error('Signup Failed.')
+      console.log(err);
+      toast.error('Signup Failed.');
     } finally {
       setLoading(false);
     }
@@ -53,11 +54,10 @@ export default function GetStartedPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-t from-brand-200 to-brand-25 px-6">
-        <ResponsiveMenubar />
+      <ResponsiveMenubar />
       <div className="w-full max-w-lg bg-white p-8 rounded-2xl mt-[72px] shadow-md">
         <h2 className="text-3xl font-bold text-center mb-8">Create an account</h2>
         <form onSubmit={handleSignUp} className="space-y-4">
-          
           <div className="mt-4 gap-2 flex flex-col">
             <Label htmlFor="name">Name</Label>
             <Input
@@ -91,7 +91,7 @@ export default function GetStartedPage() {
               placeholder="Enter your password"
             />
           </div>
-                 {/* Role selection */}
+          {/* Role selection */}
           <div className="flex flex-col gap-2 mt-4">
             <Label>Role</Label>
             <div className="flex gap-2">
@@ -99,7 +99,11 @@ export default function GetStartedPage() {
                 type="button"
                 variant={role === 'couple' ? 'default' : 'secondary'}
                 onClick={() => setRole('couple')}
-                className={role === 'couple' ? 'flex-1 bg-secondary hover:bg-secondary-hover' : 'flex-1 border-secondary text-secondary hover:bg-secondary/10'}
+                className={
+                  role === 'couple'
+                    ? 'flex-1 bg-secondary hover:bg-secondary-hover'
+                    : 'flex-1 border-secondary text-secondary hover:bg-secondary/10'
+                }
               >
                 Couple
               </Button>
@@ -107,7 +111,11 @@ export default function GetStartedPage() {
                 type="button"
                 variant={role === 'vendor' ? 'default' : 'secondary'}
                 onClick={() => setRole('vendor')}
-                className={role === 'vendor' ? 'flex-1 bg-secondary hover:bg-secondary-hover' : 'flex-1 border-secondary text-secondary hover:bg-secondary/10'}
+                className={
+                  role === 'vendor'
+                    ? 'flex-1 bg-secondary hover:bg-secondary-hover'
+                    : 'flex-1 border-secondary text-secondary hover:bg-secondary/10'
+                }
               >
                 Vendor
               </Button>
