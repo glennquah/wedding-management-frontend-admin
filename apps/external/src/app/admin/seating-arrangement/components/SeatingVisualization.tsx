@@ -132,7 +132,7 @@ export function SeatingVisualization({
             width="100%"
             height="600"
             viewBox={`${minX * baseScale} ${minY * baseScale} ${width * baseScale} ${height * baseScale}`}
-            className="w-full h-full"
+            className="w-full h-full seating-visualization-svg"
             preserveAspectRatio="xMidYMid meet"
           >
             {/* Hall Floor */}

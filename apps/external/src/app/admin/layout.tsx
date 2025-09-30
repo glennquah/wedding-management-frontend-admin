@@ -8,6 +8,7 @@ import { useWeddingStore } from '@/app/store/sessionStore';
 import { UserRole, WeddingResponseDto } from '@shared/api';
 import { Button } from '@shared/components';
 import NavigationBar from '@shared/components/NavigationBar';
+import { Cart } from '@shared/components/cart/cart';
 import {
   Card,
   CardContent,
@@ -36,8 +37,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (hasHydrated) {
       if (!selectedWeddingId) {
         fetchUserMainWedding();
+        fetchUserWeddings();
       }
-      fetchUserWeddings();
     }
   }, [hasHydrated, selectedWeddingId, fetchUserMainWedding, fetchUserWeddings]);
 
@@ -73,7 +74,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex-1 flex flex-col min-w-0">
         <NavigationBar
           notificationRoute="/admin/notifications"
-          additionalTabs={<WeddingSelector />}
+          additionalTabs={
+            <div className="flex items-center gap-4 ml-auto">
+              <Cart />
+              <WeddingSelector />
+            </div>
+          }
         />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>

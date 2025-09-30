@@ -1,4 +1,13 @@
-import { WeddingResponseDto } from '@shared/api';
+import { useMicrositeFormStore } from './micrositeStore';
+import {
+  AvailabilitySlotDto,
+  CartItemResponseDto,
+  CartService,
+  OrderResponseDto,
+  OrdersService,
+  PaymentsService,
+  WeddingResponseDto,
+} from '@shared/api';
 import { getCookie, setCookie } from 'cookies-next';
 import { signOut as nextAuthSignOut } from 'next-auth/react';
 import type { StateCreator } from 'zustand';
@@ -96,6 +105,119 @@ export const useWeddingStore = create<WeddingState>()(
   ),
 );
 
+export interface CartItem {
+  category: string;
+  id: string;
+  image: string;
+  name: string;
+  price: number;
+}
+
+interface CartState {
+  cartItems: CartItemResponseDto[];
+  hasHydrated: boolean;
+  order: OrderResponseDto | null;
+  paymentStatus: '' | 'idle' | 'creating-order' | 'redirecting' | 'success' | 'error';
+  errorMessage: string;
+
+  setOrder: (order: OrderResponseDto | null) => void;
+  setHasHydrated: (v: boolean) => void;
+
+  createOrder: (weddingId: number) => Promise<void>;
+
+  fetchCart: (adminId: number) => Promise<void>;
+  addItem: (adminId: number, item: CartItem, selectedSlots: AvailabilitySlotDto[]) => Promise<void>;
+  removeItem: (adminId: number, listingId: number) => Promise<void>;
+  clearCart: (adminId: number) => Promise<void>;
+  deleteCart: (adminId: number) => Promise<void>;
+}
+
+export const useCartStore = create<CartState>()(
+  persist(
+    (set, get) => ({
+      cartItems: [],
+      order: null,
+      paymentStatus: 'idle',
+      errorMessage: '',
+      hasHydrated: false,
+
+      createOrder: async (weddingId: number) => {
+        const cartItems = get().cartItems;
+
+        if (cartItems.length === 0) return alert('Cart is empty');
+        if (!weddingId) throw new Error('No wedding selected');
+
+        set({ paymentStatus: 'creating-order', errorMessage: '' });
+
+        try {
+          const order = await OrdersService.orderControllerCreate({
+            weddingId: weddingId,
+            listings: cartItems.map((item) => ({
+              listingId: item.listingId,
+              bookedSlots: item.selectedSlots,
+            })),
+            remark: 'Test order from frontend',
+          });
+
+          set({ order });
+
+          const checkoutData = await PaymentsService.paymentControllerCreateCheckoutSession({
+            orderId: order.id,
+            successUrl: `${window.location.origin}/admin/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancelUrl: `${window.location.origin}/admin/payment/cancel`,
+          });
+
+          set({ paymentStatus: 'redirecting' });
+          window.location.href = checkoutData.url;
+        } catch (error) {
+          set({
+            paymentStatus: 'error',
+            errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          });
+        }
+      },
+
+      fetchCart: async (adminId: number) => {
+        const res = await CartService.cartControllerGetCart(adminId);
+        set({ cartItems: res.items });
+      },
+
+      addItem: async (adminId: number, item: CartItem, selectedSlots: AvailabilitySlotDto[]) => {
+        const res = await CartService.cartControllerAddToCart({
+          adminId,
+          listingId: parseInt(item.id),
+          selectedSlots,
+        });
+        set({ cartItems: res.items });
+      },
+
+      removeItem: async (adminId: number, listingId: number) => {
+        const res = await CartService.cartControllerRemoveItem(adminId, listingId);
+        set({ cartItems: res.items });
+      },
+
+      clearCart: async (adminId: number) => {
+        const res = await CartService.cartControllerClearCart(adminId);
+        set({ cartItems: res.items });
+      },
+
+      deleteCart: async (adminId: number) => {
+        await CartService.cartControllerDeleteCart(adminId);
+        set({ cartItems: [] });
+      },
+
+      setOrder: (order) => set({ order }),
+      setHasHydrated: (v: boolean) => set({ hasHydrated: v }),
+    }),
+    {
+      name: 'cart-store',
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+    },
+  ),
+);
+
 export const initSessionFromCookie = () => {
   const token = getCookie('session_token') as string | undefined;
   if (token) {
@@ -117,6 +239,12 @@ export const signOut = async (options?: Parameters<typeof nextAuthSignOut>[0]) =
     ...useWeddingStore.getState().reset,
     hasHydrated,
   });
+
+  // Also clear microsite drafts on sign out
+  try {
+    const msHasHydrated = useMicrositeFormStore.getState().hasHydrated;
+    useMicrositeFormStore.setState({ drafts: {}, hasHydrated: msHasHydrated });
+  } catch {}
 
   if (data?.url) {
     window.location.href = data.url;
