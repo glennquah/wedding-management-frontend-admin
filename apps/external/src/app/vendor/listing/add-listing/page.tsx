@@ -32,7 +32,6 @@ export default function AddListingPage() {
         onCancel={handleCancel}
         isSubmitting={isSubmitting}
         submitButtonText="Create Listing"
-        isEditMode={false}
       />
     </ListingPageLayout>
   );
