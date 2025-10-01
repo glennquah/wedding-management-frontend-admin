@@ -115,4 +115,72 @@ export class WeddingsService {
             },
         });
     }
+    /**
+     * Add a key attendee for date optimization
+     * @param id
+     * @param adminId
+     * @returns any Key attendee added successfully
+     * @throws ApiError
+     */
+    public static weddingControllerAddKeyAttendee(
+        id: number,
+        adminId: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/weddings/{id}/key-attendees/{adminId}',
+            path: {
+                'id': id,
+                'adminId': adminId,
+            },
+            errors: {
+                404: `Wedding not found.`,
+            },
+        });
+    }
+    /**
+     * Remove a key attendee
+     * @param id
+     * @param adminId
+     * @returns any Key attendee removed successfully
+     * @throws ApiError
+     */
+    public static weddingControllerRemoveKeyAttendee(
+        id: number,
+        adminId: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/weddings/{id}/key-attendees/{adminId}',
+            path: {
+                'id': id,
+                'adminId': adminId,
+            },
+            errors: {
+                404: `Wedding not found.`,
+            },
+        });
+    }
+    /**
+     * Get all key attendees for a wedding
+     * @param id
+     * @returns any List of key attendee IDs
+     * @throws ApiError
+     */
+    public static weddingControllerGetKeyAttendees(
+        id: number,
+    ): CancelablePromise<{
+        keyAttendeeIds?: Array<number>;
+    }> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/weddings/{id}/key-attendees',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Wedding not found.`,
+            },
+        });
+    }
 }
