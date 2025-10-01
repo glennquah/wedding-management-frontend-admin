@@ -12,7 +12,6 @@ import {
   TabsTrigger,
   getAdminFormFields,
 } from '@shared/components';
-import { EmailModal } from '@shared/components/EmailModal';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import {
   AdminResponseDto,
@@ -44,10 +43,6 @@ export default function AdminManagementPage() {
   const [isEditingAdmin, setIsEditingAdmin] = useState(false);
   const [deleteConfirmAdmin, setDeleteConfirmAdmin] = useState<AdminResponseDto | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [emailModalAdmin, setEmailModalAdmin] = useState<{
-    name: string;
-    email: string;
-  } | null>();
 
   // Form data
   const [newAdmin, setNewAdmin] = useState<Partial<CreateAdminDto>>({});
@@ -125,8 +120,6 @@ export default function AdminManagementPage() {
     setDeleteConfirmAdmin(null);
   };
 
-  const closeEmailModal = () => setEmailModalAdmin(null);
-
   const fetchAdmins = async () => {
     const adminsData = await AdminsService.adminControllerGetAllAdmins();
     setAdmins(adminsData);
@@ -167,12 +160,6 @@ export default function AdminManagementPage() {
     try {
       await AdminsService.adminControllerSuspendAdmin(admin.id);
       await fetchAdmins();
-
-      setEmailModalAdmin({
-        name: admin.name!,
-        email: admin.email!,
-      });
-
       toast.success('Admin suspended');
     } catch (err) {
       toast.error('Failed to suspend admin. Please try again.');
@@ -184,24 +171,10 @@ export default function AdminManagementPage() {
     try {
       await AdminsService.adminControllerUnsuspendAdmin(admin.id);
       await fetchAdmins();
-
-      setEmailModalAdmin({
-        name: admin.name!,
-        email: admin.email!,
-      });
-
       toast.success('Admin unsuspended');
     } catch (err) {
       toast.error('Failed to unsuspend admin. Please try again.');
       console.error('Error unsuspending admin:', err);
-    }
-  };
-
-  const handleSendEmail = () => {
-    if (emailModalAdmin) {
-      // Here you would integrate with your email service
-      toast.success(`Email sent to ${emailModalAdmin.name}!`);
-      closeEmailModal();
     }
   };
 
@@ -311,17 +284,6 @@ export default function AdminManagementPage() {
         })}
         noOfColumns={2}
       />
-
-      {/* Email Admin */}
-      {emailModalAdmin && (
-        <EmailModal
-          open={!!emailModalAdmin}
-          onOpenChange={closeEmailModal}
-          name={emailModalAdmin.name}
-          email={emailModalAdmin.email}
-          onSendEmail={handleSendEmail}
-        />
-      )}
 
       <Tabs defaultValue="live">
         <TabsList className="bg-muted/50 rounded-lg p-1 grid w-full grid-cols-2 md:flex md:space-x-2 md:w-fit">
