@@ -1,8 +1,9 @@
 'use client';
 
-import { Button } from '@shared/components';
+import { Button, DeleteConfirmationModal } from '@shared/components';
 import { Calendar, Plus, ListChecks } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import {
   EmptyState,
   ErrorState,
@@ -13,12 +14,14 @@ import {
   useListingFilters,
   useListingOperations,
 } from './index';
+import { Listing } from './types';
 
 export default function ListingPage() {
   const router = useRouter();
   const { listings, setListings, vendor, isLoading, error, refetch } = useListingData();
   const { filters, setFilters, clearFilters, filteredListings } = useListingFilters(listings);
   const { handleDeleteListing } = useListingOperations(vendor, setListings);
+  const [deleteConfirmListing, setDeleteConfirmListing] = useState<Listing | null>(null);
 
   const handleAddListing = () => {
     router.push('/vendor/listing/add-listing');
@@ -26,6 +29,24 @@ export default function ListingPage() {
 
   const handleEditListing = (listing: { id: number }) => {
     router.push(`/vendor/listing/edit-listing/${listing.id}`);
+  };
+
+  const openDeleteConfirmModal = (id: number) => {
+    const listing = listings.find(l => l.id === id);
+    if (listing) {
+      setDeleteConfirmListing(listing);
+    }
+  };
+
+  const closeDeleteConfirmModal = () => {
+    setDeleteConfirmListing(null);
+  };
+
+  const confirmDeleteListing = async () => {
+    if (deleteConfirmListing) {
+      await handleDeleteListing(deleteConfirmListing.id);
+      closeDeleteConfirmModal();
+    }
   };
 
   const getEmptyState = () => {
@@ -58,7 +79,7 @@ export default function ListingPage() {
           key={listing.id}
           listing={listing}
           onEdit={handleEditListing}
-          onDelete={handleDeleteListing}
+          onDelete={openDeleteConfirmModal}
           serviceType={vendor?.serviceOffered}
         />
       ))}
@@ -116,6 +137,22 @@ export default function ListingPage() {
       <div className="mb-6">
         {emptyState || getListingGrid()}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={!!deleteConfirmListing}
+        onOpenChange={closeDeleteConfirmModal}
+        itemName={deleteConfirmListing?.listingName || 'this listing'}
+        description={
+          deleteConfirmListing && (
+            <>
+              Are you sure you want to delete {deleteConfirmListing.listingName}? This action cannot be undone.
+            </>
+          )
+        }
+        onConfirm={confirmDeleteListing}
+        onCancel={closeDeleteConfirmModal}
+      />
     </div>
   );
 }
