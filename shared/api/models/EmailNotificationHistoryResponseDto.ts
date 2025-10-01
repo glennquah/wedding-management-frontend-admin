@@ -19,6 +19,9 @@ export namespace EmailNotificationHistoryResponseDto {
         WELCOME = 'WELCOME',
         VERIFY_EMAIL = 'VERIFY_EMAIL',
         CREATE_ACCOUNT = 'CREATE_ACCOUNT',
+        VENDOR_STATUS = 'VENDOR_STATUS',
+        VENDOR_SUSPENSION = 'VENDOR_SUSPENSION',
+        ADMIN_SUSPENSION = 'ADMIN_SUSPENSION',
         CUSTOM = 'CUSTOM',
     }
 }

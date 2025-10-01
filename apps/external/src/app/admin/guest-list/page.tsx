@@ -72,7 +72,6 @@ export default function GuestListPage() {
     openDeleteConfirmModal,
     closeDeleteConfirmModal,
     closeEmailModal,
-    handleSendEmail,
   } = useGuestManager();
 
   // Get capacity information
@@ -440,7 +439,6 @@ export default function GuestListPage() {
             onOpenChange={closeEmailModal}
             name={emailModalGuest.name}
             email={emailModalGuest.email}
-            onSendEmail={handleSendEmail}
           />
         )}
       </div>
