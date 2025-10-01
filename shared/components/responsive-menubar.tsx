@@ -55,9 +55,8 @@ const MobileMenubar = () => {
                 const isActive = pathname === `/${item.toLowerCase()}/`;
                 const isLast = idx === menubar_items.length - 1;
                 return (
-                  <>
+                  <div key={item}>
                     <div
-                      key={item}
                       className={`hover:font-bold font-normal text-lg hover:text-red cursor-pointer ${
                         isActive ? 'font-bold text-red' : 'font-light'
                       }`}
@@ -76,7 +75,7 @@ const MobileMenubar = () => {
                         For Businesses
                       </Button>
                     )}
-                  </>
+                  </div>
                 );
               })}
               <Button
@@ -147,9 +146,8 @@ const DesktopMenubar = () => {
             const isActive = pathname === `/${item.toLowerCase()}/`;
             const isLast = idx === menubar_items.length - 1;
             return (
-              <>
+              <div key={item} className="flex items-center gap-8">
                 <h6
-                  key={item}
                   onClick={() =>
                     !isActive && router.push(`/${item.toLowerCase().replace(/\s+/g, '-')}`)
                   }
@@ -170,7 +168,7 @@ const DesktopMenubar = () => {
                     For Businesses
                   </Button>
                 )}
-              </>
+              </div>
             );
           })}
         </div>

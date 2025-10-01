@@ -45,7 +45,7 @@ interface SessionState {
   reset: () => void;
 }
 
-export const useSessionStore = create<SessionState>((set, get, store) => ({
+export const useSessionStore = actualCreate<SessionState>((set, get, store) => ({
   name: '',
   email: '',
   password: '',
