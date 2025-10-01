@@ -1,5 +1,7 @@
 'use client';
 
+import { useCartStore } from '@/app/store/sessionStore';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
@@ -10,6 +12,8 @@ interface PaymentDetails {
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
+  const { clearCart } = useCartStore();
   const sessionId = searchParams?.get('session_id') ?? null;
   const [loading, setLoading] = useState(true);
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
@@ -21,6 +25,9 @@ function PaymentSuccessContent() {
     setTimeout(() => {
       setLoading(false);
       if (sessionId) {
+        if (session?.user.id) {
+          clearCart(session.user.id);
+        }
         setPaymentDetails({ sessionId });
       } else {
         setError('No session ID provided');
