@@ -19,6 +19,7 @@ export namespace EmailNotificationHistoryResponseDto {
         WELCOME = 'WELCOME',
         VERIFY_EMAIL = 'VERIFY_EMAIL',
         CREATE_ACCOUNT = 'CREATE_ACCOUNT',
+        COLLABORATOR_ADDED = 'COLLABORATOR_ADDED',
         CUSTOM = 'CUSTOM',
     }
 }

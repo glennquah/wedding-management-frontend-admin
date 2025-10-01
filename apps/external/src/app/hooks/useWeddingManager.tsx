@@ -114,10 +114,6 @@ export function useWeddingManager() {
         if (!targetWedding) {
           targetWedding = userWeddings[0];
           setSelectedWeddingId(targetWedding.id);
-          // Only set as main wedding if we didn't get one from API
-          if (!fetchedMainWeddingId) {
-            setMainWeddingId(targetWedding.id);
-          }
         }
 
         setWedding(targetWedding);

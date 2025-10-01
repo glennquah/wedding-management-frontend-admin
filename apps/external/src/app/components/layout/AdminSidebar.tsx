@@ -11,6 +11,7 @@ import {
   ListTodo,
   MapPin,
   PaintRoller,
+  Sparkles,
   Users,
 } from 'lucide-react';
 
@@ -57,6 +58,11 @@ const tabs = [
         title: 'Timeline',
         href: '/timeline',
         icon: Calendar,
+      },
+      {
+        title: 'Date Optimizer',
+        href: '/date-optimizer',
+        icon: Sparkles,
       },
       {
         title: 'Microsite',

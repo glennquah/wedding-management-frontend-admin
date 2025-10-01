@@ -121,11 +121,7 @@ export function WeddingSelector() {
       <DropdownMenuContent align="end" className="w-full">
         {mainWedding && (
           <>
-            <DropdownMenuItem disabled>
-              {mainWedding && selectedWeddingId === mainWedding.id
-                ? 'Your main wedding plan'
-                : 'Select your main wedding plan'}
-            </DropdownMenuItem>
+            <DropdownMenuItem disabled>Your main wedding plan</DropdownMenuItem>
             <DropdownMenuItem
               key={mainWedding.id}
               onClick={() => selectWedding(mainWedding.id)}
@@ -139,10 +135,7 @@ export function WeddingSelector() {
         {otherWeddings.length > 0 && (
           <>
             <DropdownMenuItem disabled>
-              {' '}
-              {mainWedding && selectedWeddingId === mainWedding.id
-                ? 'Select your other wedding plans'
-                : 'Other wedding plans'}
+              {mainWedding ? 'Other wedding plans' : 'Wedding plans'}
             </DropdownMenuItem>
             {otherWeddings.map((wedding, index) => (
               <DropdownMenuItem

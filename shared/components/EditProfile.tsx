@@ -1,12 +1,15 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
+import { useGuestManager } from '../../apps/external/src/app/hooks/useGuestManager';
 import {
   AdminResponseDto,
+  AdminsService,
   AuthService,
   BudgetBucket,
   GuestCountBucket,
+  GuestResponseDto,
   RequestResetPasswordDto,
   UserRole,
   VendorResponseDto,
@@ -24,7 +27,7 @@ import { Input } from './ui/form/input';
 import { MultiSelectDropdown } from './ui/form/multiSelectDropdown';
 import { SingleSelectDropdown } from './ui/form/singleSelectDropdown';
 import { Skeleton } from './ui/skeleton';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface EditProfileProps {
@@ -32,6 +35,13 @@ interface EditProfileProps {
   userRole?: UserRole;
   onProfileUpdate?: () => void;
 }
+
+type Collaborator = {
+  id: number;
+  name: string;
+  email: string;
+  accountCreated: boolean;
+};
 
 export default function EditProfile({ userId, userRole, onProfileUpdate }: EditProfileProps) {
   // Use custom hooks for profile and wedding management
@@ -63,6 +73,15 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     resetWeddingForm,
   } = useWeddingProfile();
 
+  const { guests } = useGuestManager();
+
+  // Collaborator state
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const [collaboratorSearch, setCollaboratorSearch] = useState('');
+  const [showCollaboratorDropdown, setShowCollaboratorDropdown] = useState(false);
+  const [isInvitingCollaborator, setIsInvitingCollaborator] = useState(false);
+  const [collaboratorsToRemove, setCollaboratorsToRemove] = useState<number[]>([]);
+
   // Determine the actual user ID and role to fetch
   const targetUserId = userId;
   const targetUserRole = userRole;
@@ -83,6 +102,31 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     }
   }, [targetUserRole, userData, fetchMainWedding]);
 
+  // Fetch collaborators when wedding data is loaded
+  useEffect(() => {
+    const fetchCollaborators = async () => {
+      if (weddingData?.id) {
+        try {
+          const collaboratorsList = await AdminsService.adminControllerGetCollaborators(
+            weddingData.id,
+          );
+          setCollaborators(
+            collaboratorsList.map((c) => ({
+              id: c.id,
+              name: c.name,
+              email: c.email,
+              accountCreated: true, // If they're in the system, account exists
+            })),
+          );
+        } catch (error) {
+          console.error('Error fetching collaborators:', error);
+        }
+      }
+    };
+
+    fetchCollaborators();
+  }, [weddingData?.id]);
+
   // Enhanced submit handler that also updates wedding data
   const handleEnhancedSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,6 +138,20 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     if (targetUserRole === UserRole.ADMIN && weddingData) {
       try {
         await updateWeddingProfile();
+
+        // Remove collaborators that were marked for deletion
+        if (collaboratorsToRemove.length > 0) {
+          for (const collaboratorId of collaboratorsToRemove) {
+            try {
+              await AdminsService.adminControllerRemoveCollaborator(weddingData.id, collaboratorId);
+            } catch (error) {
+              console.error(`Error removing collaborator ${collaboratorId}:`, error);
+              toast.error('Failed to remove some collaborators. Please try again.');
+            }
+          }
+          setCollaboratorsToRemove([]);
+          toast.success('Changes saved successfully');
+        }
       } catch (error) {
         console.error('Error updating wedding profile:', error);
       }
@@ -104,6 +162,29 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
   const handleEnhancedCancel = () => {
     handleCancel();
     resetWeddingForm();
+    // Reset collaborators to remove list and refetch original collaborators
+    setCollaboratorsToRemove([]);
+    // Restore collaborators list by refetching
+    if (weddingData?.id) {
+      const fetchCollaborators = async () => {
+        try {
+          const collaboratorsList = await AdminsService.adminControllerGetCollaborators(
+            weddingData.id,
+          );
+          setCollaborators(
+            collaboratorsList.map((c) => ({
+              id: c.id,
+              name: c.name,
+              email: c.email,
+              accountCreated: true,
+            })),
+          );
+        } catch (error) {
+          console.error('Error fetching collaborators:', error);
+        }
+      };
+      fetchCollaborators();
+    }
   };
 
   // Handle password reset request
@@ -125,6 +206,82 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
       toast.error('Failed to send password reset email. Please try again.');
     }
   };
+
+  // Handle collaborator invitation
+  const handleInviteCollaborator = async (guest: GuestResponseDto) => {
+    // Prevent double-clicking
+    if (isInvitingCollaborator) {
+      return;
+    }
+
+    // Check if already added
+    if (collaborators.some((c) => c.email === guest.email)) {
+      toast.error('This guest is already added as a collaborator');
+      return;
+    }
+
+    // Check if guest has email
+    if (!guest.email) {
+      toast.error('Guest must have an email address to be invited as a collaborator');
+      return;
+    }
+
+    if (!weddingData?.id) {
+      toast.error('No wedding found');
+      return;
+    }
+
+    setIsInvitingCollaborator(true);
+
+    try {
+      const response = await AdminsService.adminControllerInviteCollaborator({
+        guestId: guest.id,
+        email: guest.email,
+        name: guest.name,
+        weddingId: weddingData.id,
+      });
+
+      const newCollaborator: Collaborator = {
+        id: response.id,
+        name: response.name,
+        email: response.email,
+        accountCreated: response.accountCreated,
+      };
+
+      setCollaborators([...collaborators, newCollaborator]);
+      setCollaboratorSearch('');
+      setShowCollaboratorDropdown(false);
+
+      if (response.existingAccount) {
+        toast.success(`${guest.name} has been added as a collaborator (existing account)`);
+      } else {
+        toast.success(
+          `Account created for ${guest.name}. An invitation email will be sent shortly.`,
+        );
+      }
+    } catch (error) {
+      console.error('Error inviting collaborator:', error);
+      toast.error('Failed to invite collaborator. Please try again.');
+    } finally {
+      setIsInvitingCollaborator(false);
+    }
+  };
+
+  const handleRemoveCollaborator = (id: number) => {
+    // Mark collaborator for removal (will be removed on save)
+    setCollaboratorsToRemove([...collaboratorsToRemove, id]);
+    // Remove from local state immediately for UI feedback
+    setCollaborators(collaborators.filter((c) => c.id !== id));
+  };
+
+  // Filter guests based on search
+  const filteredGuestsForCollaborator = guests.filter(
+    (guest) =>
+      collaboratorSearch.trim() !== '' &&
+      !collaborators.some((c) => c.id === guest.id) &&
+      (guest.name.toLowerCase().includes(collaboratorSearch.toLowerCase()) ||
+        (guest.email && guest.email.toLowerCase().includes(collaboratorSearch.toLowerCase()))),
+  );
 
   const renderUserFields = () => {
     if (!userData) return null;
@@ -399,6 +556,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     );
   };
 
+
   const renderWeddingFields = () => {
     if (targetUserRole !== UserRole.ADMIN || !weddingData) return null;
 
@@ -558,6 +716,78 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
                     : 'Not set'}
                 </span>
                 <ChevronDown className="ml-2 w-4 h-4 text-gray-400" />
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Collaborators</label>
+
+            {isEditing && (
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Search guests by name or email..."
+                  value={collaboratorSearch}
+                  onChange={(e) => {
+                    setCollaboratorSearch(e.target.value);
+                    setShowCollaboratorDropdown(e.target.value.trim() !== '');
+                  }}
+                  onFocus={() => setShowCollaboratorDropdown(collaboratorSearch.trim() !== '')}
+                  className="text-sm"
+                  disabled={isInvitingCollaborator}
+                />
+                {showCollaboratorDropdown && filteredGuestsForCollaborator.length > 0 && !isInvitingCollaborator && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 overflow-y-auto">
+                    {filteredGuestsForCollaborator.map((guest) => (
+                      <div
+                        key={guest.id}
+                        className="p-2 hover:bg-muted cursor-pointer border-b last:border-b-0"
+                        onClick={() => handleInviteCollaborator(guest)}
+                      >
+                        <p className="font-medium text-sm">{guest.name}</p>
+                        {guest.email && (
+                          <p className="text-xs text-muted-foreground">{guest.email}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {isInvitingCollaborator && (
+                  <p className="text-xs text-muted-foreground mt-1">Adding collaborator...</p>
+                )}
+              </div>
+            )}
+
+            {collaborators.length === 0 ? (
+              <p className="p-3 bg-muted rounded-md text-sm text-muted-foreground">
+                No collaborators added yet
+              </p>
+            ) : (
+              <div className="border rounded-md divide-y">
+                {collaborators.map((collaborator) => (
+                  <div
+                    key={collaborator.id}
+                    className="flex items-center justify-between p-3 hover:bg-muted/50"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-sm">{collaborator.name}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{collaborator.email}</p>
+                    </div>
+                    {isEditing && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => handleRemoveCollaborator(collaborator.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </div>
