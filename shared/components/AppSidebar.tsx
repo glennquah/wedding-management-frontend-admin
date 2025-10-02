@@ -50,6 +50,7 @@ export default function AppSidebar({
       title: string;
       href: string;
       icon: React.ComponentType<{ className?: string }>;
+      disabled?: boolean;
     }>;
   }>;
   signOut?: () => void;
@@ -79,11 +80,18 @@ export default function AppSidebar({
               <SidebarMenu>
                 {section.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <Link href={basePath ? `/${basePath}${item.href}` : item.href}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
+                    <SidebarMenuButton asChild={!item.disabled} disabled={item.disabled} className={item.disabled ? 'bg-gray-200 opacity-60' : ''}>
+                      {item.disabled ? (
+                        <div className="cursor-not-allowed flex items-center gap-2">
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </div>
+                      ) : (
+                        <Link href={basePath ? `/${basePath}${item.href}` : item.href}>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-
+import { usePathname, useRouter } from 'next/navigation';
 import AdminSidebar from '../components/layout/AdminSidebar';
 import { useWeddingManager } from '@/app/hooks/useWeddingManager';
 import { useWeddingStore } from '@/app/store/sessionStore';
@@ -26,12 +26,19 @@ import { SidebarProvider } from '@shared/components/ui/sidebar';
 import { ChevronsUpDown, Gem } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { Toaster } from 'sonner';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { fetchUserMainWedding, fetchUserWeddings, loading } = useWeddingManager();
-  const { selectedWeddingId, hasHydrated } = useWeddingStore();
+  const { selectedWeddingId, hasHydrated, weddings } = useWeddingStore();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const { data: session, status } = useSession();
+
+  // Route protection: redirect to dashboard if no wedding and trying to access protected routes
+  const allowedRoutesWithoutWedding = ['/admin', '/admin/account', '/admin/create-wedding'];
+  const hasNoWedding = !selectedWeddingId && (!weddings || weddings.length === 0);
 
   useEffect(() => {
     if (hasHydrated) {
@@ -42,8 +49,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [hasHydrated, selectedWeddingId, fetchUserMainWedding, fetchUserWeddings]);
 
-  const { data: session, status } = useSession();
-  const router = useRouter();
+  useEffect(() => {
+    if (hasNoWedding && pathname && !allowedRoutesWithoutWedding.includes(pathname)) {
+      router.push('/admin');
+    }
+  }, [hasNoWedding, pathname, router]);
+
   console.log('Session status:', status, 'Session data:', session);
 
   if (status === 'loading' || loading) {
@@ -64,7 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (!selectedWeddingId) {
+  if (!selectedWeddingId && weddings && weddings.length > 0) {
     return <SelectWeddingPage />;
   }
 
