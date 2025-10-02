@@ -54,14 +54,14 @@ export default function VendorDashboard() {
   if (hasVendorDetails === false) {
     return (
       <main className="flex items-center justify-center min-h-[80vh] px-4">
-        <div className="max-w-2xl w-full bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-lg p-8 shadow-lg">
+        <div className="max-w-2xl w-full bg-gradient-to-r from-brand-25 to-brand-50 border-2 border-brand-200 rounded-lg p-8 shadow-lg">
           <div className="flex flex-col items-center text-center gap-6">
-            <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center">
-              <AlertCircle className="w-8 h-8 text-purple-600" />
+            <div className="w-16 h-16 rounded-full bg-brand-100 flex items-center justify-center">
+              <AlertCircle className="w-8 h-8 text-brand-600" />
             </div>
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-3 flex items-center justify-center gap-2">
-                <Sparkles className="w-6 h-6 text-purple-500" />
+                <Sparkles className="w-6 h-6 text-brand-500" />
                 Complete Your Vendor Profile
               </h2>
               <p className="text-gray-700 mb-2">
@@ -74,7 +74,7 @@ export default function VendorDashboard() {
             <Button
               onClick={() => router.push('/vendor/account')}
               size="lg"
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold shadow-md hover:shadow-xl transition-all px-8 py-6 text-lg"
+              className="bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold shadow-md hover:shadow-xl transition-all px-8 py-6 text-lg"
             >
               <Sparkles className="w-5 h-5 mr-2" />
               Complete Your Profile Now
@@ -83,7 +83,7 @@ export default function VendorDashboard() {
               Update your vendor details in{' '}
               <button
                 onClick={() => router.push('/vendor/account')}
-                className="text-purple-600 hover:text-purple-700 underline font-medium"
+                className="text-brand-600 hover:text-brand-700 underline font-medium"
               >
                 Account Settings
               </button>
