@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import VendorSidebar from '../components/layout/VendorSidebar';
-import { VendorSessionProvider } from '../../contexts/VendorSessionContext';
 import { UserRole, VendorsService } from '@shared/api';
 import NavigationBar from '@shared/components/NavigationBar';
 import { SidebarProvider } from '@shared/components/ui/sidebar';
 import { Toaster } from '@shared/components/ui/sonner';
 import { useSession } from 'next-auth/react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { VendorSessionProvider } from '../../contexts/VendorSessionContext';
+import VendorSidebar from '../components/layout/VendorSidebar';
 
 export default function VendorLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
@@ -44,10 +44,10 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
   const allowedRoutesWithoutDetails = ['/vendor', '/vendor/account'];
 
   useEffect(() => {
-    if (hasVendorDetails === false && !allowedRoutesWithoutDetails.includes(pathname)) {
+    if (hasVendorDetails && pathname && !allowedRoutesWithoutDetails.includes(pathname)) {
       router.push('/vendor');
     }
-  }, [hasVendorDetails, pathname, router]);
+  }, [hasVendorDetails, pathname, router, allowedRoutesWithoutDetails]);
 
   if (status === 'loading' || isCheckingDetails) {
     return (

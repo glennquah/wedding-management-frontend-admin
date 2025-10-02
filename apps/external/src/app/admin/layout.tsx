@@ -1,8 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import AdminSidebar from '../components/layout/AdminSidebar';
 import { useWeddingManager } from '@/app/hooks/useWeddingManager';
 import { useWeddingStore } from '@/app/store/sessionStore';
 import { UserRole, WeddingResponseDto } from '@shared/api';
@@ -26,7 +23,10 @@ import { SidebarProvider } from '@shared/components/ui/sidebar';
 import { ChevronsUpDown, Gem } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { Toaster } from 'sonner';
+import AdminSidebar from '../components/layout/AdminSidebar';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { fetchUserMainWedding, fetchUserWeddings, loading } = useWeddingManager();
@@ -53,7 +53,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (hasNoWedding && pathname && !allowedRoutesWithoutWedding.includes(pathname)) {
       router.push('/admin');
     }
-  }, [hasNoWedding, pathname, router]);
+  }, [hasNoWedding, pathname, router, allowedRoutesWithoutWedding]);
 
   console.log('Session status:', status, 'Session data:', session);
 

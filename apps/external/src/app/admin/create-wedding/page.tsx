@@ -4,7 +4,6 @@ import { AdminsService, BudgetBucket, GuestCountBucket, WeddingService, Weddings
 import { Button } from '@shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { Input } from '@shared/components/ui/form/input';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -70,7 +69,6 @@ const WEDDING_SERVICES: { value: WeddingService; label: string; description: str
 
 export default function CreateWeddingPage() {
   const router = useRouter();
-  const { data: session } = useSession();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({

@@ -51,7 +51,7 @@ export default function UserDashboardPage() {
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-3 flex items-center justify-center gap-2">
                 <Sparkles className="w-6 h-6 text-amber-500" />
-                Welcome! Let's Set Up Your Wedding
+                Welcome! Let&apos;s Set Up Your Wedding
               </h2>
               <p className="text-gray-700 mb-2">
                 Hello, <span className="font-semibold">{session.user?.name || session.user?.email}</span> 👋
