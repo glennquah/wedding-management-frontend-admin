@@ -20,10 +20,10 @@ export type CreateAdminDto = {
     /**
      * Is the admin a couple?
      */
-    isCouple: boolean;
+    isCouple?: boolean;
     /**
      * Wedding ID to associate with this admin
      */
-    weddingId: number;
+    weddingId?: number;
 };
 
