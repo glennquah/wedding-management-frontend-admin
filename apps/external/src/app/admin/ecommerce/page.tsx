@@ -2,8 +2,9 @@
 
 import { useMemo } from 'react';
 import { WeddingService } from '@shared/api';
+import { PageHeader } from '@shared/components';
 import { CategoryCarousel } from './components/CategoryCarousel';
-import { LoadingState, ErrorState, Header, EmptyState } from './components/common';
+import { LoadingState, ErrorState, EmptyState } from './components/common';
 import { useEcommerceData } from './hooks';
 
 export default function EcommercePage() {
@@ -22,10 +23,9 @@ export default function EcommercePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Header
-        totalListings={totalListings}
-        vendorCount={vendors.length}
-        categoryCount={categories.length}
+      <PageHeader
+        title="Wedding Services Marketplace"
+        description={`Discover and book the perfect wedding services for your special day. Browse through our curated collection of venues, catering, photography, and more from trusted vendors. ${totalListings} total listings • ${vendors.length} trusted vendors • ${categories.length} service categories`}
       />
 
       {categories.map((category) => (

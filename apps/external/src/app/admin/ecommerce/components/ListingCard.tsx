@@ -4,7 +4,7 @@ import { ListingResponseDto, VendorResponseDto } from '@shared/api';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { Badge } from '@shared/components/ui/badge';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@shared/components/ui/carousel';
-import { Star } from 'lucide-react';
+import { Star, Camera } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
@@ -72,7 +72,7 @@ export function ListingCard({ listing, vendor }: ListingCardProps) {
             <div className="text-gray-400 text-center flex items-center justify-center h-full">
               <div>
                 <div className="w-12 h-12 mx-auto mb-2 bg-gray-300 rounded-lg flex items-center justify-center">
-                  📷
+                  <Camera className="w-6 h-6 text-gray-500" />
                 </div>
                 <span className="text-xs">No image available</span>
               </div>

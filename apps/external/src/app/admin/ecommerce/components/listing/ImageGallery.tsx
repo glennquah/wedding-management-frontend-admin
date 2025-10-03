@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@shared/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import { X, Eye } from 'lucide-react';
+import { X, Eye, Camera } from 'lucide-react';
 
 export function ImageGallery({ imageUrls, listingName }: ImageGalleryProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -39,8 +39,8 @@ export function ImageGallery({ imageUrls, listingName }: ImageGalleryProps) {
           ) : (
             <div className="flex items-center justify-center h-full text-gray-400">
               <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gray-300 rounded-lg flex items-center justify-center text-2xl">
-                  📷
+                <div className="w-16 h-16 mx-auto mb-4 bg-gray-300 rounded-lg flex items-center justify-center">
+                  <Camera className="w-8 h-8 text-gray-500" />
                 </div>
                 <span>No image available</span>
               </div>
