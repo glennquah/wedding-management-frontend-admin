@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { signOut } from '../../store/sessionStore';
+import { signOut, useWeddingStore } from '../../store/sessionStore';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
@@ -14,24 +13,10 @@ import {
   PaintRoller,
   Users,
 } from 'lucide-react';
-import { AdminsService } from '@shared/api';
 
 export default function AdminSidebar() {
-  const [hasWedding, setHasWedding] = useState<boolean>(true); // Default to true to avoid flickering
-
-  useEffect(() => {
-    const checkWedding = async () => {
-      try {
-        const { mainWeddingId } = await AdminsService.adminControllerGetMyMainWedding();
-        setHasWedding(mainWeddingId !== null);
-      } catch (error) {
-        console.error('Error checking wedding:', error);
-        setHasWedding(false);
-      }
-    };
-
-    checkWedding();
-  }, []);
+  const { weddings } = useWeddingStore();
+  const hasWedding = weddings && weddings.length > 0;
 
   const tabs = [
     {
