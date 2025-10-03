@@ -1,9 +1,9 @@
 'use client';
 
 import { AvailabilityCalendar } from '../../components/AvailabilityCalendar';
-import { CollaboratorSearchModal } from '../../components/CollaboratorSearchModal';
+import { GuestSearchModal } from '../../components/GuestSearchModal';
 import { useDateOptimizer } from '../../hooks/useDateOptimizer';
-import { Button, PageHeader } from '@shared/components';
+import { Button, ItemRankingList, PageHeader } from '@shared/components';
 import { Badge } from '@shared/components/ui/badge';
 import {
   Card,
@@ -59,12 +59,13 @@ export default function DateOptimizerPage() {
   const isMobile = useIsMobileScreen();
   const {
     // Data
-    collaborators,
+    guests,
     keyAttendees,
     loading,
     hasRunAnalysis,
     availabilityData,
     selectedMonth,
+    preferredDays,
 
     // Modal states
     isAddAttendeeModalOpen,
@@ -76,6 +77,7 @@ export default function DateOptimizerPage() {
     handleRequestCalendarAccess,
     resetAnalysis,
     handleMonthChange,
+    setPreferredDays,
 
     // Modal controls
     openAddAttendeeModal,
@@ -123,18 +125,23 @@ export default function DateOptimizerPage() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">Preferred Days</label>
-                <div className="flex gap-2 flex-wrap">
-                  {['Friday', 'Saturday', 'Sunday'].map((day) => (
-                    <Badge
-                      key={day}
-                      variant="outline"
-                      className="cursor-pointer hover:bg-primary hover:text-white"
-                    >
-                      {day}
-                    </Badge>
-                  ))}
-                </div>
+                <ItemRankingList
+                  selectedItems={preferredDays}
+                  availableItems={[
+                    'Monday',
+                    'Tuesday',
+                    'Wednesday',
+                    'Thursday',
+                    'Friday',
+                    'Saturday',
+                    'Sunday',
+                  ]}
+                  onItemsChange={setPreferredDays}
+                  label="Preferred Days"
+                  description="Drag to reorder. Days at the top will be prioritized when analyzing dates."
+                  emptyMessage="No days selected. Add at least one preferred day below."
+                  addMoreLabel="Add More Days"
+                />
               </div>
             </CardContent>
           </Card>
@@ -147,8 +154,7 @@ export default function DateOptimizerPage() {
                 Key Attendees
               </CardTitle>
               <CardDescription>
-                Select collaborators whose calendar availability is critical for choosing your
-                wedding date
+                Select guests whose calendar availability is critical for choosing your wedding date
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -156,9 +162,7 @@ export default function DateOptimizerPage() {
                 <div className="text-center py-8 text-muted-foreground">
                   <Users className="h-12 w-12 mx-auto mb-3 opacity-20" />
                   <p>No key attendees added yet</p>
-                  <p className="text-sm">
-                    Add collaborators whose availability is critical for your wedding date
-                  </p>
+                  <p className="text-sm">Add guests whose availability is critical for your wedding date</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -206,13 +210,13 @@ export default function DateOptimizerPage() {
           </Card>
         </div>
 
-        {/* Collaborator Search Modal */}
-        <CollaboratorSearchModal
+        {/* Guest Search Modal */}
+        <GuestSearchModal
           isOpen={isAddAttendeeModalOpen}
           onClose={closeAddAttendeeModal}
-          collaborators={collaborators}
-          onSelectCollaborator={handleAddKeyAttendee}
-          excludedCollaboratorIds={keyAttendees.map((a) => a.id)}
+          guests={guests}
+          onSelectGuest={handleAddKeyAttendee}
+          excludedGuestIds={keyAttendees.map((a) => a.id)}
         />
 
         {/* Run Analysis Button */}

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { AdminResponseDto } from '@shared/api';
+import { GuestResponseDto } from '@shared/api';
 import { Button } from '@shared/components';
 import { Badge } from '@shared/components/ui/badge';
 import {
@@ -15,28 +15,28 @@ import {
 } from '@shared/components/ui/dialog';
 import { Input } from '@shared/components/ui/form/input';
 
-interface CollaboratorSearchModalProps {
+interface GuestSearchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  collaborators: AdminResponseDto[];
-  onSelectCollaborator: (collaborator: AdminResponseDto) => void;
-  excludedCollaboratorIds?: number[];
+  guests: GuestResponseDto[];
+  onSelectGuest: (guest: GuestResponseDto) => void;
+  excludedGuestIds?: number[];
 }
 
-export function CollaboratorSearchModal({
+export function GuestSearchModal({
   isOpen,
   onClose,
-  collaborators,
-  onSelectCollaborator,
-  excludedCollaboratorIds = [],
-}: CollaboratorSearchModalProps) {
+  guests,
+  onSelectGuest,
+  excludedGuestIds = [],
+}: GuestSearchModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Filter collaborators based on search query
-  const filteredCollaborators = collaborators.filter(
-    (collaborator) =>
-      collaborator.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      collaborator.email.toLowerCase().includes(searchQuery.toLowerCase()),
+  // Filter guests based on search query
+  const filteredGuests = guests.filter(
+    (guest) =>
+      guest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      guest.email.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleClose = () => {
@@ -44,8 +44,8 @@ export function CollaboratorSearchModal({
     onClose();
   };
 
-  const handleSelectCollaborator = (collaborator: AdminResponseDto) => {
-    onSelectCollaborator(collaborator);
+  const handleSelectGuest = (guest: GuestResponseDto) => {
+    onSelectGuest(guest);
     setSearchQuery('');
   };
 
@@ -55,7 +55,7 @@ export function CollaboratorSearchModal({
         <DialogHeader>
           <DialogTitle>Add Key Attendee</DialogTitle>
           <DialogDescription>
-            Select collaborators from your wedding planning team whose availability is critical
+            Select guests whose availability is critical for your wedding date
           </DialogDescription>
         </DialogHeader>
 
@@ -69,31 +69,29 @@ export function CollaboratorSearchModal({
         </div>
 
         <div className="flex-1 overflow-y-auto border rounded-md">
-          {filteredCollaborators.length === 0 ? (
+          {filteredGuests.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <p>No collaborators found</p>
+              <p>No guests found</p>
               <p className="text-sm">
-                {searchQuery
-                  ? 'Try adjusting your search'
-                  : 'Add collaborators to your wedding first'}
+                {searchQuery ? 'Try adjusting your search' : 'Add guests to your wedding first'}
               </p>
             </div>
           ) : (
             <div className="divide-y">
-              {filteredCollaborators.map((collaborator) => {
-                const isExcluded = excludedCollaboratorIds.includes(collaborator.id);
+              {filteredGuests.map((guest) => {
+                const isExcluded = excludedGuestIds.includes(guest.id);
                 return (
                   <div
-                    key={collaborator.id}
+                    key={guest.id}
                     className={`p-3 hover:bg-muted/50 transition-colors ${
                       isExcluded ? 'opacity-50' : 'cursor-pointer'
                     }`}
-                    onClick={() => !isExcluded && handleSelectCollaborator(collaborator)}
+                    onClick={() => !isExcluded && handleSelectGuest(guest)}
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium">{collaborator.name}</p>
-                        <p className="text-sm text-muted-foreground">{collaborator.email}</p>
+                        <p className="font-medium">{guest.name}</p>
+                        <p className="text-sm text-muted-foreground">{guest.email}</p>
                       </div>
                       {isExcluded && <Badge variant="secondary">Already Added</Badge>}
                     </div>

@@ -36,6 +36,7 @@ export {
 export { Checkbox } from './ui/checkbox';
 export { CodeEditor } from './ui/code-editor';
 export { DeleteConfirmationModal } from './ui/delete-confirmation-modal';
+export { ItemRankingList } from './ItemRankingList';
 export {
   Dialog,
   DialogContent,

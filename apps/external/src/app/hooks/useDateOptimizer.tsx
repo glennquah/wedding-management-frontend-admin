@@ -2,10 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { useWeddingManager } from './useWeddingManager';
 import {
-  AdminResponseDto,
-  AdminsService,
   AttendeeAvailability,
   CalendarService,
+  GuestResponseDto,
+  GuestsService,
   OpenAPI,
   WeddingsService,
 } from '@shared/api';
@@ -24,7 +24,7 @@ export function useDateOptimizer() {
   const { selectedWeddingId } = useWeddingManager();
 
   // State
-  const [collaborators, setCollaborators] = useState<AdminResponseDto[]>([]);
+  const [guests, setGuests] = useState<GuestResponseDto[]>([]);
   const [keyAttendees, setKeyAttendees] = useState<KeyAttendee[]>([]);
   const [isAddAttendeeModalOpen, setIsAddAttendeeModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -32,6 +32,7 @@ export function useDateOptimizer() {
   const [availabilityData, setAvailabilityData] = useState<AttendeeAvailability[]>([]);
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
+  const [preferredDays, setPreferredDays] = useState<string[]>(['Friday', 'Saturday', 'Sunday']);
 
   // Authentication setup
   const setupAuth = useCallback(() => {
@@ -57,7 +58,7 @@ export function useDateOptimizer() {
     [session, setupAuth],
   );
 
-  // Fetch collaborators and key attendees
+  // Fetch collaborators, guests, and key attendees
   const fetchData = useCallback(async () => {
     if (!selectedWeddingId || !session?.backendTokens?.accessToken) return;
 
@@ -65,26 +66,25 @@ export function useDateOptimizer() {
       setLoading(true);
       setupAuth();
 
-      // Fetch collaborators
-      const collaboratorsData =
-        await AdminsService.adminControllerGetCollaborators(selectedWeddingId);
-      setCollaborators(collaboratorsData);
+      // Fetch guests
+      const guestsData = await GuestsService.guestControllerGetGuestsByWedding(selectedWeddingId);
+      setGuests(guestsData);
 
       // Fetch key attendees
       const keyAttendeesResponse =
         await WeddingsService.weddingControllerGetKeyAttendees(selectedWeddingId);
       const keyAttendeeIds = keyAttendeesResponse.keyAttendeeIds || [];
 
-      // Convert to KeyAttendee objects
+      // Convert to KeyAttendee objects - find in guests
       const attendeesPromises = keyAttendeeIds.map(async (id: number) => {
-        const collaborator = collaboratorsData.find((c) => c.id === id);
-        if (!collaborator) return null;
+        const guest = guestsData.find((g) => g.id === id);
+        if (!guest) return null;
 
         const isConnected = await checkCalendarStatus(id);
         return {
-          id: collaborator.id,
-          name: collaborator.name,
-          email: collaborator.email,
+          id: guest.id,
+          name: guest.name,
+          email: guest.email,
           calendarConnected: isConnected,
         };
       });
@@ -93,7 +93,7 @@ export function useDateOptimizer() {
       setKeyAttendees(attendees);
     } catch (error) {
       console.error('Error fetching data:', error);
-      toast.error('Failed to fetch collaborators');
+      toast.error('Failed to fetch data');
     } finally {
       setLoading(false);
     }
@@ -182,28 +182,28 @@ export function useDateOptimizer() {
 
   // Add key attendee
   const handleAddKeyAttendee = useCallback(
-    async (collaborator: AdminResponseDto) => {
+    async (attendee: GuestResponseDto) => {
       if (!selectedWeddingId || !session?.backendTokens?.accessToken) return;
 
       try {
         setupAuth();
 
         // Check if calendar is already connected
-        const isConnected = await checkCalendarStatus(collaborator.id);
+        const isConnected = await checkCalendarStatus(attendee.id);
 
         const newAttendee: KeyAttendee = {
-          id: collaborator.id,
-          name: collaborator.name,
-          email: collaborator.email,
+          id: attendee.id,
+          name: attendee.name,
+          email: attendee.email,
           calendarConnected: isConnected,
         };
 
         // Save to backend
-        await WeddingsService.weddingControllerAddKeyAttendee(selectedWeddingId, collaborator.id);
+        await WeddingsService.weddingControllerAddKeyAttendee(selectedWeddingId, attendee.id);
 
         setKeyAttendees((prev) => [...prev, newAttendee]);
         setIsAddAttendeeModalOpen(false);
-        toast.success(`${collaborator.name} added as key attendee`);
+        toast.success(`${attendee.name} added as key attendee`);
       } catch (error) {
         console.error('Error adding key attendee:', error);
         toast.error('Failed to add key attendee');
@@ -287,13 +287,14 @@ export function useDateOptimizer() {
 
   return {
     // Data
-    collaborators,
+    guests,
     keyAttendees,
     loading,
     hasRunAnalysis,
     availabilityData,
     isLoadingAvailability,
     selectedMonth,
+    preferredDays,
 
     // Modal states
     isAddAttendeeModalOpen,
@@ -305,6 +306,7 @@ export function useDateOptimizer() {
     handleRequestCalendarAccess,
     resetAnalysis,
     handleMonthChange,
+    setPreferredDays,
 
     // Modal controls
     openAddAttendeeModal,
