@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { VendorsService } from '@shared/api';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   CalendarDays,
@@ -11,7 +10,8 @@ import {
   Settings,
   Users,
 } from 'lucide-react';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
+import { useEffect, useState } from 'react';
 
 const tabs = [
   {
