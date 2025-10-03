@@ -13,49 +13,6 @@ import {
 import { signOut, useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 
-const tabs = [
-  {
-    sectionHeader: 'Overview',
-    items: [
-      {
-        title: 'Dashboard',
-        href: '/',
-        icon: LayoutDashboard,
-      },
-      {
-        title: 'Listings',
-        href: '/listing',
-        icon: FileSpreadsheet,
-      },
-      {
-        title: 'Revenue',
-        href: '/revenue',
-        icon: CircleDollarSign,
-      },
-    ],
-  },
-  {
-    sectionHeader: 'Management',
-    items: [
-      {
-        title: 'Customers',
-        href: '/customers',
-        icon: Users,
-      },
-      {
-        title: 'Services',
-        href: '/services',
-        icon: Settings,
-      },
-      {
-        title: 'Calendar',
-        href: '/calendar',
-        icon: CalendarDays,
-      },
-    ],
-  },
-];
-
 export default function VendorSidebar() {
   const { data: session } = useSession();
   const [hasVendorDetails, setHasVendorDetails] = useState<boolean>(true); // Default to true to avoid flickering
@@ -85,6 +42,12 @@ export default function VendorSidebar() {
           title: 'Dashboard',
           href: '/',
           icon: LayoutDashboard,
+        },
+        {
+          title: 'Listings',
+          href: '/listing',
+          icon: FileSpreadsheet,
+          disabled: !hasVendorDetails,
         },
         {
           title: 'Revenue',

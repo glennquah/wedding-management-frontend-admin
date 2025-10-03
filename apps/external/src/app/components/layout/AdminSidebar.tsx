@@ -17,69 +17,6 @@ import {
 import { useEffect, useState } from 'react';
 import { signOut } from '../../store/sessionStore';
 
-const tabs = [
-  {
-    sectionHeader: 'Overview',
-    items: [
-      {
-        title: 'Dashboard',
-        href: '/',
-        icon: LayoutDashboard,
-      },
-      {
-        title: 'Shop',
-        href: '/ecommerce',
-        icon: ShoppingCart,
-      },
-      {
-        title: 'Progress Tracker',
-        href: '/progress-tracker',
-        icon: Clock,
-      },
-      {
-        title: 'Notification Templates',
-        href: '/notification-templates',
-        icon: BellDot,
-      },
-    ],
-  },
-  {
-    sectionHeader: 'Planning',
-    items: [
-      {
-        title: 'Checklist',
-        href: '/checklist',
-        icon: CheckSquare,
-      },
-      {
-        title: 'Guest List',
-        href: '/guest-list',
-        icon: Users,
-      },
-      {
-        title: 'Seating Arrangement',
-        href: '/seating-arrangement',
-        icon: MapPin,
-      },
-      {
-        title: 'Timeline',
-        href: '/timeline',
-        icon: Calendar,
-      },
-      {
-        title: 'Microsite',
-        href: '/microsite',
-        icon: PaintRoller,
-      },
-      {
-        title: 'Tasks',
-        href: '/tasks',
-        icon: ListTodo,
-      },
-    ],
-  },
-];
-
 export default function AdminSidebar() {
   const [hasWedding, setHasWedding] = useState<boolean>(true); // Default to true to avoid flickering
 
@@ -105,6 +42,11 @@ export default function AdminSidebar() {
           title: 'Dashboard',
           href: '/',
           icon: LayoutDashboard,
+        },
+        {
+          title: 'Shop',
+          href: '/ecommerce',
+          icon: ShoppingCart,
         },
         {
           title: 'Progress Tracker',

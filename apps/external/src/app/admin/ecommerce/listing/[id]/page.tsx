@@ -19,6 +19,7 @@ import { useListingData, usePagination } from '../../hooks';
 import { formatPrice } from '../../utils';
 import { useCartStore } from '../../../../store/sessionStore';
 import type { AvailabilitySlotDto } from '@shared/api';
+import { toast } from 'sonner';
 
 export default function ListingPage() {
   const params = useParams();
@@ -64,17 +65,17 @@ export default function ListingPage() {
 
   const handleAddToCart = async () => {
     if (!session?.user?.id) {
-      alert('Please log in to add items to cart');
+      toast.error('Please log in to add items to cart');
       return;
     }
 
     if (selectedSlots.length === 0) {
-      alert('Please select at least one availability slot');
+      toast.error('Please select at least one availability slot');
       return;
     }
 
     if (!listing) {
-      alert('Listing not found');
+      toast.error('Listing not found');
       return;
     }
 
@@ -91,11 +92,11 @@ export default function ListingPage() {
         },
         selectedSlots
       );
-      alert('Successfully added to cart!');
+      toast.success('Successfully added to cart!');
       setSelectedSlots([]);
     } catch (error) {
       console.error('Error adding to cart:', error);
-      alert('Failed to add to cart. Please try again.');
+      toast.error('Failed to add to cart. Please try again.');
     } finally {
       setIsAddingToCart(false);
     }
