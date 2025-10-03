@@ -59,6 +59,9 @@ export function useWeddingManager() {
         // Fetch the wedding details using the main wedding ID
         const mainWedding = await WeddingsService.weddingControllerFindOne(fetchedMainWeddingId);
         setWedding(mainWedding);
+      } else {
+        // No main wedding set on the server
+        setMainWeddingId(null);
       }
     } catch (err) {
       console.error('Error fetching main wedding:', err);
@@ -95,10 +98,8 @@ export function useWeddingManager() {
       setWeddings(userWeddings);
 
       if (userWeddings.length > 0) {
-        // Set the main wedding ID if we got one from the API
-        if (fetchedMainWeddingId) {
-          setMainWeddingId(fetchedMainWeddingId);
-        }
+        // Reflect server truth for main wedding: set to actual id, else null
+        setMainWeddingId(fetchedMainWeddingId ?? null);
 
         // Use selected wedding if available, otherwise use main wedding, otherwise use first wedding as fallback
         let targetWedding;
@@ -114,10 +115,7 @@ export function useWeddingManager() {
         if (!targetWedding) {
           targetWedding = userWeddings[0];
           setSelectedWeddingId(targetWedding.id);
-          // Only set as main wedding if we didn't get one from API
-          if (!fetchedMainWeddingId) {
-            setMainWeddingId(targetWedding.id);
-          }
+          // Do NOT promote first wedding to main; keep mainWeddingId as null when server has none
         }
 
         setWedding(targetWedding);
