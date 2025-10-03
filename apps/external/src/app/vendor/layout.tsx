@@ -15,6 +15,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
   const router = useRouter();
   const pathname = usePathname();
   const [hasVendorDetails, setHasVendorDetails] = useState<boolean | null>(null);
+  const [vendorOnboardingStatus, setVendorOnboardingStatus] = useState<string | null>(null);
   const [isCheckingDetails, setIsCheckingDetails] = useState(true);
 
   console.log('Session status:', status, 'Session data:', session);
@@ -25,6 +26,8 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
         if (!session?.user?.id) return;
 
         const vendor = await VendorsService.vendorControllerGetVendor(session.user.id);
+        setVendorOnboardingStatus(vendor.onboardingStatus);
+
         const hasDetails = !!(vendor.serviceOffered && vendor.styleOffered && vendor.weddingTypes?.length);
         setHasVendorDetails(hasDetails);
       } catch (error) {
@@ -40,14 +43,27 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
     }
   }, [session]);
 
-  // Route protection: redirect to dashboard if no vendor details and trying to access protected routes
+  // Route protection: prioritize PENDING/REJECTED status check over details check
   const allowedRoutesWithoutDetails = ['/vendor', '/vendor/account'];
 
   useEffect(() => {
-    if (hasVendorDetails && pathname && !allowedRoutesWithoutDetails.includes(pathname)) {
+    // If vendor is PENDING, redirect to pending page
+    if (vendorOnboardingStatus === 'PENDING' && pathname !== '/vendor/pending') {
+      router.push('/vendor/pending');
+      return;
+    }
+
+    // If vendor is REJECTED, sign them out
+    if (vendorOnboardingStatus === 'REJECTED') {
+      router.push('/login?error=vendor_rejected');
+      return;
+    }
+
+    // If vendor is ONBOARDED but has no details, allow access to /vendor and /vendor/account only
+    if (vendorOnboardingStatus === 'ONBOARDED' && hasVendorDetails === false && pathname && !allowedRoutesWithoutDetails.includes(pathname)) {
       router.push('/vendor');
     }
-  }, [hasVendorDetails, pathname, router, allowedRoutesWithoutDetails]);
+  }, [vendorOnboardingStatus, hasVendorDetails, pathname, router]);
 
   if (status === 'loading' || isCheckingDetails) {
     return (
@@ -65,6 +81,11 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
         <div>Loading...</div>
       </main>
     );
+  }
+
+  // If vendor status is PENDING, only render the pending page without layout
+  if (vendorOnboardingStatus === 'PENDING') {
+    return <>{children}</>;
   }
 
   return (

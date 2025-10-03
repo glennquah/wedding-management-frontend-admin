@@ -43,14 +43,14 @@ export default function UserDashboardPage() {
   if (hasWedding === false) {
     return (
       <main className="flex items-center justify-center min-h-[80vh] px-4">
-        <div className="max-w-2xl w-full bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-lg p-8 shadow-lg">
+        <div className="max-w-2xl w-full bg-gradient-to-r from-brand-25 to-brand-50 border-2 border-brand-200 rounded-lg p-8 shadow-lg">
           <div className="flex flex-col items-center text-center gap-6">
-            <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
-              <AlertCircle className="w-8 h-8 text-amber-600" />
+            <div className="w-16 h-16 rounded-full bg-brand-100 flex items-center justify-center">
+              <AlertCircle className="w-8 h-8 text-brand-600" />
             </div>
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-3 flex items-center justify-center gap-2">
-                <Sparkles className="w-6 h-6 text-amber-500" />
+                <Sparkles className="w-6 h-6 text-brand-500" />
                 Welcome! Let&apos;s Set Up Your Wedding
               </h2>
               <p className="text-gray-700 mb-2">
@@ -63,7 +63,7 @@ export default function UserDashboardPage() {
             <Button
               onClick={() => router.push('/admin/create-wedding')}
               size="lg"
-              className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold shadow-md hover:shadow-xl transition-all px-8 py-6 text-lg"
+              className="bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold shadow-md hover:shadow-xl transition-all px-8 py-6 text-lg"
             >
               <Sparkles className="w-5 h-5 mr-2" />
               Create Your Wedding Now
@@ -72,7 +72,7 @@ export default function UserDashboardPage() {
               Or update your profile in{' '}
               <button
                 onClick={() => router.push('/admin/account')}
-                className="text-amber-600 hover:text-amber-700 underline font-medium"
+                className="text-brand-600 hover:text-brand-700 underline font-medium"
               >
                 Account Settings
               </button>

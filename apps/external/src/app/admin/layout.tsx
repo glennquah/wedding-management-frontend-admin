@@ -86,10 +86,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <NavigationBar
           notificationRoute="/admin/notifications"
           additionalTabs={
-            <div className="flex items-center gap-4 ml-auto">
-              <Cart />
-              <WeddingSelector />
-            </div>
+            !hasNoWedding && (
+              <div className="flex items-center gap-4 ml-auto">
+                <Cart />
+                <WeddingSelector />
+              </div>
+            )
           }
         />
         <main className="flex-1 overflow-y-auto">{children}</main>
