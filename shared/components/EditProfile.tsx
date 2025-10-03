@@ -2,6 +2,8 @@
 
 import { useEffect } from 'react';
 
+import { ChevronDown } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   AdminResponseDto,
   AuthService,
@@ -24,8 +26,6 @@ import { Input } from './ui/form/input';
 import { MultiSelectDropdown } from './ui/form/multiSelectDropdown';
 import { SingleSelectDropdown } from './ui/form/singleSelectDropdown';
 import { Skeleton } from './ui/skeleton';
-import { ChevronDown } from 'lucide-react';
-import { toast } from 'sonner';
 
 interface EditProfileProps {
   userId?: number;
@@ -400,7 +400,39 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
   };
 
   const renderWeddingFields = () => {
-    if (targetUserRole !== UserRole.ADMIN || !weddingData) return null;
+    if (targetUserRole !== UserRole.ADMIN) return null;
+
+    // If admin has no wedding, show a prompt to create one
+    if (!weddingData) {
+      return (
+        <Card className="mt-6 bg-gradient-to-br from-brand-50 to-pink-50 border-2 border-brand-300 shadow-lg">
+          <CardHeader className="text-center pb-2">
+            <CardTitle className="text-2xl font-bold text-brand-700">
+              ✨ Your Dream Wedding Awaits! ✨
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="py-6">
+            <div className="text-center space-y-4">
+              <p className="text-lg text-gray-700 font-medium">
+                Let's bring your special day to life!
+              </p>
+              <p className="text-sm text-gray-600 max-w-md mx-auto">
+                Share your wedding details with us and unlock personalized vendor recommendations,
+                smart budgeting tools, and everything you need to plan the perfect celebration.
+              </p>
+              <Button
+                onClick={() => {
+                  window.location.href = '/admin/create-wedding';
+                }}
+                className="mx-auto mt-4 px-8 py-6 text-lg font-semibold bg-gradient-to-r from-brand-600 to-pink-600 hover:from-brand-700 hover:to-pink-700 shadow-md hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+              >
+                🎉 Start Planning Your Wedding
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
 
     return (
       <Card className="mt-6 bg-outline border-primary">
@@ -625,13 +657,13 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
             {targetUserRole !== UserRole.SUPERADMIN && (
               <>
                 <Button
-                  className="bg-warning-900 text-base-white"
+                  variant="secondary"
                   onClick={() => sendResetPasswordEmail()}
                 >
                   Reset Password
                 </Button>
                 <Button
-                  className="bg-warning-900 text-base-white"
+                  className="bg-destructive text-base-white"
                   onClick={() => setShowDeleteModal(true)}
                 >
                   Delete Profile

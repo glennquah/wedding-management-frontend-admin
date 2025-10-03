@@ -1,15 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useHandleSession } from '../../hooks/useHandleSession';
-import { useSessionStore } from '../../store/sessionStore';
-import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/ui/card';
+import { AdminsService, BudgetBucket, GuestCountBucket, WeddingService, WeddingsService, WeddingStyle, WeddingType } from '@shared/api';
 import { Button } from '@shared/components/ui/button';
-import { WeddingType, BudgetBucket, GuestCountBucket, WeddingStyle, WeddingService } from '@shared/api';
-
+import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/ui/card';
+import { Input } from '@shared/components/ui/form/input';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface OnboardingData {
+  name: string;
+  date: string;
+  location: string;
   weddingType: WeddingType | null;
   budgetBucket: BudgetBucket | null;
   guestCountBucket: GuestCountBucket | null;
@@ -18,6 +20,7 @@ interface OnboardingData {
 }
 
 const STEPS = [
+  { key: 'basic', title: 'Let\'s start with the basics', subtitle: 'Tell us about your wedding' },
   { key: 'weddingType', title: 'What type of wedding are you planning?', subtitle: 'Select your wedding type' },
   { key: 'budgetBucket', title: 'What\'s your budget range?', subtitle: 'Choose your budget bracket' },
   { key: 'guestCountBucket', title: 'How many guests will you have?', subtitle: 'Select your guest count' },
@@ -64,25 +67,20 @@ const WEDDING_SERVICES: { value: WeddingService; label: string; description: str
   { value: WeddingService.TRANSPORTATION, label: 'Transportation', description: 'Wedding day transportation' }
 ];
 
-export default function GetStartedCouplePage() {
+export default function CreateWeddingPage() {
   const router = useRouter();
-  const { name, email, password } = useSessionStore();
-  const { handleSignUpAdmin } = useHandleSession();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
+    name: '',
+    date: '',
+    location: '',
     weddingType: null,
     budgetBucket: null,
     guestCountBucket: null,
     preferredStyle: null,
     preferredServices: []
   });
-
-  // Redirect if onboarding data is missing
-  if (!name || !email || !password) {
-    router.replace('/get-started');
-    return null;
-  }
 
   const handleSingleSelect = (key: keyof OnboardingData, value: WeddingType | BudgetBucket | GuestCountBucket | WeddingStyle | null) => {
     setOnboardingData(prev => ({ ...prev, [key]: value }));
@@ -97,48 +95,123 @@ export default function GetStartedCouplePage() {
     }));
   };
 
+  const handleInputChange = (field: keyof OnboardingData, value: string) => {
+    setOnboardingData(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleNext = async () => {
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       // Final step - submit data
-      if (!onboardingData.weddingType || !onboardingData.budgetBucket || 
+      if (!onboardingData.name || !onboardingData.weddingType || !onboardingData.budgetBucket ||
           !onboardingData.guestCountBucket || !onboardingData.preferredStyle ||
           onboardingData.preferredServices.length === 0) {
+        toast.error('Please complete all required fields');
         return;
       }
 
-      await handleSignUpAdmin({
-        email: email!,
-        password: password!,
-        name: name!,
-        weddingType: onboardingData.weddingType,
-        budgetBucket: onboardingData.budgetBucket,
-        guestCountBucket: onboardingData.guestCountBucket,
-        preferredStyle: onboardingData.preferredStyle,
-        preferredServices: onboardingData.preferredServices,
-      }, setLoading);
+      try {
+        setLoading(true);
+        const wedding = await WeddingsService.weddingControllerCreate({
+          name: onboardingData.name,
+          date: onboardingData.date || undefined,
+          location: onboardingData.location || undefined,
+          weddingType: onboardingData.weddingType,
+          budgetBucket: onboardingData.budgetBucket,
+          guestCountBucket: onboardingData.guestCountBucket,
+          preferredStyle: onboardingData.preferredStyle,
+          preferredServices: onboardingData.preferredServices,
+        });
+
+        // Set this wedding as the main wedding for the admin
+        await AdminsService.adminControllerSetMainWedding(wedding.id);
+
+        toast.success('Wedding created successfully!');
+
+        // Force a full page reload to refresh the sidebar and all wedding-related data
+        window.location.href = '/admin';
+      } catch (error) {
+        console.error('Error creating wedding:', error);
+        toast.error('Failed to create wedding. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   const handleBack = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+    } else {
+      router.back();
     }
   };
 
   const isCurrentStepValid = () => {
     const step = STEPS[currentStep];
+
+    if (step.key === 'basic') {
+      return onboardingData.name.trim().length > 0;
+    }
+
     if (step.key === 'preferredServices') {
       return onboardingData.preferredServices.length > 0;
     }
+
     return onboardingData[step.key as keyof OnboardingData] !== null;
   };
 
   const renderStep = () => {
     const step = STEPS[currentStep];
-    
+
     switch (step.key) {
+      case 'basic':
+        return (
+          <div className='space-y-6 max-w-2xl mx-auto'>
+            <div className='space-y-2'>
+              <label className='text-sm font-medium text-gray-700'>
+                Wedding Name <span className='text-red-500'>*</span>
+              </label>
+              <Input
+                type='text'
+                value={onboardingData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                placeholder="e.g., Sarah & John's Wedding"
+                className='w-full'
+              />
+              <p className='text-xs text-gray-500'>Give your wedding a memorable name</p>
+            </div>
+
+            <div className='space-y-2'>
+              <label className='text-sm font-medium text-gray-700'>
+                Wedding Date (Optional)
+              </label>
+              <Input
+                type='date'
+                value={onboardingData.date}
+                onChange={(e) => handleInputChange('date', e.target.value)}
+                className='w-full'
+              />
+              <p className='text-xs text-gray-500'>You can always update this later</p>
+            </div>
+
+            <div className='space-y-2'>
+              <label className='text-sm font-medium text-gray-700'>
+                Location (Optional)
+              </label>
+              <Input
+                type='text'
+                value={onboardingData.location}
+                onChange={(e) => handleInputChange('location', e.target.value)}
+                placeholder='e.g., Singapore Botanic Gardens'
+                className='w-full'
+              />
+              <p className='text-xs text-gray-500'>Where will your special day take place?</p>
+            </div>
+          </div>
+        );
+
       case 'weddingType':
         return (
           <div className='grid grid-cols-2 lg:grid-cols-4 gap-4'>
@@ -152,9 +225,9 @@ export default function GetStartedCouplePage() {
                 }`}
                 onClick={() => {
                     if (onboardingData.weddingType === type.value) {
-                      handleSingleSelect('weddingType', null); // unselect
+                      handleSingleSelect('weddingType', null);
                     } else {
-                      handleSingleSelect('weddingType', type.value); // select
+                      handleSingleSelect('weddingType', type.value);
                     }
                   }}
               >
@@ -182,9 +255,9 @@ export default function GetStartedCouplePage() {
                 }`}
                 onClick={() => {
                     if (onboardingData.budgetBucket === budget.value) {
-                      handleSingleSelect('budgetBucket', null); // unselect
+                      handleSingleSelect('budgetBucket', null);
                     } else {
-                      handleSingleSelect('budgetBucket', budget.value); // select
+                      handleSingleSelect('budgetBucket', budget.value);
                     }
                   }}
               >
@@ -212,9 +285,9 @@ export default function GetStartedCouplePage() {
                 }`}
                 onClick={() => {
                     if (onboardingData.guestCountBucket === count.value) {
-                      handleSingleSelect('guestCountBucket', null); // unselect
+                      handleSingleSelect('guestCountBucket', null);
                     } else {
-                      handleSingleSelect('guestCountBucket', count.value); // select
+                      handleSingleSelect('guestCountBucket', count.value);
                     }
                   }}
               >
@@ -242,9 +315,9 @@ export default function GetStartedCouplePage() {
                 }`}
                 onClick={() => {
                     if (onboardingData.preferredStyle === style.value) {
-                      handleSingleSelect('preferredStyle', null); // unselect
+                      handleSingleSelect('preferredStyle', null);
                     } else {
-                      handleSingleSelect('preferredStyle', style.value); // select
+                      handleSingleSelect('preferredStyle', style.value);
                     }
                   }}
               >
@@ -272,7 +345,6 @@ export default function GetStartedCouplePage() {
                 }`}
                 onClick={() => handleMultiSelect(service.value)}
               >
-                {/* Floating badge outside of content flow */}
                 {onboardingData.preferredServices.includes(service.value) && (
                   <span className='absolute top-2 right-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-brand-100 text-brand-800 shadow'>
                     ✓ Selected
@@ -308,7 +380,7 @@ export default function GetStartedCouplePage() {
         <div className='mb-8'>
           <div className='flex items-center justify-between mb-2'>
             <h1 className='text-2xl font-bold text-gray-900'>
-              Welcome, {name}!
+              Create Your Wedding
             </h1>
             <span className='text-sm text-gray-600'>
               Step {currentStep + 1} of {STEPS.length}
@@ -332,28 +404,21 @@ export default function GetStartedCouplePage() {
         </div>
 
         {/* Navigation */}
-        <div className={'flex items-center justify-between'}
-        >
+        <div className='flex items-center justify-between'>
           <Button
             variant='darkOutline'
-            onClick={() => {
-              if (currentStep === 0) {
-                router.back(); // go to previous page
-              } else {
-                handleBack(); // normal step back
-              }
-            }}
+            onClick={handleBack}
           >
             Back
           </Button>
-          
+
           <Button
             onClick={handleNext}
             disabled={!isCurrentStepValid() || loading}
             variant={currentStep === STEPS.length - 1 ? undefined : 'default'}
             className={currentStep === STEPS.length - 1 ? 'bg-brand-500 hover:bg-brand-600' : ''}
           >
-            {loading ? 'Creating Account...' : (currentStep === STEPS.length - 1 ? 'Complete Setup' : 'Next')}
+            {loading ? 'Creating Wedding...' : (currentStep === STEPS.length - 1 ? 'Create Wedding' : 'Next')}
           </Button>
         </div>
       </div>

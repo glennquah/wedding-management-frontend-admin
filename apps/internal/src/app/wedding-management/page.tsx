@@ -159,8 +159,8 @@ export default function WeddingManagementPage() {
 
       const weddingData: CreateWeddingDto = {
         name: newWedding.name!,
-        date: newWedding.date,
-        location: newWedding.location,
+        date: newWedding.date?.trim() || undefined,
+        location: newWedding.location?.trim() || undefined,
         weddingType: newWedding.weddingType!,
         budgetBucket: newWedding.budgetBucket!,
         guestCountBucket: newWedding.guestCountBucket!,

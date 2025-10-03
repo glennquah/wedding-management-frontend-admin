@@ -9,6 +9,7 @@ import { Drawer, DrawerClose, DrawerContent, DrawerTrigger } from '../ui/drawer'
 import { Separator } from '../ui/separator';
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '../ui/sheet';
 import { useCartStore, useWeddingStore } from '@/app/store/sessionStore';
+import { CartItemResponseDto } from '@shared/api';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ShoppingCart, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
@@ -121,7 +122,7 @@ export function Cart() {
               </motion.div>
             ) : (
               <div className="space-y-4 py-4 max-h-120 overflow-y-auto">
-                {cartItems.map((item) => (
+                {cartItems.map((item: CartItemResponseDto) => (
                   <motion.div
                     animate={{ opacity: 1, y: 0 }}
                     className={`

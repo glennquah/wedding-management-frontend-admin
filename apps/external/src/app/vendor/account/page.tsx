@@ -11,8 +11,8 @@ export default function AccountPage() {
   const { vendorId, isLoading } = useVendorSession();
 
   const handleProfileUpdate = () => {
-    // Optionally refresh session or perform other updates
-    console.log('Profile updated successfully');
+    // Force a full page reload to refresh the sidebar and all vendor-related data
+    window.location.href = '/vendor';
   };
 
   if (isLoading) {
