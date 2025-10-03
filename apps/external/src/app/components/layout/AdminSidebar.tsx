@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { signOut } from '../../store/sessionStore';
+import { AdminsService } from '@shared/api';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
@@ -15,6 +14,8 @@ import {
   ShoppingCart,
   Users,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { signOut } from '../../store/sessionStore';
 
 const tabs = [
   {
