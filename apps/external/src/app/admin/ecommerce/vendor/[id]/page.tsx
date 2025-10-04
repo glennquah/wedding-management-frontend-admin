@@ -3,8 +3,8 @@
 import { Badge } from '@shared/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { Skeleton } from '@shared/components/ui/skeleton';
-import { Mail, Star, Globe } from 'lucide-react';
-import { useParams, useRouter } from 'next/navigation';
+import { Globe, Mail, Star } from 'lucide-react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ListingsGrid } from '../../components/ListingsGrid';
 import { ErrorState } from '../../components/common';
 import { BackButton } from '../../components/ui';
@@ -13,13 +13,20 @@ import { useVendorData } from '../../hooks';
 export default function VendorPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const vendorId = params?.id as string;
+
+  // Determine where the user came from based on query param
+  const from = searchParams?.get('from') || 'marketplace';
 
   const { vendor, listings, loading, error } = useVendorData(vendorId);
 
   const handleBack = () => {
-    router.push('/admin/ecommerce');
+    router.back();
   };
+
+  // Determine back button label based on where user came from
+  const backLabel = from === 'listing' ? 'Back to Listing' : 'Back to Marketplace';
 
   if (loading) {
     return (
@@ -65,7 +72,7 @@ export default function VendorPage() {
         <BackButton onBack={handleBack} />
         <div className="text-center py-12">
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">Vendor Not Found</h2>
-          <p className="text-muted-foreground">The vendor you're looking for doesn't exist.</p>
+          <p className="text-muted-foreground">The vendor you&apos;re looking for doesn&apos;t exist.</p>
         </div>
       </div>
     );
@@ -73,7 +80,7 @@ export default function VendorPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <BackButton onBack={handleBack} />
+      <BackButton onBack={handleBack} label={backLabel} />
 
       {/* Vendor Header */}
       <div className="mb-8">

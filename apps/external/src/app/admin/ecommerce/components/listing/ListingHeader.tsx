@@ -14,7 +14,7 @@ export function ListingHeader({ listing, vendor, formatPrice }: ListingHeaderPro
           <span>
             by{' '}
             <Link
-              href={`/admin/ecommerce/vendor/${vendor.id}`}
+              href={`/admin/ecommerce/vendor/${vendor.id}?from=listing`}
               className="text-primary hover:underline font-medium"
             >
               {vendor.name}
