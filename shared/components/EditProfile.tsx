@@ -16,6 +16,7 @@ import {
   WeddingService,
   WeddingStyle,
   WeddingType,
+  WeddingsService,
 } from '../api';
 import { useEditProfile } from '../hooks/useEditProfile';
 import { useWeddingProfile } from '../hooks/useWeddingProfile';
@@ -75,6 +76,13 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
 
   const { guests } = useGuestManager();
 
+  // Partner state
+  const [partner, setPartner] = useState<Collaborator | null>(null);
+  const [partnerName, setPartnerName] = useState('');
+  const [partnerEmail, setPartnerEmail] = useState('');
+  const [isInvitingPartner, setIsInvitingPartner] = useState(false);
+  const [partnerToRemove, setPartnerToRemove] = useState<number | null>(null);
+
   // Collaborator state
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [collaboratorSearch, setCollaboratorSearch] = useState('');
@@ -102,6 +110,33 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     }
   }, [targetUserRole, userData, fetchMainWedding]);
 
+  // Fetch partner (main couple) when wedding data is loaded
+  useEffect(() => {
+    const fetchPartner = async () => {
+      if (weddingData?.id && userData) {
+        try {
+          const mainCouple = await WeddingsService.weddingControllerGetMainCouple(weddingData.id);
+          // Filter out the current user to get the partner
+          const partnerData = mainCouple.find((member) => member.id !== userData.id);
+          if (partnerData && partnerData.id && partnerData.name && partnerData.email) {
+            setPartner({
+              id: partnerData.id,
+              name: partnerData.name,
+              email: partnerData.email,
+              accountCreated: true,
+            });
+          } else {
+            setPartner(null);
+          }
+        } catch (error) {
+          console.error('Error fetching partner:', error);
+        }
+      }
+    };
+
+    fetchPartner();
+  }, [weddingData?.id, userData]);
+
   // Fetch collaborators when wedding data is loaded
   useEffect(() => {
     const fetchCollaborators = async () => {
@@ -110,8 +145,12 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           const collaboratorsList = await AdminsService.adminControllerGetCollaborators(
             weddingData.id,
           );
+          // Filter out the partner from collaborators list
+          const filteredCollaborators = collaboratorsList.filter(
+            (c) => !partner || c.id !== partner.id
+          );
           setCollaborators(
-            collaboratorsList.map((c) => ({
+            filteredCollaborators.map((c) => ({
               id: c.id,
               name: c.name,
               email: c.email,
@@ -125,7 +164,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     };
 
     fetchCollaborators();
-  }, [weddingData?.id]);
+  }, [weddingData?.id, partner]);
 
   // Enhanced submit handler that also updates wedding data
   const handleEnhancedSubmit = async (e: React.FormEvent) => {
@@ -138,6 +177,18 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     if (targetUserRole === UserRole.ADMIN && weddingData) {
       try {
         await updateWeddingProfile();
+
+        // Remove partner if marked for deletion
+        if (partnerToRemove !== null) {
+          try {
+            await AdminsService.adminControllerRemovePartner(weddingData.id, partnerToRemove);
+            setPartnerToRemove(null);
+            toast.success('Partner removed successfully');
+          } catch (error) {
+            console.error(`Error removing partner ${partnerToRemove}:`, error);
+            toast.error('Failed to remove partner. Please try again.');
+          }
+        }
 
         // Remove collaborators that were marked for deletion
         if (collaboratorsToRemove.length > 0) {
@@ -162,17 +213,44 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
   const handleEnhancedCancel = () => {
     handleCancel();
     resetWeddingForm();
+    // Reset partner to remove
+    setPartnerToRemove(null);
+    // Reset partner input fields
+    setPartnerName('');
+    setPartnerEmail('');
     // Reset collaborators to remove list and refetch original collaborators
     setCollaboratorsToRemove([]);
-    // Restore collaborators list by refetching
-    if (weddingData?.id) {
+    // Restore partner and collaborators list by refetching
+    if (weddingData?.id && userData) {
+      const fetchPartner = async () => {
+        try {
+          const mainCouple = await WeddingsService.weddingControllerGetMainCouple(weddingData.id);
+          const partnerData = mainCouple.find((member) => member.id !== userData.id);
+          if (partnerData && partnerData.id && partnerData.name && partnerData.email) {
+            setPartner({
+              id: partnerData.id,
+              name: partnerData.name,
+              email: partnerData.email,
+              accountCreated: true,
+            });
+          } else {
+            setPartner(null);
+          }
+        } catch (error) {
+          console.error('Error fetching partner:', error);
+        }
+      };
       const fetchCollaborators = async () => {
         try {
           const collaboratorsList = await AdminsService.adminControllerGetCollaborators(
             weddingData.id,
           );
+          // Filter out the partner from collaborators list
+          const filteredCollaborators = collaboratorsList.filter(
+            (c) => !partner || c.id !== partner.id
+          );
           setCollaborators(
-            collaboratorsList.map((c) => ({
+            filteredCollaborators.map((c) => ({
               id: c.id,
               name: c.name,
               email: c.email,
@@ -183,6 +261,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           console.error('Error fetching collaborators:', error);
         }
       };
+      fetchPartner();
       fetchCollaborators();
     }
   };
@@ -204,6 +283,77 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     } catch (error) {
       console.error('Failed to send password reset email:', error);
       toast.error('Failed to send password reset email. Please try again.');
+    }
+  };
+
+  // Handle partner invitation
+  const handleInvitePartner = async () => {
+    // Prevent double-clicking
+    if (isInvitingPartner) {
+      return;
+    }
+
+    // Check if partner already exists
+    if (partner) {
+      toast.error('You already have a partner. Please remove the existing partner first.');
+      return;
+    }
+
+    // Validate inputs
+    if (!partnerName.trim()) {
+      toast.error('Partner name is required');
+      return;
+    }
+
+    if (!partnerEmail.trim()) {
+      toast.error('Partner email is required');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(partnerEmail)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    if (!weddingData?.id) {
+      toast.error('No wedding found');
+      return;
+    }
+
+    setIsInvitingPartner(true);
+
+    try {
+      const response = await AdminsService.adminControllerInvitePartner({
+        email: partnerEmail.trim(),
+        name: partnerName.trim(),
+        weddingId: weddingData.id,
+      });
+
+      const newPartner: Collaborator = {
+        id: response.id,
+        name: response.name,
+        email: response.email,
+        accountCreated: response.accountCreated,
+      };
+
+      setPartner(newPartner);
+      setPartnerName('');
+      setPartnerEmail('');
+
+      if (response.existingAccount) {
+        toast.success(`${partnerName} has been added as your partner (existing account)`);
+      } else {
+        toast.success(
+          `Account created for ${partnerName}. An invitation email will be sent shortly.`,
+        );
+      }
+    } catch (error) {
+      console.error('Error inviting partner:', error);
+      toast.error('Failed to invite partner. Please try again.');
+    } finally {
+      setIsInvitingPartner(false);
     }
   };
 
@@ -267,6 +417,13 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     }
   };
 
+  const handleRemovePartner = (id: number) => {
+    // Mark partner for removal (will be removed on save)
+    setPartnerToRemove(id);
+    // Remove from local state immediately for UI feedback
+    setPartner(null);
+  };
+
   const handleRemoveCollaborator = (id: number) => {
     // Mark collaborator for removal (will be removed on save)
     setCollaboratorsToRemove([...collaboratorsToRemove, id]);
@@ -279,6 +436,8 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     (guest) =>
       collaboratorSearch.trim() !== '' &&
       !collaborators.some((c) => c.id === guest.id) &&
+      !partner ||
+      (partner && guest.email !== partner.email) &&
       (guest.name.toLowerCase().includes(collaboratorSearch.toLowerCase()) ||
         (guest.email && guest.email.toLowerCase().includes(collaboratorSearch.toLowerCase()))),
   );
@@ -747,6 +906,73 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
                     : 'Not set'}
                 </span>
                 <ChevronDown className="ml-2 w-4 h-4 text-gray-400" />
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Partner</label>
+
+            {isEditing && !partner && (
+              <div className="space-y-3">
+                <div>
+                  <Input
+                    type="text"
+                    placeholder="Partner's name"
+                    value={partnerName}
+                    onChange={(e) => setPartnerName(e.target.value)}
+                    className="text-sm"
+                    disabled={isInvitingPartner}
+                  />
+                </div>
+                <div>
+                  <Input
+                    type="email"
+                    placeholder="Partner's email"
+                    value={partnerEmail}
+                    onChange={(e) => setPartnerEmail(e.target.value)}
+                    className="text-sm"
+                    disabled={isInvitingPartner}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={handleInvitePartner}
+                  disabled={isInvitingPartner || !partnerName.trim() || !partnerEmail.trim()}
+                  className="w-full"
+                  size="sm"
+                >
+                  {isInvitingPartner ? 'Adding Partner...' : 'Add Partner'}
+                </Button>
+              </div>
+            )}
+
+            {!partner && !isEditing && (
+              <p className="p-3 bg-muted rounded-md text-sm text-muted-foreground">
+                No partner added yet
+              </p>
+            )}
+
+            {partner && (
+              <div className="border rounded-md">
+                <div className="flex items-center justify-between p-3 hover:bg-muted/50">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-sm">{partner.name}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{partner.email}</p>
+                  </div>
+                  {isEditing && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={() => handleRemovePartner(partner.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
           </div>
