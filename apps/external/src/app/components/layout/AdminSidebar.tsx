@@ -1,6 +1,5 @@
 'use client';
 
-import { signOut, useWeddingStore } from '../../store/sessionStore';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
@@ -11,8 +10,10 @@ import {
   ListTodo,
   MapPin,
   PaintRoller,
+  ShoppingCart,
   Users,
 } from 'lucide-react';
+import { signOut, useWeddingStore } from '../../store/sessionStore';
 
 export default function AdminSidebar() {
   const { weddings } = useWeddingStore();
@@ -26,6 +27,11 @@ export default function AdminSidebar() {
           title: 'Dashboard',
           href: '/',
           icon: LayoutDashboard,
+        },
+        {
+          title: 'Shop',
+          href: '/ecommerce',
+          icon: ShoppingCart,
         },
         {
           title: 'Progress Tracker',
