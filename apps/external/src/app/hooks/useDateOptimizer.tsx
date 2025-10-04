@@ -65,24 +65,33 @@ export function useDateOptimizer() {
 
   // Check calendar connection status for an attendee or admin
   const checkCalendarStatus = useCallback(
-    async (userId: number, isAdmin: boolean = false): Promise<{ isConnected: boolean; accessStatus: CalendarConnectionStatusDto.accessStatus }> => {
+    async (
+      userId: number,
+      isAdmin: boolean = false,
+    ): Promise<{
+      isConnected: boolean;
+      accessStatus: CalendarConnectionStatusDto.accessStatus;
+    }> => {
       if (!session?.backendTokens?.accessToken) {
-        return { isConnected: false, accessStatus: CalendarConnectionStatusDto.accessStatus.NOT_REQUESTED };
+        return {
+          isConnected: false,
+          accessStatus: CalendarConnectionStatusDto.accessStatus.NOT_REQUESTED,
+        };
       }
 
       try {
         setupAuth();
-        const data = await CalendarService.calendarControllerGetConnectionStatus(
-          userId,
-          isAdmin,
-        );
+        const data = await CalendarService.calendarControllerGetConnectionStatus(userId, isAdmin);
         return {
           isConnected: data.isConnected || false,
           accessStatus: data.accessStatus || CalendarConnectionStatusDto.accessStatus.NOT_REQUESTED,
         };
       } catch (error) {
         console.error('Error checking calendar status:', error);
-        return { isConnected: false, accessStatus: CalendarConnectionStatusDto.accessStatus.NOT_REQUESTED };
+        return {
+          isConnected: false,
+          accessStatus: CalendarConnectionStatusDto.accessStatus.NOT_REQUESTED,
+        };
       }
     },
     [session, setupAuth],
@@ -103,21 +112,19 @@ export function useDateOptimizer() {
       // Fetch main couple
       const mainCoupleResponse =
         await WeddingsService.weddingControllerGetMainCouple(selectedWeddingId);
-      const mainCouplePromises = mainCoupleResponse.map(
-        async (partner) => {
-          if (!partner.id || !partner.name || !partner.email) {
-            throw new Error('Invalid partner data');
-          }
-          const status = await checkCalendarStatus(partner.id, true);
-          return {
-            id: partner.id,
-            name: partner.name,
-            email: partner.email,
-            calendarConnected: status.isConnected,
-            accessStatus: status.accessStatus,
-          };
-        },
-      );
+      const mainCouplePromises = mainCoupleResponse.map(async (partner) => {
+        if (!partner.id || !partner.name || !partner.email) {
+          throw new Error('Invalid partner data');
+        }
+        const status = await checkCalendarStatus(partner.id, true);
+        return {
+          id: partner.id,
+          name: partner.name,
+          email: partner.email,
+          calendarConnected: status.isConnected,
+          accessStatus: status.accessStatus,
+        };
+      });
       const mainCoupleData = await Promise.all(mainCouplePromises);
       setMainCouple(mainCoupleData);
 
@@ -151,23 +158,22 @@ export function useDateOptimizer() {
     }
   }, [selectedWeddingId, session, setupAuth, checkCalendarStatus]);
 
-
   // Fetch saved preferences
   const fetchPreferences = useCallback(async () => {
     if (!selectedWeddingId || !session?.backendTokens?.accessToken) return;
 
     try {
       setupAuth();
-      const prefs = await WeddingsService.weddingControllerGetDateOptimizerPreferences(
-        selectedWeddingId,
-      );
+      const prefs =
+        await WeddingsService.weddingControllerGetDateOptimizerPreferences(selectedWeddingId);
 
       // Always load saved preferences
       setEarliestDate(prefs.earliestDate || '2025-05-01');
       setLatestDate(prefs.latestDate || '2025-12-31');
-      setPreferredDays(prefs.preferredDays && prefs.preferredDays.length > 0
-        ? prefs.preferredDays
-        : ['Friday', 'Saturday', 'Sunday']
+      setPreferredDays(
+        prefs.preferredDays && prefs.preferredDays.length > 0
+          ? prefs.preferredDays
+          : ['Friday', 'Saturday', 'Sunday'],
       );
 
       if (prefs.lastResults !== undefined && prefs.lastResults !== null) {
@@ -206,81 +212,90 @@ export function useDateOptimizer() {
     const timeoutId = setTimeout(async () => {
       try {
         setupAuth();
-        await WeddingsService.weddingControllerUpdateDateOptimizerPreferences(
-          selectedWeddingId,
-          {
-            earliestDate,
-            latestDate,
-            preferredDays,
-            lastResults: dateRecommendations,
-          },
-        );
+        await WeddingsService.weddingControllerUpdateDateOptimizerPreferences(selectedWeddingId, {
+          earliestDate,
+          latestDate,
+          preferredDays,
+          lastResults: dateRecommendations,
+        });
       } catch (error) {
         console.error('Error auto-saving preferences:', error);
       }
     }, 1000); // 1 second debounce
 
     return () => clearTimeout(timeoutId);
-  }, [earliestDate, latestDate, preferredDays, selectedWeddingId, session, setupAuth, dateRecommendations, preferencesLoaded]);
+  }, [
+    earliestDate,
+    latestDate,
+    preferredDays,
+    selectedWeddingId,
+    session,
+    setupAuth,
+    dateRecommendations,
+    preferencesLoaded,
+  ]);
 
   // Fetch availability data for the selected month
-  const fetchAvailability = useCallback(async (startDate?: string, endDate?: string) => {
-    if (!selectedWeddingId || !session?.backendTokens?.accessToken) return [];
-    if (keyAttendees.length === 0 && mainCouple.length === 0) return [];
+  const fetchAvailability = useCallback(
+    async (startDate?: string, endDate?: string) => {
+      if (!selectedWeddingId || !session?.backendTokens?.accessToken) return [];
+      if (keyAttendees.length === 0 && mainCouple.length === 0) return [];
 
-    try {
-      setIsLoadingAvailability(true);
-      setupAuth();
+      try {
+        setIsLoadingAvailability(true);
+        setupAuth();
 
-      // Use provided dates or default to selected month
-      let start: Date;
-      let end: Date;
+        // Use provided dates or default to selected month
+        let start: Date;
+        let end: Date;
 
-      if (startDate && endDate) {
-        start = new Date(startDate);
-        end = new Date(endDate);
-      } else {
-        // Get start and end dates for the month (with buffer)
-        start = new Date(selectedMonth);
-        start.setDate(1);
-        start.setHours(0, 0, 0, 0);
+        if (startDate && endDate) {
+          start = new Date(startDate);
+          end = new Date(endDate);
+        } else {
+          // Get start and end dates for the month (with buffer)
+          start = new Date(selectedMonth);
+          start.setDate(1);
+          start.setHours(0, 0, 0, 0);
 
-        end = new Date(selectedMonth);
-        end.setMonth(end.getMonth() + 1);
-        end.setDate(0);
-        end.setHours(23, 59, 59, 999);
-      }
+          end = new Date(selectedMonth);
+          end.setMonth(end.getMonth() + 1);
+          end.setDate(0);
+          end.setHours(23, 59, 59, 999);
+        }
 
-      // Fetch availability for all connected key attendees and main couple
-      const connectedMainCoupleIds = mainCouple
-        .filter((p) => p.calendarConnected)
-        .map((p) => p.id);
-      const connectedAttendeeIds = keyAttendees
-        .filter((a) => a.calendarConnected)
-        .map((a) => a.id);
-      const allConnectedIds = [...connectedMainCoupleIds, ...connectedAttendeeIds];
+        // Fetch availability for all connected key attendees and main couple
+        const connectedMainCoupleIds = mainCouple
+          .filter((p) => p.calendarConnected)
+          .map((p) => p.id);
+        const connectedAttendeeIds = keyAttendees
+          .filter((a) => a.calendarConnected)
+          .map((a) => a.id);
+        const allConnectedIds = [...connectedMainCoupleIds, ...connectedAttendeeIds];
 
-      if (allConnectedIds.length === 0) {
-        setAvailabilityData([]);
+        if (allConnectedIds.length === 0) {
+          setAvailabilityData([]);
+          return [];
+        }
+
+        const response = await CalendarService.calendarControllerCheckAvailability({
+          attendeeIds: allConnectedIds,
+          startDate: start.toISOString(),
+          endDate: end.toISOString(),
+        });
+
+        setAvailabilityData(response.attendees);
+        return response.attendees;
+      } catch (error) {
+        console.error('Error fetching availability:', error);
+        toast.error('Failed to fetch calendar availability');
         return [];
+      } finally {
+        setIsLoadingAvailability(false);
       }
-
-      const response = await CalendarService.calendarControllerCheckAvailability({
-        attendeeIds: allConnectedIds,
-        startDate: start.toISOString(),
-        endDate: end.toISOString(),
-      });
-
-      setAvailabilityData(response.attendees);
-      return response.attendees;
-    } catch (error) {
-      console.error('Error fetching availability:', error);
-      toast.error('Failed to fetch calendar availability');
-      return [];
-    } finally {
-      setIsLoadingAvailability(false);
-    }
-  }, [selectedWeddingId, session, keyAttendees, mainCouple, selectedMonth, setupAuth]);
+    },
+    [selectedWeddingId, session, keyAttendees, mainCouple, selectedMonth, setupAuth],
+  );
 
   // Run analysis
   const handleRunAnalysis = useCallback(async () => {
@@ -299,10 +314,12 @@ export function useDateOptimizer() {
       const unavailabilityMap: Record<number, string[]> = {};
 
       for (const attendee of freshAvailabilityData) {
-        const unavailableDates = attendee.busySlots.map((slot) => {
-          // Extract date part only (YYYY-MM-DD)
-          return slot.start?.split('T')[0] || '';
-        }).filter(Boolean);
+        const unavailableDates = attendee.busySlots
+          .map((slot) => {
+            // Extract date part only (YYYY-MM-DD)
+            return slot.start?.split('T')[0] || '';
+          })
+          .filter(Boolean);
         // Remove duplicates
         unavailabilityMap[attendee.attendeeId] = [...new Set(unavailableDates)];
       }
@@ -337,15 +354,12 @@ export function useDateOptimizer() {
 
         // Save preferences and results
         try {
-          await WeddingsService.weddingControllerUpdateDateOptimizerPreferences(
-            selectedWeddingId,
-            {
-              earliestDate,
-              latestDate,
-              preferredDays,
-              lastResults: response.recommendations,
-            },
-          );
+          await WeddingsService.weddingControllerUpdateDateOptimizerPreferences(selectedWeddingId, {
+            earliestDate,
+            latestDate,
+            preferredDays,
+            lastResults: response.recommendations,
+          });
         } catch (saveError) {
           console.error('Error saving preferences:', saveError);
         }
@@ -353,15 +367,12 @@ export function useDateOptimizer() {
         // Clear recommendations when there are no viable dates and save
         setDateRecommendations([]);
         try {
-          await WeddingsService.weddingControllerUpdateDateOptimizerPreferences(
-            selectedWeddingId,
-            {
-              earliestDate,
-              latestDate,
-              preferredDays,
-              lastResults: [],
-            },
-          );
+          await WeddingsService.weddingControllerUpdateDateOptimizerPreferences(selectedWeddingId, {
+            earliestDate,
+            latestDate,
+            preferredDays,
+            lastResults: [],
+          });
         } catch (saveError) {
           console.error('Error saving preferences:', saveError);
         }
@@ -472,14 +483,21 @@ export function useDateOptimizer() {
         if (isAdmin) {
           setMainCouple((prev) =>
             prev.map((partner) =>
-              partner.id === attendee.id ? { ...partner, accessStatus: 'REQUESTED' as CalendarConnectionStatusDto.accessStatus } : partner
-            )
+              partner.id === attendee.id
+                ? {
+                    ...partner,
+                    accessStatus: CalendarConnectionStatusDto.accessStatus.REQUESTED,
+                  }
+                : partner,
+            ),
           );
         } else {
           setKeyAttendees((prev) =>
             prev.map((att) =>
-              att.id === attendee.id ? { ...att, accessStatus: 'REQUESTED' as CalendarConnectionStatusDto.accessStatus } : att
-            )
+              att.id === attendee.id
+                ? { ...att, accessStatus: CalendarConnectionStatusDto.accessStatus.REQUESTED }
+                : att,
+            ),
           );
         }
 

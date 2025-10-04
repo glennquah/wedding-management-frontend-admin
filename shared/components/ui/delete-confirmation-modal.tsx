@@ -95,15 +95,10 @@ export function DeleteConfirmationModal({
         )}
 
         <DialogFooter>
-          <Button
-            variant="destructive"
-            onClick={handleCancel}
-            disabled={isLoading}
-            className="text-base-white"
-          >
+          <Button variant="outline" onClick={handleCancel} disabled={isLoading}>
             {cancelButtonText}
           </Button>
-          <Button variant="secondary" onClick={handleConfirm} disabled={isLoading}>
+          <Button variant="destructive" onClick={handleConfirm} disabled={isLoading}>
             {confirmButtonText}
           </Button>
         </DialogFooter>
