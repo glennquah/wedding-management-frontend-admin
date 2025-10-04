@@ -33,7 +33,7 @@ function PaymentSuccessContent() {
         setError('No session ID provided');
       }
     }, 1500);
-  }, [sessionId]);
+  }, [sessionId, clearCart, session?.user.id]);
 
   if (loading) {
     return (

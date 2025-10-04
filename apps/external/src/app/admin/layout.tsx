@@ -37,7 +37,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { data: session, status } = useSession();
 
   // Route protection: redirect to dashboard if no wedding and trying to access protected routes
-  const allowedRoutesWithoutWedding = ['/admin', '/admin/account', '/admin/create-wedding'];
   const hasNoWedding = !selectedWeddingId && (!weddings || weddings.length === 0);
 
   useEffect(() => {
@@ -50,10 +49,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [hasHydrated, selectedWeddingId, fetchUserMainWedding, fetchUserWeddings]);
 
   useEffect(() => {
+    const allowedRoutesWithoutWedding = ['/admin', '/admin/account', '/admin/create-wedding'];
     if (hasNoWedding && pathname && !allowedRoutesWithoutWedding.includes(pathname)) {
       router.push('/admin');
     }
-  }, [hasNoWedding, pathname, router, allowedRoutesWithoutWedding]);
+  }, [hasNoWedding, pathname, router]);
 
   console.log('Session status:', status, 'Session data:', session);
 

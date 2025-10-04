@@ -46,7 +46,6 @@ export default function GuestManagementPage() {
     handleUpdateGuest,
     confirmDeleteGuest,
     handleEditGuest,
-    handleSendEmail,
 
     // Modal controls
     closeEditGuestModal,
