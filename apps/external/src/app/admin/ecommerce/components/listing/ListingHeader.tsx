@@ -1,4 +1,5 @@
 import { Star } from 'lucide-react';
+import Link from 'next/link';
 import { Badge } from '@shared/components/ui/badge';
 import { ListingHeaderProps } from '../../types';
 
@@ -10,7 +11,15 @@ export function ListingHeader({ listing, vendor, formatPrice }: ListingHeaderPro
       </h1>
       {vendor && (
         <div className="flex items-center gap-2 text-muted-foreground mb-4">
-          <span>by {vendor.name}</span>
+          <span>
+            by{' '}
+            <Link
+              href={`/admin/ecommerce/vendor/${vendor.id}`}
+              className="text-primary hover:underline font-medium"
+            >
+              {vendor.name}
+            </Link>
+          </span>
           {vendor.rating && (
             <div className="flex items-center gap-1">
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
