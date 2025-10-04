@@ -31,8 +31,12 @@ export type MainCouplePartner = {
 
 export type DateRecommendation = {
   date: string;
+  day_of_week: string;
+  total_score: number;
+  score_breakdown: Record<string, unknown>;
   available_attendees_count: number;
   total_attendees_count: number;
+  unavailable_attendees: string[];
   pros: string[];
   cons: string[];
 };
@@ -216,7 +220,11 @@ export function useDateOptimizer() {
           earliestDate,
           latestDate,
           preferredDays,
-          lastResults: dateRecommendations,
+          lastResults: dateRecommendations.length > 0 ? {
+            success: true,
+            message: 'Date recommendations generated',
+            recommendations: dateRecommendations,
+          } : undefined,
         });
       } catch (error) {
         console.error('Error auto-saving preferences:', error);
@@ -358,7 +366,7 @@ export function useDateOptimizer() {
             earliestDate,
             latestDate,
             preferredDays,
-            lastResults: response.recommendations,
+            lastResults: response,
           });
         } catch (saveError) {
           console.error('Error saving preferences:', saveError);
@@ -371,7 +379,7 @@ export function useDateOptimizer() {
             earliestDate,
             latestDate,
             preferredDays,
-            lastResults: [],
+            lastResults: response,
           });
         } catch (saveError) {
           console.error('Error saving preferences:', saveError);
