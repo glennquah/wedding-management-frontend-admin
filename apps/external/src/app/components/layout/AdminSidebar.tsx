@@ -32,6 +32,7 @@ export default function AdminSidebar() {
           title: 'Shop',
           href: '/ecommerce',
           icon: ShoppingCart,
+          disabled: !hasWedding,
         },
         {
           title: 'Progress Tracker',
@@ -54,7 +55,6 @@ export default function AdminSidebar() {
           title: 'Checklist',
           href: '/checklist',
           icon: CheckSquare,
-          disabled: !hasWedding,
         },
         {
           title: 'Guest List',
