@@ -19,7 +19,6 @@ import {
   TabsList,
   TabsTrigger,
 } from '@shared/components';
-import { EmailModal } from '@shared/components/EmailModal';
 import FormField from '@shared/components/FormField';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import { MultiSelectDropdown } from '@shared/components/ui/form/multiSelectDropdown';
@@ -36,7 +35,6 @@ export default function VendorListPage() {
     editingVendor,
     deleteConfirmVendor,
     isSubmitting,
-    emailModalVendor,
 
     // Form data
     setSelectedVendor,
@@ -55,8 +53,6 @@ export default function VendorListPage() {
     closeEditVendorModal,
     openDeleteConfirmModal,
     closeDeleteConfirmModal,
-    closeEmailModal,
-    handleSendEmail,
   } = useVendorManager();
 
   // Column definitions for Live Vendor DataTable
@@ -241,17 +237,6 @@ export default function VendorListPage() {
         onConfirm={confirmDeleteVendor}
         onCancel={closeDeleteConfirmModal}
       />
-
-      {/* Email Guest Vendor */}
-      {emailModalVendor && (
-        <EmailModal
-          open={!!emailModalVendor}
-          onOpenChange={closeEmailModal}
-          name={emailModalVendor.name}
-          email={emailModalVendor.email}
-          onSendEmail={handleSendEmail}
-        />
-      )}
 
       <Tabs defaultValue="live">
         <TabsList className="bg-muted/50 rounded-lg p-1 grid w-full grid-cols-3 md:flex md:space-x-2 md:w-fit">

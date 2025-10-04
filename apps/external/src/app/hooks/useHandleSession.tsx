@@ -1,14 +1,8 @@
 import {
   AuthService,
-  BudgetBucket,
   CreateAdminDto,
   CreateVendorDto,
-  GuestCountBucket,
   UserRole,
-  WeddingService,
-  WeddingStyle,
-  WeddingType,
-  WeddingsService,
 } from '@shared/api';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -18,56 +12,27 @@ export function useHandleSession() {
   const router = useRouter();
 
   const handleSignUpAdmin = async (
+    e: React.FormEvent,
     {
       email,
       password,
       name,
-      weddingType,
-      budgetBucket,
-      guestCountBucket,
-      preferredStyle,
-      preferredServices,
     }: {
       email: string;
       password: string;
       name: string;
-      weddingType: WeddingType;
-      budgetBucket: BudgetBucket;
-      guestCountBucket: GuestCountBucket;
-      preferredStyle: WeddingStyle;
-      preferredServices: WeddingService[];
     },
     setLoading: (loading: boolean) => void,
   ) => {
+    e.preventDefault();
     setLoading(true);
     try {
-      if (
-        !weddingType ||
-        !budgetBucket ||
-        !guestCountBucket ||
-        !preferredStyle ||
-        !preferredServices
-      ) {
-        throw new Error('Missing field.');
-      }
-
-      // create wedding get id
-      const wedding = await WeddingsService.weddingControllerCreate({
-        name: name + "'s Wedding",
-        weddingType: weddingType,
-        budgetBucket: budgetBucket,
-        guestCountBucket: guestCountBucket,
-        preferredStyle: preferredStyle,
-        preferredServices: preferredServices,
-      });
-
+      // Create admin without wedding details (can be added later)
       await AuthService.authControllerRegisterAdmin({
         email,
         password,
         name,
         role: UserRole.ADMIN,
-        isCouple: true,
-        weddingId: wedding.id,
       } as CreateAdminDto);
 
       toast.success('Signup Successful.');
@@ -116,30 +81,22 @@ export function useHandleSession() {
       password,
       role,
       name,
-      serviceOffered,
-      styleOffered,
-      weddingTypes,
       vendorWebsite,
       uenNumber,
-      bio,
     }: {
       email: string;
       password: string;
       role: UserRole | undefined;
       name: string;
-      serviceOffered: WeddingService | undefined;
-      styleOffered: WeddingStyle | undefined;
-      weddingTypes: WeddingType[] | undefined;
       vendorWebsite: string;
       uenNumber: string;
-      bio: string;
     },
     setLoading: (loading: boolean) => void,
   ) => {
     e.preventDefault();
     setLoading(true);
     try {
-      if (!role || !serviceOffered || !styleOffered || !weddingTypes) {
+      if (!role) {
         throw new Error('Missing field.');
       }
       await AuthService.authControllerRegisterVendor({
@@ -147,12 +104,8 @@ export function useHandleSession() {
         password,
         role,
         name,
-        serviceOffered,
-        styleOffered,
-        weddingTypes,
         vendorWebsite,
         uenNumber,
-        bio,
         onboardedDate: new Date().toISOString(),
       } as CreateVendorDto);
 

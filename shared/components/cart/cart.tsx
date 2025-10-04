@@ -9,17 +9,13 @@ import { Drawer, DrawerClose, DrawerContent, DrawerTrigger } from '../ui/drawer'
 import { Separator } from '../ui/separator';
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '../ui/sheet';
 import { useCartStore, useWeddingStore } from '@/app/store/sessionStore';
+import { CartItemResponseDto } from '@shared/api';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ShoppingCart, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-/* 
-TODO:
-1) define href for Continue Shopping button
-2) define href for link to indiv listing 
-*/
 export function Cart() {
   const { cartItems, removeItem, clearCart, fetchCart, createOrder } = useCartStore();
   const { selectedWeddingId } = useWeddingStore();
@@ -124,7 +120,7 @@ export function Cart() {
               </motion.div>
             ) : (
               <div className="space-y-4 py-4 max-h-120 overflow-y-auto">
-                {cartItems.map((item) => (
+                {cartItems.map((item: CartItemResponseDto) => (
                   <motion.div
                     animate={{ opacity: 1, y: 0 }}
                     className={`
@@ -149,16 +145,41 @@ export function Cart() {
                     <div className="ml-4 flex flex-1 flex-col justify-between">
                       <div>
                         <div className="flex items-start justify-between">
-                          <Link
-                            className={`
-                              line-clamp-2 text-sm font-medium
-                              group-hover:text-primary
-                            `}
-                            href={`/products/${item.id}`}
-                            onClick={() => setIsOpen(false)}
-                          >
-                            {item.listingName}
-                          </Link>
+                          <div className="flex flex-col">
+                            <Link
+                              className={`
+        line-clamp-2 text-sm font-medium
+        group-hover:text-primary
+      `}
+                              href={`/products/${item.id}`}
+                              onClick={() => setIsOpen(false)}
+                            >
+                              {item.listingName}
+                            </Link>
+
+                            {item.selectedSlots.length > 0 && (
+                              <p className="text-[0.625rem] text-muted-foreground mt-1">
+                                {item.selectedSlots.map((slot, index) => {
+                                  const date = slot.date ? `${slot.date} ` : '';
+                                  const start = new Date(slot.startTime).toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  });
+                                  const end = new Date(slot.endTime).toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  });
+                                  return (
+                                    <span key={index}>
+                                      {date}
+                                      {start} - {end}
+                                      {index < item.selectedSlots.length - 1 ? ', ' : ''}
+                                    </span>
+                                  );
+                                })}
+                              </p>
+                            )}
+                          </div>
                           <button
                             className={`
                               -mt-1 -mr-1 ml-2 rounded-full p-1

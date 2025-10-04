@@ -278,7 +278,6 @@ export default function GuestManagementPage() {
           onOpenChange={closeEmailModal}
           name={emailModalGuest.name}
           email={emailModalGuest.email}
-          onSendEmail={handleSendEmail}
         />
       )}
     </div>
