@@ -7,8 +7,8 @@ export default withAuth(
     const { pathname } = req.nextUrl;
     const token = req.nextauth.token;
 
-    // Allow access to root path
-    if (pathname === '/login') {
+    // Allow access to public paths
+    if (pathname === '/login' || pathname === '/reset-password') {
       return NextResponse.next();
     }
 
@@ -41,5 +41,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico)(?!/api)(?!/).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|reset-password)(?!/api)(?!/).*)'],
 };

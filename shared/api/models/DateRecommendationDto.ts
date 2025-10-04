@@ -16,6 +16,10 @@ export type DateRecommendationDto = {
      */
     total_score: number;
     /**
+     * Breakdown of scores by factor
+     */
+    score_breakdown: Record<string, any>;
+    /**
      * Number of key attendees available
      */
     available_attendees_count: number;
@@ -27,10 +31,6 @@ export type DateRecommendationDto = {
      * Names of unavailable key attendees
      */
     unavailable_attendees: Array<string>;
-    /**
-     * Breakdown of scores by factor
-     */
-    score_breakdown: Record<string, any>;
     /**
      * Advantages of this date
      */

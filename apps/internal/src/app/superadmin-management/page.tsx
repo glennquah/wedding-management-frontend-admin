@@ -6,15 +6,13 @@ import { getSuperAdminColumns } from '../../../../../shared/columns/superadmin-c
 import { Button, DataTable, DeleteConfirmationModal, PageHeader } from '@shared/components';
 import FormField from '@shared/components/FormField';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
-import { Input } from '@shared/components/ui/form/input';
-import { Label } from '@shared/components/ui/form/label';
 import {
   CreateSuperAdminDto,
   SuperAdminResponseDto,
   SuperAdminsService,
   UserRole,
 } from '@wedding/api-types';
-import { Cog, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -58,23 +56,10 @@ export default function SuperAdminManagementPage() {
     fetchSuperAdmins();
   }, [session?.user, router]);
 
-  // Generate random password
-  const generateRandomPassword = () => {
-    const length = 24;
-    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-    let password = '';
-    for (let i = 0; i < length; i++) {
-      password += charset.charAt(Math.floor(Math.random() * charset.length));
-    }
-    return password;
-  };
-
   // Modal controls
   const openAddSuperAdminModal = () => {
-    const generatedPassword = generateRandomPassword();
     setNewSuperAdmin({
       role: UserRole.SUPERADMIN,
-      password: generatedPassword,
     });
     setIsAddingSuperAdmin(true);
   };
@@ -96,7 +81,7 @@ export default function SuperAdminManagementPage() {
   const handleAddSuperAdmin = async () => {
     setIsSubmitting(true);
     try {
-      if (!newSuperAdmin.name || !newSuperAdmin.email || !newSuperAdmin.password) {
+      if (!newSuperAdmin.name || !newSuperAdmin.email) {
         toast.error('Please fill in all required fields');
         return;
       }
@@ -104,12 +89,13 @@ export default function SuperAdminManagementPage() {
       const superAdminData: CreateSuperAdminDto = {
         name: newSuperAdmin.name,
         email: newSuperAdmin.email,
-        password: newSuperAdmin.password,
         role: UserRole.SUPERADMIN,
       };
 
       await SuperAdminsService.superAdminControllerCreate(superAdminData);
-      toast.success('Super admin added successfully!');
+      toast.success(
+        `Account created for ${newSuperAdmin.name}. A password reset email has been sent to ${newSuperAdmin.email}.`,
+      );
       closeAddSuperAdminModal();
       // Refresh super admins list
       const superAdminsData = await SuperAdminsService.superAdminControllerGetAllAdmins();
@@ -141,12 +127,6 @@ export default function SuperAdminManagementPage() {
     }
   };
 
-  const handleGeneratePassword = () => {
-    const newPassword = generateRandomPassword();
-    setNewSuperAdmin({ ...newSuperAdmin, password: newPassword });
-    toast.success('Password generated successfully!');
-  };
-
   // Add Super Admin Form Fields
   const superAdminFormFields = (
     superAdmin: Partial<CreateSuperAdminDto & { id?: number }>,
@@ -176,37 +156,9 @@ export default function SuperAdminManagementPage() {
         required
         placeholder="Email address"
       />
-    </div>,
-
-    <div key="password" className="md:col-span-2">
-      <div className="mt-4 gap-2 flex flex-col">
-        <Label htmlFor="password">Password *</Label>
-        <div className="relative w-full">
-          <Input
-            id="password"
-            type="text"
-            value={superAdmin.password || ''}
-            onChange={(e) => setSuperAdmin({ ...superAdmin, password: e.target.value })}
-            required
-            placeholder="Generated password will appear here"
-            readOnly
-            className="w-full pr-10"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={handleGeneratePassword}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100"
-            title="Click to regenerate random password"
-          >
-            <Cog className="h-4 w-4" />
-          </Button>
-        </div>
-        <p className="text-xs text-gray-500 mt-1">
-          A secure password will be generated. The super admin can change it after first login.
-        </p>
-      </div>
+      <p className="text-xs text-gray-500 mt-3">
+        An email will be sent to this address with instructions to set up their password.
+      </p>
     </div>,
   ];
 

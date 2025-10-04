@@ -5,17 +5,13 @@
 import type { UserRole } from './UserRole';
 export type CreateSuperAdminDto = {
     /**
-     * The name of the user
+     * The name of the super admin
      */
     name: string;
     /**
-     * Email address of the user
+     * Email address of the super admin
      */
     email: string;
-    /**
-     * Password for the user account
-     */
-    password: string;
     role: UserRole;
 };
 

@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { OptimizeDateResponseDto } from './OptimizeDateResponseDto';
 export type DateOptimizerPreferencesDto = {
     /**
      * Earliest date for wedding date optimization
@@ -18,6 +19,6 @@ export type DateOptimizerPreferencesDto = {
     /**
      * Last analysis results from AI optimizer
      */
-    lastResults?: Record<string, any>;
+    lastResults?: OptimizeDateResponseDto;
 };
 

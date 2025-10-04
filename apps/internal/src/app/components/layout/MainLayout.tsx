@@ -25,15 +25,17 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
 
   const isLoginPage = pathname === '/login';
+  const isResetPasswordPage = pathname === '/reset-password';
+  const isPublicPage = isLoginPage || isResetPasswordPage;
 
   useEffect(() => {
-    if (status !== 'loading' && !isLoginPage && (!session?.user || session.user.role !== UserRole.SUPERADMIN)) {
+    if (status !== 'loading' && !isPublicPage && (!session?.user || session.user.role !== UserRole.SUPERADMIN)) {
       router.push('/login');
     }
-  }, [session, status, router, isLoginPage]);
+  }, [session, status, router, isPublicPage]);
 
-  // If it's the login page, render it without authentication checks
-  if (isLoginPage) {
+  // If it's a public page, render it without authentication checks
+  if (isPublicPage) {
     return (
       <>
         <main className="flex flex-1 flex-col overflow-y-auto">{children}</main>
