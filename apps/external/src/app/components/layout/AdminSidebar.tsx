@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { signOut } from '../../store/sessionStore';
+import { AdminsService } from '@shared/api';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
@@ -12,9 +11,11 @@ import {
   ListTodo,
   MapPin,
   PaintRoller,
+  ShoppingCart,
   Users,
 } from 'lucide-react';
-import { AdminsService } from '@shared/api';
+import { useEffect, useState } from 'react';
+import { signOut } from '../../store/sessionStore';
 
 export default function AdminSidebar() {
   const [hasWedding, setHasWedding] = useState<boolean>(true); // Default to true to avoid flickering
@@ -41,6 +42,11 @@ export default function AdminSidebar() {
           title: 'Dashboard',
           href: '/',
           icon: LayoutDashboard,
+        },
+        {
+          title: 'Shop',
+          href: '/ecommerce',
+          icon: ShoppingCart,
         },
         {
           title: 'Progress Tracker',
