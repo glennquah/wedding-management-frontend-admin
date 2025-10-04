@@ -1,9 +1,10 @@
 'use client';
 
-import { AvailabilityCalendar } from '../../components/AvailabilityCalendar';
+import { useState } from 'react';
+
 import { GuestSearchModal } from '../../components/GuestSearchModal';
 import { useDateOptimizer } from '../../hooks/useDateOptimizer';
-import { Button, ItemRankingList, PageHeader } from '@shared/components';
+import { Button, DeleteConfirmationModal, ItemRankingList, PageHeader } from '@shared/components';
 import { Badge } from '@shared/components/ui/badge';
 import {
   Card,
@@ -15,57 +16,23 @@ import {
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
 import { Calendar, CheckCircle2, Clock, Trash2, Users, XCircle } from 'lucide-react';
 
-// Dummy data for recommendations
-const dummyRecommendations = [
-  {
-    id: 1,
-    date: '2025-06-14',
-    availabilityScore: 10,
-    totalAttendees: 10,
-    availableAttendees: 10,
-    pros: ['All collaborators available', 'Ideal weather season', 'Mid-range venue pricing'],
-    cons: ['Popular date - book early'],
-  },
-  {
-    id: 2,
-    date: '2025-06-21',
-    availabilityScore: 9,
-    totalAttendees: 10,
-    availableAttendees: 9,
-    pros: ['9/10 collaborators available', 'Great weather', 'More venue options'],
-    cons: ['One collaborator unavailable', 'Peak season pricing'],
-  },
-  {
-    id: 3,
-    date: '2025-09-13',
-    availabilityScore: 9,
-    totalAttendees: 10,
-    availableAttendees: 9,
-    pros: ['Beautiful fall season', 'Moderate pricing', 'High venue availability'],
-    cons: ['One collaborator conflict', 'Potential rain'],
-  },
-  {
-    id: 4,
-    date: '2025-05-17',
-    availabilityScore: 8,
-    totalAttendees: 10,
-    availableAttendees: 8,
-    pros: ['Spring season', 'Lower venue costs', 'Good weather'],
-    cons: ['2 collaborators unavailable', 'Limited vendor availability'],
-  },
-];
-
 export default function DateOptimizerPage() {
   const isMobile = useIsMobileScreen();
+  const [attendeeToDelete, setAttendeeToDelete] = useState<{ id: number; name: string } | null>(
+    null,
+  );
+
   const {
     // Data
     guests,
     keyAttendees,
+    mainCouple,
     loading,
     hasRunAnalysis,
-    availabilityData,
-    selectedMonth,
     preferredDays,
+    dateRecommendations,
+    earliestDate,
+    latestDate,
 
     // Modal states
     isAddAttendeeModalOpen,
@@ -75,14 +42,29 @@ export default function DateOptimizerPage() {
     handleAddKeyAttendee,
     handleRemoveKeyAttendee,
     handleRequestCalendarAccess,
-    resetAnalysis,
-    handleMonthChange,
     setPreferredDays,
+    setEarliestDate,
+    setLatestDate,
 
     // Modal controls
     openAddAttendeeModal,
     closeAddAttendeeModal,
   } = useDateOptimizer();
+
+  const handleDeleteClick = (attendee: { id: number; name: string }) => {
+    setAttendeeToDelete(attendee);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (attendeeToDelete) {
+      await handleRemoveKeyAttendee(attendeeToDelete.id);
+      setAttendeeToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setAttendeeToDelete(null);
+  };
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
@@ -112,7 +94,9 @@ export default function DateOptimizerPage() {
                   <input
                     type="date"
                     className="w-full px-3 py-2 border rounded-md"
-                    defaultValue="2025-05-01"
+                    value={earliestDate}
+                    max={latestDate}
+                    onChange={(e) => setEarliestDate(e.target.value)}
                   />
                 </div>
                 <div>
@@ -120,7 +104,9 @@ export default function DateOptimizerPage() {
                   <input
                     type="date"
                     className="w-full px-3 py-2 border rounded-md"
-                    defaultValue="2025-12-31"
+                    value={latestDate}
+                    min={earliestDate}
+                    onChange={(e) => setLatestDate(e.target.value)}
                   />
                 </div>
               </div>
@@ -146,6 +132,69 @@ export default function DateOptimizerPage() {
             </CardContent>
           </Card>
 
+          {/* Main Couple Calendar */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Main Couple Calendar
+              </CardTitle>
+              <CardDescription>
+                Connect the main couple's calendars to ensure the wedding date works for both of you
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {mainCouple.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Users className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                  <p>No main couple members found</p>
+                  <p className="text-sm">Main couple members are set when creating the wedding</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {mainCouple.map((partner) => (
+                    <div
+                      key={partner.id}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div>
+                          <p className="font-medium">{partner.name}</p>
+                          <p className="text-sm text-muted-foreground">{partner.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {partner.accessStatus === 'CONNECTED' ? (
+                          <>
+                            <CheckCircle2 className="h-5 w-5 text-green-600" />
+                            <span className="text-sm text-green-600">Connected</span>
+                          </>
+                        ) : partner.accessStatus === 'REQUESTED' ? (
+                          <>
+                            <Clock className="h-5 w-5 text-amber-600" />
+                            <span className="text-sm text-amber-600">Pending</span>
+                          </>
+                        ) : partner.accessStatus === 'REJECTED' ? (
+                          <>
+                            <XCircle className="h-5 w-5 text-red-600" />
+                            <span className="text-sm text-red-600">Rejected</span>
+                          </>
+                        ) : (
+                          <Button
+                            size="sm"
+                            onClick={() => handleRequestCalendarAccess(partner, true)}
+                          >
+                            Request Access
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Key Attendees */}
           <Card>
             <CardHeader>
@@ -162,7 +211,9 @@ export default function DateOptimizerPage() {
                 <div className="text-center py-8 text-muted-foreground">
                   <Users className="h-12 w-12 mx-auto mb-3 opacity-20" />
                   <p>No key attendees added yet</p>
-                  <p className="text-sm">Add guests whose availability is critical for your wedding date</p>
+                  <p className="text-sm">
+                    Add guests whose availability is critical for your wedding date
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -178,23 +229,32 @@ export default function DateOptimizerPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {attendee.calendarConnected ? (
+                        {attendee.accessStatus === 'CONNECTED' ? (
                           <>
                             <CheckCircle2 className="h-5 w-5 text-green-600" />
                             <span className="text-sm text-green-600 mr-2">Connected</span>
                           </>
-                        ) : (
+                        ) : attendee.accessStatus === 'REQUESTED' ? (
                           <>
-                            <XCircle className="h-5 w-5 text-gray-400" />
-                            <Button size="sm" onClick={() => handleRequestCalendarAccess(attendee)}>
-                              Request Access
-                            </Button>
+                            <Clock className="h-5 w-5 text-amber-600" />
+                            <span className="text-sm text-amber-600 mr-2">Pending</span>
                           </>
+                        ) : attendee.accessStatus === 'REJECTED' ? (
+                          <>
+                            <XCircle className="h-5 w-5 text-red-600" />
+                            <span className="text-sm text-red-600 mr-2">Rejected</span>
+                          </>
+                        ) : (
+                          <Button size="sm" onClick={() => handleRequestCalendarAccess(attendee)}>
+                            Request Access
+                          </Button>
                         )}
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleRemoveKeyAttendee(attendee.id)}
+                          onClick={() =>
+                            handleDeleteClick({ id: attendee.id, name: attendee.name })
+                          }
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
@@ -203,7 +263,12 @@ export default function DateOptimizerPage() {
                   ))}
                 </div>
               )}
-              <Button className="w-full mt-4" onClick={openAddAttendeeModal} disabled={loading}>
+              <Button
+                variant="outline"
+                className="w-full mt-4 border-primary text-primary hover:bg-primary hover:text-white"
+                onClick={openAddAttendeeModal}
+                disabled={loading}
+              >
                 + Add Key Attendee
               </Button>
             </CardContent>
@@ -221,23 +286,15 @@ export default function DateOptimizerPage() {
 
         {/* Run Analysis Button */}
         <div className="flex justify-center mb-8">
-          <Button size="lg" onClick={handleRunAnalysis} disabled={hasRunAnalysis} className="px-8">
+          <Button size="lg" onClick={handleRunAnalysis} className="px-8">
             <Clock className="mr-2 h-5 w-5" />
-            {hasRunAnalysis ? 'Analysis Complete' : 'Run AI Analysis'}
+            Run AI Analysis
           </Button>
         </div>
 
         {/* Results Section */}
         {hasRunAnalysis && (
           <div>
-            {/* Availability Calendar */}
-            <div className="mb-6">
-              <AvailabilityCalendar
-                attendees={availabilityData}
-                selectedMonth={selectedMonth}
-                onMonthChange={handleMonthChange}
-              />
-            </div>
             <div className="mb-4">
               <h2 className="text-2xl font-bold mb-2">Recommended Dates</h2>
               <p className="text-muted-foreground">
@@ -246,10 +303,10 @@ export default function DateOptimizerPage() {
             </div>
 
             <div className="grid gap-4">
-              {dummyRecommendations.map((rec, index) => (
-                <Card key={rec.id} className={index === 0 ? 'border-primary border-2' : ''}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
+              {dateRecommendations.length > 0 ? (
+                dateRecommendations.map((rec, index) => (
+                  <Card key={rec.date} className={index === 0 ? 'border-primary border-2' : ''}>
+                    <CardHeader>
                       <div>
                         <CardTitle className="flex items-center gap-2">
                           {index === 0 && <Badge className="bg-primary">Best Match</Badge>}
@@ -262,59 +319,65 @@ export default function DateOptimizerPage() {
                         </CardTitle>
                         <CardDescription className="mt-2 flex items-center gap-2">
                           <Users className="h-4 w-4" />
-                          {rec.availableAttendees}/{rec.totalAttendees} collaborators available
+                          {rec.available_attendees_count}/{rec.total_attendees_count} key attendees
+                          available
                         </CardDescription>
                       </div>
-                      <div className="text-right">
-                        <div className="text-3xl font-bold text-primary">
-                          {rec.availabilityScore}/10
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <h4 className="font-semibold text-sm mb-2 text-green-600">Pros</h4>
+                          <ul className="space-y-1">
+                            {rec.pros.map((pro: string, i: number) => (
+                              <li key={i} className="text-sm flex items-start gap-2">
+                                <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                                {pro}
+                              </li>
+                            ))}
+                          </ul>
                         </div>
-                        <div className="text-sm text-muted-foreground">Score</div>
+                        <div>
+                          <h4 className="font-semibold text-sm mb-2 text-amber-600">
+                            Considerations
+                          </h4>
+                          <ul className="space-y-1">
+                            {rec.cons.map((con: string, i: number) => (
+                              <li key={i} className="text-sm flex items-start gap-2">
+                                <XCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                                {con}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <h4 className="font-semibold text-sm mb-2 text-green-600">Pros</h4>
-                        <ul className="space-y-1">
-                          {rec.pros.map((pro, i) => (
-                            <li key={i} className="text-sm flex items-start gap-2">
-                              <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                              {pro}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-sm mb-2 text-amber-600">
-                          Considerations
-                        </h4>
-                        <ul className="space-y-1">
-                          {rec.cons.map((con, i) => (
-                            <li key={i} className="text-sm flex items-start gap-2">
-                              <XCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                              {con}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                    <Button className="w-full" variant={index === 0 ? 'default' : 'outline'}>
-                      Select This Date
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <div className="mt-6 flex justify-center">
-              <Button variant="outline" onClick={resetAnalysis}>
-                Re-run Analysis with Different Parameters
-              </Button>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  <XCircle className="h-16 w-16 mx-auto mb-4 opacity-20 text-destructive" />
+                  <p className="text-lg font-medium">No viable dates found</p>
+                  <p className="text-sm">
+                    Try adjusting your date range or preferred days to find more options
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        <DeleteConfirmationModal
+          open={!!attendeeToDelete}
+          onOpenChange={(open) => !open && handleCancelDelete()}
+          title="Remove Key Attendee"
+          itemName={attendeeToDelete?.name || ''}
+          description={`Are you sure you want to remove ${attendeeToDelete?.name} from key attendees? Their calendar will be disconnected and will no longer be considered in the date analysis.`}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+          confirmButtonText="Remove"
+        />
       </div>
     </div>
   );

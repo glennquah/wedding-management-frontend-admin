@@ -8,6 +8,10 @@ export type CalendarConnectionStatusDto = {
      */
     isConnected: boolean;
     /**
+     * The calendar access status
+     */
+    accessStatus: CalendarConnectionStatusDto.accessStatus;
+    /**
      * The email associated with the calendar connection
      */
     email?: string;
@@ -15,5 +19,20 @@ export type CalendarConnectionStatusDto = {
      * The date when the connection was established
      */
     connectedAt?: string;
+    /**
+     * The date when access was requested
+     */
+    accessRequestedAt?: string;
 };
+export namespace CalendarConnectionStatusDto {
+    /**
+     * The calendar access status
+     */
+    export enum accessStatus {
+        NOT_REQUESTED = 'NOT_REQUESTED',
+        REQUESTED = 'REQUESTED',
+        REJECTED = 'REJECTED',
+        CONNECTED = 'CONNECTED',
+    }
+}
 

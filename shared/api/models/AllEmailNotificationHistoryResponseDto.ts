@@ -21,6 +21,7 @@ export namespace AllEmailNotificationHistoryResponseDto {
         VERIFY_EMAIL = 'VERIFY_EMAIL',
         CREATE_ACCOUNT = 'CREATE_ACCOUNT',
         COLLABORATOR_ADDED = 'COLLABORATOR_ADDED',
+        CALENDAR_ACCESS_REQUEST = 'CALENDAR_ACCESS_REQUEST',
         CUSTOM = 'CUSTOM',
     }
 }

@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { CreateWeddingDto } from '../models/CreateWeddingDto';
+import type { DateOptimizerPreferencesDto } from '../models/DateOptimizerPreferencesDto';
 import type { UpdateWeddingDto } from '../models/UpdateWeddingDto';
 import type { WeddingResponseDto } from '../models/WeddingResponseDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -175,6 +176,74 @@ export class WeddingsService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/weddings/{id}/key-attendees',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Wedding not found.`,
+            },
+        });
+    }
+    /**
+     * Get main couple for a wedding
+     * @param id
+     * @returns any Main couple members
+     * @throws ApiError
+     */
+    public static weddingControllerGetMainCouple(
+        id: number,
+    ): CancelablePromise<Array<{
+        id?: number;
+        name?: string;
+        email?: string;
+    }>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/weddings/{id}/main-couple',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Wedding not found.`,
+            },
+        });
+    }
+    /**
+     * Update date optimizer preferences for a wedding
+     * @param id
+     * @param requestBody
+     * @returns any Date optimizer preferences updated successfully
+     * @throws ApiError
+     */
+    public static weddingControllerUpdateDateOptimizerPreferences(
+        id: number,
+        requestBody: DateOptimizerPreferencesDto,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/weddings/{id}/date-optimizer-preferences',
+            path: {
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                404: `Wedding not found.`,
+            },
+        });
+    }
+    /**
+     * Get date optimizer preferences for a wedding
+     * @param id
+     * @returns DateOptimizerPreferencesDto Date optimizer preferences
+     * @throws ApiError
+     */
+    public static weddingControllerGetDateOptimizerPreferences(
+        id: number,
+    ): CancelablePromise<DateOptimizerPreferencesDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/weddings/{id}/date-optimizer-preferences',
             path: {
                 'id': id,
             },

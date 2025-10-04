@@ -1,6 +1,14 @@
 import { ReactNode, useState } from 'react';
+
 import { Button } from './button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './dialog';
 import { Input } from './form/input';
 
 interface DeleteConfirmationModalProps {
@@ -20,15 +28,15 @@ interface DeleteConfirmationModalProps {
 export function DeleteConfirmationModal({
   open,
   onOpenChange,
-  title = "Confirm Deletion",
+  title = 'Confirm Deletion',
   itemName,
   description,
   onConfirm,
   onCancel,
   isLoading = false,
-  confirmButtonText = "Delete",
-  cancelButtonText = "Cancel",
-  requirePasswordConfirmation = false
+  confirmButtonText = 'Delete',
+  cancelButtonText = 'Cancel',
+  requirePasswordConfirmation = false,
 }: DeleteConfirmationModalProps) {
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -60,14 +68,15 @@ export function DeleteConfirmationModal({
       setPasswordError('');
     }
   };
-  
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            {description || (requirePasswordConfirmation ? passwordDescription : defaultDescription)}
+            {description ||
+              (requirePasswordConfirmation ? passwordDescription : defaultDescription)}
           </DialogDescription>
         </DialogHeader>
 
@@ -81,18 +90,21 @@ export function DeleteConfirmationModal({
               placeholder="Enter your password"
               className={passwordError ? 'border-red-500' : ''}
             />
-            {passwordError && (
-              <p className="text-sm text-red-500">{passwordError}</p>
-            )}
+            {passwordError && <p className="text-sm text-red-500">{passwordError}</p>}
           </div>
         )}
 
         <DialogFooter>
+          <Button
+            variant="destructive"
+            onClick={handleCancel}
+            disabled={isLoading}
+            className="text-base-white"
+          >
+            {cancelButtonText}
+          </Button>
           <Button variant="secondary" onClick={handleConfirm} disabled={isLoading}>
             {confirmButtonText}
-          </Button>
-          <Button variant="destructive" onClick={handleCancel} disabled={isLoading} className='text-base-white'>
-            {cancelButtonText}
           </Button>
         </DialogFooter>
       </DialogContent>

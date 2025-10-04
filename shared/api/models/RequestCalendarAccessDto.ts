@@ -4,12 +4,16 @@
 /* eslint-disable */
 export type RequestCalendarAccessDto = {
     /**
-     * The ID of the collaborator to request calendar access from
+     * The ID of the attendee (admin or guest) to request calendar access from
      */
-    collaboratorId: number;
+    attendeeId: number;
     /**
      * The ID of the wedding
      */
     weddingId: number;
+    /**
+     * Whether the attendee is an admin (true) or guest (false)
+     */
+    isAdmin?: boolean;
 };
 

@@ -4,9 +4,9 @@
 /* eslint-disable */
 export type AvailabilityCheckDto = {
     /**
-     * Array of collaborator IDs to check availability for
+     * Array of attendee IDs (admins or guests) to check availability for
      */
-    collaboratorIds: Array<number>;
+    attendeeIds: Array<number>;
     /**
      * Start date for availability check (ISO 8601 format)
      */

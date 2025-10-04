@@ -4,11 +4,11 @@
 /* eslint-disable */
 export type AttendeeAvailability = {
     /**
-     * The collaborator ID
+     * The attendee ID (admin or guest)
      */
-    collaboratorId: number;
+    attendeeId: number;
     /**
-     * The collaborator name
+     * The attendee name
      */
     name: string;
     /**
