@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useWeddingManager } from './useWeddingManager';
 import {
   AttendeeAvailability,
+  CalendarConnectionStatusDto,
   CalendarService,
   GuestResponseDto,
   GuestsService,
@@ -17,7 +18,7 @@ export type KeyAttendee = {
   name: string;
   email: string;
   calendarConnected: boolean;
-  accessStatus?: 'NOT_REQUESTED' | 'REQUESTED' | 'REJECTED' | 'CONNECTED';
+  accessStatus?: CalendarConnectionStatusDto.accessStatus;
 };
 
 export type MainCouplePartner = {
@@ -25,7 +26,15 @@ export type MainCouplePartner = {
   name: string;
   email: string;
   calendarConnected: boolean;
-  accessStatus?: 'NOT_REQUESTED' | 'REQUESTED' | 'REJECTED' | 'CONNECTED';
+  accessStatus?: CalendarConnectionStatusDto.accessStatus;
+};
+
+export type DateRecommendation = {
+  date: string;
+  available_attendees_count: number;
+  total_attendees_count: number;
+  pros: string[];
+  cons: string[];
 };
 
 export function useDateOptimizer() {
@@ -43,7 +52,7 @@ export function useDateOptimizer() {
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
   const [preferredDays, setPreferredDays] = useState<string[]>([]);
-  const [dateRecommendations, setDateRecommendations] = useState<any[]>([]);
+  const [dateRecommendations, setDateRecommendations] = useState<DateRecommendation[]>([]);
   const [earliestDate, setEarliestDate] = useState<string>('');
   const [latestDate, setLatestDate] = useState<string>('');
 
@@ -56,9 +65,9 @@ export function useDateOptimizer() {
 
   // Check calendar connection status for an attendee or admin
   const checkCalendarStatus = useCallback(
-    async (userId: number, isAdmin: boolean = false): Promise<{ isConnected: boolean; accessStatus: string }> => {
+    async (userId: number, isAdmin: boolean = false): Promise<{ isConnected: boolean; accessStatus: CalendarConnectionStatusDto.accessStatus }> => {
       if (!session?.backendTokens?.accessToken) {
-        return { isConnected: false, accessStatus: 'NOT_REQUESTED' };
+        return { isConnected: false, accessStatus: CalendarConnectionStatusDto.accessStatus.NOT_REQUESTED };
       }
 
       try {
@@ -69,11 +78,11 @@ export function useDateOptimizer() {
         );
         return {
           isConnected: data.isConnected || false,
-          accessStatus: data.accessStatus || 'NOT_REQUESTED',
+          accessStatus: data.accessStatus || CalendarConnectionStatusDto.accessStatus.NOT_REQUESTED,
         };
       } catch (error) {
         console.error('Error checking calendar status:', error);
-        return { isConnected: false, accessStatus: 'NOT_REQUESTED' };
+        return { isConnected: false, accessStatus: CalendarConnectionStatusDto.accessStatus.NOT_REQUESTED };
       }
     },
     [session, setupAuth],
@@ -95,14 +104,17 @@ export function useDateOptimizer() {
       const mainCoupleResponse =
         await WeddingsService.weddingControllerGetMainCouple(selectedWeddingId);
       const mainCouplePromises = mainCoupleResponse.map(
-        async (partner: { id: number; name: string; email: string }) => {
+        async (partner) => {
+          if (!partner.id || !partner.name || !partner.email) {
+            throw new Error('Invalid partner data');
+          }
           const status = await checkCalendarStatus(partner.id, true);
           return {
             id: partner.id,
             name: partner.name,
             email: partner.email,
             calendarConnected: status.isConnected,
-            accessStatus: status.accessStatus as any,
+            accessStatus: status.accessStatus,
           };
         },
       );
@@ -125,7 +137,7 @@ export function useDateOptimizer() {
           name: guest.name,
           email: guest.email,
           calendarConnected: status.isConnected,
-          accessStatus: status.accessStatus as any,
+          accessStatus: status.accessStatus,
         };
       });
 
@@ -367,7 +379,6 @@ export function useDateOptimizer() {
     fetchAvailability,
     mainCouple,
     keyAttendees,
-    availabilityData,
     earliestDate,
     latestDate,
     preferredDays,
@@ -389,7 +400,7 @@ export function useDateOptimizer() {
           name: attendee.name,
           email: attendee.email,
           calendarConnected: status.isConnected,
-          accessStatus: status.accessStatus as any,
+          accessStatus: status.accessStatus,
         };
 
         // Save to backend
@@ -461,13 +472,13 @@ export function useDateOptimizer() {
         if (isAdmin) {
           setMainCouple((prev) =>
             prev.map((partner) =>
-              partner.id === attendee.id ? { ...partner, accessStatus: 'REQUESTED' } : partner
+              partner.id === attendee.id ? { ...partner, accessStatus: 'REQUESTED' as CalendarConnectionStatusDto.accessStatus } : partner
             )
           );
         } else {
           setKeyAttendees((prev) =>
             prev.map((att) =>
-              att.id === attendee.id ? { ...att, accessStatus: 'REQUESTED' } : att
+              att.id === attendee.id ? { ...att, accessStatus: 'REQUESTED' as CalendarConnectionStatusDto.accessStatus } : att
             )
           );
         }

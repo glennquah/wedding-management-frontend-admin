@@ -140,7 +140,7 @@ export default function DateOptimizerPage() {
                 Main Couple Calendar
               </CardTitle>
               <CardDescription>
-                Connect the main couple's calendars to ensure the wedding date works for both of you
+                Connect the main couple&apos;s calendars to ensure the wedding date works for both of you
               </CardDescription>
             </CardHeader>
             <CardContent>
