@@ -59,7 +59,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     ) {
       router.push('/admin');
     }
-  }, [hasHydrated, hasNoWedding, pathname, router]);
+  }, [hasHydrated, hasNoWedding, pathname, router, allowedRoutesWithoutWedding]);
 
   console.log('Session status:', status, 'Session data:', session);
 
