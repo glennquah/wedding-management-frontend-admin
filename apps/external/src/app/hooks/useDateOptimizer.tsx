@@ -5,6 +5,7 @@ import {
   AttendeeAvailability,
   CalendarConnectionStatusDto,
   CalendarService,
+  DateRecommendationDto,
   GuestResponseDto,
   GuestsService,
   OpenAPI,
@@ -29,13 +30,7 @@ export type MainCouplePartner = {
   accessStatus?: CalendarConnectionStatusDto.accessStatus;
 };
 
-export type DateRecommendation = {
-  date: string;
-  available_attendees_count: number;
-  total_attendees_count: number;
-  pros: string[];
-  cons: string[];
-};
+export type DateRecommendation = DateRecommendationDto;
 
 export function useDateOptimizer() {
   const { data: session } = useSession();
@@ -177,7 +172,7 @@ export function useDateOptimizer() {
       );
 
       if (prefs.lastResults !== undefined && prefs.lastResults !== null) {
-        setDateRecommendations(Array.isArray(prefs.lastResults) ? prefs.lastResults : []);
+        setDateRecommendations(prefs.lastResults.recommendations || []);
         setHasRunAnalysis(true);
       }
     } catch (error) {
@@ -216,7 +211,11 @@ export function useDateOptimizer() {
           earliestDate,
           latestDate,
           preferredDays,
-          lastResults: dateRecommendations,
+          lastResults: dateRecommendations.length > 0 ? {
+            success: true,
+            message: 'Saved recommendations',
+            recommendations: dateRecommendations,
+          } : undefined,
         });
       } catch (error) {
         console.error('Error auto-saving preferences:', error);
@@ -352,13 +351,20 @@ export function useDateOptimizer() {
       if (response.success && response.recommendations) {
         setDateRecommendations(response.recommendations);
 
+        // Show success toast
+        if (response.recommendations.length > 0) {
+          toast.success(`Successfully generated ${response.recommendations.length} date recommendation${response.recommendations.length === 1 ? '' : 's'}`);
+        } else {
+          toast.info('No viable dates found for your criteria');
+        }
+
         // Save preferences and results
         try {
           await WeddingsService.weddingControllerUpdateDateOptimizerPreferences(selectedWeddingId, {
             earliestDate,
             latestDate,
             preferredDays,
-            lastResults: response.recommendations,
+            lastResults: response,
           });
         } catch (saveError) {
           console.error('Error saving preferences:', saveError);
@@ -366,12 +372,13 @@ export function useDateOptimizer() {
       } else {
         // Clear recommendations when there are no viable dates and save
         setDateRecommendations([]);
+        toast.info('No viable dates found for your criteria');
         try {
           await WeddingsService.weddingControllerUpdateDateOptimizerPreferences(selectedWeddingId, {
             earliestDate,
             latestDate,
             preferredDays,
-            lastResults: [],
+            lastResults: response,
           });
         } catch (saveError) {
           console.error('Error saving preferences:', saveError);
