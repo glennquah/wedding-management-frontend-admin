@@ -1,9 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
-import { signOut } from '../../store/sessionStore';
-import { AdminsService } from '@shared/api';
+import { signOut, useWeddingStore } from '../../store/sessionStore';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
@@ -14,26 +11,14 @@ import {
   ListTodo,
   MapPin,
   PaintRoller,
+  ShoppingCart,
   Sparkles,
   Users,
 } from 'lucide-react';
 
 export default function AdminSidebar() {
-  const [hasWedding, setHasWedding] = useState<boolean>(true); // Default to true to avoid flickering
-
-  useEffect(() => {
-    const checkWedding = async () => {
-      try {
-        const { mainWeddingId } = await AdminsService.adminControllerGetMyMainWedding();
-        setHasWedding(mainWeddingId !== null);
-      } catch (error) {
-        console.error('Error checking wedding:', error);
-        setHasWedding(false);
-      }
-    };
-
-    checkWedding();
-  }, []);
+  const { weddings } = useWeddingStore();
+  const hasWedding = weddings && weddings.length > 0;
 
   const tabs = [
     {
@@ -43,6 +28,12 @@ export default function AdminSidebar() {
           title: 'Dashboard',
           href: '/',
           icon: LayoutDashboard,
+        },
+        {
+          title: 'Shop',
+          href: '/ecommerce',
+          icon: ShoppingCart,
+          disabled: !hasWedding,
         },
         {
           title: 'Progress Tracker',
@@ -65,7 +56,6 @@ export default function AdminSidebar() {
           title: 'Checklist',
           href: '/checklist',
           icon: CheckSquare,
-          disabled: !hasWedding,
         },
         {
           title: 'Guest List',

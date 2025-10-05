@@ -14,12 +14,18 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ShoppingCart, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
+/*
+TODO:
+1) define href for Continue Shopping button
+2) define href for link to indiv listing
+*/
 export function Cart() {
   const { cartItems, removeItem, clearCart, fetchCart, createOrder } = useCartStore();
   const { selectedWeddingId } = useWeddingStore();
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   const [isOpen, setIsOpen] = React.useState(false);
   const [isMounted, setIsMounted] = React.useState(false);
@@ -106,15 +112,11 @@ export function Cart() {
                 </p>
                 {isDesktop ? (
                   <SheetClose asChild>
-                    <Link href="/products">
-                      <Button>Browse Products</Button>
-                    </Link>
+                    <Button onClick={() => router.push('/admin/ecommerce')}>Browse Products</Button>
                   </SheetClose>
                 ) : (
                   <DrawerClose asChild>
-                    <Link href="/products">
-                      <Button>Browse Products</Button>
-                    </Link>
+                    <Button onClick={() => router.push('/admin/ecommerce')}>Browse Products</Button>
                   </DrawerClose>
                 )}
               </motion.div>
@@ -145,41 +147,18 @@ export function Cart() {
                     <div className="ml-4 flex flex-1 flex-col justify-between">
                       <div>
                         <div className="flex items-start justify-between">
-                          <div className="flex flex-col">
-                            <Link
-                              className={`
-        line-clamp-2 text-sm font-medium
-        group-hover:text-primary
-      `}
-                              href={`/products/${item.id}`}
-                              onClick={() => setIsOpen(false)}
-                            >
-                              {item.listingName}
-                            </Link>
-
-                            {item.selectedSlots.length > 0 && (
-                              <p className="text-[0.625rem] text-muted-foreground mt-1">
-                                {item.selectedSlots.map((slot, index) => {
-                                  const date = slot.date ? `${slot.date} ` : '';
-                                  const start = new Date(slot.startTime).toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  });
-                                  const end = new Date(slot.endTime).toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  });
-                                  return (
-                                    <span key={index}>
-                                      {date}
-                                      {start} - {end}
-                                      {index < item.selectedSlots.length - 1 ? ', ' : ''}
-                                    </span>
-                                  );
-                                })}
-                              </p>
-                            )}
-                          </div>
+                          <button
+                            className={`
+                              line-clamp-2 text-sm font-medium text-left
+                              group-hover:text-primary
+                            `}
+                            onClick={() => {
+                              router.push(`/admin/ecommerce/listing/${item.listingId}`);
+                              setIsOpen(false);
+                            }}
+                          >
+                            {item.listingName}
+                          </button>
                           <button
                             className={`
                               -mt-1 -mr-1 ml-2 rounded-full p-1
@@ -234,11 +213,11 @@ export function Cart() {
               <div className="flex items-center justify-between">
                 {isDesktop ? (
                   <SheetClose asChild>
-                    <Button variant="secondary">Continue Shopping</Button>
+                    <Button variant="secondary" onClick={() => router.push('/admin/ecommerce')}>Continue Shopping</Button>
                   </SheetClose>
                 ) : (
                   <DrawerClose asChild>
-                    <Button variant="secondary">Continue Shopping</Button>
+                    <Button variant="secondary" onClick={() => router.push('/admin/ecommerce')}>Continue Shopping</Button>
                   </DrawerClose>
                 )}
                 <Button
