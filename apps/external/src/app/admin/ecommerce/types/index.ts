@@ -67,6 +67,7 @@ export interface VendorCardProps {
 
 export interface BackButtonProps {
   onBack: () => void;
+  label?: string;
 }
 
 export interface PaginationState {
