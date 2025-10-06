@@ -1,15 +1,7 @@
-import { Badge } from '@shared/components/ui/badge';
 import { Button } from '@shared/components/ui/button';
 import { Checkbox } from '@shared/components/ui/checkbox';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@shared/components/ui/form/dropdown-menu';
 import { ColumnDef } from '@tanstack/react-table';
 import { ConfirmationStatus, GuestResponseDto } from '@wedding/api-types';
-import { ChevronDown, Edit2, Trash2 } from 'lucide-react';
 
 // Helper functions for confirmation status
 const getConfirmationStatusVariant = (
@@ -49,18 +41,16 @@ const getConfirmationIcon = (status: ConfirmationStatus) => {
 
 interface AttendanceColumnsProps {
   guests: GuestResponseDto[];
-  onEditGuest: (guest: GuestResponseDto) => void;
-  onDeleteGuest: (guest: GuestResponseDto) => void;
   onToggleAttendance: (guest: GuestResponseDto) => void;
   hasAttendanceChange: (guestId: number) => boolean;
+  onOpenAccompanyingGuestDialog: (primaryGuestId: number) => void;
 }
 
 export const getAttendanceColumns = ({
   guests,
-  onEditGuest,
-  onDeleteGuest,
   onToggleAttendance,
   hasAttendanceChange,
+  onOpenAccompanyingGuestDialog,
 }: AttendanceColumnsProps): ColumnDef<GuestResponseDto>[] => {
   const columns: ColumnDef<GuestResponseDto>[] = [
     {
@@ -100,25 +90,14 @@ export const getAttendanceColumns = ({
         }
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-1 text-xs font-normal justify-start whitespace-nowrap min-w-0"
-              >
-                +{accompanyingGuestsList.length}
-                <ChevronDown className="ml-1 h-3 w-3" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              {accompanyingGuestsList.map((accompanyingGuest, index) => (
-                <DropdownMenuItem key={accompanyingGuest.id || index} className="cursor-default">
-                  <span className="font-medium">{accompanyingGuest.name}</span>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onOpenAccompanyingGuestDialog(guest.id)}
+            className="h-auto p-1 text-xs font-normal justify-start whitespace-nowrap min-w-0 hover:bg-brand-50 hover:text-brand-700"
+          >
+            +{accompanyingGuestsList.length}
+          </Button>
         );
       },
     },
@@ -128,36 +107,6 @@ export const getAttendanceColumns = ({
       cell: ({ row }) => (
         <div className="text-sm text-foreground">{row.getValue('allergies') || '-'}</div>
       ),
-    },
-    {
-      accessorKey: 'weddingName',
-      header: 'Wedding Name',
-      cell: ({ row }) => (
-        <div className="text-sm text-foreground">{row.getValue('weddingName') || '-'}</div>
-      ),
-      size: 200,
-    },
-    {
-      id: 'actions',
-      header: 'Actions',
-      cell: ({ row }) => {
-        const guest = row.original;
-        return (
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="ghost" onClick={() => onEditGuest(guest)}>
-              <Edit2 className="w-4 h-4" />
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => onDeleteGuest(guest)}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
-        );
-      },
     },
     {
       id: 'attendance',

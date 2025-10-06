@@ -17,6 +17,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useGuestManager } from '../../hooks/useGuestManager';
+import { AccompanyingGuestAttendanceDialog } from './components/accompanying-guest-attendance-dialog';
 import { getAttendanceColumns } from './components/attendance-columns';
 
 type AccompanyingGuestData = {
@@ -96,6 +97,12 @@ export default function GuestListPage() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isApplyingChanges, setIsApplyingChanges] = useState(false);
 
+  // State for accompanying guest attendance dialog
+  const [accompanyingGuestDialog, setAccompanyingGuestDialog] = useState<{
+    open: boolean;
+    guests: GuestResponseDto[];
+  }>({ open: false, guests: [] });
+
   // Handler to toggle attendance locally (without backend call)
   const handleToggleAttendance = (guest: GuestResponseDto) => {
     setAttendanceChanges((prev) => {
@@ -134,13 +141,46 @@ export default function GuestListPage() {
   // Check if guest has pending attendance change
   const hasAttendanceChange = (guestId: number) => attendanceChanges.has(guestId);
 
+  // Handler to open accompanying guest attendance dialog
+  const handleOpenAccompanyingGuestDialog = (primaryGuestId: number) => {
+    const accompanyingGuestsList = confirmedGuests.filter(
+      (g) => g.primaryGuestId === primaryGuestId,
+    );
+    setAccompanyingGuestDialog({
+      open: true,
+      guests: accompanyingGuestsList,
+    });
+  };
+
+  // Handler to close accompanying guest attendance dialog
+  const handleCloseAccompanyingGuestDialog = () => {
+    setAccompanyingGuestDialog({ open: false, guests: [] });
+  };
+
+  // Handler to apply accompanying guest attendance changes
+  const handleApplyAccompanyingGuestChanges = async (guestIds: number[]) => {
+    setIsApplyingChanges(true);
+    try {
+      // Call backend for each guest
+      await Promise.all(
+        guestIds.map((guestId) => GuestsService.guestControllerMarkAttendance(guestId))
+      );
+      // Close dialog and refetch guests
+      handleCloseAccompanyingGuestDialog();
+      await fetchGuests();
+    } catch (error) {
+      console.error('Failed to apply accompanying guest attendance changes:', error);
+    } finally {
+      setIsApplyingChanges(false);
+    }
+  };
+
   // Column definitions for DataTable using attendance columns
   const columns = getAttendanceColumns({
     guests: confirmedGuests,
-    onEditGuest: handleEditGuest,
-    onDeleteGuest: openDeleteConfirmModal,
     onToggleAttendance: handleToggleAttendance,
     hasAttendanceChange,
+    onOpenAccompanyingGuestDialog: handleOpenAccompanyingGuestDialog,
   });
 
   // Add Guest Form Fields (without dietary requirements and confirmation status)
@@ -524,6 +564,15 @@ export default function GuestListPage() {
           onConfirm={handleApplyChanges}
           onCancel={() => setShowConfirmDialog(false)}
           confirmButtonText={isApplyingChanges ? 'Applying...' : 'Confirm'}
+        />
+
+        {/* Accompanying Guest Attendance Dialog */}
+        <AccompanyingGuestAttendanceDialog
+          open={accompanyingGuestDialog.open}
+          onOpenChange={handleCloseAccompanyingGuestDialog}
+          accompanyingGuests={accompanyingGuestDialog.guests}
+          onApplyChanges={handleApplyAccompanyingGuestChanges}
+          isApplying={isApplyingChanges}
         />
       </div>
     </div>
