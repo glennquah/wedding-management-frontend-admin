@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import AdminSidebar from '../components/layout/AdminSidebar';
 import { useWeddingManager } from '@/app/hooks/useWeddingManager';
@@ -38,7 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { data: session, status } = useSession();
 
   // Route protection: redirect to dashboard if no wedding and trying to access protected routes
-  const allowedRoutesWithoutWedding = ['/admin', '/admin/account', '/admin/create-wedding'];
+  const allowedRoutesWithoutWedding = useMemo(() => ['/admin', '/admin/account', '/admin/create-wedding'], []);
   const hasNoWedding = !selectedWeddingId && (!weddings || weddings.length === 0);
 
   useEffect(() => {

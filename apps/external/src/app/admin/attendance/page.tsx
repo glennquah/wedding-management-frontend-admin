@@ -106,17 +106,15 @@ export default function GuestListPage() {
     updateAccompanyingGuest,
   );
 
-  const editGuestFormFields = editingGuest
-    ? useEditGuestFormFields(
-        editingGuest,
-        setEditingGuest as React.Dispatch<React.SetStateAction<GuestFormData>>,
-        existingGroups,
-        capacityInfo,
-        addAccompanyingGuestField,
-        removeAccompanyingGuestField,
-        updateAccompanyingGuest,
-      )
-    : [];
+  const editGuestFormFields = useEditGuestFormFields(
+    editingGuest || ({} as GuestFormData),
+    setEditingGuest as React.Dispatch<React.SetStateAction<GuestFormData>>,
+    existingGroups,
+    capacityInfo,
+    addAccompanyingGuestField,
+    removeAccompanyingGuestField,
+    updateAccompanyingGuest,
+  );
 
   // Memoized statistics
   const attendanceStats = useMemo(

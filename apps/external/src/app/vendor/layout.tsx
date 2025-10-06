@@ -6,7 +6,7 @@ import { SidebarProvider } from '@shared/components/ui/sidebar';
 import { Toaster } from '@shared/components/ui/sonner';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { VendorSessionProvider } from '../../contexts/VendorSessionContext';
 import VendorSidebar from '../components/layout/VendorSidebar';
 
@@ -44,7 +44,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
   }, [session]);
 
   // Route protection: prioritize PENDING/REJECTED status check over details check
-  const allowedRoutesWithoutDetails = ['/vendor', '/vendor/account'];
+  const allowedRoutesWithoutDetails = useMemo(() => ['/vendor', '/vendor/account'], []);
 
   useEffect(() => {
     // If vendor is PENDING, redirect to pending page
@@ -63,7 +63,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
     if (vendorOnboardingStatus === 'ONBOARDED' && hasVendorDetails === false && pathname && !allowedRoutesWithoutDetails.includes(pathname)) {
       router.push('/vendor');
     }
-  }, [vendorOnboardingStatus, hasVendorDetails, pathname, router]);
+  }, [vendorOnboardingStatus, hasVendorDetails, pathname, router, allowedRoutesWithoutDetails]);
 
   if (status === 'loading' || isCheckingDetails) {
     return (
