@@ -2,6 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { EmailTemplateResponse } from '../models/EmailTemplateResponse';
+import type { GenerateAiEmailTemplateDto } from '../models/GenerateAiEmailTemplateDto';
 import type { SendBulkEmailDto } from '../models/SendBulkEmailDto';
 import type { SendSingleEmailDto } from '../models/SendSingleEmailDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -36,6 +38,28 @@ export class EmailNotificationService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/email-notification/send-bulk',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Generate an AI-powered email template
+     * Uses AI to generate a custom HTML email template based on provided parameters. Returns both the HTML template and a suggested subject line.
+     * @param weddingId
+     * @param requestBody
+     * @returns EmailTemplateResponse Email template successfully generated.
+     * @throws ApiError
+     */
+    public static emailNotificationControllerGetAiEmailTemplate(
+        weddingId: number,
+        requestBody: GenerateAiEmailTemplateDto,
+    ): CancelablePromise<EmailTemplateResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/email-notification/generate-ai-template/{weddingId}',
+            path: {
+                'weddingId': weddingId,
+            },
             body: requestBody,
             mediaType: 'application/json',
         });
