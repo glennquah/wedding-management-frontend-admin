@@ -1,4 +1,4 @@
-import { DatePicker, ItemRankingList } from '@shared/components';
+import { DateRangePicker, ItemRankingList } from '@shared/components';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { Calendar } from 'lucide-react';
 
@@ -29,25 +29,29 @@ export function DatePreferencesCard({
         <CardDescription>Set your preferred date range and constraints</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium mb-2 block">Earliest Date</label>
-            <DatePicker
-              selectedDates={earliestDate ? [earliestDate] : []}
-              onChange={onEarliestDateChange}
-              placeholder="Select earliest date"
-              className="w-full"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium mb-2 block">Latest Date</label>
-            <DatePicker
-              selectedDates={latestDate ? [latestDate] : []}
-              onChange={onLatestDateChange}
-              placeholder="Select latest date"
-              className="w-full"
-            />
-          </div>
+        <div>
+          <label className="text-sm font-medium mb-2 block">Wedding Date Range</label>
+          <DateRangePicker
+            value={{
+              startDate: earliestDate || undefined,
+              endDate: latestDate || undefined,
+            }}
+            onChange={(range) => {
+              if (range.startDate) {
+                onEarliestDateChange([range.startDate]);
+              } else {
+                onEarliestDateChange([]);
+              }
+
+              if (range.endDate) {
+                onLatestDateChange([range.endDate]);
+              } else {
+                onLatestDateChange([]);
+              }
+            }}
+            placeholder="Select date range"
+            className="w-full"
+          />
         </div>
         <div>
           <ItemRankingList

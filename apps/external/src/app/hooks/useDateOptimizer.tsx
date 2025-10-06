@@ -211,11 +211,14 @@ export function useDateOptimizer() {
           earliestDate,
           latestDate,
           preferredDays,
-          lastResults: dateRecommendations.length > 0 ? {
-            success: true,
-            message: 'Saved recommendations',
-            recommendations: dateRecommendations,
-          } : undefined,
+          lastResults:
+            dateRecommendations.length > 0
+              ? {
+                  success: true,
+                  message: 'Saved recommendations',
+                  recommendations: dateRecommendations,
+                }
+              : undefined,
         });
       } catch (error) {
         console.error('Error auto-saving preferences:', error);
@@ -250,7 +253,10 @@ export function useDateOptimizer() {
 
         if (startDate && endDate) {
           start = new Date(startDate);
+          start.setUTCHours(0, 0, 0, 0);
+
           end = new Date(endDate);
+          end.setUTCHours(23, 59, 59, 999);
         } else {
           // Get start and end dates for the month (with buffer)
           start = new Date(selectedMonth);
@@ -313,15 +319,33 @@ export function useDateOptimizer() {
       const unavailabilityMap: Record<number, string[]> = {};
 
       for (const attendee of freshAvailabilityData) {
-        const unavailableDates = attendee.busySlots
-          .map((slot) => {
-            // Extract date part only (YYYY-MM-DD)
-            return slot.start?.split('T')[0] || '';
-          })
-          .filter(Boolean);
-        // Remove duplicates
-        unavailabilityMap[attendee.attendeeId] = [...new Set(unavailableDates)];
+        const unavailableDates = new Set<string>();
+
+        for (const slot of attendee.busySlots) {
+          if (!slot.start || !slot.end) continue;
+
+          const start = new Date(slot.start);
+          const end = new Date(slot.end);
+
+          // Get the date part in UTC to establish a baseline
+          let current = new Date(
+            Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()),
+          );
+          const endDate = new Date(
+            Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate()),
+          );
+
+          // Iterate through each day the event touches, in a timezone-agnostic way
+          while (current <= endDate) {
+            const unavailableDate = current.toISOString().slice(0, 10);
+            unavailableDates.add(unavailableDate);
+            current.setUTCDate(current.getUTCDate() + 1);
+          }
+        }
+
+        unavailabilityMap[attendee.attendeeId] = Array.from(unavailableDates);
       }
+      console.log('Final unavailability map:', JSON.stringify(unavailabilityMap, null, 2));
 
       // Separate main couple and key attendees
       const mainCoupleUnavailability = mainCouple.map((partner) => ({
@@ -353,7 +377,9 @@ export function useDateOptimizer() {
 
         // Show success toast
         if (response.recommendations.length > 0) {
-          toast.success(`Successfully generated ${response.recommendations.length} date recommendation${response.recommendations.length === 1 ? '' : 's'}`);
+          toast.success(
+            `Successfully generated ${response.recommendations.length} date recommendation${response.recommendations.length === 1 ? '' : 's'}`,
+          );
         } else {
           toast.info('No viable dates found for your criteria');
         }
