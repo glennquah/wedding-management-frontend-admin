@@ -24,6 +24,7 @@ type AccompanyingGuestData = {
 type GuestFormData = Partial<CreateGuestDto> & {
   id?: number;
   accompanyingGuests?: AccompanyingGuestData[];
+  sendRsvpEmail?: boolean;
 };
 
 type GuestFormSetter = (guest: GuestFormData) => void;
@@ -37,6 +38,7 @@ const getDefaultNewGuest = (weddingId: number): GuestFormData => ({
   weddingId,
   primaryGuestId: undefined,
   accompanyingGuests: [],
+  sendRsvpEmail: false,
 });
 
 // Guest count bucket capacity mappings
@@ -363,6 +365,7 @@ export function useGuestManager() {
         confirmationStatus: ConfirmationStatus.PENDING,
         weddingId: currentWeddingId!,
         primaryGuestId: undefined,
+        sendEmail: newGuest.sendRsvpEmail || false,
       };
 
       const accompanyingGuestsData: CreateGuestDto[] = [];
@@ -391,12 +394,6 @@ export function useGuestManager() {
 
       setNewGuest(getDefaultNewGuest(currentWeddingId!));
       setIsAddingGuest(false);
-
-      // Show email modal for the newly added guest
-      setEmailModalGuest({
-        name: primaryGuestData.name!,
-        email: primaryGuestData.email!,
-      });
 
       toast.success('Guest added successfully!');
     } catch (err) {

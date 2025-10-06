@@ -203,4 +203,24 @@ export class GuestsService {
             },
         });
     }
+    /**
+     * Toggle guest attendance status
+     * @param id
+     * @returns GuestResponseDto The guest attendance has been toggled.
+     * @throws ApiError
+     */
+    public static guestControllerMarkAttendance(
+        id: number,
+    ): CancelablePromise<GuestResponseDto> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/guests/{id}/mark-attendance',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Guest not found.`,
+            },
+        });
+    }
 }

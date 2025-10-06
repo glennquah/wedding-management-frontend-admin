@@ -13,6 +13,7 @@ import {
 import { EmailModal } from '@shared/components/EmailModal';
 import FormField from '@shared/components/FormField';
 import GuestSummaryStats from '@shared/components/guest-management/GuestSummaryStats';
+import { Checkbox } from '@shared/components/ui/checkbox';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import { SingleSelectDropdown } from '@shared/components/ui/form/singleSelectDropdown';
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
@@ -27,6 +28,7 @@ type AccompanyingGuestData = {
 type GuestFormData = Partial<CreateGuestDto> & {
   id?: number;
   accompanyingGuests?: AccompanyingGuestData[];
+  sendRsvpEmail?: boolean;
 };
 
 export default function GuestListPage() {
@@ -124,6 +126,24 @@ export default function GuestListPage() {
         required
         placeholder="Guest email address"
       />
+    </div>,
+
+    <div key="sendRsvpEmail" className="md:col-span-2">
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="sendRsvpEmail"
+          checked={guest.sendRsvpEmail || false}
+          onCheckedChange={(checked) =>
+            setGuest({ ...guest, sendRsvpEmail: checked as boolean })
+          }
+        />
+        <label
+          htmlFor="sendRsvpEmail"
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          Send RSVP email notification to guest
+        </label>
+      </div>
     </div>,
 
     <div key="accompanyingGuests" className="md:col-span-2">
