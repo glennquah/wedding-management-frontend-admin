@@ -1,44 +1,17 @@
 import { Button } from '@shared/components/ui/button';
 import { Checkbox } from '@shared/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
-import { ConfirmationStatus, GuestResponseDto } from '@wedding/api-types';
+import { GuestResponseDto } from '@wedding/api-types';
+import React from 'react';
 
-// Helper functions for confirmation status
-const getConfirmationStatusVariant = (
-  status: ConfirmationStatus,
-): 'default' | 'secondary' | 'destructive' | 'outline' => {
-  switch (status) {
-    case ConfirmationStatus.CONFIRMED:
-      return 'default';
-    case ConfirmationStatus.REJECTED:
-      return 'destructive';
-    default:
-      return 'outline';
-  }
-};
+/**
+ * Constants for email truncation
+ */
+const EMAIL_TRUNCATE_LENGTH = 12;
 
-const getConfirmationLabel = (status: ConfirmationStatus) => {
-  switch (status) {
-    case ConfirmationStatus.CONFIRMED:
-      return 'Confirmed';
-    case ConfirmationStatus.REJECTED:
-      return 'Declined';
-    default:
-      return 'Pending';
-  }
-};
-
-const getConfirmationIcon = (status: ConfirmationStatus) => {
-  switch (status) {
-    case ConfirmationStatus.CONFIRMED:
-      return '✓';
-    case ConfirmationStatus.REJECTED:
-      return '✗';
-    default:
-      return '?';
-  }
-};
-
+/**
+ * Props for attendance columns configuration
+ */
 interface AttendanceColumnsProps {
   guests: GuestResponseDto[];
   onToggleAttendance: (guest: GuestResponseDto) => void;
@@ -46,6 +19,119 @@ interface AttendanceColumnsProps {
   onOpenAccompanyingGuestDialog: (primaryGuestId: number) => void;
 }
 
+/**
+ * Get the count of accompanying guests for a primary guest
+ */
+const getAccompanyingGuestsCount = (
+  guests: GuestResponseDto[],
+  primaryGuestId: number,
+): number => {
+  return guests.filter((g) => g.primaryGuestId === primaryGuestId).length;
+};
+
+/**
+ * Truncate email if it exceeds the maximum length
+ */
+const truncateEmail = (email: string): string => {
+  if (!email) return '-';
+  return email.length > EMAIL_TRUNCATE_LENGTH
+    ? `${email.substring(0, EMAIL_TRUNCATE_LENGTH)}...`
+    : email;
+};
+
+/**
+ * Calculate the displayed attendance state based on current state and pending changes
+ */
+const getDisplayedAttendanceState = (
+  currentAttendance: boolean,
+  hasPendingChange: boolean,
+): boolean => {
+  return hasPendingChange ? !currentAttendance : currentAttendance;
+};
+
+/**
+ * Name cell component
+ */
+const NameCell = React.memo<{ name: string }>(({ name }) => (
+  <div className="font-medium text-foreground">{name}</div>
+));
+NameCell.displayName = 'NameCell';
+
+/**
+ * Group cell component
+ */
+const GroupCell = React.memo<{ group?: string }>(({ group }) => (
+  <div className="text-sm text-foreground">{group || '-'}</div>
+));
+GroupCell.displayName = 'GroupCell';
+
+/**
+ * Email cell component
+ */
+const EmailCell = React.memo<{ email: string }>(({ email }) => (
+  <div className="text-sm text-foreground" title={email}>
+    {truncateEmail(email)}
+  </div>
+));
+EmailCell.displayName = 'EmailCell';
+
+/**
+ * Dietary requirements cell component
+ */
+const AllergiesCell = React.memo<{ allergies?: string }>(({ allergies }) => (
+  <div className="text-sm text-foreground">{allergies || '-'}</div>
+));
+AllergiesCell.displayName = 'AllergiesCell';
+
+/**
+ * Accompanying guests cell component
+ */
+interface AccompanyingGuestsCellProps {
+  count: number;
+  onOpenDialog: () => void;
+}
+
+const AccompanyingGuestsCell = React.memo<AccompanyingGuestsCellProps>(
+  ({ count, onOpenDialog }) => {
+    if (count === 0) {
+      return <div className="text-sm text-foreground">0 guests</div>;
+    }
+
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onOpenDialog}
+        className="h-auto p-1 text-xs font-normal justify-start whitespace-nowrap min-w-0 hover:bg-brand-50 hover:text-brand-700"
+      >
+        +{count}
+      </Button>
+    );
+  },
+);
+AccompanyingGuestsCell.displayName = 'AccompanyingGuestsCell';
+
+/**
+ * Attendance checkbox cell component
+ */
+interface AttendanceCellProps {
+  isChecked: boolean;
+  onToggle: () => void;
+}
+
+const AttendanceCell = React.memo<AttendanceCellProps>(({ isChecked, onToggle }) => (
+  <Checkbox
+    checked={isChecked}
+    onCheckedChange={onToggle}
+    aria-label="Mark attendance"
+    className="border-black data-[state=checked]:bg-black data-[state=checked]:border-black"
+  />
+));
+AttendanceCell.displayName = 'AttendanceCell';
+
+/**
+ * Generate column definitions for the attendance table
+ */
 export const getAttendanceColumns = ({
   guests,
   onToggleAttendance,
@@ -56,75 +142,51 @@ export const getAttendanceColumns = ({
     {
       accessorKey: 'name',
       header: 'Name',
-      cell: ({ row }) => <div className="font-medium text-foreground">{row.getValue('name')}</div>,
+      cell: ({ row }) => <NameCell name={row.getValue('name')} />,
     },
     {
       accessorKey: 'group',
       header: 'Group',
-      cell: ({ row }) => (
-        <div className="text-sm text-foreground">{row.getValue('group') || '-'}</div>
-      ),
+      cell: ({ row }) => <GroupCell group={row.getValue('group')} />,
     },
     {
       accessorKey: 'email',
       header: 'Email',
-      cell: ({ row }) => {
-        const email = row.getValue('email') as string;
-        const truncatedEmail = email && email.length > 12 ? email.substring(0, 12) + '...' : email;
-        return (
-          <div className="text-sm text-foreground" title={email}>
-            {truncatedEmail || '-'}
-          </div>
-        );
-      },
+      cell: ({ row }) => <EmailCell email={row.getValue('email')} />,
     },
     {
       id: 'accompanyingGuests',
       header: 'Accompanying Guests',
       cell: ({ row }) => {
         const guest = row.original;
-        const accompanyingGuestsList = guests.filter((g) => g.primaryGuestId === guest.id);
-
-        if (accompanyingGuestsList.length === 0) {
-          return <div className="text-sm text-foreground">0 guests</div>;
-        }
+        const count = getAccompanyingGuestsCount(guests, guest.id);
 
         return (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onOpenAccompanyingGuestDialog(guest.id)}
-            className="h-auto p-1 text-xs font-normal justify-start whitespace-nowrap min-w-0 hover:bg-brand-50 hover:text-brand-700"
-          >
-            +{accompanyingGuestsList.length}
-          </Button>
+          <AccompanyingGuestsCell
+            count={count}
+            onOpenDialog={() => onOpenAccompanyingGuestDialog(guest.id)}
+          />
         );
       },
     },
     {
       accessorKey: 'allergies',
       header: 'Dietary Requirements',
-      cell: ({ row }) => (
-        <div className="text-sm text-foreground">{row.getValue('allergies') || '-'}</div>
-      ),
+      cell: ({ row }) => <AllergiesCell allergies={row.getValue('allergies')} />,
     },
     {
       id: 'attendance',
       header: 'Attendance',
       cell: ({ row }) => {
         const guest = row.original;
-        // Determine the checkbox state based on current attendance and pending changes
         const hasPendingChange = hasAttendanceChange(guest.id);
         const currentAttendance = guest.attendance || false;
-        // If there's a pending change, toggle the current state
-        const displayedState = hasPendingChange ? !currentAttendance : currentAttendance;
+        const displayedState = getDisplayedAttendanceState(currentAttendance, hasPendingChange);
 
         return (
-          <Checkbox
-            checked={displayedState}
-            onCheckedChange={() => onToggleAttendance(guest)}
-            aria-label="Mark attendance"
-            className="border-black data-[state=checked]:bg-black data-[state=checked]:border-black"
+          <AttendanceCell
+            isChecked={displayedState}
+            onToggle={() => onToggleAttendance(guest)}
           />
         );
       },

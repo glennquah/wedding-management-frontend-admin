@@ -1,454 +1,161 @@
 'use client';
 
-import { ConfirmationStatus, CreateGuestDto, GuestsService, GuestResponseDto } from '@shared/api';
-import {
-  Button,
-  DataTable,
-  DeleteConfirmationModal,
-  GroupSelectDropdown,
-  PageHeader,
-} from '@shared/components';
+import { ConfirmationStatus } from '@shared/api';
+import { Button, DataTable, DeleteConfirmationModal, PageHeader } from '@shared/components';
 import { EmailModal } from '@shared/components/EmailModal';
-import FormField from '@shared/components/FormField';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
-import { SingleSelectDropdown } from '@shared/components/ui/form/singleSelectDropdown';
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
-import { Plus, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import React, { useMemo } from 'react';
 import { useGuestManager } from '../../hooks/useGuestManager';
 import { AccompanyingGuestAttendanceDialog } from './components/accompanying-guest-attendance-dialog';
 import { getAttendanceColumns } from './components/attendance-columns';
-
-type AccompanyingGuestData = {
-  name: string;
-  allergies?: string;
-  confirmationStatus: ConfirmationStatus;
-};
-
-type GuestFormData = Partial<CreateGuestDto> & {
-  id?: number;
-  accompanyingGuests?: AccompanyingGuestData[];
-};
+import { AttendanceStats } from './components/AttendanceStats';
+import { useAddGuestFormFields, useEditGuestFormFields } from './components/GuestFormFields';
+import {
+  ATTENDANCE_MESSAGES,
+  ATTENDANCE_PAGE_CONSTANTS,
+  BUTTON_LABELS,
+  DIALOG_TITLES,
+} from './constants';
+import { useAttendanceManager } from './hooks/useAttendanceManager';
+import { GuestFormData } from './types';
+import { calculateAttendanceStats, getAccompanyingGuestCount } from './utils';
 
 export default function GuestListPage() {
-  const router = useRouter();
   const isMobile = useIsMobileScreen();
+
+  // Guest management hook
   const {
-    // Core data
     guests,
     wedding,
     primaryGuests,
     existingGroups,
     isLoading,
-
-    // Capacity management
     getGuestCapacityInfo,
-
-    // Modal states
     isAddingGuest,
     editingGuest,
     deleteConfirmGuest,
     isSubmitting,
     emailModalGuest,
-
-    // Form data
     newGuest,
     setNewGuest,
     setEditingGuest,
-
-    // Form field management
     addAccompanyingGuestField,
     removeAccompanyingGuestField,
     updateAccompanyingGuest,
-
-    // CRUD operations
     fetchGuests,
-
-    // Handlers
     handleAddGuest,
     handleUpdateGuest,
     confirmDeleteGuest,
-    handleEditGuest,
-
-    // Modal controls
-    openAddGuestModal,
     closeAddGuestModal,
     closeEditGuestModal,
-    openDeleteConfirmModal,
     closeDeleteConfirmModal,
     closeEmailModal,
   } = useGuestManager();
 
-  // Get capacity information
-  const capacityInfo = getGuestCapacityInfo();
+  // Memoized capacity information
+  const capacityInfo = useMemo(() => getGuestCapacityInfo(), [getGuestCapacityInfo]);
 
-  // Filter to only show confirmed guests (both primary and accompanying)
-  const confirmedGuests = guests.filter(
-    (guest) => guest.confirmationStatus === ConfirmationStatus.CONFIRMED,
+  // Memoized filtered guest lists
+  const confirmedGuests = useMemo(
+    () => guests.filter((guest) => guest.confirmationStatus === ConfirmationStatus.CONFIRMED),
+    [guests],
   );
 
-  const confirmedPrimaryGuests = primaryGuests.filter(
-    (guest) => guest.confirmationStatus === ConfirmationStatus.CONFIRMED,
+  const confirmedPrimaryGuests = useMemo(
+    () => primaryGuests.filter((guest) => guest.confirmationStatus === ConfirmationStatus.CONFIRMED),
+    [primaryGuests],
   );
 
-  // State for tracking attendance changes
-  const [attendanceChanges, setAttendanceChanges] = useState<Set<number>>(new Set());
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [isApplyingChanges, setIsApplyingChanges] = useState(false);
-
-  // State for accompanying guest attendance dialog
-  const [accompanyingGuestDialog, setAccompanyingGuestDialog] = useState<{
-    open: boolean;
-    guests: GuestResponseDto[];
-  }>({ open: false, guests: [] });
-
-  // Handler to toggle attendance locally (without backend call)
-  const handleToggleAttendance = (guest: GuestResponseDto) => {
-    setAttendanceChanges((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(guest.id)) {
-        newSet.delete(guest.id);
-      } else {
-        newSet.add(guest.id);
-      }
-      return newSet;
-    });
-  };
-
-  // Handler to apply attendance changes
-  const handleApplyChanges = async () => {
-    setIsApplyingChanges(true);
-    try {
-      // Call backend for each guest with attendance change
-      await Promise.all(
-        Array.from(attendanceChanges).map((guestId) =>
-          GuestsService.guestControllerMarkAttendance(guestId)
-        )
-      );
-      // Clear changes and close dialog
-      setAttendanceChanges(new Set());
-      setShowConfirmDialog(false);
-      // Refetch guests to show updated attendance
-      await fetchGuests();
-    } catch (error) {
-      console.error('Failed to apply attendance changes:', error);
-    } finally {
-      setIsApplyingChanges(false);
-    }
-  };
-
-  // Check if guest has pending attendance change
-  const hasAttendanceChange = (guestId: number) => attendanceChanges.has(guestId);
-
-  // Handler to open accompanying guest attendance dialog
-  const handleOpenAccompanyingGuestDialog = (primaryGuestId: number) => {
-    const accompanyingGuestsList = confirmedGuests.filter(
-      (g) => g.primaryGuestId === primaryGuestId,
-    );
-    setAccompanyingGuestDialog({
-      open: true,
-      guests: accompanyingGuestsList,
-    });
-  };
-
-  // Handler to close accompanying guest attendance dialog
-  const handleCloseAccompanyingGuestDialog = () => {
-    setAccompanyingGuestDialog({ open: false, guests: [] });
-  };
-
-  // Handler to apply accompanying guest attendance changes
-  const handleApplyAccompanyingGuestChanges = async (guestIds: number[]) => {
-    setIsApplyingChanges(true);
-    try {
-      // Call backend for each guest
-      await Promise.all(
-        guestIds.map((guestId) => GuestsService.guestControllerMarkAttendance(guestId))
-      );
-      // Close dialog and refetch guests
-      handleCloseAccompanyingGuestDialog();
-      await fetchGuests();
-    } catch (error) {
-      console.error('Failed to apply accompanying guest attendance changes:', error);
-    } finally {
-      setIsApplyingChanges(false);
-    }
-  };
-
-  // Column definitions for DataTable using attendance columns
-  const columns = getAttendanceColumns({
-    guests: confirmedGuests,
-    onToggleAttendance: handleToggleAttendance,
+  // Attendance management hook
+  const {
+    attendanceChanges,
+    showConfirmDialog,
+    isApplyingChanges,
+    accompanyingGuestDialog,
+    handleToggleAttendance,
     hasAttendanceChange,
-    onOpenAccompanyingGuestDialog: handleOpenAccompanyingGuestDialog,
-  });
+    handleApplyChanges,
+    handleOpenAccompanyingGuestDialog,
+    handleCloseAccompanyingGuestDialog,
+    handleApplyAccompanyingGuestChanges,
+    openConfirmDialog,
+    closeConfirmDialog,
+  } = useAttendanceManager(confirmedGuests, fetchGuests);
 
-  // Add Guest Form Fields (without dietary requirements and confirmation status)
-  const addGuestFormFields = (
-    guest: GuestFormData,
-    setGuest: React.Dispatch<React.SetStateAction<GuestFormData>>,
-  ) => [
-    <div key="name" className="md:col-span-2">
-      <FormField
-        label="Name *"
-        id="name"
-        type="text"
-        value={guest.name || ''}
-        onChange={(e) => setGuest({ ...guest, name: e.target.value })}
-        required
-        placeholder="Guest Name"
-      />
-    </div>,
+  // Memoized column definitions
+  const columns = useMemo(
+    () =>
+      getAttendanceColumns({
+        guests: confirmedGuests,
+        onToggleAttendance: handleToggleAttendance,
+        hasAttendanceChange,
+        onOpenAccompanyingGuestDialog: handleOpenAccompanyingGuestDialog,
+      }),
+    [confirmedGuests, handleToggleAttendance, hasAttendanceChange, handleOpenAccompanyingGuestDialog],
+  );
 
-    <div key="group" className="md:col-span-2">
-      <GroupSelectDropdown
-        label="Group *"
-        existingGroups={existingGroups}
-        selected={guest.group || ''}
-        setSelected={(group) => setGuest({ ...guest, group })}
-        placeholder="Select or add group"
-      />
-    </div>,
+  // Memoized form fields
+  const addGuestFormFields = useAddGuestFormFields(
+    newGuest,
+    setNewGuest,
+    existingGroups,
+    capacityInfo,
+    addAccompanyingGuestField,
+    removeAccompanyingGuestField,
+    updateAccompanyingGuest,
+  );
 
-    <div key="email" className="md:col-span-2">
-      <FormField
-        label="Email *"
-        id="email"
-        type="email"
-        value={guest.email || ''}
-        onChange={(e) => setGuest({ ...guest, email: e.target.value })}
-        required
-        placeholder="Guest email address"
-      />
-    </div>,
+  const editGuestFormFields = editingGuest
+    ? useEditGuestFormFields(
+        editingGuest,
+        setEditingGuest as React.Dispatch<React.SetStateAction<GuestFormData>>,
+        existingGroups,
+        capacityInfo,
+        addAccompanyingGuestField,
+        removeAccompanyingGuestField,
+        updateAccompanyingGuest,
+      )
+    : [];
 
-    <div key="accompanyingGuests" className="md:col-span-2">
-      <div className="flex justify-between items-center">
-        <label className="block text-sm font-medium text-foreground">Accompanying Guests</label>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => addAccompanyingGuestField(guest, setGuest)}
-          className="text-brand-600 hover:text-brand-700"
-          disabled={capacityInfo.isAtCapacity}
-          title={capacityInfo.isAtCapacity ? 'Guest limit reached' : 'Add accompanying guest'}
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Add Guest
-        </Button>
-      </div>
-      <div className="space-y-4">
-        {guest.accompanyingGuests &&
-          guest.accompanyingGuests.map(
-            (accompanyingGuest: AccompanyingGuestData, index: number) => (
-              <div key={index} className="rounded-lg ">
-                <div className="flex items-end gap-1">
-                  <div className="flex-1">
-                    <FormField
-                      label="Name"
-                      id={`accompanying-name-${index}`}
-                      type="text"
-                      value={accompanyingGuest.name}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        updateAccompanyingGuest(index, 'name', e.target.value, guest, setGuest)
-                      }
-                      placeholder={`Guest ${index + 1} name`}
-                    />
-                  </div>
-                  {(guest.accompanyingGuests?.length || 0) > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeAccompanyingGuestField(index, guest, setGuest)}
-                      className="text-red-600 hover:text-red-700 px-2 mb-1"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ),
-          )}
-      </div>
-    </div>,
-  ];
+  // Memoized statistics
+  const attendanceStats = useMemo(
+    () => calculateAttendanceStats(confirmedGuests),
+    [confirmedGuests],
+  );
 
-  // Edit Guest Form Fields (with all fields including dietary requirements and confirmation status)
-  const editGuestFormFields = (
-    guest: GuestFormData,
-    setGuest: React.Dispatch<React.SetStateAction<GuestFormData>>,
-  ) => [
-    <div key="name" className="md:col-span-2">
-      <FormField
-        label="Name *"
-        id="name"
-        type="text"
-        value={guest.name || ''}
-        onChange={(e) => setGuest({ ...guest, name: e.target.value })}
-        required
-        placeholder="Guest Name"
-      />
-    </div>,
+  // Memoized page description
+  const pageDescription = useMemo(() => {
+    if (wedding) {
+      return ATTENDANCE_MESSAGES.DESCRIPTION_WITH_CAPACITY(capacityInfo.current, capacityInfo.limit);
+    }
+    return ATTENDANCE_MESSAGES.DESCRIPTION_WITHOUT_CAPACITY;
+  }, [wedding, capacityInfo]);
 
-    <div key="group" className="md:col-span-2">
-      <GroupSelectDropdown
-        label="Group *"
-        existingGroups={existingGroups}
-        selected={guest.group || ''}
-        setSelected={(group) => setGuest({ ...guest, group })}
-        placeholder="Select or add group"
-      />
-    </div>,
-
-    <div key="email" className="md:col-span-2">
-      <FormField
-        label="Email *"
-        id="email"
-        type="email"
-        value={guest.email || ''}
-        onChange={(e) => setGuest({ ...guest, email: e.target.value })}
-        required
-        placeholder="Guest email address"
-      />
-    </div>,
-
-    <div key="allergies" className="md:col-span-2">
-      <FormField
-        label="Dietary Requirements"
-        id="allergies"
-        type="text"
-        value={guest.allergies || ''}
-        onChange={(e) => setGuest({ ...guest, allergies: e.target.value })}
-        placeholder="Vegetarian, Gluten-Free, etc."
-      />
-    </div>,
-
-    <div key="confirmationStatus" className="md:col-span-2">
-      <SingleSelectDropdown
-        label="Confirmation Status"
-        options={Object.values(ConfirmationStatus)}
-        selected={guest.confirmationStatus || ConfirmationStatus.PENDING}
-        setSelected={(selected) =>
-          setGuest({
-            ...guest,
-            confirmationStatus: selected as ConfirmationStatus,
-          })
-        }
-        placeholder="Select confirmation status"
-      />
-    </div>,
-
-    <div key="accompanyingGuests" className="md:col-span-2">
-      <div className="flex justify-between items-center mb-2">
-        <label className="block text-sm font-medium text-foreground">Accompanying Guests</label>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => addAccompanyingGuestField(guest, setGuest)}
-          className="text-brand-600 hover:text-brand-700"
-          disabled={capacityInfo.isAtCapacity}
-          title={capacityInfo.isAtCapacity ? 'Guest limit reached' : 'Add accompanying guest'}
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Add Guest
-        </Button>
-      </div>
-      <div className="space-y-4">
-        {guest.accompanyingGuests &&
-          guest.accompanyingGuests.map(
-            (accompanyingGuest: AccompanyingGuestData, index: number) => (
-              <div key={index} className="rounded-lg ">
-                <div className="flex items-center justify-end">
-                  {(guest.accompanyingGuests?.length || 0) > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeAccompanyingGuestField(index, guest, setGuest)}
-                      className="text-red-600 hover:text-red-700 px-2"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                  <div>
-                    <FormField
-                      label="Name"
-                      id={`accompanying-name-${index}`}
-                      type="text"
-                      value={accompanyingGuest.name}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        updateAccompanyingGuest(index, 'name', e.target.value, guest, setGuest)
-                      }
-                      placeholder={`Guest ${index + 1} name`}
-                    />
-                  </div>
-                  <div>
-                    <FormField
-                      label="Dietary Requirements"
-                      id={`accompanying-allergies-${index}`}
-                      type="text"
-                      value={accompanyingGuest.allergies || ''}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        updateAccompanyingGuest(index, 'allergies', e.target.value, guest, setGuest)
-                      }
-                      placeholder="Dietary requirements"
-                    />
-                  </div>
-                  <div>
-                    <SingleSelectDropdown
-                      label="Confirmation Status"
-                      options={Object.values(ConfirmationStatus)}
-                      selected={accompanyingGuest.confirmationStatus || ConfirmationStatus.PENDING}
-                      setSelected={(selected) =>
-                        updateAccompanyingGuest(
-                          index,
-                          'confirmationStatus',
-                          selected as ConfirmationStatus,
-                          guest,
-                          setGuest,
-                        )
-                      }
-                      placeholder="Select status"
-                      className="mt-4"
-                    />
-                  </div>
-                </div>
-              </div>
-            ),
-          )}
-      </div>
-    </div>,
-  ];
+  // Memoized delete confirmation message
+  const deleteConfirmationMessage = useMemo(() => {
+    if (!deleteConfirmGuest) return '';
+    const accompanyingCount = getAccompanyingGuestCount(guests, deleteConfirmGuest.id);
+    return ATTENDANCE_MESSAGES.DELETE_CONFIRMATION(deleteConfirmGuest.name, accompanyingCount);
+  }, [deleteConfirmGuest, guests]);
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
       {!isMobile && <div className="mt-6 w-full"></div>}
 
       <div className="container mx-auto px-4 pt-4 md:pt-6">
-        <PageHeader
-          title="Attendance"
-          description={
-            wedding
-              ? `Manage your wedding guests attendance (${capacityInfo.current}/${capacityInfo.limit} guests)\nOnly confirmed guests will be in the list.`
-              : 'Manage your wedding guests attendance\nOnly confirmed guests will be in the list.'
-          }
-        />
+        <PageHeader title={ATTENDANCE_MESSAGES.TITLE} description={pageDescription} />
 
         {/* Add Guest Modal */}
         <FormDialog
           open={isAddingGuest}
           onOpenChange={closeAddGuestModal}
-          title="Add New Guest"
+          title={DIALOG_TITLES.ADD_GUEST}
           isSubmitting={isSubmitting}
           onSubmit={handleAddGuest}
           onCancel={closeAddGuestModal}
-          submitButtonText="Add Guest"
-          formFields={addGuestFormFields(newGuest, setNewGuest)}
+          submitButtonText={BUTTON_LABELS.ADD_GUEST}
+          formFields={addGuestFormFields}
           noOfColumns={2}
         />
 
@@ -457,49 +164,24 @@ export default function GuestListPage() {
           <FormDialog
             open={!!editingGuest}
             onOpenChange={closeEditGuestModal}
-            title="Edit Guest"
+            title={DIALOG_TITLES.EDIT_GUEST}
             isSubmitting={isSubmitting}
             onSubmit={handleUpdateGuest}
             onCancel={closeEditGuestModal}
-            submitButtonText="Update Guest"
-            formFields={editGuestFormFields(
-              editingGuest!,
-              setEditingGuest as React.Dispatch<React.SetStateAction<GuestFormData>>,
-            )}
+            submitButtonText={BUTTON_LABELS.UPDATE_GUEST}
+            formFields={editGuestFormFields}
             noOfColumns={2}
           />
         )}
 
         {/* Summary Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-          <div className="bg-transparent border-brand-200 rounded-lg border p-3 sm:p-4">
-            <div className="text-xl sm:text-2xl font-bold text-brand-600">
-              {confirmedGuests.length}
-            </div>
-            <div className="text-xs sm:text-sm text-muted-foreground">Total Confirmed Guests</div>
-          </div>
-          <div className="bg-transparent border-brand-200 rounded-lg border p-3 sm:p-4">
-            <div className="text-xl sm:text-2xl font-bold text-green-600">
-              {confirmedGuests.filter((g) => g.attendance).length}
-            </div>
-            <div className="text-xs sm:text-sm text-muted-foreground">Present (Marked)</div>
-          </div>
-          <div className="bg-transparent border-brand-200 rounded-lg border p-3 sm:p-4">
-            <div className="text-xl sm:text-2xl font-bold text-red-600">
-              {confirmedGuests.filter((g) => !g.attendance).length}
-            </div>
-            <div className="text-xs sm:text-sm text-muted-foreground">Not Present (Unmarked)</div>
-          </div>
-        </div>
+        <AttendanceStats stats={attendanceStats} />
 
         {/* Apply Changes Button */}
         {attendanceChanges.size > 0 && (
           <div className="mb-4 flex justify-end">
-            <Button
-              onClick={() => setShowConfirmDialog(true)}
-              className="bg-brand-600 hover:bg-brand-700 text-white"
-            >
-              Apply Changes ({attendanceChanges.size})
+            <Button onClick={openConfirmDialog} className="bg-brand-600 hover:bg-brand-700 text-white">
+              {BUTTON_LABELS.APPLY_CHANGES(attendanceChanges.size)}
             </Button>
           </div>
         )}
@@ -512,12 +194,12 @@ export default function GuestListPage() {
           enableSelection={false}
           enableColumnVisibility={true}
           enablePagination={true}
-          defaultPageSize={10}
+          defaultPageSize={ATTENDANCE_PAGE_CONSTANTS.DEFAULT_PAGE_SIZE}
           title={`Confirmed Guests (${confirmedGuests.length})`}
           isLoading={isLoading}
-          loadingMessage="Loading guests..."
-          emptyMessage="No confirmed guests yet."
-          emptyDescription="Guests will appear here once they confirm their attendance."
+          loadingMessage={ATTENDANCE_MESSAGES.LOADING}
+          emptyMessage={ATTENDANCE_MESSAGES.EMPTY_MESSAGE}
+          emptyDescription={ATTENDANCE_MESSAGES.EMPTY_DESCRIPTION}
         />
 
         {/* Delete Confirmation Modal */}
@@ -525,22 +207,7 @@ export default function GuestListPage() {
           open={!!deleteConfirmGuest}
           onOpenChange={closeDeleteConfirmModal}
           itemName={deleteConfirmGuest?.name || 'this guest'}
-          description={
-            deleteConfirmGuest && (
-              <>
-                Are you sure you want to delete {deleteConfirmGuest.name}?
-                {(() => {
-                  const accompanyingCount = guests.filter(
-                    (g) => g.primaryGuestId === deleteConfirmGuest?.id,
-                  ).length;
-                  return accompanyingCount > 0
-                    ? ` This will also delete ${accompanyingCount} accompanying guest${accompanyingCount === 1 ? '' : 's'}.`
-                    : '';
-                })()}{' '}
-                This action cannot be undone.
-              </>
-            )
-          }
+          description={deleteConfirmationMessage}
           onConfirm={confirmDeleteGuest}
           onCancel={closeDeleteConfirmModal}
         />
@@ -558,12 +225,12 @@ export default function GuestListPage() {
         {/* Confirm Apply Changes Modal */}
         <DeleteConfirmationModal
           open={showConfirmDialog}
-          onOpenChange={() => setShowConfirmDialog(false)}
+          onOpenChange={closeConfirmDialog}
           itemName="attendance changes"
-          description={`Are you sure you want to mark attendance for ${attendanceChanges.size} guest${attendanceChanges.size === 1 ? '' : 's'}?`}
+          description={ATTENDANCE_MESSAGES.APPLY_CHANGES_CONFIRMATION(attendanceChanges.size)}
           onConfirm={handleApplyChanges}
-          onCancel={() => setShowConfirmDialog(false)}
-          confirmButtonText={isApplyingChanges ? 'Applying...' : 'Confirm'}
+          onCancel={closeConfirmDialog}
+          confirmButtonText={isApplyingChanges ? BUTTON_LABELS.APPLYING : BUTTON_LABELS.CONFIRM}
         />
 
         {/* Accompanying Guest Attendance Dialog */}
