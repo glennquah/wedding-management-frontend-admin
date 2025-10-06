@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { MicrositeResponseDto } from '@shared/api';
 import FormField from '@shared/components/FormField';
@@ -8,6 +8,9 @@ export default function MicrositeLogin({
   micrositeData,
   decodedPlanName,
   handleMicrositeLogin,
+  initialFirstName = '',
+  initialLastName = '',
+  initialPassword = '',
 }: {
   micrositeData: MicrositeResponseDto | null;
   decodedPlanName: string;
@@ -19,14 +22,41 @@ export default function MicrositeLogin({
     setPasswordError: (error: string | null) => void,
     setNameError: (error: string | null) => void,
   ) => Promise<void>;
+  initialFirstName?: string;
+  initialLastName?: string;
+  initialPassword?: string;
 }) {
-  // Local form state
-  const [firstNameInput, setFirstNameInput] = useState('');
-  const [lastNameInput, setLastNameInput] = useState('');
-  const [passwordInput, setPasswordInput] = useState('');
+  // Local form state with initial values from URL params
+  const [firstNameInput, setFirstNameInput] = useState(initialFirstName);
+  const [lastNameInput, setLastNameInput] = useState(initialLastName);
+  const [passwordInput, setPasswordInput] = useState(initialPassword);
   const [nameError, setNameError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isValidatingAuth, setIsValidatingAuth] = useState(false);
+
+  // Auto-login if all fields are pre-filled from URL
+  useEffect(() => {
+    const attemptAutoLogin = async () => {
+      if (initialFirstName && initialLastName && initialPassword) {
+        setIsValidatingAuth(true);
+        try {
+          await handleMicrositeLogin(
+            initialFirstName,
+            initialLastName,
+            initialPassword,
+            decodedPlanName,
+            setPasswordError,
+            setNameError,
+          );
+        } finally {
+          setIsValidatingAuth(false);
+        }
+      }
+    };
+
+    attemptAutoLogin();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
 
   // Handle form submission
   const handlePasswordSubmit = async (e: React.FormEvent) => {
