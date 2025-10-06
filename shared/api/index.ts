@@ -46,6 +46,7 @@ export type { GuestLookupDto } from './models/GuestLookupDto';
 export type { GuestResponseDto } from './models/GuestResponseDto';
 export type { HallLayoutDto } from './models/HallLayoutDto';
 export type { InviteCollaboratorDto } from './models/InviteCollaboratorDto';
+export type { InvitePartnerDto } from './models/InvitePartnerDto';
 export type { LayoutConfigDto } from './models/LayoutConfigDto';
 export type { ListingResponseDto } from './models/ListingResponseDto';
 export type { LoginDto } from './models/LoginDto';

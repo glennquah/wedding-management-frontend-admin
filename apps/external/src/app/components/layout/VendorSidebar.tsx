@@ -1,17 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { VendorsService } from '@shared/api';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   CalendarDays,
   CircleDollarSign,
   FileSpreadsheet,
   LayoutDashboard,
+  Settings,
   Users,
 } from 'lucide-react';
-import { signOut } from 'next-auth/react';
-import { VendorsService } from '@shared/api';
+import { signOut, useSession } from 'next-auth/react';
+import { useEffect, useState } from 'react';
 
 export default function VendorSidebar() {
   const { data: session } = useSession();
@@ -42,6 +42,12 @@ export default function VendorSidebar() {
           title: 'Dashboard',
           href: '/',
           icon: LayoutDashboard,
+        },
+        {
+          title: 'Listings',
+          href: '/listing',
+          icon: FileSpreadsheet,
+          disabled: !hasVendorDetails,
         },
         {
           title: 'Revenue',

@@ -50,10 +50,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     const allowedRoutesWithoutWedding = ['/admin', '/admin/account', '/admin/create-wedding'];
-    if (hasNoWedding && pathname && !allowedRoutesWithoutWedding.includes(pathname)) {
+    // Only redirect if store is hydrated to avoid redirecting during initial load
+    if (hasHydrated && hasNoWedding && pathname && !allowedRoutesWithoutWedding.includes(pathname)) {
       router.push('/admin');
     }
-  }, [hasNoWedding, pathname, router]);
+  }, [hasHydrated, hasNoWedding, pathname, router]);
 
   console.log('Session status:', status, 'Session data:', session);
 
