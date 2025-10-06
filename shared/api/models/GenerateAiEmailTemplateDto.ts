@@ -8,9 +8,9 @@ export type GenerateAiEmailTemplateDto = {
      */
     emailPurpose: string;
     /**
-     * Recipient name for personalization
+     * Target audience for the email greeting (e.g., "Dear Close Ones", "Dear Family and Friends", "Dear Valued Guests")
      */
-    recipientName?: string;
+    audience?: string;
     /**
      * Main content or message for the email
      */
@@ -28,17 +28,9 @@ export type GenerateAiEmailTemplateDto = {
      */
     tone?: GenerateAiEmailTemplateDto.tone;
     /**
-     * Text for the call-to-action button
+     * Location address to display on Google Maps. If provided, a "View On Map" button will be included in the email.
      */
-    buttonText?: string;
-    /**
-     * URL for the call-to-action button
-     */
-    buttonUrl?: string;
-    /**
-     * Brand name to use in the template
-     */
-    brandName?: string;
+    mapLocation?: string;
     /**
      * Additional context or special requirements for the email
      */
