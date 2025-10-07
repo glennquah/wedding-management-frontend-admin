@@ -83,6 +83,7 @@ const NotificationTemplateDetailPage = () => {
         <NotificationTemplateDetailView
           template={template}
           isLoading={isLoading}
+          weddingId={template?.notificationDetails?.wedding?.id}
           onTemplateUpdated={fetchTemplate}
           onTemplateDeleted={() => router.push('/notification-templates')}
         />

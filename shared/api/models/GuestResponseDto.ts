@@ -38,6 +38,10 @@ export type GuestResponseDto = {
     primaryGuestId?: number;
     confirmationStatus: ConfirmationStatus;
     /**
+     * Attendance status of the guest
+     */
+    attendance?: boolean;
+    /**
      * List of accompanying guests
      */
     accompanyingGuests?: Array<GuestResponseDto>;
