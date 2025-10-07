@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { useWeddingStore } from '@/app/store/sessionStore';
 import { EmailTemplateWithWeddingDto } from '@shared/api';
 import { NotificationDetailsService } from '@shared/api/services/NotificationDetailsService';
 import { NotificationTemplateDetailView, PageHeader } from '@shared/components';
@@ -12,6 +13,7 @@ import { useParams, useRouter } from 'next/navigation';
 const NotificationTemplateDetailPage = () => {
   const params = useParams();
   const router = useRouter();
+  const selectedWeddingId = useWeddingStore((state) => state.selectedWeddingId);
   const notificationTemplateId = params?.notificationTemplateId
     ? parseInt(params.notificationTemplateId as string)
     : NaN;
@@ -83,6 +85,7 @@ const NotificationTemplateDetailPage = () => {
         <NotificationTemplateDetailView
           template={template}
           isLoading={isLoading}
+          weddingId={selectedWeddingId}
           onTemplateUpdated={fetchTemplate}
           onTemplateDeleted={() => router.push('/admin/notification-templates')}
         />
