@@ -2,16 +2,13 @@
 module.exports = {
   semi: true,
   singleQuote: true,
-  trailingComma: "all",
+  trailingComma: 'all',
   printWidth: 100,
   tabWidth: 2,
   bracketSpacing: true,
-  arrowParens: "always",
-  plugins: [
-    "prettier-plugin-tailwindcss",
-    "@trivago/prettier-plugin-sort-imports",
-  ],
-  importOrder: ["^react(.*)$", "<THIRD_PARTY_MODULES>", "", "^@/.*", "^[./]"],
+  arrowParens: 'always',
+  plugins: ['prettier-plugin-tailwindcss'],
+  importOrder: ['^react(.*)$', '<THIRD_PARTY_MODULES>', '', '^@/.*', '^[./]'],
   importOrderSeparation: true,
   importOrderSortSpecifiers: true,
 };
