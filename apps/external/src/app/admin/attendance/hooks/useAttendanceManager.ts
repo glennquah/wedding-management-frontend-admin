@@ -41,9 +41,26 @@ export function useAttendanceManager(
     setIsApplyingChanges(true);
     try {
       await Promise.all(
-        Array.from(attendanceChanges).map((guestId) =>
-          GuestsService.guestControllerMarkAttendance(guestId),
-        ),
+        Array.from(attendanceChanges).map(async (guestId) => {
+          // Find the guest to determine if we're marking present or absent
+          const guest = confirmedGuests.find((g) => g.id === guestId);
+          if (!guest) return;
+
+          const isMarkingPresent = !guest.attendance;
+
+          // Get current time and add 8 hours for SGT
+          const now = new Date();
+          const sgtTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+          const checkInTime = sgtTime.toISOString();
+
+          // First toggle attendance
+          await GuestsService.guestControllerMarkAttendance(guestId);
+
+          // Then update checkInTime accordingly
+          await GuestsService.guestControllerUpdate(guestId, {
+            checkInTime: isMarkingPresent ? checkInTime : null
+          });
+        }),
       );
       setAttendanceChanges(new Set());
       setShowConfirmDialog(false);
@@ -53,7 +70,7 @@ export function useAttendanceManager(
     } finally {
       setIsApplyingChanges(false);
     }
-  }, [attendanceChanges, fetchGuests]);
+  }, [attendanceChanges, fetchGuests, confirmedGuests]);
 
   // Open accompanying guest attendance dialog
   const handleOpenAccompanyingGuestDialog = useCallback(
@@ -80,7 +97,26 @@ export function useAttendanceManager(
       setIsApplyingChanges(true);
       try {
         await Promise.all(
-          guestIds.map((guestId) => GuestsService.guestControllerMarkAttendance(guestId)),
+          guestIds.map(async (guestId) => {
+            // Find the guest to determine if we're marking present or absent
+            const guest = confirmedGuests.find((g) => g.id === guestId);
+            if (!guest) return;
+
+            const isMarkingPresent = !guest.attendance;
+
+            // Get current time and add 8 hours for SGT
+            const now = new Date();
+            const sgtTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+            const checkInTime = sgtTime.toISOString();
+
+            // First toggle attendance
+            await GuestsService.guestControllerMarkAttendance(guestId);
+
+            // Then update checkInTime accordingly
+            await GuestsService.guestControllerUpdate(guestId, {
+              checkInTime: isMarkingPresent ? checkInTime : null
+            });
+          }),
         );
         handleCloseAccompanyingGuestDialog();
         await fetchGuests();
@@ -90,7 +126,7 @@ export function useAttendanceManager(
         setIsApplyingChanges(false);
       }
     },
-    [fetchGuests, handleCloseAccompanyingGuestDialog],
+    [fetchGuests, handleCloseAccompanyingGuestDialog, confirmedGuests],
   );
 
   // Show confirm dialog
