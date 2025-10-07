@@ -1,5 +1,6 @@
 import { GuestResponseDto, GuestsService } from '@shared/api';
 import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
 import { AccompanyingDialogState } from '../types';
 
 /**
@@ -40,33 +41,45 @@ export function useAttendanceManager(
   const handleApplyChanges = useCallback(async () => {
     setIsApplyingChanges(true);
     try {
-      await Promise.all(
+      const results = await Promise.all(
         Array.from(attendanceChanges).map(async (guestId) => {
           // Find the guest to determine if we're marking present or absent
           const guest = confirmedGuests.find((g) => g.id === guestId);
-          if (!guest) return;
+          if (!guest) return null;
 
           const isMarkingPresent = !guest.attendance;
-
-          // Get current time and add 8 hours for SGT
-          const now = new Date();
-          const sgtTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
-          const checkInTime = sgtTime.toISOString();
 
           // First toggle attendance
           await GuestsService.guestControllerMarkAttendance(guestId);
 
           // Then update checkInTime accordingly
-          await GuestsService.guestControllerUpdate(guestId, {
-            checkInTime: isMarkingPresent ? checkInTime : null
-          });
+          if (isMarkingPresent) {
+            await GuestsService.guestControllerCheckIn(guestId);
+          } else {
+            await GuestsService.guestControllerRemoveCheckIn(guestId);
+          }
+
+          return { isMarkingPresent, guestName: guest.name };
         }),
       );
+
+      // Show success toasts for each change
+      results.forEach((result) => {
+        if (result) {
+          if (result.isMarkingPresent) {
+            toast.success('Attendance marked successfully');
+          } else {
+            toast.success('Attendance unmarked successfully');
+          }
+        }
+      });
+
       setAttendanceChanges(new Set());
       setShowConfirmDialog(false);
       await fetchGuests();
     } catch (error) {
       console.error('Failed to apply attendance changes:', error);
+      toast.error('Failed to update attendance');
     } finally {
       setIsApplyingChanges(false);
     }
@@ -96,32 +109,44 @@ export function useAttendanceManager(
     async (guestIds: number[]) => {
       setIsApplyingChanges(true);
       try {
-        await Promise.all(
+        const results = await Promise.all(
           guestIds.map(async (guestId) => {
             // Find the guest to determine if we're marking present or absent
             const guest = confirmedGuests.find((g) => g.id === guestId);
-            if (!guest) return;
+            if (!guest) return null;
 
             const isMarkingPresent = !guest.attendance;
-
-            // Get current time and add 8 hours for SGT
-            const now = new Date();
-            const sgtTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
-            const checkInTime = sgtTime.toISOString();
 
             // First toggle attendance
             await GuestsService.guestControllerMarkAttendance(guestId);
 
             // Then update checkInTime accordingly
-            await GuestsService.guestControllerUpdate(guestId, {
-              checkInTime: isMarkingPresent ? checkInTime : null
-            });
+            if (isMarkingPresent) {
+              await GuestsService.guestControllerCheckIn(guestId);
+            } else {
+              await GuestsService.guestControllerRemoveCheckIn(guestId);
+            }
+
+            return { isMarkingPresent, guestName: guest.name };
           }),
         );
+
+        // Show success toasts for each change
+        results.forEach((result) => {
+          if (result) {
+            if (result.isMarkingPresent) {
+              toast.success('Attendance marked successfully');
+            } else {
+              toast.success('Attendance unmarked successfully');
+            }
+          }
+        });
+
         handleCloseAccompanyingGuestDialog();
         await fetchGuests();
       } catch (error) {
         console.error('Failed to apply accompanying guest attendance changes:', error);
+        toast.error('Failed to update attendance');
       } finally {
         setIsApplyingChanges(false);
       }
