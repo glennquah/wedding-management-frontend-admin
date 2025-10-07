@@ -14,7 +14,7 @@ interface AttendanceStatsProps {
  */
 export const AttendanceStats = React.memo<AttendanceStatsProps>(({ stats }) => {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+    <div className="grid grid-cols-3 gap-4 mb-6">
       <StatCard
         value={stats.totalConfirmed}
         label={STAT_LABELS.TOTAL_CONFIRMED}
