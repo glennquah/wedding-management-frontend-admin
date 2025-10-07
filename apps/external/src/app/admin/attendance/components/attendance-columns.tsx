@@ -1,7 +1,7 @@
 import { Button } from '@shared/components/ui/button';
 import { Checkbox } from '@shared/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
-import { GuestResponseDto } from '@wedding/api-types';
+import { GuestResponseDto } from '@shared/api';
 import React from 'react';
 
 /**

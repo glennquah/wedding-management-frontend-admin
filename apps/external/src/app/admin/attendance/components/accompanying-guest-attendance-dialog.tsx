@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@shared/components/ui/dialog';
-import { GuestResponseDto } from '@wedding/api-types';
+import { GuestResponseDto } from '@shared/api';
 import React, { useCallback, useState } from 'react';
 
 /**
