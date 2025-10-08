@@ -1,11 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
 import { signOut } from '../../store/sessionStore';
+import { AdminsService } from '@shared/api';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
   Calendar,
+  Camera,
   CheckSquare,
   Clock,
   LayoutDashboard,
@@ -14,7 +17,6 @@ import {
   PaintRoller,
   Users,
 } from 'lucide-react';
-import { AdminsService } from '@shared/api';
 
 export default function AdminSidebar() {
   const [hasWedding, setHasWedding] = useState<boolean>(true); // Default to true to avoid flickering
@@ -87,6 +89,12 @@ export default function AdminSidebar() {
           title: 'Microsite',
           href: '/microsite',
           icon: PaintRoller,
+          disabled: !hasWedding,
+        },
+        {
+          title: 'Album Invite',
+          href: '/album',
+          icon: Camera,
           disabled: !hasWedding,
         },
         {

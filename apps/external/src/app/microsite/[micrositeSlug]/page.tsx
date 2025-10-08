@@ -9,7 +9,7 @@ import TemplateThree from '../components/templates/templateThree';
 import TemplateTwo from '../components/templates/templateTwo';
 import { useRouter } from 'next/navigation';
 
-type PageProps = {
+export type PageProps = {
   params: Promise<{ micrositeSlug: string }>;
 };
 
