@@ -9,6 +9,7 @@ import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
 import { GuestResponseDto, MicrositeResponseDto } from '@wedding/api-types';
 import { Lora, Playfair_Display } from 'next/font/google';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 // Rustic fonts
 const lora = Lora({ subsets: ['latin'] });
@@ -18,6 +19,8 @@ interface TemplateTwoProps {
   micrositeData: MicrositeResponseDto;
   rsvpRef: RefObject<HTMLDivElement | null>;
   guestDetails: GuestResponseDto | null;
+  isWeddingLive: boolean;
+  micrositeSlug: string;
   handleConfirmGuestAttendance: (allergies?: string[]) => Promise<void>;
 }
 
@@ -25,9 +28,12 @@ export default function TemplateTwo({
   micrositeData,
   rsvpRef,
   guestDetails,
+  isWeddingLive,
+  micrositeSlug,
   handleConfirmGuestAttendance,
 }: TemplateTwoProps) {
   const isMobile = useIsMobileScreen();
+  const router = useRouter();
 
   // Food allergies state
   const [selectedAllergies, setSelectedAllergies] = useState<string[]>([]);
@@ -114,6 +120,17 @@ export default function TemplateTwo({
           />
         </div>
       </div>
+
+      {isWeddingLive && micrositeSlug && (
+        <div className="absolute top-4 right-4 z-50">
+          <Button
+            onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
+            className="rounded-full bg-amber-700 hover:bg-amber-800 text-white px-6 py-3"
+          >
+            View Album
+          </Button>
+        </div>
+      )}
 
       {/* Hero Split: left images (50vw), right text (50vw) */}
       <section className="w-screen md:h-[90vh]">
