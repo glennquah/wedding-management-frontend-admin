@@ -56,6 +56,7 @@ export type { SeatingGuestDto } from './models/SeatingGuestDto';
 export type { SeatingRequestDto } from './models/SeatingRequestDto';
 export type { SeatingResultDto } from './models/SeatingResultDto';
 export type { SendBulkEmailDto } from './models/SendBulkEmailDto';
+export type { SendRsvpInvitationDto } from './models/SendRsvpInvitationDto';
 export type { SendSingleEmailDto } from './models/SendSingleEmailDto';
 export type { SuperAdminResponseDto } from './models/SuperAdminResponseDto';
 export type { TableDto } from './models/TableDto';

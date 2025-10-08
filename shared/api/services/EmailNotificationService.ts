@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { SendBulkEmailDto } from '../models/SendBulkEmailDto';
+import type { SendRsvpInvitationDto } from '../models/SendRsvpInvitationDto';
 import type { SendSingleEmailDto } from '../models/SendSingleEmailDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -36,6 +37,22 @@ export class EmailNotificationService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/email-notification/send-bulk',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Send RSVP invitation email to a guest
+     * @param requestBody
+     * @returns any The RSVP invitation email has been successfully sent.
+     * @throws ApiError
+     */
+    public static emailNotificationControllerSendRsvpInvitation(
+        requestBody: SendRsvpInvitationDto,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/email-notification/send-rsvp-invitation',
             body: requestBody,
             mediaType: 'application/json',
         });

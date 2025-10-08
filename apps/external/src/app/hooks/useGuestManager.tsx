@@ -120,7 +120,7 @@ export function useGuestManager() {
         setupAuth();
         const micrositeData = await MicrositeService.micrositeControllerGetMicrositeByWeddingId(weddingId);
         setMicrosite(micrositeData);
-      } catch (err) {
+      } catch {
         // Microsite not found is expected if not created yet
         console.log('No microsite found for wedding:', weddingId);
         setMicrosite(null);
