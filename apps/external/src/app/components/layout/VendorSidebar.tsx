@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+
+import { VendorsService } from '@shared/api';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   CalendarDays,
@@ -10,8 +11,7 @@ import {
   LayoutDashboard,
   Users,
 } from 'lucide-react';
-import { signOut } from 'next-auth/react';
-import { VendorsService } from '@shared/api';
+import { signOut, useSession } from 'next-auth/react';
 
 export default function VendorSidebar() {
   const { data: session } = useSession();
@@ -23,7 +23,11 @@ export default function VendorSidebar() {
         if (!session?.user?.id) return;
 
         const vendor = await VendorsService.vendorControllerGetVendor(session.user.id);
-        const hasDetails = !!(vendor.serviceOffered && vendor.styleOffered && vendor.weddingTypes?.length);
+        const hasDetails = !!(
+          vendor.serviceOffered &&
+          vendor.styleOffered &&
+          vendor.weddingTypes?.length
+        );
         setHasVendorDetails(hasDetails);
       } catch (error) {
         console.error('Error checking vendor details:', error);
@@ -42,6 +46,12 @@ export default function VendorSidebar() {
           title: 'Dashboard',
           href: '/',
           icon: LayoutDashboard,
+        },
+        {
+          title: 'Listings',
+          href: '/listing',
+          icon: FileSpreadsheet,
+          disabled: !hasVendorDetails,
         },
         {
           title: 'Revenue',
@@ -80,7 +90,7 @@ export default function VendorSidebar() {
     <AppSidebar
       tabs={tabs}
       signOut={() => signOut({ callbackUrl: window.location.origin, redirect: false })}
-      basePath='vendor'
+      basePath="vendor"
     />
   );
 }

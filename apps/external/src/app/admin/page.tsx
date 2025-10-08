@@ -1,37 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { AdminsService } from '@shared/api';
+import { useWeddingStore } from '@/app/store/sessionStore';
 import { Button } from '@shared/components/ui/button';
 import { AlertCircle, Sparkles } from 'lucide-react';
 
 export default function UserDashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [hasWedding, setHasWedding] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { weddings, hasHydrated } = useWeddingStore();
 
-  useEffect(() => {
-    if (status === 'loading') return;
+  const hasWedding = weddings && weddings.length > 0;
 
-    const checkWedding = async () => {
-      try {
-        const { mainWeddingId } = await AdminsService.adminControllerGetMyMainWedding();
-        setHasWedding(mainWeddingId !== null);
-      } catch (error) {
-        console.error('Error checking wedding:', error);
-        setHasWedding(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkWedding();
-  }, [status, session]);
-
-  if (status === 'loading' || isLoading) {
+  if (status === 'loading' || !hasHydrated) {
     return <p className="text-center mt-16">Loading...</p>;
   }
 
@@ -40,7 +22,7 @@ export default function UserDashboardPage() {
   }
 
   // If no wedding, show only the setup banner
-  if (hasWedding === false) {
+  if (!hasWedding) {
     return (
       <main className="flex items-center justify-center min-h-[80vh] px-4">
         <div className="max-w-2xl w-full bg-gradient-to-r from-brand-25 to-brand-50 border-2 border-brand-200 rounded-lg p-8 shadow-lg">
