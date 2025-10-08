@@ -32,7 +32,7 @@ export class AlbumService {
         });
     }
     /**
-     * Create a album for a wedding
+     * Create an album for a wedding
      * @param requestBody
      * @returns AlbumResponseDto The album has been successfully created.
      * @throws ApiError
@@ -48,12 +48,12 @@ export class AlbumService {
             errors: {
                 400: `Bad request.`,
                 404: `Admin or wedding not found.`,
-                409: `Album slug already exists or wedding already has a album.`,
+                409: `Album slug already exists or wedding already has an album.`,
             },
         });
     }
     /**
-     * Update a album
+     * Update an album
      * @param id
      * @param requestBody
      * @returns AlbumResponseDto The album has been successfully updated.
@@ -79,7 +79,7 @@ export class AlbumService {
         });
     }
     /**
-     * Delete a album
+     * Delete an album
      * @param id
      * @returns any The album has been successfully deleted.
      * @throws ApiError
@@ -122,26 +122,6 @@ export class AlbumService {
             errors: {
                 400: `Bad request.`,
                 404: `Album not found.`,
-            },
-        });
-    }
-    /**
-     * Download all photos in an album as a ZIP file
-     * @param id
-     * @returns binary ZIP file containing all album photos
-     * @throws ApiError
-     */
-    public static albumControllerDownloadAlbum(
-        id: number,
-    ): CancelablePromise<Blob> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/album/{id}/download',
-            path: {
-                'id': id,
-            },
-            errors: {
-                404: `Album not found or no photos in album.`,
             },
         });
     }
