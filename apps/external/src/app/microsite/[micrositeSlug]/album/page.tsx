@@ -2,6 +2,10 @@
 
 import { use, useEffect, useMemo, useRef, useState } from 'react';
 
+import MicrositeLogin from '../../components/MicrositeLogin';
+import Modal from '../../components/Modal';
+import { downloadImagesAsZip } from '../../utils/downloadPhoto';
+import { PageProps } from '../page';
 import { useMicrositeManager } from '@/app/hooks/useMicrositeManager';
 import { AlbumResponseDto, AlbumService } from '@shared/api';
 import { Button, ImageUploadWidget } from '@shared/components';
@@ -9,10 +13,6 @@ import { CldImage } from 'next-cloudinary';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import MicrositeLogin from '../../components/MicrositeLogin';
-import Modal from '../../components/Modal';
-import { downloadImagesAsZip } from '../../utils/downloadPhoto';
-import { PageProps } from '../page';
 
 export interface ImageProps {
   id: number;
@@ -97,7 +97,7 @@ export default function AlbumPage({ params }: PageProps) {
   */
   if (isCheckingAccess || isLoadingMicrosite) {
     return (
-      <div className='flex min-h-screen items-center justify-center text-gray-600'>
+      <div className="flex min-h-screen items-center justify-center text-gray-600">
         {isLoadingMicrosite ? 'Loading microsite...' : 'Checking access...'}
       </div>
     );
@@ -105,7 +105,7 @@ export default function AlbumPage({ params }: PageProps) {
 
   if (micrositeError) {
     return (
-      <div className='flex min-h-screen items-center justify-center text-red-600'>
+      <div className="flex min-h-screen items-center justify-center text-red-600">
         {micrositeError}
       </div>
     );
@@ -114,7 +114,7 @@ export default function AlbumPage({ params }: PageProps) {
   if (!micrositeData) {
     router.replace('/microsite/not-found');
     return (
-      <div className='flex min-h-screen items-center justify-center text-gray-600'>
+      <div className="flex min-h-screen items-center justify-center text-gray-600">
         Redirecting to not found page...
       </div>
     );
@@ -147,7 +147,7 @@ export default function AlbumPage({ params }: PageProps) {
   }
 
   return (
-    <main className='mx-auto max-w-[1960px] p-4 bg-black min-h-screen text-white'>
+    <main className="mx-auto max-w-[1960px] p-4 bg-black min-h-screen text-white">
       {photoId !== null && (
         <Modal
           images={images}
@@ -157,30 +157,31 @@ export default function AlbumPage({ params }: PageProps) {
         />
       )}
 
-      <div className='columns-1 gap-4 sm:columns-2 xl:columns-3 2xl:columns-4'>
+      <div className="columns-1 gap-4 sm:columns-2 xl:columns-3 2xl:columns-4">
         <div className={images.length === 0 ? 'flex min-h-screen items-center justify-center' : ''}>
           {album && (
             <div
-              className='relative flex h-[630px] flex-col items-center justify-end gap-4 overflow-hidden rounded-lg bg-white/10 pb-16 text-center'
+              className="relative flex h-[630px] flex-col items-center justify-end gap-4 overflow-hidden rounded-lg bg-white/10 pb-16 text-center"
               style={{
-                backgroundImage: 'url(\'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759851783/ring_qy7s3y.jpg\')',
+                backgroundImage:
+                  "url('https://res.cloudinary.com/dnyxxyolp/image/upload/v1759851783/ring_qy7s3y.jpg')",
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
                 backdropFilter: 'blur(4px)',
               }}
             >
-              <div className='absolute inset-0 pointer-events-none rounded-lg bg-gradient-to-t from-transparent via-black/30 to-black/60' />
+              <div className="absolute inset-0 pointer-events-none rounded-lg bg-gradient-to-t from-transparent via-black/30 to-black/60" />
 
               <div
-                className='relative z-10 text-white'
+                className="relative z-10 text-white"
                 style={{ textShadow: '0 0 5px rgba(0,0,0,0.7)' }}
               >
-                <h1 className='mt-10 mb-5 text-2xl font-bold uppercase tracking-widest'>
+                <h1 className="mt-10 mb-5 text-2xl font-bold uppercase tracking-widest">
                   {album.coupleName} Wedding Photos
                 </h1>
 
-                <div className='flex justify-center gap-3'>
+                <div className="flex justify-center gap-3">
                   <ImageUploadWidget
                     folder={`${album.coupleName}-${micrositeData.weddingDate?.split('T')[0]}`}
                     onUpload={async (url) => {
@@ -209,9 +210,9 @@ export default function AlbumPage({ params }: PageProps) {
                 </div>
 
                 {album.landingMessage && (
-                  <p className='max-w-[60ch] sm:max-w-[40ch] mx-auto text-black mt-6'>
+                  <p className="max-w-[60ch] sm:max-w-[40ch] mx-auto text-black mt-6">
                     <span
-                      className='text-lg'
+                      className="text-lg"
                       style={{ textShadow: '0 0 3px rgba(255,255,255,0.6)' }}
                     >
                       <b>{album.landingMessage}</b>
@@ -233,15 +234,15 @@ export default function AlbumPage({ params }: PageProps) {
               router.replace(`?photoId=${id}`, { scroll: false });
             }}
             ref={id === photoId ? lastViewedPhotoRef : null}
-            className='group relative mb-5 block w-full cursor-zoom-in after:content after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:shadow-highlight'
+            className="group relative mb-5 block w-full cursor-zoom-in after:content after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:shadow-highlight"
           >
             <CldImage
               alt={`Gallery photo ${id + 1}`}
-              className='transform rounded-lg brightness-90 transition will-change-auto group-hover:brightness-110'
+              className="transform rounded-lg brightness-90 transition will-change-auto group-hover:brightness-110"
               src={image_url}
               width={720}
               height={480}
-              crop='scale'
+              crop="scale"
             />
           </Link>
         ))}

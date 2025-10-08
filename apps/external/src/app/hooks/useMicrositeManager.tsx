@@ -14,6 +14,7 @@ interface UseMicrositeManagerReturn {
   guestDetails: GuestResponseDto | null;
   isValidatingAuth: boolean;
   hasAccess: boolean;
+  isWeddingLive: boolean;
 
   // Functions
   fetchMicrositeData: (decodedPlanName: string) => Promise<void>;
@@ -26,6 +27,7 @@ interface UseMicrositeManagerReturn {
     setNameError: (error: string | null) => void,
   ) => Promise<void>;
   handleConfirmGuestAttendance: (allergies?: string[]) => Promise<void>;
+  checkWeddingStatus: () => void;
 
   // State setters
   setMicrositeData: (data: MicrositeResponseDto | null) => void;
@@ -43,6 +45,7 @@ export const useMicrositeManager = (): UseMicrositeManagerReturn => {
   const [guestDetails, setGuestDetails] = useState<GuestResponseDto | null>(null);
   const [isValidatingAuth, setIsValidatingAuth] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
+  const [isWeddingLive, setIsWeddingLive] = useState(false);
 
   const fetchMicrositeData = useCallback(
     async (decodedPlanName: string) => {
@@ -186,6 +189,24 @@ export const useMicrositeManager = (): UseMicrositeManagerReturn => {
     [guestDetails, micrositeData],
   );
 
+  const checkWeddingStatus = () => {
+    if (!micrositeData?.weddingDate) return;
+
+    const today = new Date();
+    const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const weddingDate = new Date(micrositeData.weddingDate);
+    const weddingDateOnly = new Date(
+      weddingDate.getFullYear(),
+      weddingDate.getMonth(),
+      weddingDate.getDate(),
+    );
+
+    const isLive = todayDateOnly >= weddingDateOnly;
+
+    setIsWeddingLive(isLive);
+    return isLive;
+  };
+
   return {
     // State
     micrositeData,
@@ -194,11 +215,13 @@ export const useMicrositeManager = (): UseMicrositeManagerReturn => {
     guestDetails,
     isValidatingAuth,
     hasAccess,
+    isWeddingLive,
 
     // Functions
     fetchMicrositeData,
     handleMicrositeLogin,
     handleConfirmGuestAttendance,
+    checkWeddingStatus,
 
     // State setters
     setMicrositeData,

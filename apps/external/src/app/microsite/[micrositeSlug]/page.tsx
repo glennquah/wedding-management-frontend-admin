@@ -28,9 +28,11 @@ export default function MicrositePage({ params }: PageProps) {
     micrositeError,
     guestDetails,
     hasAccess,
+    isWeddingLive,
     fetchMicrositeData,
     handleMicrositeLogin,
     handleConfirmGuestAttendance,
+    checkWeddingStatus,
     setHasAccess,
   } = useMicrositeManager();
 
@@ -43,6 +45,12 @@ export default function MicrositePage({ params }: PageProps) {
     setHasAccess(false);
     fetchMicrositeData(decodedPlanName);
   }, [decodedPlanName, fetchMicrositeData, setHasAccess]);
+
+  useEffect(() => {
+    if (micrositeData) {
+      checkWeddingStatus();
+    }
+  }, [micrositeData]);
 
   const rsvpRef = useRef<HTMLDivElement | null>(null);
 
@@ -86,6 +94,8 @@ export default function MicrositePage({ params }: PageProps) {
       micrositeData={micrositeData}
       rsvpRef={rsvpRef}
       guestDetails={guestDetails}
+      isWeddingLive={isWeddingLive}
+      micrositeSlug={decodedPlanName}
       handleConfirmGuestAttendance={handleConfirmGuestAttendance}
     />
   ) : micrositeData.templateNumber === 2 ? (
@@ -93,6 +103,8 @@ export default function MicrositePage({ params }: PageProps) {
       micrositeData={micrositeData}
       rsvpRef={rsvpRef}
       guestDetails={guestDetails}
+      isWeddingLive={isWeddingLive}
+      micrositeSlug={decodedPlanName}
       handleConfirmGuestAttendance={handleConfirmGuestAttendance}
     />
   ) : (
@@ -100,6 +112,8 @@ export default function MicrositePage({ params }: PageProps) {
       micrositeData={micrositeData}
       rsvpRef={rsvpRef}
       guestDetails={guestDetails}
+      isWeddingLive={isWeddingLive}
+      micrositeSlug={decodedPlanName}
       handleConfirmGuestAttendance={handleConfirmGuestAttendance}
     />
   );
