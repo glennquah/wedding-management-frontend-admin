@@ -5,7 +5,8 @@ import {
   CarouselContent,
   CarouselItem,
   CarouselNext,
-  CarouselPrevious
+  CarouselPrevious,
+  type CarouselApi
 } from '@shared/components/ui/carousel';
 import { Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -17,7 +18,7 @@ interface RecommendedVendorsCarouselProps {
 }
 
 export function RecommendedVendorsCarousel({ vendors, loading }: RecommendedVendorsCarouselProps) {
-  const [api, setApi] = useState<any>();
+  const [api, setApi] = useState<CarouselApi>();
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
 
