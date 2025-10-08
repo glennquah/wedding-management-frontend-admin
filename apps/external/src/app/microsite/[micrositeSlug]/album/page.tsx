@@ -143,7 +143,7 @@ export default function AlbumPage({ params }: PageProps) {
   if (todayDateOnly < weddingDateOnly) {
     toast.error('Not wedding day yet!');
     router.push(`/microsite/${decodedPlanName}`);
-    return;
+    return null;
   }
 
   return (

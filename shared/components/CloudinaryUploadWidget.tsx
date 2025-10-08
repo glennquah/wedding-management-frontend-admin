@@ -34,10 +34,10 @@ interface ImageUploadWidgetProps {
 export default function ImageUploadWidget({
   onUpload,
   buttonText = 'Upload Image',
-  maxImageHeight,
-  minImageHeight,
-  maxImageWidth,
-  minImageWidth,
+  maxImageHeight = 8192,
+  maxImageWidth = 8192,
+  minImageHeight = 100,
+  minImageWidth = 100,
   folder,
 }: ImageUploadWidgetProps) {
   const configOptions = {
