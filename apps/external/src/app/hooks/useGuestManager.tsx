@@ -7,6 +7,8 @@ import {
   GuestCountBucket,
   GuestResponseDto,
   GuestsService,
+  MicrositeResponseDto,
+  MicrositeService,
   OpenAPI,
   UpdateGuestDto,
   WeddingResponseDto,
@@ -62,6 +64,7 @@ export function useGuestManager() {
   // Core guest data
   const [guests, setGuests] = useState<GuestResponseDto[]>([]);
   const [wedding, setWedding] = useState<WeddingResponseDto | null>(null);
+  const [microsite, setMicrosite] = useState<MicrositeResponseDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -105,6 +108,22 @@ export function useGuestManager() {
         console.error('Error fetching user wedding:', err);
         toast.error('Failed to fetch wedding information');
         return null;
+      }
+    },
+    [setupAuth],
+  );
+
+  // Fetch microsite for the wedding
+  const fetchMicrosite = useCallback(
+    async (weddingId: number) => {
+      try {
+        setupAuth();
+        const micrositeData = await MicrositeService.micrositeControllerGetMicrositeByWeddingId(weddingId);
+        setMicrosite(micrositeData);
+      } catch (err) {
+        // Microsite not found is expected if not created yet
+        console.log('No microsite found for wedding:', weddingId);
+        setMicrosite(null);
       }
     },
     [setupAuth],
@@ -572,13 +591,15 @@ export function useGuestManager() {
     if (currentWeddingId) {
       setNewGuest(getDefaultNewGuest(currentWeddingId));
       fetchGuests();
+      fetchMicrosite(currentWeddingId);
     }
-  }, [currentWeddingId, fetchGuests]);
+  }, [currentWeddingId, fetchGuests, fetchMicrosite]);
 
   return {
     // Core data
     guests,
     wedding,
+    microsite,
     primaryGuests,
     existingGroups,
     isLoading,

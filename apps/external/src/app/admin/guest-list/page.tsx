@@ -37,6 +37,7 @@ export default function GuestListPage() {
     // Core data
     guests,
     wedding,
+    microsite,
     primaryGuests,
     existingGroups,
     isLoading,
@@ -133,6 +134,7 @@ export default function GuestListPage() {
         <Checkbox
           id="sendRsvpEmail"
           checked={guest.sendRsvpEmail || false}
+          disabled={!microsite}
           onCheckedChange={(checked) =>
             setGuest({ ...guest, sendRsvpEmail: checked as boolean })
           }
@@ -144,6 +146,11 @@ export default function GuestListPage() {
           Send RSVP email notification to guest
         </label>
       </div>
+      {!microsite && (
+        <p className="text-sm text-red-600 mt-1">
+          You must create a microsite before sending RSVP email notifications.
+        </p>
+      )}
     </div>,
 
     <div key="accompanyingGuests" className="md:col-span-2">
