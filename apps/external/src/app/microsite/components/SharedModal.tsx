@@ -36,7 +36,7 @@ export default function SharedModal({
   const [loaded, setLoaded] = useState(false);
 
   const range = (start: number, end: number) => {
-    let output = [];
+    const output = [];
     if (typeof end === 'undefined') {
       end = start;
       start = 0;
@@ -47,7 +47,7 @@ export default function SharedModal({
     return output;
   };
 
-  let filteredImages = images?.filter((img: ImageProps) =>
+  const filteredImages = images?.filter((img: ImageProps) =>
     range(index - 15, index + 15).includes(img.id),
   );
 
@@ -61,7 +61,7 @@ export default function SharedModal({
     trackMouse: true,
   });
 
-  let currentImage = images ? images[index] : currentPhoto;
+  const currentImage = images ? images[index] : currentPhoto;
 
   return (
     <MotionConfig

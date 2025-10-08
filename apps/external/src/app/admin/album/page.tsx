@@ -3,8 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 
-import { InviteInformation } from './components/InviteInformation';
-import InviteCard from './template/albumInvite';
 import { useAlbumManager } from '@/app/hooks/useAlbumManager';
 import { useWeddingStore } from '@/app/store/sessionStore';
 import { CreateAlbumDto } from '@shared/api';
@@ -16,11 +14,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from '@shared/components/ui/dialog';
 import { PageHeader } from '@shared/components/ui/page-header';
 import { Printer } from 'lucide-react';
 import { toast } from 'sonner';
+import { InviteInformation } from './components/InviteInformation';
+import InviteCard from './template/albumInvite';
 
 export default function CreateAlbumInvitePage() {
   const selectedWeddingId = useWeddingStore((state) => state.selectedWeddingId);
@@ -242,7 +242,7 @@ export default function CreateAlbumInvitePage() {
                 coupleName2={coupleName2 || 'Ranae'}
                 inviteMessage={
                   formData.inviteCardMessage ||
-                  "We'd love your help to remember our wedding day — scan to upload your photos!"
+                  'We\'d love your help to remember our wedding day — scan to upload your photos!'
                 }
                 qrCodeUrl={
                   formData.albumURL ||
