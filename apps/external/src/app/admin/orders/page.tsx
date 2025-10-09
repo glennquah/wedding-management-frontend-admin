@@ -1,141 +1,22 @@
-'use client';
+ 'use client';
 
-import { ListingResponseDto, OrderResponseDto, OrderStatus, OrdersService, PaymentsService, VendorResponseDto, VendorsService } from '@shared/api';
 import { OrderCard, PageHeader, Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
 import { Loader2, Package } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import { OrderListing, useOrders } from '../../hooks/useOrders';
 import { useWeddingStore } from '../../store/sessionStore';
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<OrderResponseDto[]>([]);
-  const [vendors, setVendors] = useState<Record<number, VendorResponseDto>>({});
-  const [isLoading, setIsLoading] = useState(true);
   const { selectedWeddingId } = useWeddingStore();
-
-  useEffect(() => {
-    if (selectedWeddingId) {
-      fetchOrders();
-    }
-  }, [selectedWeddingId]);
-
-  const fetchOrders = async () => {
-    if (!selectedWeddingId) {
-      toast.error('No wedding selected');
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-
-      // Fetch orders by wedding ID - the backend already includes listing details
-      const fetchedOrders = await OrdersService.orderControllerFindByWedding(selectedWeddingId);
-
-      // Sort orders by purchase date (most recent first)
-      const sortedOrders = fetchedOrders.sort((a, b) => {
-        return new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime();
-      });
-
-      setOrders(sortedOrders);
-
-      // Extract unique vendor IDs from all listings
-      const vendorIds = new Set<number>();
-      fetchedOrders.forEach(order => {
-        if (order.listings) {
-          const listings = order.listings as any;
-          listings.forEach((listingData: any) => {
-            if (listingData.vendorId) {
-              vendorIds.add(listingData.vendorId);
-            }
-          });
-        }
-      });
-
-      // Fetch all vendors
-      const vendorsMap: Record<number, VendorResponseDto> = {};
-      await Promise.all(
-        Array.from(vendorIds).map(async (id) => {
-          try {
-            const vendor = await VendorsService.vendorControllerGetVendor(id);
-            vendorsMap[id] = vendor;
-          } catch (err) {
-            console.error(`Failed to fetch vendor ${id}:`, err);
-          }
-        })
-      );
-      setVendors(vendorsMap);
-    } catch (err) {
-      console.error('Error fetching orders:', err);
-      toast.error('Failed to fetch orders. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDeleteOrder = async (orderId: number) => {
-    try {
-      await OrdersService.orderControllerDelete(orderId);
-      toast.success('Order deleted successfully');
-      // Refresh orders after deletion
-      fetchOrders();
-    } catch (err) {
-      console.error('Error deleting order:', err);
-      toast.error('Failed to delete order. Please try again.');
-    }
-  };
-
-  const handlePayNow = async (orderId: number) => {
-    try {
-      // Create checkout session and redirect to Stripe
-      const checkoutData = await PaymentsService.paymentControllerCreateCheckoutSession({
-        orderId: orderId,
-        successUrl: `${window.location.origin}/admin/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: `${window.location.origin}/admin/payment/cancel`
-      });
-
-      // Redirect to Stripe Checkout
-      window.location.href = checkoutData.url;
-    } catch (error) {
-      console.error('Error creating payment session:', error);
-      toast.error('Failed to initiate payment. Please try again.');
-    }
-  };
-
-  // Flatten orders into individual order listings for display
-  const getOrderListingsFlat = () => {
-    const orderListings: Array<{
-      order: OrderResponseDto;
-      listing: ListingResponseDto;
-      bookedSlots?: any;
-    }> = [];
-
-    orders.forEach(order => {
-      if (order.listings) {
-        const listings = order.listings as any;
-        listings.forEach((listingData: any) => {
-          orderListings.push({
-            order,
-            listing: listingData as ListingResponseDto,
-            bookedSlots: listingData.bookedSlots,
-          });
-        });
-      }
-    });
-
-    return orderListings;
-  };
-
-  const filterOrderListingsByStatus = (status?: OrderStatus) => {
-    const allOrderListings = getOrderListingsFlat();
-    if (!status) return allOrderListings;
-    return allOrderListings.filter(ol => ol.order.orderStatus === status);
-  };
-
-  const allOrderListings = getOrderListingsFlat();
-  const toPayOrderListings = filterOrderListingsByStatus(OrderStatus.PENDING);
-  const paidOrderListings = filterOrderListingsByStatus(OrderStatus.PAID);
-  const completedOrderListings = filterOrderListingsByStatus(OrderStatus.COMPLETED);
+  const {
+    vendors,
+    isLoading,
+    handleDeleteOrder,
+    handlePayNow,
+    allOrderListings,
+    toPayOrderListings,
+    paidOrderListings,
+    completedOrderListings,
+  } = useOrders(selectedWeddingId ?? undefined);
 
   if (isLoading) {
     return (
@@ -155,7 +36,7 @@ export default function OrdersPage() {
     </div>
   );
 
-  const OrderListingList = ({ orderListings }: { orderListings: Array<{ order: OrderResponseDto; listing: ListingResponseDto; bookedSlots?: any }> }) => (
+  const OrderListingList = ({ orderListings }: { orderListings: OrderListing[] }) => (
     <div className="grid grid-cols-1 gap-4 mt-6">
       {orderListings.map((ol, index) => {
         const vendor = vendors[ol.listing.vendorId];
