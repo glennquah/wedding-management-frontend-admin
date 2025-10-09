@@ -164,7 +164,7 @@ const AdminDashboardModule = () => {
         />
 
         {/* First Row - Stats Cards */}
-        <div className="mb-6">
+        <div className="mb-4">
           <DashboardStatsCards
             guestCount={guestCount}
             spending={spending}
