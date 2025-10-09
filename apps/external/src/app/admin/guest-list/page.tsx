@@ -17,6 +17,7 @@ import {
   GroupSelectDropdown,
   PageHeader,
 } from '@shared/components';
+import { BroadcastRsvpDialog } from '@shared/components/BroadcastRsvpDialog';
 import { EmailModal } from '@shared/components/EmailModal';
 import FormField from '@shared/components/FormField';
 import GuestSummaryStats from '@shared/components/guest-management/GuestSummaryStats';
@@ -99,8 +100,6 @@ export default function GuestListPage() {
 
   // Broadcast RSVP Dialog state
   const [isBroadcastDialogOpen, setIsBroadcastDialogOpen] = useState(false);
-  const [selectedGuestIds, setSelectedGuestIds] = useState<Set<number>>(new Set());
-  const [isBroadcasting, setIsBroadcasting] = useState(false);
 
   // Get capacity information
   const capacityInfo = getGuestCapacityInfo();
@@ -140,63 +139,7 @@ export default function GuestListPage() {
       toast.error('You must create a microsite before sending RSVP invitations.');
       return;
     }
-    setSelectedGuestIds(new Set());
     setIsBroadcastDialogOpen(true);
-  };
-
-  // Handler for toggling guest selection
-  const handleToggleGuest = (guestId: number) => {
-    setSelectedGuestIds((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(guestId)) {
-        newSet.delete(guestId);
-      } else {
-        newSet.add(guestId);
-      }
-      return newSet;
-    });
-  };
-
-  // Handler for selecting all guests
-  const handleSelectAll = () => {
-    if (selectedGuestIds.size === primaryGuests.length) {
-      setSelectedGuestIds(new Set());
-    } else {
-      setSelectedGuestIds(new Set(primaryGuests.map((g) => g.id)));
-    }
-  };
-
-  // Handler for broadcasting RSVP invitations
-  const handleBroadcastRsvp = async () => {
-    if (selectedGuestIds.size === 0) {
-      toast.error('Please select at least one guest');
-      return;
-    }
-
-    if (!wedding) {
-      toast.error('Wedding information not found');
-      return;
-    }
-
-    try {
-      setIsBroadcasting(true);
-
-      await EmailNotificationService.emailNotificationControllerBroadcastRsvpInvitations({
-        weddingId: wedding.id,
-        guestIds: Array.from(selectedGuestIds),
-      });
-
-      toast.success(
-        `RSVP invitations sent to ${selectedGuestIds.size} guest${selectedGuestIds.size === 1 ? '' : 's'}!`,
-      );
-      setIsBroadcastDialogOpen(false);
-      setSelectedGuestIds(new Set());
-    } catch (error) {
-      console.error('Error broadcasting RSVP invitations:', error);
-      toast.error('Failed to send RSVP invitations. Please try again.');
-    } finally {
-      setIsBroadcasting(false);
-    }
   };
 
   // Column definitions for DataTable using shared columns
@@ -624,102 +567,14 @@ export default function GuestListPage() {
         </Dialog>
 
         {/* Broadcast RSVP Dialog */}
-        <Dialog open={isBroadcastDialogOpen} onOpenChange={setIsBroadcastDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
-            <DialogHeader>
-              <DialogTitle>Broadcast RSVP Invitations</DialogTitle>
-              <DialogDescription>
-                Select guests to send RSVP invitation emails. All selected guests will receive their
-                invitation to RSVP via email.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="flex-1 overflow-y-auto">
-              <div className="mb-4 pb-3 border-b border-gray-200 sticky top-0 bg-white z-10">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="select-all"
-                      checked={
-                        selectedGuestIds.size === primaryGuests.length && primaryGuests.length > 0
-                      }
-                      onCheckedChange={handleSelectAll}
-                    />
-                    <label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
-                      Select All ({primaryGuests.length} guests)
-                    </label>
-                  </div>
-                  {selectedGuestIds.size > 0 && (
-                    <span className="text-sm text-muted-foreground">
-                      {selectedGuestIds.size} selected
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                {primaryGuests.map((guest) => (
-                  <div
-                    key={guest.id}
-                    className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-                  >
-                    <Checkbox
-                      id={`guest-${guest.id}`}
-                      checked={selectedGuestIds.has(guest.id)}
-                      onCheckedChange={() => handleToggleGuest(guest.id)}
-                    />
-                    <label
-                      htmlFor={`guest-${guest.id}`}
-                      className="flex-1 cursor-pointer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1"
-                    >
-                      <div className="flex flex-col">
-                        <span className="font-medium">{guest.name}</span>
-                        <span className="text-sm text-muted-foreground">{guest.email}</span>
-                      </div>
-                      <div className="flex flex-col sm:items-end gap-1">
-                        {guest.group && (
-                          <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full">
-                            {guest.group}
-                          </span>
-                        )}
-                        {guest.accompanyingGuests && guest.accompanyingGuests.length > 0 && (
-                          <span className="text-xs text-muted-foreground">
-                            +{guest.accompanyingGuests.length} guest
-                            {guest.accompanyingGuests.length === 1 ? '' : 's'}
-                          </span>
-                        )}
-                      </div>
-                    </label>
-                  </div>
-                ))}
-              </div>
-
-              {primaryGuests.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  No guests available to send invitations.
-                </div>
-              )}
-            </div>
-
-            <DialogFooter className="mt-4">
-              <Button
-                variant="outline"
-                onClick={() => setIsBroadcastDialogOpen(false)}
-                disabled={isBroadcasting}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleBroadcastRsvp}
-                disabled={isBroadcasting || selectedGuestIds.size === 0}
-              >
-                {isBroadcasting
-                  ? 'Sending...'
-                  : `Send to ${selectedGuestIds.size} Guest${selectedGuestIds.size === 1 ? '' : 's'}`}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {wedding && (
+          <BroadcastRsvpDialog
+            open={isBroadcastDialogOpen}
+            onOpenChange={setIsBroadcastDialogOpen}
+            guests={primaryGuests}
+            weddingId={wedding.id}
+          />
+        )}
       </div>
     </div>
   );
