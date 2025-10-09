@@ -4,6 +4,7 @@ import { signOut, useWeddingStore } from '../../store/sessionStore';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
+  BookOpenText,
   Calendar,
   Camera,
   CheckSquare,
@@ -92,6 +93,16 @@ export default function AdminSidebar() {
           href: '/tasks',
           icon: ListTodo,
           disabled: !hasWedding,
+        },
+      ],
+    },
+    {
+      sectionHeader: 'Post Wedding',
+      items: [
+        {
+          title: 'Gratitude Card',
+          href: '/gratitude',
+          icon: BookOpenText,
         },
       ],
     },
