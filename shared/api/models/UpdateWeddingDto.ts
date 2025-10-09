@@ -25,5 +25,9 @@ export type UpdateWeddingDto = {
     guestCountBucket?: GuestCountBucket;
     preferredStyle?: WeddingStyle;
     preferredServices?: Array<WeddingService>;
+    /**
+     * PayNow QR code link
+     */
+    paynowQR?: string;
 };
 

@@ -2,7 +2,8 @@
 
 import { useEffect } from 'react';
 
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, X } from 'lucide-react';
+import { CldImage } from 'next-cloudinary';
 import { toast } from 'sonner';
 import {
   AdminResponseDto,
@@ -26,6 +27,7 @@ import { Input } from './ui/form/input';
 import { MultiSelectDropdown } from './ui/form/multiSelectDropdown';
 import { SingleSelectDropdown } from './ui/form/singleSelectDropdown';
 import { Skeleton } from './ui/skeleton';
+import ImageUploadWidget from './CloudinaryUploadWidget';
 
 interface EditProfileProps {
   userId?: number;
@@ -591,6 +593,60 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
                 </span>
                 <ChevronDown className="ml-2 w-4 h-4 text-gray-400" />
               </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">PayNow QR Code</label>
+            {isEditing ? (
+              <div className="space-y-3">
+                {weddingFormData.paynowQR && (
+                  <div className="relative group cursor-pointer inline-block">
+                    <CldImage
+                      width={200}
+                      height={200}
+                      src={weddingFormData.paynowQR}
+                      alt="PayNow QR Code"
+                      className="w-48 h-48 object-cover rounded-lg shadow-sm border transition-all duration-200"
+                    />
+                    <div
+                      className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg flex items-center justify-center"
+                      onClick={() => handleWeddingInputChange('paynowQR', '')}
+                    >
+                      <X className="h-8 w-8 text-white" />
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <ImageUploadWidget
+                    onUpload={(url) => handleWeddingInputChange('paynowQR', url)}
+                    buttonText={weddingFormData.paynowQR ? 'Replace QR Code' : 'Upload QR Code'}
+                    maxImageWidth={800}
+                    minImageWidth={200}
+                    maxImageHeight={800}
+                    minImageHeight={200}
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Upload a PayNow QR code image for guests to make payments
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {weddingData.paynowQR ? (
+                  <div className="p-3 bg-muted rounded-md">
+                    <CldImage
+                      width={200}
+                      height={200}
+                      src={weddingData.paynowQR}
+                      alt="PayNow QR Code"
+                      className="w-48 h-48 object-cover rounded-lg shadow-sm"
+                    />
+                  </div>
+                ) : (
+                  <p className="p-3 bg-muted rounded-md">No QR code uploaded</p>
+                )}
+              </>
             )}
           </div>
         </CardContent>

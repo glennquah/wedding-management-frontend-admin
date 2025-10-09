@@ -35,6 +35,10 @@ export type WeddingResponseDto = {
     preferredStyle: WeddingStyle;
     preferredServices: Array<WeddingService>;
     /**
+     * PayNow QR code link
+     */
+    paynowQR?: string;
+    /**
      * Creation timestamp
      */
     createdAt: string;
