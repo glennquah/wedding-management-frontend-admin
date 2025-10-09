@@ -1,6 +1,14 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@shared/components/ui/table';
 import { OrderResponseDto } from '@shared/api';
 import { Badge } from '@shared/components/ui/badge';
 import { Package } from 'lucide-react';
@@ -37,48 +45,50 @@ export const RecentOrdersList = ({ orders, isLoading }: RecentOrdersListProps) =
         <CardTitle>Recent Orders</CardTitle>
         <CardDescription>Your latest 5 orders</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="h-[400px]">
         {isLoading ? (
-          <div className="flex h-[300px] items-center justify-center text-muted-foreground">
+          <div className="flex h-full items-center justify-center text-muted-foreground">
             Loading orders...
           </div>
         ) : recentOrders.length === 0 ? (
-          <div className="flex h-[300px] flex-col items-center justify-center text-muted-foreground">
+          <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
             <Package className="h-12 w-12 mb-2 opacity-50" />
             <p>No orders yet</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {recentOrders.map((order) => (
-              <div
-                key={order.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium">Order #{order.id}</span>
-                    <Badge className={getStatusColor(order.orderStatus)} variant="secondary">
-                      {order.orderStatus}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(order.purchaseDate).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </p>
-                  {order.remark && (
-                    <p className="text-xs text-muted-foreground mt-1">{order.remark}</p>
-                  )}
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold">
-                    {order.currency} {order.totalAmount.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            ))}
+          <div className="overflow-auto h-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Order ID</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recentOrders.map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell className="font-medium">#{order.id}</TableCell>
+                    <TableCell>
+                      {new Date(order.purchaseDate).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getStatusColor(order.orderStatus)} variant="secondary">
+                        {order.orderStatus}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">
+                      {order.currency} {order.totalAmount.toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         )}
       </CardContent>

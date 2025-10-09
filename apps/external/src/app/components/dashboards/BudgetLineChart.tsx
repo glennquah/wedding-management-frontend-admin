@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '@shared/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@shared/components/ui/chart';
-import { CartesianGrid, Line, LineChart, ReferenceLine, XAxis, YAxis } from 'recharts';
+import { Line, LineChart, ReferenceLine, XAxis, YAxis } from 'recharts';
 
 interface BudgetLineChartProps {
   orders: OrderResponseDto[];
@@ -54,11 +54,11 @@ export const BudgetLineChart = ({
   const chartConfig = {
     spending: {
       label: 'Spending',
-      color: 'hsl(var(--chart-1))',
+      color: '#3b82f6',
     },
     budget: {
       label: 'Budget',
-      color: 'hsl(var(--chart-2))',
+      color: '#ef4444',
     },
   };
 
@@ -68,19 +68,18 @@ export const BudgetLineChart = ({
         <CardTitle>Budget Tracking</CardTitle>
         <CardDescription>Cumulative spending over time vs allocated budget</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="h-[400px]">
         {isLoading ? (
-          <div className="flex h-[300px] items-center justify-center text-muted-foreground">
+          <div className="flex h-full items-center justify-center text-muted-foreground">
             Loading chart...
           </div>
         ) : chartData.length === 0 ? (
-          <div className="flex h-[300px] items-center justify-center text-muted-foreground">
+          <div className="flex h-full items-center justify-center text-muted-foreground">
             No order data available
           </div>
         ) : (
-          <ChartContainer config={chartConfig} className="h-[300px] w-full">
-            <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+          <ChartContainer config={chartConfig} className="h-full w-full">
+            <LineChart data={chartData}>
               <XAxis
                 dataKey="date"
                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
@@ -89,7 +88,7 @@ export const BudgetLineChart = ({
               <YAxis
                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
                 tickLine={{ stroke: 'hsl(var(--muted-foreground))' }}
-                tickFormatter={(value) => `${currency}${value}`}
+                tickFormatter={(value) => `${value}`}
               />
               <ChartTooltip
                 content={
@@ -106,16 +105,16 @@ export const BudgetLineChart = ({
               />
               <ReferenceLine
                 y={allocatedBudget}
-                stroke="hsl(var(--destructive))"
+                stroke="#ef4444"
                 strokeDasharray="3 3"
                 label={{ value: 'Budget Limit', position: 'insideTopRight' }}
               />
               <Line
                 type="monotone"
                 dataKey="spending"
-                stroke="var(--color-spending)"
+                stroke="#3b82f6"
                 strokeWidth={2}
-                dot={{ fill: 'var(--color-spending)' }}
+                dot={{ fill: '#3b82f6', r: 4 }}
               />
             </LineChart>
           </ChartContainer>
