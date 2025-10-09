@@ -54,6 +54,14 @@ export function OrderCard({ order, listings, vendorName, vendorId, vendorEmail, 
     });
   };
 
+  // Compute the total amount for the listings shown in this card (i.e. this vendor's subtotal).
+  // If a listing has booked slots, count each slot separately; otherwise count the listing once.
+  const vendorTotal = listings.reduce((sum, item) => {
+    const count = item.bookedSlots && item.bookedSlots.length > 0 ? item.bookedSlots.length : 1;
+    const price = item.listing?.price ?? 0;
+    return sum + price * count;
+  }, 0);
+
   const getStatusColor = (status: OrderStatus) => {
     switch (status) {
       case OrderStatus.PENDING:
@@ -298,12 +306,12 @@ export function OrderCard({ order, listings, vendorName, vendorId, vendorEmail, 
           })}
         </div>
 
-        {/* Order Total */}
+        {/* Vendor Subtotal */}
         <div className="mt-4 pt-4 border-t">
           <div className="flex justify-between items-center">
-            <span className="text-sm font-medium text-gray-700">Total Amount</span>
+            <span className="text-sm font-medium text-gray-700">Subtotal</span>
             <span className="text-xl font-bold text-primary">
-              {formatPrice(order.totalAmount)}
+              {formatPrice(vendorTotal)}
             </span>
           </div>
 
