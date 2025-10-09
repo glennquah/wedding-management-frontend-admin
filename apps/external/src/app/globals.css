@@ -384,3 +384,41 @@ p {
     color: var(--foreground);
   }
 }
+
+@media print {
+  body {
+    background: white !important;
+    -webkit-print-color-adjust: exact !important; /* preserve color */
+    print-color-adjust: exact !important;
+  }
+
+  /* Only show the invite card */
+  body * {
+    visibility: hidden;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  #print-section,
+  #print-section * {
+    visibility: visible;
+  }
+
+  #print-section {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white !important;
+    box-shadow: none !important;
+    color: black !important;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Ensure images like QR codes print cleanly */
+  #print-section img {
+    background: white !important;
+    box-shadow: none !important;
+  }
+}

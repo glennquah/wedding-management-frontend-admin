@@ -9,6 +9,7 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { AddToCartDto } from './models/AddToCartDto';
 export type { AdminResponseDto } from './models/AdminResponseDto';
+export type { AlbumResponseDto } from './models/AlbumResponseDto';
 export { AllEmailNotificationHistoryResponseDto } from './models/AllEmailNotificationHistoryResponseDto';
 export type { AuthResponseDto } from './models/AuthResponseDto';
 export type { AvailabilitySlotDto } from './models/AvailabilitySlotDto';
@@ -19,6 +20,7 @@ export type { CheckoutSessionResponseDto } from './models/CheckoutSessionRespons
 export { ConfirmationStatus } from './models/ConfirmationStatus';
 export type { ConfirmGuestDto } from './models/ConfirmGuestDto';
 export type { CreateAdminDto } from './models/CreateAdminDto';
+export type { CreateAlbumDto } from './models/CreateAlbumDto';
 export type { CreateCheckoutSessionDto } from './models/CreateCheckoutSessionDto';
 export type { CreateEmailTemplateDto } from './models/CreateEmailTemplateDto';
 export type { CreateGuestDto } from './models/CreateGuestDto';
@@ -63,6 +65,7 @@ export type { SuperAdminResponseDto } from './models/SuperAdminResponseDto';
 export type { TableDto } from './models/TableDto';
 export type { TokensDto } from './models/TokensDto';
 export type { UpdateAdminDto } from './models/UpdateAdminDto';
+export type { UpdateAlbumDto } from './models/UpdateAlbumDto';
 export type { UpdateEmailTemplateDto } from './models/UpdateEmailTemplateDto';
 export type { UpdateGuestDto } from './models/UpdateGuestDto';
 export type { UpdateListingDto } from './models/UpdateListingDto';
@@ -87,6 +90,7 @@ export { WeddingStyle } from './models/WeddingStyle';
 export { WeddingType } from './models/WeddingType';
 
 export { AdminsService } from './services/AdminsService';
+export { AlbumService } from './services/AlbumService';
 export { AuthService } from './services/AuthService';
 export { CartService } from './services/CartService';
 export { EmailNotificationService } from './services/EmailNotificationService';
