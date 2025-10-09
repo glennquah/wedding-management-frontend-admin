@@ -2,6 +2,7 @@
 
 import { Bot } from 'lucide-react';
 import { forwardRef } from 'react';
+import { parseAndRenderText } from '../../../utils/linkParser';
 
 interface ChatMessage {
   id: string;
@@ -15,24 +16,26 @@ interface ChatTabContentProps {
   loadingText?: string;
 }
 
-// Simple Markdown renderer for basic formatting
+// Enhanced Markdown renderer with link support
 const renderMarkdown = (text: string) => {
   const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|•\s)/g);
 
   return parts.map((part, index) => {
     // Bold text **text**
     if (part.startsWith('**') && part.endsWith('**')) {
+      const innerText = part.slice(2, -2);
       return (
         <strong key={index} className="font-semibold">
-          {part.slice(2, -2)}
+          {parseAndRenderText(innerText, 'text-blue-600 hover:text-blue-800 underline')}
         </strong>
       );
     }
     // Italic text *text*
     if (part.startsWith('*') && part.endsWith('*') && !part.startsWith('**')) {
+      const innerText = part.slice(1, -1);
       return (
         <em key={index} className="italic">
-          {part.slice(1, -1)}
+          {parseAndRenderText(innerText, 'text-blue-600 hover:text-blue-800 underline')}
         </em>
       );
     }
@@ -53,7 +56,12 @@ const renderMarkdown = (text: string) => {
       );
     }
 
-    return part;
+    // Regular text - parse for links
+    return (
+      <span key={index}>
+        {parseAndRenderText(part, 'text-blue-600 hover:text-blue-800 underline')}
+      </span>
+    );
   });
 };
 

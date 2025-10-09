@@ -3,6 +3,8 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useSidebar } from '@shared/components/ui/sidebar';
 import { ChecklistItem } from '../../../store/progressTrackerStore';
+import { parseAndRenderText } from '../../../utils/linkParser';
+import { X, Calendar, CheckCircle } from 'lucide-react';
 
 interface TimelineOverviewProps {
   checklist: ChecklistItem[];
@@ -16,18 +18,52 @@ interface TimelineItem {
   monthsBeforeWedding: number;
   completed?: boolean;
   isWeddingDay?: boolean;
+  isBranchItem?: boolean; // New property for T-0 branch items
+  branchItems?: TimelineItem[]; // For wedding day item to hold T-0 items
   displayLabel: string;
   status: 'completed' | 'upcoming' | 'overdue';
 }
 
 export default function TimelineOverview({ checklist, selectedWedding }: TimelineOverviewProps) {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [isWeddingDayModalOpen, setIsWeddingDayModalOpen] = useState(false);
   const [itemsPerRow, setItemsPerRow] = useState(6);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const dotRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [pathD, setPathD] = useState<string>('');
   const { open, openMobile } = useSidebar();
+
+  // Helper function to calculate smart popup positioning
+  const getSmartPopupPosition = (
+    itemIndex: number,
+    totalItems: number,
+    isLeftmost: boolean,
+    isRightmost: boolean,
+  ) => {
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const popupWidth = 320; // max-w-80 = 320px
+    const margin = 32; // minimum margin from viewport edges
+
+    // If there's enough space to center, use default centering
+    if (!isLeftmost && !isRightmost) {
+      return { left: '50%', transform: 'translateX(-50%)' };
+    }
+
+    // For edge items, check if centering would cause overflow
+    if (isLeftmost) {
+      // Item is on the left edge - align popup to left edge of item
+      return { left: 0, right: 'auto', transform: 'none' };
+    }
+
+    if (isRightmost) {
+      // Item is on the right edge - align popup to right edge of item
+      return { right: 0, left: 'auto', transform: 'none' };
+    }
+
+    // Default fallback
+    return { left: '50%', transform: 'translateX(-50%)' };
+  };
 
   // Handle responsive layout
   useEffect(() => {
@@ -56,56 +92,82 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
       (date.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24 * 30),
     );
 
-    // Create timeline items from checklist
-    const items: TimelineItem[] = checklist
+    // Separate main timeline items and T-0 branch items
+    const mainTimelineItems: TimelineItem[] = [];
+    const branchItems: TimelineItem[] = [];
+
+    checklist
       .filter((item) => item.monthsBeforeWedding !== undefined)
-      .map((item) => {
+      .forEach((item) => {
         const monthsBeforeWedding = item.monthsBeforeWedding || 0;
         const isOverdue = monthsUntilWedding < monthsBeforeWedding;
 
-        return {
+        // Create appropriate display label
+        let displayLabel: string;
+        if (monthsBeforeWedding > 0) {
+          displayLabel = `T-${monthsBeforeWedding}`;
+        } else if (monthsBeforeWedding < 0) {
+          displayLabel = `T+${Math.abs(monthsBeforeWedding)}`;
+        } else {
+          displayLabel = 'T-0';
+        }
+
+        const timelineItem: TimelineItem = {
           id: item.id,
           title: item.title,
           description: item.description,
           monthsBeforeWedding,
           completed: item.completed || false,
           isWeddingDay: false,
-          displayLabel: `T-${monthsBeforeWedding}`,
+          isBranchItem: monthsBeforeWedding === 0,
+          displayLabel,
           status: item.completed ? 'completed' : isOverdue ? 'overdue' : 'upcoming',
         };
+
+        if (monthsBeforeWedding === 0) {
+          branchItems.push(timelineItem);
+        } else {
+          // Include both positive and negative months in main timeline
+          mainTimelineItems.push(timelineItem);
+        }
       });
 
-    // Add "The Big Day" item
-    items.push({
+    // Add "The Big Day" item to main timeline
+    const weddingDayItem: TimelineItem = {
       id: 'wedding-day',
       title: 'The Big Day',
       description: 'Your wedding celebration!',
       monthsBeforeWedding: 0,
       completed: false,
       isWeddingDay: true,
+      isBranchItem: false,
       displayLabel: date.toLocaleDateString(),
       status: monthsUntilWedding <= 0 ? 'completed' : 'upcoming',
-    });
+      branchItems: branchItems, // Attach branch items to wedding day
+    };
 
-    // Sort by months before wedding (descending), then after wedding (ascending)
-    return items.sort((a, b) => {
-      // Wedding day always in the middle
-      if (a.isWeddingDay) return 0;
-      if (b.isWeddingDay) return a.monthsBeforeWedding > 0 ? -1 : 1;
+    mainTimelineItems.push(weddingDayItem);
 
-      // Before wedding items (positive months)
+    // Sort main timeline: positive months (descending) → Wedding Day → negative months (ascending)
+    return mainTimelineItems.sort((a, b) => {
+      // Wedding day comes between positive and negative months
+      if (a.isWeddingDay && b.monthsBeforeWedding > 0) return 1; // Wedding day after positive
+      if (b.isWeddingDay && a.monthsBeforeWedding > 0) return -1; // Positive before wedding day
+      if (a.isWeddingDay && b.monthsBeforeWedding < 0) return -1; // Wedding day before negative
+      if (b.isWeddingDay && a.monthsBeforeWedding < 0) return 1; // Negative after wedding day
+
+      // Both are positive months: sort descending (higher months first)
       if (a.monthsBeforeWedding > 0 && b.monthsBeforeWedding > 0) {
         return b.monthsBeforeWedding - a.monthsBeforeWedding;
       }
 
-      // After wedding items (0 months)
-      if (a.monthsBeforeWedding === 0 && b.monthsBeforeWedding === 0) {
-        return 0;
+      // Both are negative months: sort ascending (closer to wedding day first)
+      if (a.monthsBeforeWedding < 0 && b.monthsBeforeWedding < 0) {
+        return a.monthsBeforeWedding - b.monthsBeforeWedding;
       }
 
-      // Mixed before/after
-      if (a.monthsBeforeWedding > 0) return -1;
-      return 1;
+      // Mixed positive and negative (shouldn't happen due to wedding day in between)
+      return b.monthsBeforeWedding - a.monthsBeforeWedding;
     });
   }, [checklist, selectedWedding]);
 
@@ -181,7 +243,7 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
     }
     // Build smooth path only
     let d = `M ${points[0].x} ${points[0].y}`;
-    const smoothing = 0.45;
+    const smoothing = 0.8;
     for (let i = 1; i < points.length; i++) {
       const prev = points[i - 1];
       const curr = points[i];
@@ -239,6 +301,26 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
     return () => ro.disconnect();
   }, [rows]);
 
+  // Handle Escape key to close modal
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isWeddingDayModalOpen) {
+        setIsWeddingDayModalOpen(false);
+      }
+    };
+
+    if (isWeddingDayModalOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isWeddingDayModalOpen]);
+
   return (
     <div className="flex h-full w-full flex-col">
       {selectedWedding?.date ? (
@@ -262,13 +344,15 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                 <span>Overdue</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="bg-brand-500 h-3 w-3 rounded-full"></div>
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-white bg-gradient-to-br from-yellow-400 to-orange-500 shadow-sm">
+                  <Calendar className="h-3 w-3 text-white" />
+                </div>
                 <span>Wedding Day</span>
               </div>
             </div>
             <div className="mt-2 text-xs text-gray-500">
-              Note: T-X means X months before the wedding date (e.g., T-6 = 6 months before; T-0 =
-              Wedding Day).
+              Note: T-X means X months before the wedding date (e.g., T-6 = 6 months before); T+X
+              means X months after the wedding date (e.g., T+1 = 1 month after); T-0 = Wedding Day.
             </div>
           </div>
 
@@ -302,13 +386,17 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                     const isDomLast = itemIndex === row.items.length - 1;
                     const isLeftmost = isDomFirst;
                     const isRightmost = isDomLast;
+                    const smartPosition = getSmartPopupPosition(
+                      itemIndex,
+                      row.items.length,
+                      isLeftmost,
+                      isRightmost,
+                    );
                     const hoverStyle: React.CSSProperties = {
                       top: rowIndex % 2 === 0 ? '60px' : '-120px',
-                      ...(isLeftmost
-                        ? { left: 0, right: 'auto', transform: 'none' }
-                        : isRightmost
-                          ? { right: 0, left: 'auto', transform: 'none' }
-                          : { left: '50%', transform: 'translateX(-50%)' }),
+                      ...smartPosition,
+                      minWidth: '256px', // min-w-64
+                      maxWidth: '320px', // max-w-80
                     };
 
                     return (
@@ -319,8 +407,8 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                         onMouseLeave={() => setHoveredItem(null)}
                         style={{ minWidth: '160px' }}
                       >
-                        {/* Clean hover display */}
-                        {isHovered && (
+                        {/* Clean hover display - Skip for Wedding Day */}
+                        {isHovered && !item.isWeddingDay && (
                           <div
                             className="absolute z-[60] max-w-80 min-w-64 rounded-lg border border-gray-200 bg-white p-4 shadow-lg transition-all duration-200"
                             style={hoverStyle}
@@ -331,7 +419,12 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                             </div>
 
                             {/* Description */}
-                            <div className="mb-3 text-sm text-gray-600">{item.description}</div>
+                            <div className="mb-3 text-sm text-gray-600">
+                              {parseAndRenderText(
+                                item.description,
+                                'text-blue-600 hover:text-blue-800 underline',
+                              )}
+                            </div>
 
                             {/* Status */}
                             <div className="flex items-center justify-between text-xs">
@@ -351,26 +444,144 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                           </div>
                         )}
 
-                        {/* Timeline dot */}
+                        {/* Timeline dot - Special styling for Wedding Day */}
                         <div
                           ref={(el) => {
                             dotRefs.current[item.id] = el;
                           }}
-                          className={`${dotSize} rounded-full ${getItemColor(item, isHovered)} transition-all duration-200 ${isHovered ? 'scale-110 shadow-lg' : ''}`}
-                        />
+                          className={`${
+                            item.isWeddingDay
+                              ? 'h-12 w-12 transform cursor-pointer border-4 border-white bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg ring-2 ring-yellow-300 hover:scale-110 hover:shadow-xl'
+                              : `${dotSize} ${getItemColor(item, isHovered)}`
+                          } rounded-full transition-all duration-200 ${isHovered && !item.isWeddingDay ? 'scale-110 shadow-lg' : ''}`}
+                          onClick={() => {
+                            if (
+                              item.isWeddingDay &&
+                              item.branchItems &&
+                              item.branchItems.length > 0
+                            ) {
+                              setIsWeddingDayModalOpen(true);
+                            }
+                          }}
+                        >
+                          {/* Wedding Day Icon */}
+                          {item.isWeddingDay && (
+                            <div className="flex h-full w-full items-center justify-center">
+                              <Calendar className="h-6 w-6 text-white" />
+                            </div>
+                          )}
+                        </div>
 
-                        {/* Title label */}
+                        {/* Wedding Day CTA Badge */}
+                        {item.isWeddingDay && item.branchItems && item.branchItems.length > 0 && (
+                          <div className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 text-xs font-bold text-white">
+                            {item.branchItems.length}
+                          </div>
+                        )}
+
+                        {/* Wedding Day Activities Popup - Adjacent to icon */}
+                        {item.isWeddingDay && isWeddingDayModalOpen && (
+                          <div
+                            className={`absolute top-full z-[100] mt-2 ${
+                              isLeftmost
+                                ? 'left-0'
+                                : isRightmost
+                                  ? 'right-0'
+                                  : 'left-1/2 -translate-x-1/2'
+                            }`}
+                          >
+                            {/* Popup Content - Similar to Clean Hover Display */}
+                            <div className="max-w-96 min-w-80 rounded-lg border border-gray-200 bg-white p-4 shadow-lg transition-all duration-200">
+                              {/* Header with close button */}
+                              <div className="mb-3 flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                  <Calendar className="h-5 w-5 text-yellow-500" />
+                                  <div className="text-sm font-semibold text-gray-800">
+                                    Wedding Day Activities
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => setIsWeddingDayModalOpen(false)}
+                                  className="flex h-6 w-6 items-center justify-center rounded-full transition-colors duration-200 hover:bg-gray-100"
+                                >
+                                  <X className="h-4 w-4 text-gray-500" />
+                                </button>
+                              </div>
+
+                              {/* Activities List */}
+                              <div className="max-h-80 space-y-3 overflow-y-auto">
+                                {item.branchItems?.map((branchItem, index) => (
+                                  <div
+                                    key={branchItem.id}
+                                    className="border-b border-gray-100 pb-3 last:border-b-0 last:pb-0"
+                                  >
+                                    {/* Activity Title */}
+                                    <div className="mb-1 flex items-center justify-start">
+                                      <div className="text-sm font-medium text-gray-800">
+                                        {branchItem.title}
+                                      </div>
+                                    </div>
+
+                                    {/* Activity Description */}
+                                    <div className="mb-2 text-xs text-gray-600">
+                                      {parseAndRenderText(
+                                        branchItem.description,
+                                        'text-blue-600 hover:text-blue-800 underline',
+                                      )}
+                                    </div>
+
+                                    {/* Activity Status */}
+                                    <div className="flex items-center justify-end text-xs">
+                                      <div>
+                                        {branchItem.completed ? (
+                                          <span className="font-medium text-green-600">
+                                            ✓ Completed
+                                          </span>
+                                        ) : (
+                                          <span className="font-medium text-blue-600">
+                                            ○ Pending
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Title label - Special styling for Wedding Day */}
                         <div
-                          className={`mt-2 max-w-32 min-w-0 text-center text-xs font-medium break-words transition-colors duration-200 ${isHovered ? 'text-gray-900' : 'text-gray-700'}`}
+                          className={`mt-2 min-w-0 text-center font-medium break-words transition-colors duration-200 ${
+                            item.isWeddingDay
+                              ? 'max-w-40 text-base font-bold text-yellow-600'
+                              : `max-w-32 text-xs ${isHovered ? 'text-gray-900' : 'text-gray-700'}`
+                          }`}
                         >
                           {item.title}
                         </div>
 
-                        {/* Month label */}
+                        {/* Month label with CTA for Wedding Day */}
                         <div
-                          className={`mt-1 min-w-0 text-center text-xs transition-colors duration-200 ${isHovered ? 'text-gray-700' : 'text-gray-500'}`}
+                          className={`mt-1 min-w-0 text-center transition-colors duration-200 ${
+                            item.isWeddingDay
+                              ? 'cursor-pointer text-sm font-semibold text-yellow-700 hover:text-yellow-800'
+                              : `text-xs ${isHovered ? 'text-gray-700' : 'text-gray-500'}`
+                          }`}
+                          onClick={() => {
+                            if (
+                              item.isWeddingDay &&
+                              item.branchItems &&
+                              item.branchItems.length > 0
+                            ) {
+                              setIsWeddingDayModalOpen(true);
+                            }
+                          }}
                         >
-                          {item.displayLabel}
+                          {item.isWeddingDay && item.branchItems && item.branchItems.length > 0
+                            ? `Click to view ${item.branchItems.length} activities`
+                            : item.displayLabel}
                         </div>
                       </div>
                     );

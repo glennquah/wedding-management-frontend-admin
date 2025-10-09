@@ -3,28 +3,34 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useProgressTrackerManager } from '../../../hooks/useProgressTrackerManager';
-import { useProgressTrackerStore } from '../../../store/progressTrackerStore';
+import {
+  useProgressTrackerStore,
+  createEmptyProgressTrackerData,
+} from '../../../store/progressTrackerStore';
+import { useWeddingStore } from '../../../store/sessionStore';
 import ChatTabContent from './ChatTabContent';
 import { Button } from '@shared/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@shared/components/ui/card';
 import { Input } from '@shared/components/ui/form/input';
-import { Bot, MessageCircle, Send, X, ArrowRight } from 'lucide-react';
+import { Bot, MessageCircle, Send, X, ArrowRight, Wand } from 'lucide-react';
 
 type ChatProps = { selectedWedding?: any | null };
 
 export default function Chat({ selectedWedding }: ChatProps) {
-  const [open, setOpen] = useState(true);
+  const { selectedWeddingId } = useWeddingStore();
+
+  // Get wedding-specific data
+  const progressData = useProgressTrackerStore((s) =>
+    typeof selectedWeddingId === 'number'
+      ? (s.drafts[selectedWeddingId]?.data ?? createEmptyProgressTrackerData(selectedWeddingId))
+      : createEmptyProgressTrackerData(0),
+  );
+
+  const [open, setOpen] = useState(progressData.stage !== 'generated');
   const viewportRef = useRef<HTMLDivElement | null>(null);
 
-  const { stage } = useProgressTrackerStore();
-  const {
-    isLoading,
-    messages,
-    categoryIntro,
-    handleNextCategory,
-    handleChecklist,
-    handleWeddingAssistant,
-  } = useProgressTrackerManager();
+  const { isLoading, handleNextCategory, handleChecklist, handleWeddingAssistant } =
+    useProgressTrackerManager(selectedWeddingId);
 
   const [input, setInput] = useState('');
 
@@ -37,17 +43,21 @@ export default function Chat({ selectedWedding }: ChatProps) {
     const el = viewportRef.current;
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
-  }, [messages]);
+  }, [progressData.messages]);
 
   const showNextButton =
-    stage === 'introduction' && categoryIntro && !categoryIntro.isIntroductionComplete;
-  const showSendButton =
-    (stage === 'planning' && categoryIntro && categoryIntro.isIntroductionComplete) ||
-    stage === 'generated';
+    progressData.stage === 'introduction' &&
+    progressData.categoryIntro &&
+    !progressData.categoryIntro.isIntroductionComplete;
+  const showPlanningButton =
+    progressData.stage === 'planning' &&
+    progressData.categoryIntro &&
+    progressData.categoryIntro.isIntroductionComplete;
+  const showSendButton = progressData.stage === 'generated';
 
   // Debug logging
-  console.log('Debug - Stage:', stage);
-  console.log('Debug - CategoryIntro:', categoryIntro);
+  console.log('Debug - Stage:', progressData.stage);
+  console.log('Debug - CategoryIntro:', progressData.categoryIntro);
   console.log('Debug - Show Next Button:', showNextButton);
   console.log('Debug - Show Send Button:', showSendButton);
 
@@ -77,7 +87,7 @@ export default function Chat({ selectedWedding }: ChatProps) {
                     Wedding Planner Assistant
                   </span>
                   <span className="text-xs text-black/60 dark:text-white/60">
-                    {stage === 'introduction'
+                    {progressData.stage === 'introduction'
                       ? 'Learning about your wedding checklist'
                       : 'Here to customize your wedding planning'}
                   </span>
@@ -97,12 +107,12 @@ export default function Chat({ selectedWedding }: ChatProps) {
             <CardContent className="flex-1 overflow-hidden px-4 py-3">
               <ChatTabContent
                 ref={viewportRef}
-                messages={messages}
+                messages={progressData.messages}
                 isLoading={isLoading}
                 loadingText={
-                  stage === 'introduction'
+                  progressData.stage === 'introduction'
                     ? 'Preparing next category...'
-                    : stage === 'planning'
+                    : progressData.stage === 'planning'
                       ? 'Updating your checklist...'
                       : 'Let me think...'
                 }
@@ -123,6 +133,36 @@ export default function Chat({ selectedWedding }: ChatProps) {
                 </div>
               )}
 
+              {showPlanningButton && (
+                <form
+                  className="flex w-full items-center gap-2"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const text = input.trim();
+                    if (!text) return;
+                    setInput('');
+                    handleChecklist(text);
+                  }}
+                >
+                  <Input
+                    value={input}
+                    onChange={handleInputChange}
+                    placeholder="Tell me about your specific wedding needs..."
+                    className="bg-white text-black dark:bg-black dark:text-white"
+                    aria-label="Chat message"
+                    disabled={isLoading}
+                  />
+                  <Button
+                    type="submit"
+                    disabled={!canSend}
+                    className="bg-brand-500 hover:bg-brand-700 text-white"
+                  >
+                    <Wand className="mr-2 h-4 w-4" />
+                    Generate Checklist
+                  </Button>
+                </form>
+              )}
+
               {showSendButton && (
                 <form
                   className="flex w-full items-center gap-2"
@@ -131,17 +171,13 @@ export default function Chat({ selectedWedding }: ChatProps) {
                     const text = input.trim();
                     if (!text) return;
                     setInput('');
-                    if (stage === 'planning') {
-                      handleChecklist(text);
-                    } else {
-                      handleWeddingAssistant(text, { wedding: selectedWedding ?? undefined });
-                    }
+                    handleWeddingAssistant(text, { wedding: selectedWedding ?? undefined });
                   }}
                 >
                   <Input
                     value={input}
                     onChange={handleInputChange}
-                    placeholder="Tell me about your specific wedding needs..."
+                    placeholder="Ask me anything about your wedding..."
                     className="bg-white text-black dark:bg-black dark:text-white"
                     aria-label="Chat message"
                     disabled={isLoading}

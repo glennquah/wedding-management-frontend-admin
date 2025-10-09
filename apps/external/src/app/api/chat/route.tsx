@@ -9,7 +9,7 @@ export const ChecklistItemSchema = z.object({
   title: z.string(),
   description: z.string(),
   category: z.string(),
-  monthsBeforeWedding: z.number().int().min(0).max(36),
+  monthsBeforeWedding: z.number().int().min(-36).max(36),
   completed: z.boolean().optional(),
 });
 export type ChecklistItem = z.infer<typeof ChecklistItemSchema>;
@@ -60,50 +60,63 @@ export async function POST(req: Request) {
 
   if (action === 'checklist') {
     try {
+      // Get the user's latest message
+      const msgsAny = (messages as unknown as Array<{ role?: string; content?: unknown }>) || [];
+      const lastUser = [...msgsAny].reverse().find((m) => m?.role === 'user');
+      const content = lastUser?.content as unknown;
+      const userText = typeof content === 'string' ? content : JSON.stringify(content ?? '');
+
       const { object } = await withRetry(
         () =>
-          generateObject<ChecklistResponse>({
+          generateObject({
             model: openai('gpt-4o'),
+            schema: ChecklistResponseSchema,
             temperature: 0.2,
             system:
-              'You are a professional wedding planning assistant for Knotly. You help couples customize their wedding planning checklist by adding relevant items based on their specific needs, preferences, and requirements.',
-            prompt:
-              `Conversation History:\n${history}\n\n` +
-              `Here is the current wedding planning checklist with ${checklist?.length || 0} items:\n${JSON.stringify(checklist, null, 2)}\n\n` +
-              `Based on the user's input and requirements, please:\n` +
-              `1. Keep ALL existing checklist items unchanged\n` +
-              `2. Add new relevant checklist items that address the user's specific needs\n` +
-              `3. Ensure each new item has a unique ID, title, description, appropriate category, and monthsBeforeWedding value\n` +
-              `4. Categories should be one of: "Getting Started", "Initial Planning", "Creating the Foundation", "Detailed Planning", "During the Wedding", "After the Wedding", "Additional Details"\n` +
-              `5. monthsBeforeWedding should be a realistic timeline (-36 to 36 months; negative values represent months after the wedding day)\n` +
-              `6. Provide a helpful response message explaining what you've added\n\n` +
-              `IMPORTANT: You MUST return a JSON object with this EXACT structure:\n` +
-              `{\n` +
-              `  "message": "string - Your helpful explanation of what was added",\n` +
-              `  "checklist": [\n` +
-              `    {\n` +
-              `      "id": "string - Unique identifier",\n` +
-              `      "title": "string - Item title",\n` +
-              `      "description": "string - Detailed description",\n` +
-              `      "category": "string - Must be one of the 7 categories listed above",\n` +
-              `      "monthsBeforeWedding": number - Integer between -36 to 36 months; negative values represent months after the wedding day,\n` +
-              `      "completed": false\n` +
-              `    }\n` +
-              `  ]\n` +
-              `}\n\n` +
-              `Requirements:\n` +
-              `- The checklist array must contain between 1 and 50 items\n` +
-              `- Include ALL existing items plus new ones\n` +
-              `- Each item's "id" must be a string\n` +
-              `- Each item's "monthsBeforeWedding" must be an integer between -36 to 36 months; negative values represent months after the wedding day\n` +
-              `- Each item's "completed" should be false for new items\n` +
-              `- Do not include any extra fields not specified in the schema\n` +
-              `- Do not wrap the response in markdown code blocks\n\n` +
-              `Return the complete updated checklist including both existing and new items.`,
+              'You are a professional wedding planning assistant for Knotly. You help couples customize their wedding planning checklist by adding relevant items based on their specific needs, preferences, and requirements.\n\n' +
+              'INSTRUCTIONS:\n' +
+              "Based on the user's input and requirements, please:\n" +
+              '1. Keep ALL existing checklist items unchanged\n' +
+              "2. Add new relevant checklist items that address the user's specific needs\n" +
+              '3. Ensure each new item has a unique ID, title, description, appropriate category, and monthsBeforeWedding value\n' +
+              '4. Categories should be one of: "Getting Started", "Initial Planning", "Creating the Foundation", "Detailed Planning", "During the Wedding", "After the Wedding", "Additional Details"\n' +
+              '5. monthsBeforeWedding should be a realistic timeline (-36 to 36 months; negative values represent months after the wedding day)\n' +
+              "6. Provide a helpful response message explaining what you've added\n\n" +
+              'RESPONSE FORMAT:\n' +
+              'You MUST return a JSON object with this EXACT structure:\n' +
+              '{\n' +
+              '  "message": "string - Your helpful explanation of what was added",\n' +
+              '  "checklist": [\n' +
+              '    {\n' +
+              '      "id": "string - Unique identifier",\n' +
+              '      "title": "string - Item title",\n' +
+              '      "description": "string - Detailed description",\n' +
+              '      "category": "string - Must be one of the 7 categories listed above",\n' +
+              '      "monthsBeforeWedding": number - Integer between -36 to 36 months,\n' +
+              '      "completed": false\n' +
+              '    }\n' +
+              '  ]\n' +
+              '}\n\n' +
+              'REQUIREMENTS:\n' +
+              '- The checklist array must contain between 1 and 50 items\n' +
+              '- Include ALL existing items plus new ones\n' +
+              '- Each item\'s "id" must be a string\n' +
+              '- Each item\'s "monthsBeforeWedding" must be an integer between -36 to 36\n' +
+              '- Each item\'s "completed" should be false for new items\n' +
+              '- Do not include any extra fields not specified in the schema\n' +
+              '- Do not wrap the response in markdown code blocks\n\n' +
+              `EXISTING CHECKLIST (${checklist?.length || 0} items):\n${JSON.stringify(checklist, null, 2)}`,
+            prompt: `User's request: ${userText}`,
             schema: ChecklistResponseSchema,
           }),
         1,
       );
+
+      console.log('Checklist API success:', {
+        messageLength: object.message?.length,
+        checklistLength: object.checklist?.length,
+        firstItem: object.checklist?.[0],
+      });
 
       return new Response(
         JSON.stringify({
@@ -116,6 +129,16 @@ export async function POST(req: Request) {
       );
     } catch (err) {
       console.error('Checklist API error:', err);
+
+      // Log more details about the error
+      if (err && typeof err === 'object') {
+        console.error('Error details:', {
+          name: (err as any).name,
+          message: (err as any).message,
+          stack: (err as any).stack,
+          cause: (err as any).cause,
+        });
+      }
 
       return new Response(
         JSON.stringify({
@@ -142,11 +165,11 @@ export async function POST(req: Request) {
         system:
           'You are a professional wedding planning assistant for Knotly. Your role is to: ' +
           'identify details couples may miss in their current plan, suggest additional relevant checklist items, and provide general help on wedding planning and coordination. ' +
-          'Keep responses concise, friendly, and actionable. When information is missing, ask a clear follow-up question.',
-        prompt:
-          `Wedding instance (may be null):\n${JSON.stringify(wedding ?? null, null, 2)}\n\n` +
-          `Conversation so far:\n${history}\n\n` +
-          `User message:\n${userText}`,
+          'Keep responses concise, friendly, and actionable. When information is missing, ask a clear follow-up question.\n\n' +
+          `WEDDING INSTANCE:\n${JSON.stringify(wedding ?? null, null, 2)}\n\n` +
+          `CONVERSATION HISTORY:\n${history}\n\n` +
+          `CURRENT CHECKLIST (${checklist?.length || 0} items):\n${JSON.stringify(checklist ?? [], null, 2)}`,
+        prompt: `User message:\n${userText}`,
       });
 
       let fullText = '';

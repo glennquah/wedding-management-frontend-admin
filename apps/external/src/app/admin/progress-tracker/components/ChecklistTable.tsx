@@ -3,14 +3,27 @@
 import { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { ChecklistItem, useProgressTrackerStore } from '../../../store/progressTrackerStore';
+import { useWeddingStore } from '../../../store/sessionStore';
 import { Checkbox } from '@shared/components/ui/checkbox';
+import { Button } from '@shared/components/ui/button';
 import { DataTable } from '@shared/components/ui/table';
+import { parseAndRenderText } from '../../../utils/linkParser';
+import { Edit2, Trash2 } from 'lucide-react';
 
 interface ChecklistTableProps {
   checklist: ChecklistItem[];
+  onEditItem?: (item: ChecklistItem) => void;
+  onDeleteItem?: (item: ChecklistItem) => void;
+  onToggleCompletion?: (itemId: string, completed: boolean) => Promise<void>;
 }
 
-export default function ChecklistTable({ checklist }: ChecklistTableProps) {
+export default function ChecklistTable({
+  checklist,
+  onEditItem,
+  onDeleteItem,
+  onToggleCompletion,
+}: ChecklistTableProps) {
+  const { selectedWeddingId } = useWeddingStore();
   const { updateChecklistItem } = useProgressTrackerStore();
 
   // Sort checklist items by months before wedding (descending)
@@ -24,8 +37,13 @@ export default function ChecklistTable({ checklist }: ChecklistTableProps) {
     [checklist],
   );
 
-  const handleCheckboxChange = (itemId: string, completed: boolean) => {
-    updateChecklistItem(itemId, { completed });
+  const handleCheckboxChange = async (itemId: string, completed: boolean) => {
+    if (onToggleCompletion) {
+      await onToggleCompletion(itemId, completed);
+    } else if (typeof selectedWeddingId === 'number') {
+      // Fallback to local store if no callback provided
+      updateChecklistItem(selectedWeddingId, itemId, { completed });
+    }
   };
 
   const getCategoryColor = (category: string) => {
@@ -41,54 +59,93 @@ export default function ChecklistTable({ checklist }: ChecklistTableProps) {
     return colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
-  const columns: ColumnDef<ChecklistItem>[] = [
-    {
-      accessorKey: 'title',
-      header: 'Task',
-      cell: ({ row }) => (
-        <div className="min-w-0">
-          <div className="font-medium text-gray-900">{row.original.title}</div>
-          <div className="line-clamp-2 text-sm text-gray-500">{row.original.description}</div>
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'category',
-      header: 'Category',
-      cell: ({ row }) => (
-        <span
-          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${getCategoryColor(row.original.category)}`}
-        >
-          {row.original.category}
-        </span>
-      ),
-    },
-    {
-      accessorKey: 'monthsBeforeWedding',
-      header: 'Months Before Wedding',
-      cell: ({ row }) => (
-        <div className="text-sm text-gray-600">
-          {row.original.monthsBeforeWedding !== undefined
-            ? `${row.original.monthsBeforeWedding}`
-            : 'Not specified'}
-        </div>
-      ),
-    },
-    {
-      id: 'completed',
-      header: 'Completed',
-      cell: ({ row }) => (
-        <div className="flex w-full items-center justify-center">
-          <Checkbox
-            className="border-2 data-[state=unchecked]:border-gray-400 data-[state=unchecked]:bg-white dark:data-[state=unchecked]:border-gray-500 dark:data-[state=unchecked]:bg-transparent"
-            checked={row.original.completed || false}
-            onCheckedChange={(checked) => handleCheckboxChange(row.original.id, !!checked)}
-            aria-label={`Mark ${row.original.title} as ${row.original.completed ? 'incomplete' : 'complete'}`}
-          />
-        </div>
-      ),
-    },
-  ];
+  const columns: ColumnDef<ChecklistItem>[] = useMemo(() => {
+    const baseColumns: ColumnDef<ChecklistItem>[] = [
+      {
+        accessorKey: 'title',
+        header: 'Task',
+        cell: ({ row }) => (
+          <div className="min-w-0">
+            <div className="font-medium text-gray-900">{row.original.title}</div>
+            <div className="line-clamp-2 text-sm text-gray-500">
+              {parseAndRenderText(
+                row.original.description,
+                'text-blue-600 hover:text-blue-800 underline',
+              )}
+            </div>
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'category',
+        header: 'Category',
+        cell: ({ row }) => (
+          <span
+            className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${getCategoryColor(row.original.category)}`}
+          >
+            {row.original.category}
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'monthsBeforeWedding',
+        header: 'Months Before Wedding',
+        cell: ({ row }) => (
+          <div className="text-sm text-gray-600">
+            {row.original.monthsBeforeWedding !== undefined
+              ? `${row.original.monthsBeforeWedding}`
+              : 'Not specified'}
+          </div>
+        ),
+      },
+      {
+        id: 'completed',
+        header: 'Completed',
+        cell: ({ row }) => (
+          <div className="flex w-full items-center justify-center">
+            <Checkbox
+              className="border-2 data-[state=unchecked]:border-gray-400 data-[state=unchecked]:bg-white dark:data-[state=unchecked]:border-gray-500 dark:data-[state=unchecked]:bg-transparent"
+              checked={row.original.completed || false}
+              onCheckedChange={(checked) => handleCheckboxChange(row.original.id, !!checked)}
+              aria-label={`Mark ${row.original.title} as ${row.original.completed ? 'incomplete' : 'complete'}`}
+            />
+          </div>
+        ),
+      },
+    ];
+
+    // Add actions column if handlers are provided
+    if (onEditItem || onDeleteItem) {
+      baseColumns.push({
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => {
+          const item = row.original;
+          return (
+            <div className="flex items-center gap-2">
+              {onEditItem && (
+                <Button size="sm" variant="ghost" onClick={() => onEditItem(item)}>
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+              )}
+              {onDeleteItem && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onDeleteItem(item)}
+                  className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          );
+        },
+      });
+    }
+
+    return baseColumns;
+  }, [onEditItem, onDeleteItem]);
 
   return (
     <DataTable
