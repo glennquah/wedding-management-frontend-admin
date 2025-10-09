@@ -1,7 +1,14 @@
 'use client';
 
+import { useState } from 'react';
+
 import { useGuestManager } from '../../hooks/useGuestManager';
-import { ConfirmationStatus, CreateGuestDto } from '@shared/api';
+import {
+  ConfirmationStatus,
+  CreateGuestDto,
+  EmailNotificationService,
+  GuestResponseDto,
+} from '@shared/api';
 import { getGuestColumns } from '@shared/columns/guest-columns';
 import {
   Button,
@@ -10,13 +17,24 @@ import {
   GroupSelectDropdown,
   PageHeader,
 } from '@shared/components';
+import { BroadcastRsvpDialog } from '@shared/components/BroadcastRsvpDialog';
 import { EmailModal } from '@shared/components/EmailModal';
 import FormField from '@shared/components/FormField';
 import GuestSummaryStats from '@shared/components/guest-management/GuestSummaryStats';
+import { Checkbox } from '@shared/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@shared/components/ui/dialog';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import { SingleSelectDropdown } from '@shared/components/ui/form/singleSelectDropdown';
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
-import { Plus, Trash2 } from 'lucide-react';
+import { Mail, Plus, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 type AccompanyingGuestData = {
   name: string;
@@ -27,6 +45,7 @@ type AccompanyingGuestData = {
 type GuestFormData = Partial<CreateGuestDto> & {
   id?: number;
   accompanyingGuests?: AccompanyingGuestData[];
+  sendRsvpEmail?: boolean;
 };
 
 export default function GuestListPage() {
@@ -35,6 +54,7 @@ export default function GuestListPage() {
     // Core data
     guests,
     wedding,
+    microsite,
     primaryGuests,
     existingGroups,
     isLoading,
@@ -74,14 +94,60 @@ export default function GuestListPage() {
     closeEmailModal,
   } = useGuestManager();
 
+  // RSVP Invitation Dialog state
+  const [sendRsvpDialogGuest, setSendRsvpDialogGuest] = useState<GuestResponseDto | null>(null);
+  const [isSendingRsvp, setIsSendingRsvp] = useState(false);
+
+  // Broadcast RSVP Dialog state
+  const [isBroadcastDialogOpen, setIsBroadcastDialogOpen] = useState(false);
+
   // Get capacity information
   const capacityInfo = getGuestCapacityInfo();
+
+  // Handler for opening RSVP invitation dialog
+  const handleOpenSendRsvpDialog = (guest: GuestResponseDto) => {
+    if (!microsite) {
+      toast.error('You must create a microsite before sending RSVP invitations.');
+      return;
+    }
+    setSendRsvpDialogGuest(guest);
+  };
+
+  // Handler for sending RSVP invitation
+  const handleSendRsvpInvitation = async () => {
+    if (!sendRsvpDialogGuest || !wedding) return;
+
+    try {
+      setIsSendingRsvp(true);
+      await EmailNotificationService.emailNotificationControllerSendRsvpInvitation({
+        guestId: sendRsvpDialogGuest.id!,
+        weddingId: wedding.id,
+      });
+      toast.success(`RSVP invitation sent to ${sendRsvpDialogGuest.name}!`);
+      setSendRsvpDialogGuest(null);
+    } catch (error) {
+      console.error('Error sending RSVP invitation:', error);
+      toast.error('Failed to send RSVP invitation. Please try again.');
+    } finally {
+      setIsSendingRsvp(false);
+    }
+  };
+
+  // Handler for opening broadcast RSVP dialog
+  const handleOpenBroadcastDialog = () => {
+    if (!microsite) {
+      toast.error('You must create a microsite before sending RSVP invitations.');
+      return;
+    }
+    setIsBroadcastDialogOpen(true);
+  };
 
   // Column definitions for DataTable using shared columns
   const columns = getGuestColumns({
     guests,
     onEditGuest: handleEditGuest,
     onDeleteGuest: openDeleteConfirmModal,
+    onSendRsvpInvitation: handleOpenSendRsvpDialog,
     includeEmail: true,
     showConfirmationIcon: true,
     detailedAccompanyingGuests: true,
@@ -124,6 +190,28 @@ export default function GuestListPage() {
         required
         placeholder="Guest email address"
       />
+    </div>,
+
+    <div key="sendRsvpEmail" className="md:col-span-2">
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="sendRsvpEmail"
+          checked={guest.sendRsvpEmail || false}
+          disabled={!microsite}
+          onCheckedChange={(checked) => setGuest({ ...guest, sendRsvpEmail: checked as boolean })}
+        />
+        <label
+          htmlFor="sendRsvpEmail"
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          Send RSVP email notification to guest
+        </label>
+      </div>
+      {!microsite && (
+        <p className="text-sm text-red-600 mt-1">
+          You must create a microsite before sending RSVP email notifications.
+        </p>
+      )}
     </div>,
 
     <div key="accompanyingGuests" className="md:col-span-2">
@@ -345,6 +433,17 @@ export default function GuestListPage() {
           onButtonClick={openAddGuestModal}
           buttonIcon={<Plus className="w-4 h-4" />}
           isButtonDisabled={isLoading || capacityInfo.isAtCapacity}
+          additionalActions={
+            <Button
+              onClick={handleOpenBroadcastDialog}
+              className="flex items-center gap-2"
+              variant="secondary"
+              disabled={isLoading || primaryGuests.length === 0 || !microsite}
+            >
+              <Mail className="w-4 h-4" />
+              Broadcast RSVP
+            </Button>
+          }
         />
 
         {/* Add Guest Modal */}
@@ -439,6 +538,41 @@ export default function GuestListPage() {
             onOpenChange={closeEmailModal}
             name={emailModalGuest.name}
             email={emailModalGuest.email}
+          />
+        )}
+
+        {/* Send RSVP Invitation Dialog */}
+        <Dialog open={!!sendRsvpDialogGuest} onOpenChange={() => setSendRsvpDialogGuest(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Send RSVP Invitation</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to send an RSVP invitation email to{' '}
+                <span className="font-semibold">{sendRsvpDialogGuest?.name}</span>?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setSendRsvpDialogGuest(null)}
+                disabled={isSendingRsvp}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleSendRsvpInvitation} disabled={isSendingRsvp}>
+                {isSendingRsvp ? 'Sending...' : 'Send Invitation'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Broadcast RSVP Dialog */}
+        {wedding && (
+          <BroadcastRsvpDialog
+            open={isBroadcastDialogOpen}
+            onOpenChange={setIsBroadcastDialogOpen}
+            guests={primaryGuests}
+            weddingId={wedding.id}
           />
         )}
       </div>
