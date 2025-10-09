@@ -118,7 +118,8 @@ export function useGuestManager() {
     async (weddingId: number) => {
       try {
         setupAuth();
-        const micrositeData = await MicrositeService.micrositeControllerGetMicrositeByWeddingId(weddingId);
+        const micrositeData =
+          await MicrositeService.micrositeControllerGetMicrositeByWeddingId(weddingId);
         setMicrosite(micrositeData);
       } catch {
         // Microsite not found is expected if not created yet
@@ -414,7 +415,9 @@ export function useGuestManager() {
       setNewGuest(getDefaultNewGuest(currentWeddingId!));
       setIsAddingGuest(false);
 
-      toast.success('Guest added successfully!');
+      toast.success(
+        `Guest added successfully!${newGuest.sendRsvpEmail ? ' RSVP email sent.' : ' No email sent.'}`,
+      );
     } catch (err) {
       toast.error('Failed to add guest. Please try again.');
       console.error('Error adding guest:', err);
