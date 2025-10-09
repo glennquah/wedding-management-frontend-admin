@@ -51,7 +51,7 @@ export const RecentOrdersList = ({ orders, isLoading }: RecentOrdersListProps) =
         <CardTitle>Recent Orders</CardTitle>
         <CardDescription>Your latest 5 orders</CardDescription>
       </CardHeader>
-      <CardContent className="h-[330px]">
+      <CardContent className="h-[320px]">
         {isLoading ? (
           <div className="flex h-full items-center justify-center text-muted-foreground">
             Loading orders...
@@ -62,7 +62,7 @@ export const RecentOrdersList = ({ orders, isLoading }: RecentOrdersListProps) =
             <p>No orders yet</p>
           </div>
         ) : (
-          <div className="overflow-auto h-full border rounded-md">
+          <div className="overflow-auto h-full border rounded-md ">
             <Table>
               <TableHeader>
                 <TableRow>
