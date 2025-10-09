@@ -68,7 +68,7 @@ export const BudgetLineChart = ({
         <CardTitle>Budget Tracking</CardTitle>
         <CardDescription>Cumulative spending over time vs allocated budget</CardDescription>
       </CardHeader>
-      <CardContent className="h-[400px]">
+      <CardContent className="h-[300px]">
         {isLoading ? (
           <div className="flex h-full items-center justify-center text-muted-foreground">
             Loading chart...

@@ -1,6 +1,14 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/ui/card';
+import { OrderResponseDto } from '@shared/api';
+import { Badge } from '@shared/components/ui/badge';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@shared/components/ui/card';
 import {
   Table,
   TableBody,
@@ -9,8 +17,6 @@ import {
   TableHeader,
   TableRow,
 } from '@shared/components/ui/table';
-import { OrderResponseDto } from '@shared/api';
-import { Badge } from '@shared/components/ui/badge';
 import { Package } from 'lucide-react';
 
 interface RecentOrdersListProps {
@@ -45,7 +51,7 @@ export const RecentOrdersList = ({ orders, isLoading }: RecentOrdersListProps) =
         <CardTitle>Recent Orders</CardTitle>
         <CardDescription>Your latest 5 orders</CardDescription>
       </CardHeader>
-      <CardContent className="h-[400px]">
+      <CardContent className="h-[330px]">
         {isLoading ? (
           <div className="flex h-full items-center justify-center text-muted-foreground">
             Loading orders...
@@ -56,7 +62,7 @@ export const RecentOrdersList = ({ orders, isLoading }: RecentOrdersListProps) =
             <p>No orders yet</p>
           </div>
         ) : (
-          <div className="overflow-auto h-full">
+          <div className="overflow-auto h-full border rounded-md">
             <Table>
               <TableHeader>
                 <TableRow>

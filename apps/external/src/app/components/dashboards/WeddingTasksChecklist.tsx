@@ -74,9 +74,9 @@ export const WeddingTasksChecklist = ({
             {tasks.map((task, index) => (
               <div
                 key={index}
-                className="flex items-start justify-between p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                className="flex items-start justify-between p-4 rounded-lg border border-gray-200 hover:bg-gray-50 bg-white transition-colors"
               >
-                <div className="flex items-start gap-3 flex-1">
+                <div className="flex items-center gap-3 flex-1">
                   <div
                     className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
                       task.completed ? 'bg-green-100' : 'bg-gray-100'
