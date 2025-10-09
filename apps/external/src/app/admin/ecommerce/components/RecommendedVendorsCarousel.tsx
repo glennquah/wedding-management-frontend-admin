@@ -10,7 +10,8 @@ import {
 } from '@shared/components/ui/carousel';
 import { Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { VendorCard, VendorWithScore } from './VendorCard';
+import { VendorWithScore } from '../hooks';
+import { VendorCard } from './VendorCard';
 
 interface RecommendedVendorsCarouselProps {
   vendors: VendorWithScore[];
@@ -39,6 +40,7 @@ export function RecommendedVendorsCarousel({ vendors, loading }: RecommendedVend
       api.off('select', onSelect);
     };
   }, [api]);
+
   if (loading) {
     return (
       <section className='mb-12'>
@@ -63,7 +65,7 @@ export function RecommendedVendorsCarousel({ vendors, loading }: RecommendedVend
   }
 
   // Get the max score (first vendor's score) for normalization so first vendor shows 100% match
-  const maxScore = vendors.length > 0 ? vendors[0].score.final_score : 1;
+  const maxScore = vendors.length > 0 ? vendors[0].final_score : 1;
 
   return (
     <section className='mb-12 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-xl p-6 border-2 border-primary/20'>

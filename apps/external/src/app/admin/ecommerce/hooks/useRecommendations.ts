@@ -1,6 +1,6 @@
 import { ListingsService, VendorRecommendationService, VendorResponseDto, VendorsService } from '@shared/api';
 import { useEffect, useState } from 'react';
-import { VendorWithScore } from '../components/VendorCard';
+import { VendorWithScore } from './useVendorData';
 
 export function useRecommendations(vendors: VendorResponseDto[], weddingId?: number) {
   const [recommendedVendors, setRecommendedVendors] = useState<VendorWithScore[]>([]);
@@ -35,22 +35,11 @@ export function useRecommendations(vendors: VendorResponseDto[], weddingId?: num
                   styleOffered: vendorDetails.styleOffered || 'N/A',
                   rating: vendorDetails.rating || 0,
                   bio: vendorDetails.bio,
-                  score,
+                  final_score: score.final_score,
                 } as VendorWithScore;
               } catch (err) {
                 console.error(`Error fetching vendor details for ${score.vendor_id}:`, err);
-                // Fallback to basic vendor info from the vendors array
-                const vendor = vendors.find(v => v.id === score.vendor_id);
-                if (!vendor) return null;
-                return {
-                  id: vendor.id,
-                  name: vendor.name || 'Unknown Vendor',
-                  serviceOffered: vendor.serviceOffered || 'N/A',
-                  styleOffered: vendor.styleOffered || 'N/A',
-                  rating: vendor.rating || 0,
-                  bio: vendor.bio,
-                  score,
-                } as VendorWithScore;
+                setError(err instanceof Error ? err.message : `Error fetching vendor details for ${score.vendor_id}: ${err}`);
               }
             })
           );

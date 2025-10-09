@@ -1,31 +1,10 @@
 'use client';
 
-import { ListingResponseDto } from '@shared/api';
 import { Badge } from '@shared/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { Star, TrendingUp } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
-
-export interface VendorScore {
-  vendor_id: number;
-  final_score: number;
-  cluster_popularity_score: number;
-  neighbor_score: number;
-  content_similarity_score: number;
-}
-
-export interface VendorWithScore {
-  id: number;
-  name: string;
-  serviceOffered: string;
-  styleOffered: string;
-  rating: number;
-  bio?: string;
-  score: VendorScore;
-  cheapestListing?: ListingResponseDto | null;
-  startingPrice?: number | null;
-}
+import { VendorWithScore } from '../hooks/useVendorData';
 
 interface VendorCardProps {
   vendor: VendorWithScore;
@@ -41,8 +20,8 @@ export function VendorCard({ vendor, maxScore }: VendorCardProps) {
 
   // Normalize score - if maxScore is provided, scale relative to it
   const matchScore = maxScore && maxScore > 0
-    ? Math.round((vendor.score.final_score / maxScore) * 100)
-    : Math.round(vendor.score.final_score * 100);
+    ? Math.round((vendor.final_score / maxScore) * 100)
+    : Math.round(vendor.final_score * 100);
 
   return (
     <Card
