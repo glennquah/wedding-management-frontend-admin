@@ -22,6 +22,7 @@ export namespace EmailNotificationHistoryResponseDto {
         VENDOR_STATUS = 'VENDOR_STATUS',
         VENDOR_SUSPENSION = 'VENDOR_SUSPENSION',
         ADMIN_SUSPENSION = 'ADMIN_SUSPENSION',
+        RSVP_INVITATION = 'RSVP_INVITATION',
         CUSTOM = 'CUSTOM',
     }
 }

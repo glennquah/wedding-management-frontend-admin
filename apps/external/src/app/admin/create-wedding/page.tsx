@@ -14,6 +14,7 @@ interface OnboardingData {
   location: string;
   weddingType: WeddingType | null;
   budgetBucket: BudgetBucket | null;
+  allocatedBudget: number;
   guestCountBucket: GuestCountBucket | null;
   preferredStyle: WeddingStyle | null;
   preferredServices: WeddingService[];
@@ -77,6 +78,7 @@ export default function CreateWeddingPage() {
     location: '',
     weddingType: null,
     budgetBucket: null,
+    allocatedBudget: 0,
     guestCountBucket: null,
     preferredStyle: null,
     preferredServices: []
@@ -96,7 +98,11 @@ export default function CreateWeddingPage() {
   };
 
   const handleInputChange = (field: keyof OnboardingData, value: string) => {
-    setOnboardingData(prev => ({ ...prev, [field]: value }));
+    if (field === 'allocatedBudget') {
+      setOnboardingData(prev => ({ ...prev, [field]: parseFloat(value) || 0 }));
+    } else {
+      setOnboardingData(prev => ({ ...prev, [field]: value }));
+    }
   };
 
   const handleNext = async () => {
@@ -105,6 +111,7 @@ export default function CreateWeddingPage() {
     } else {
       // Final step - submit data
       if (!onboardingData.name || !onboardingData.weddingType || !onboardingData.budgetBucket ||
+          !onboardingData.allocatedBudget || onboardingData.allocatedBudget <= 0 ||
           !onboardingData.guestCountBucket || !onboardingData.preferredStyle ||
           onboardingData.preferredServices.length === 0) {
         toast.error('Please complete all required fields');
@@ -119,6 +126,7 @@ export default function CreateWeddingPage() {
           location: onboardingData.location || undefined,
           weddingType: onboardingData.weddingType,
           budgetBucket: onboardingData.budgetBucket,
+          allocatedBudget: onboardingData.allocatedBudget,
           guestCountBucket: onboardingData.guestCountBucket,
           preferredStyle: onboardingData.preferredStyle,
           preferredServices: onboardingData.preferredServices,
@@ -153,6 +161,10 @@ export default function CreateWeddingPage() {
 
     if (step.key === 'basic') {
       return onboardingData.name.trim().length > 0;
+    }
+
+    if (step.key === 'budgetBucket') {
+      return onboardingData.budgetBucket !== null && onboardingData.allocatedBudget > 0;
     }
 
     if (step.key === 'preferredServices') {
@@ -244,31 +256,49 @@ export default function CreateWeddingPage() {
 
       case 'budgetBucket':
         return (
-          <div className='grid grid-cols-2 lg:grid-cols-4 gap-4'>
-            {BUDGET_BUCKETS.map((budget) => (
-              <Card
-                key={budget.value}
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  onboardingData.budgetBucket === budget.value
-                    ? 'ring-2 ring-brand-500 bg-destructive'
-                    : 'hover:bg-primary-hover'
-                }`}
-                onClick={() => {
-                    if (onboardingData.budgetBucket === budget.value) {
-                      handleSingleSelect('budgetBucket', null);
-                    } else {
-                      handleSingleSelect('budgetBucket', budget.value);
-                    }
-                  }}
-              >
-                <CardHeader>
-                  <CardTitle className='text-lg'>{budget.label}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className='!text-base text-gray-900 font-medium'>{budget.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+          <div className='space-y-6'>
+            <div className='grid grid-cols-2 lg:grid-cols-4 gap-4'>
+              {BUDGET_BUCKETS.map((budget) => (
+                <Card
+                  key={budget.value}
+                  className={`cursor-pointer transition-all hover:shadow-md ${
+                    onboardingData.budgetBucket === budget.value
+                      ? 'ring-2 ring-brand-500 bg-destructive'
+                      : 'hover:bg-primary-hover'
+                  }`}
+                  onClick={() => {
+                      if (onboardingData.budgetBucket === budget.value) {
+                        handleSingleSelect('budgetBucket', null);
+                      } else {
+                        handleSingleSelect('budgetBucket', budget.value);
+                      }
+                    }}
+                >
+                  <CardHeader>
+                    <CardTitle className='text-lg'>{budget.label}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className='!text-base text-gray-900 font-medium'>{budget.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <div className='space-y-2 max-w-2xl mx-auto'>
+              <label className='text-sm font-medium text-gray-700'>
+                Allocated Budget <span className='text-red-500'>*</span>
+              </label>
+              <Input
+                type='number'
+                value={onboardingData.allocatedBudget || ''}
+                onChange={(e) => handleInputChange('allocatedBudget', e.target.value)}
+                placeholder='Enter your exact budget amount'
+                className='w-full'
+                min='0'
+                step='100'
+              />
+              <p className='text-xs text-gray-500'>Enter the total budget you've allocated for your wedding</p>
+            </div>
           </div>
         );
 
