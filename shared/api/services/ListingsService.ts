@@ -383,4 +383,24 @@ export class ListingsService {
             },
         });
     }
+    /**
+     * Get cheapest listing for a vendor
+     * @param vendorId
+     * @returns ListingResponseDto Cheapest listing for the vendor.
+     * @throws ApiError
+     */
+    public static listingControllerGetCheapestListingForVendor(
+        vendorId: number,
+    ): CancelablePromise<ListingResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/listings/vendor/{vendorId}/cheapest',
+            path: {
+                'vendorId': vendorId,
+            },
+            errors: {
+                404: `Vendor or listings not found.`,
+            },
+        });
+    }
 }
