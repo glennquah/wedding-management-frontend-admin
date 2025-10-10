@@ -6,7 +6,7 @@ import { Button } from '@shared/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@shared/components/ui/carousel';
 import { DeleteConfirmationModal } from '@shared/components/ui/delete-confirmation-modal';
-import { Calendar, Camera, Clock, ExternalLink, Mail, Trash2 } from 'lucide-react';
+import { Calendar, Camera, Clock, ExternalLink, Mail, Trash2, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -14,15 +14,36 @@ import { useState } from 'react';
 interface OrderCardProps {
   order: OrderResponseDto;
   listings: Array<{ listing: ListingResponseDto; bookedSlots?: AvailabilitySlotDto[] }>;
-  vendorName: string;
+  vendorName?: string;
   vendorId?: number;
   vendorEmail?: string;
+  weddingName?: string;
+  coupleNames?: string[];
+  adminEmail?: string;
   onDelete?: (orderId: number) => void;
   onPayNow?: (orderId: number) => void;
+  onConfirm?: (orderId: number) => void;
+  onReject?: (orderId: number) => void;
+  viewMode?: 'admin' | 'vendor';
 }
 
-export function OrderCard({ order, listings, vendorName, vendorId, vendorEmail, onDelete, onPayNow }: OrderCardProps) {
+export function OrderCard({
+  order,
+  listings,
+  vendorName,
+  vendorId,
+  vendorEmail,
+  weddingName,
+  coupleNames,
+  adminEmail,
+  onDelete,
+  onPayNow,
+  onConfirm,
+  onReject,
+  viewMode = 'admin'
+}: OrderCardProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-SG', {
       style: 'currency',
@@ -68,6 +89,8 @@ export function OrderCard({ order, listings, vendorName, vendorId, vendorEmail, 
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case OrderStatus.PAID:
         return 'bg-blue-100 text-blue-800 border-blue-200';
+      case OrderStatus.CONFIRMED:
+        return 'bg-purple-100 text-purple-800 border-purple-200';
       case OrderStatus.COMPLETED:
         return 'bg-green-100 text-green-800 border-green-200';
       case OrderStatus.CANCELLED:
@@ -77,6 +100,13 @@ export function OrderCard({ order, listings, vendorName, vendorId, vendorEmail, 
     }
   };
 
+  // Determine which name/id/email to display based on viewMode
+  const displayName = viewMode === 'vendor' ? weddingName : vendorName;
+  const displayEmail = viewMode === 'vendor' ? adminEmail : vendorEmail;
+  const displayLinkHref = viewMode === 'vendor'
+    ? `/vendor/orders`
+    : `/admin/ecommerce/vendor/${vendorId}?from=orders`;
+
   return (
     <Card className="w-full hover:shadow-lg transition-shadow duration-200">
       <CardHeader className="pb-3">
@@ -84,28 +114,34 @@ export function OrderCard({ order, listings, vendorName, vendorId, vendorEmail, 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <CardTitle className="text-lg font-semibold">
-               {vendorName}
+               {displayName}
               </CardTitle>
-              {vendorId && (
+              {viewMode === 'admin' && vendorId && (
                 <Link
-                  href={`/admin/ecommerce/vendor/${vendorId}?from=orders`}
+                  href={displayLinkHref}
                   className="text-brand-600 hover:text-brand-800"
                   title="View vendor page"
                 >
                   <ExternalLink className="h-4 w-4" />
                 </Link>
               )}
-              {vendorEmail && (
+              {displayEmail && (
                 <a
-                  href={`mailto:${vendorEmail}`}
+                  href={`mailto:${displayEmail}`}
                   className="text-brand-600 hover:text-brand-800"
-                  title="Contact vendor"
+                  title={viewMode === 'vendor' ? 'Contact customer' : 'Contact vendor'}
                 >
                   <Mail className="h-4 w-4" />
                 </a>
               )}
             </div>
             <CardDescription className="text-sm text-muted-foreground mt-1">
+              {coupleNames && coupleNames.length > 0 && (
+                <div className="flex items-center gap-1 mb-1">
+                  <Users className="text-base-black w-4 h-4" />
+                  <span className="font-semibold text-base text-foreground">{coupleNames.join(' & ')}</span>
+                </div>
+              )}
               <div className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 Purchased on: {formatDate(order.purchaseDate)}
@@ -113,7 +149,7 @@ export function OrderCard({ order, listings, vendorName, vendorId, vendorEmail, 
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            {order.orderStatus === OrderStatus.PENDING && onDelete && (
+            {order.orderStatus === OrderStatus.PENDING && onDelete && viewMode === 'admin' && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -315,8 +351,8 @@ export function OrderCard({ order, listings, vendorName, vendorId, vendorEmail, 
             </span>
           </div>
 
-          {/* Pay Now Button for Pending Orders */}
-          {order.orderStatus === OrderStatus.PENDING && onPayNow && (
+          {/* Pay Now Button for Pending Orders - Admin View */}
+          {viewMode === 'admin' && order.orderStatus === OrderStatus.PENDING && onPayNow && (
             <div className="flex justify-end">
               <Button
                 className="mt-4"
@@ -327,6 +363,29 @@ export function OrderCard({ order, listings, vendorName, vendorId, vendorEmail, 
               </Button>
             </div>
           )}
+
+          {/* Confirm/Reject Buttons for Paid Orders - Vendor View */}
+          {viewMode === 'vendor' && order.orderStatus === OrderStatus.PAID && (onConfirm || onReject) && (
+            <div className="flex justify-end gap-2 mt-4">
+              {onReject && (
+                <Button
+                  onClick={() => setShowRejectModal(true)}
+                  variant="outline"
+                  className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                >
+                  Reject Order
+                </Button>
+              )}
+              {onConfirm && (
+                <Button
+                  onClick={() => onConfirm(order.id)}
+                  variant="default"
+                >
+                  Confirm Order
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </CardContent>
 
@@ -334,7 +393,7 @@ export function OrderCard({ order, listings, vendorName, vendorId, vendorEmail, 
         open={showDeleteModal}
         onOpenChange={setShowDeleteModal}
         title="Delete Order"
-        itemName={`order from ${vendorName}`}
+        itemName={`order from ${displayName}`}
         description={`Are you sure you want to delete this order? This will cancel your booking and cannot be undone.`}
         onConfirm={() => {
           if (onDelete) {
@@ -344,6 +403,23 @@ export function OrderCard({ order, listings, vendorName, vendorId, vendorEmail, 
         }}
         onCancel={() => setShowDeleteModal(false)}
         confirmButtonText="Delete Order"
+        cancelButtonText="Keep Order"
+      />
+
+      <DeleteConfirmationModal
+        open={showRejectModal}
+        onOpenChange={setShowRejectModal}
+        title="Reject Order"
+        itemName={`order from ${displayName}`}
+        description={`Are you sure you want to reject this order? This will automatically refund the customer and restore the listing availability. This action cannot be undone.`}
+        onConfirm={() => {
+          if (onReject) {
+            onReject(order.id);
+          }
+          setShowRejectModal(false);
+        }}
+        onCancel={() => setShowRejectModal(false)}
+        confirmButtonText="Reject Order"
         cancelButtonText="Keep Order"
       />
     </Card>

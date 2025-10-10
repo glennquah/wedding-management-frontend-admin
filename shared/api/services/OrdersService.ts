@@ -126,6 +126,26 @@ export class OrdersService {
         });
     }
     /**
+     * Get orders by vendor ID
+     * @param vendorId
+     * @returns OrderResponseDto List of orders containing listings from this vendor.
+     * @throws ApiError
+     */
+    public static orderControllerFindByVendor(
+        vendorId: number,
+    ): CancelablePromise<Array<OrderResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/orders/vendor/{vendorId}',
+            path: {
+                'vendorId': vendorId,
+            },
+            errors: {
+                404: `Vendor not found.`,
+            },
+        });
+    }
+    /**
      * Cancel an order
      * @param id
      * @returns OrderResponseDto The order has been successfully cancelled.
@@ -142,6 +162,50 @@ export class OrdersService {
             },
             errors: {
                 400: `Order cannot be cancelled.`,
+                404: `Order not found.`,
+            },
+        });
+    }
+    /**
+     * Vendor confirms an order
+     * @param id
+     * @returns OrderResponseDto The order has been successfully confirmed by the vendor.
+     * @throws ApiError
+     */
+    public static orderControllerVendorConfirm(
+        id: number,
+    ): CancelablePromise<OrderResponseDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/orders/{id}/vendor-confirm',
+            path: {
+                'id': id,
+            },
+            errors: {
+                400: `Order cannot be confirmed.`,
+                403: `Vendor does not own the listings in this order.`,
+                404: `Order not found.`,
+            },
+        });
+    }
+    /**
+     * Vendor rejects an order and triggers refund
+     * @param id
+     * @returns OrderResponseDto The order has been successfully rejected by the vendor and payment refunded.
+     * @throws ApiError
+     */
+    public static orderControllerVendorReject(
+        id: number,
+    ): CancelablePromise<OrderResponseDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/orders/{id}/vendor-reject',
+            path: {
+                'id': id,
+            },
+            errors: {
+                400: `Order cannot be rejected.`,
+                403: `Vendor does not own the listings in this order.`,
                 404: `Order not found.`,
             },
         });

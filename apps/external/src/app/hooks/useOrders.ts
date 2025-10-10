@@ -1,12 +1,12 @@
 import {
-    AvailabilitySlotDto,
-    ListingResponseDto,
-    OrderResponseDto,
-    OrderStatus,
-    OrdersService,
-    PaymentsService,
-    VendorResponseDto,
-    VendorsService,
+  AvailabilitySlotDto,
+  ListingResponseDto,
+  OrderResponseDto,
+  OrderStatus,
+  OrdersService,
+  PaymentsService,
+  VendorResponseDto,
+  VendorsService,
 } from '@shared/api';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -123,6 +123,8 @@ export function useOrders(selectedWeddingId?: number) {
   const toPayOrderListings = filterOrderListingsByStatus(OrderStatus.PENDING);
   const paidOrderListings = filterOrderListingsByStatus(OrderStatus.PAID);
   const completedOrderListings = filterOrderListingsByStatus(OrderStatus.COMPLETED);
+  const confirmedOrderListings = filterOrderListingsByStatus(OrderStatus.CONFIRMED);
+  const cancelledOrderListings = filterOrderListingsByStatus(OrderStatus.CANCELLED);
 
   return {
     orders,
@@ -135,5 +137,7 @@ export function useOrders(selectedWeddingId?: number) {
     toPayOrderListings,
     paidOrderListings,
     completedOrderListings,
+    confirmedOrderListings,
+    cancelledOrderListings,
   };
 }
