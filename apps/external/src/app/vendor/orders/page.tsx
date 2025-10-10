@@ -12,8 +12,8 @@ export default function VendorOrdersPage() {
   const {
     weddings,
     isLoading,
-    handleConfirmOrder,
-    handleRejectOrder,
+    handleConfirmListing,
+    handleRejectListing,
     allOrderListings,
     pendingConfirmationListings,
     confirmedOrderListings,
@@ -61,8 +61,8 @@ export default function VendorOrdersPage() {
             weddingName={weddingName}
             coupleNames={coupleNames}
             adminEmail={adminEmail}
-            onConfirm={handleConfirmOrder}
-            onReject={handleRejectOrder}
+            onConfirm={() => handleConfirmListing(ol.order.id, ol.listing.id)}
+            onReject={() => handleRejectListing(ol.order.id, ol.listing.id)}
             viewMode="vendor"
           />
         );

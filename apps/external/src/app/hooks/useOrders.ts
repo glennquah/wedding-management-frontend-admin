@@ -11,8 +11,16 @@ import {
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-export type ListingWithBookedSlots = ListingResponseDto & { bookedSlots?: AvailabilitySlotDto[] };
-export type OrderListing = { order: OrderResponseDto; listing: ListingWithBookedSlots; bookedSlots?: AvailabilitySlotDto[] };
+export type ListingWithBookedSlots = ListingResponseDto & {
+  bookedSlots?: AvailabilitySlotDto[];
+  bookingStatus?: OrderStatus;
+};
+export type OrderListing = {
+  order: OrderResponseDto;
+  listing: ListingWithBookedSlots;
+  bookedSlots?: AvailabilitySlotDto[];
+  bookingStatus?: OrderStatus;
+};
 
 export function useOrders(selectedWeddingId?: number) {
   const [orders, setOrders] = useState<OrderResponseDto[]>([]);
@@ -108,7 +116,12 @@ export function useOrders(selectedWeddingId?: number) {
       if (order.listings && isListingWithBookedSlotsArray(order.listings)) {
         const listings = order.listings as unknown as ListingWithBookedSlots[];
         listings.forEach(listingData => {
-          orderListings.push({ order, listing: listingData, bookedSlots: listingData.bookedSlots });
+          orderListings.push({
+            order,
+            listing: listingData,
+            bookedSlots: listingData.bookedSlots,
+            bookingStatus: listingData.bookingStatus,
+          });
         });
       }
     });
@@ -118,7 +131,8 @@ export function useOrders(selectedWeddingId?: number) {
   const filterOrderListingsByStatus = (status?: OrderStatus) => {
     const all = getOrderListingsFlat();
     if (!status) return all;
-    return all.filter(ol => ol.order.orderStatus === status);
+    // Filter by bookingStatus on the listing level, not order level
+    return all.filter(ol => ol.bookingStatus === status);
   };
 
   const allOrderListings = getOrderListingsFlat();

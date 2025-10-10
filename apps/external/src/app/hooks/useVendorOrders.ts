@@ -10,8 +10,16 @@ import {
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-export type ListingWithBookedSlots = ListingResponseDto & { bookedSlots?: AvailabilitySlotDto[] };
-export type OrderListing = { order: OrderResponseDto; listing: ListingWithBookedSlots; bookedSlots?: AvailabilitySlotDto[] };
+export type ListingWithBookedSlots = ListingResponseDto & {
+  bookedSlots?: AvailabilitySlotDto[];
+  bookingStatus?: OrderStatus;
+};
+export type OrderListing = {
+  order: OrderResponseDto;
+  listing: ListingWithBookedSlots;
+  bookedSlots?: AvailabilitySlotDto[];
+  bookingStatus?: OrderStatus;
+};
 
 export function useVendorOrders(vendorId?: number) {
   const [orders, setOrders] = useState<OrderResponseDto[]>([]);
@@ -34,18 +42,23 @@ export function useVendorOrders(vendorId?: number) {
       setIsLoading(true);
       const fetchedOrders = await OrdersService.orderControllerFindByVendor(vendorId);
 
-      // Filter out PENDING payment orders (only show paid or confirmed orders)
-      const paidOrders = fetchedOrders.filter(
-        order => order.orderStatus !== OrderStatus.PENDING
-      );
+      // Filter orders to only show those with at least one PAID or CONFIRMED listing for this vendor
+      const relevantOrders = fetchedOrders.filter((order: OrderResponseDto) => {
+        if (!order.listings || !isListingWithBookedSlotsArray(order.listings)) return false;
+        const listings = order.listings as unknown as ListingWithBookedSlots[];
+        // Check if there's at least one listing from this vendor that's not PENDING
+        return listings.some(
+          l => l.vendorId === vendorId && l.bookingStatus !== OrderStatus.PENDING
+        );
+      });
 
       // Sort newest first
-      const sortedOrders = paidOrders.sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime());
+      const sortedOrders = relevantOrders.sort((a: OrderResponseDto, b: OrderResponseDto) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime());
       setOrders(sortedOrders);
 
       // Collect unique wedding IDs
       const weddingIds = new Set<number>();
-      sortedOrders.forEach(order => {
+      sortedOrders.forEach((order: OrderResponseDto) => {
         weddingIds.add(order.weddingId);
       });
 
@@ -74,25 +87,25 @@ export function useVendorOrders(vendorId?: number) {
     if (vendorId) fetchOrders();
   }, [vendorId]);
 
-  const handleConfirmOrder = async (orderId: number) => {
+  const handleConfirmListing = async (orderId: number, listingId: number) => {
     try {
-      await OrdersService.orderControllerVendorConfirm(orderId);
-      toast.success('Order confirmed successfully');
+      await OrdersService.orderControllerVendorConfirmListing(orderId, listingId);
+      toast.success('Listing confirmed successfully');
       fetchOrders();
     } catch (err) {
-      console.error('Error confirming order:', err);
-      toast.error('Failed to confirm order. Please try again.');
+      console.error('Error confirming listing:', err);
+      toast.error('Failed to confirm listing. Please try again.');
     }
   };
 
-  const handleRejectOrder = async (orderId: number) => {
+  const handleRejectListing = async (orderId: number, listingId: number) => {
     try {
-      await OrdersService.orderControllerVendorReject(orderId);
-      toast.success('Order rejected and refund initiated');
+      await OrdersService.orderControllerVendorRejectListing(orderId, listingId);
+      toast.success('Listing rejected and partial refund initiated');
       fetchOrders();
     } catch (err) {
-      console.error('Error rejecting order:', err);
-      toast.error('Failed to reject order. Please try again.');
+      console.error('Error rejecting listing:', err);
+      toast.error('Failed to reject listing. Please try again.');
     }
   };
 
@@ -105,7 +118,12 @@ export function useVendorOrders(vendorId?: number) {
         // Filter to only include listings belonging to this vendor
         const vendorListings = listings.filter(l => l.vendorId === vendorId);
         vendorListings.forEach(listingData => {
-          orderListings.push({ order, listing: listingData, bookedSlots: listingData.bookedSlots });
+          orderListings.push({
+            order,
+            listing: listingData,
+            bookedSlots: listingData.bookedSlots,
+            bookingStatus: listingData.bookingStatus,
+          });
         });
       }
     });
@@ -115,7 +133,8 @@ export function useVendorOrders(vendorId?: number) {
   const filterOrderListingsByStatus = (status?: OrderStatus) => {
     const all = getOrderListingsFlat();
     if (!status) return all;
-    return all.filter(ol => ol.order.orderStatus === status);
+    // Filter by bookingStatus on the listing level, not order level
+    return all.filter(ol => ol.bookingStatus === status);
   };
 
   const allOrderListings = getOrderListingsFlat();
@@ -128,8 +147,8 @@ export function useVendorOrders(vendorId?: number) {
     weddings,
     isLoading,
     fetchOrders,
-    handleConfirmOrder,
-    handleRejectOrder,
+    handleConfirmListing,
+    handleRejectListing,
     allOrderListings,
     pendingConfirmationListings,
     confirmedOrderListings,

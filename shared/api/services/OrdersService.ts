@@ -190,46 +190,52 @@ export class OrdersService {
         });
     }
     /**
-     * Vendor confirms an order
-     * @param id
-     * @returns OrderResponseDto The order has been successfully confirmed by the vendor.
+     * Vendor confirms a specific listing in an order
+     * @param orderId
+     * @param listingId
+     * @returns OrderResponseDto The listing has been successfully confirmed by the vendor.
      * @throws ApiError
      */
-    public static orderControllerVendorConfirm(
-        id: number,
+    public static orderControllerVendorConfirmListing(
+        orderId: number,
+        listingId: number,
     ): CancelablePromise<OrderResponseDto> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/orders/{id}/vendor-confirm',
+            url: '/orders/{orderId}/listings/{listingId}/vendor-confirm',
             path: {
-                'id': id,
+                'orderId': orderId,
+                'listingId': listingId,
             },
             errors: {
-                400: `Order cannot be confirmed.`,
-                403: `Vendor does not own the listings in this order.`,
-                404: `Order not found.`,
+                400: `Listing cannot be confirmed.`,
+                403: `Vendor does not own this listing.`,
+                404: `Order or listing not found.`,
             },
         });
     }
     /**
-     * Vendor rejects an order and triggers refund
-     * @param id
-     * @returns OrderResponseDto The order has been successfully rejected by the vendor and payment refunded.
+     * Vendor rejects a specific listing in an order and triggers partial refund
+     * @param orderId
+     * @param listingId
+     * @returns OrderResponseDto The listing has been successfully rejected by the vendor and partial refund processed.
      * @throws ApiError
      */
-    public static orderControllerVendorReject(
-        id: number,
+    public static orderControllerVendorRejectListing(
+        orderId: number,
+        listingId: number,
     ): CancelablePromise<OrderResponseDto> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/orders/{id}/vendor-reject',
+            url: '/orders/{orderId}/listings/{listingId}/vendor-reject',
             path: {
-                'id': id,
+                'orderId': orderId,
+                'listingId': listingId,
             },
             errors: {
-                400: `Order cannot be rejected.`,
-                403: `Vendor does not own the listings in this order.`,
-                404: `Order not found.`,
+                400: `Listing cannot be rejected.`,
+                403: `Vendor does not own this listing.`,
+                404: `Order or listing not found.`,
             },
         });
     }

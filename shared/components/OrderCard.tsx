@@ -13,7 +13,7 @@ import { useState } from 'react';
 
 interface OrderCardProps {
   order: OrderResponseDto;
-  listings: Array<{ listing: ListingResponseDto; bookedSlots?: AvailabilitySlotDto[] }>;
+  listings: Array<{ listing: ListingResponseDto & { bookingStatus?: OrderStatus }; bookedSlots?: AvailabilitySlotDto[] }>;
   vendorName?: string;
   vendorId?: number;
   vendorEmail?: string;
@@ -22,8 +22,8 @@ interface OrderCardProps {
   adminEmail?: string;
   onDelete?: (orderId: number, listingId?: number) => void;
   onPayNow?: (orderId: number) => void;
-  onConfirm?: (orderId: number) => void;
-  onReject?: (orderId: number) => void;
+  onConfirm?: () => void;
+  onReject?: () => void;
   viewMode?: 'admin' | 'vendor';
 }
 
@@ -149,7 +149,7 @@ export function OrderCard({
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            {order.orderStatus === OrderStatus.PENDING && onDelete && viewMode === 'admin' && (
+            {listings[0]?.listing?.bookingStatus === OrderStatus.PENDING && onDelete && viewMode === 'admin' && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -160,8 +160,8 @@ export function OrderCard({
                 <Trash2 className="h-4 w-4" />
               </Button>
             )}
-            <Badge className={`${getStatusColor(order.orderStatus)} border`}>
-              {order.orderStatus}
+            <Badge className={`${getStatusColor(listings[0]?.listing?.bookingStatus || OrderStatus.PENDING)} border`}>
+              {listings[0]?.listing?.bookingStatus || OrderStatus.PENDING}
             </Badge>
           </div>
         </div>
@@ -352,7 +352,7 @@ export function OrderCard({
           </div>
 
           {/* Pay Now Button for Pending Orders - Admin View */}
-          {viewMode === 'admin' && order.orderStatus === OrderStatus.PENDING && onPayNow && (
+          {viewMode === 'admin' && listings[0]?.listing?.bookingStatus === OrderStatus.PENDING && onPayNow && (
             <div className="flex justify-end">
               <Button
                 className="mt-4"
@@ -365,7 +365,7 @@ export function OrderCard({
           )}
 
           {/* Confirm/Reject Buttons for Paid Orders - Vendor View */}
-          {viewMode === 'vendor' && order.orderStatus === OrderStatus.PAID && (onConfirm || onReject) && (
+          {viewMode === 'vendor' && listings[0]?.listing?.bookingStatus === OrderStatus.PAID && (onConfirm || onReject) && (
             <div className="flex justify-end gap-2 mt-4">
               {onReject && (
                 <Button
@@ -373,15 +373,15 @@ export function OrderCard({
                   variant="outline"
                   className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
                 >
-                  Reject Order
+                  Reject Booking
                 </Button>
               )}
               {onConfirm && (
                 <Button
-                  onClick={() => onConfirm(order.id)}
+                  onClick={() => onConfirm()}
                   variant="default"
                 >
-                  Confirm Order
+                  Confirm Booking
                 </Button>
               )}
             </div>
@@ -409,18 +409,18 @@ export function OrderCard({
       <DeleteConfirmationModal
         open={showRejectModal}
         onOpenChange={setShowRejectModal}
-        title="Reject Order"
-        itemName={`order from ${displayName}`}
-        description={`Are you sure you want to reject this order? This will automatically refund the customer and restore the listing availability. This action cannot be undone.`}
+        title="Reject Booking"
+        itemName={`booking from ${displayName}`}
+        description={`Are you sure you want to reject this booking? This will automatically issue a partial refund to the customer and restore the listing availability. This action cannot be undone.`}
         onConfirm={() => {
           if (onReject) {
-            onReject(order.id);
+            onReject();
           }
           setShowRejectModal(false);
         }}
         onCancel={() => setShowRejectModal(false)}
-        confirmButtonText="Reject Order"
-        cancelButtonText="Keep Order"
+        confirmButtonText="Reject Booking"
+        cancelButtonText="Keep Booking"
       />
     </Card>
   );
