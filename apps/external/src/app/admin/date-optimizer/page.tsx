@@ -62,21 +62,14 @@ export default function DateOptimizerPage() {
     setAttendeeToDelete(null);
   };
 
-  const handleEarliestDateChange = (dates: string[]) => {
-    const nextDate = dates[dates.length - 1] || '';
-    setEarliestDate(nextDate);
+  const handleDateChange = (newStartDate: string | undefined, newEndDate: string | undefined) => {
+    const today = new Date().toISOString().split('T')[0];
+    const finalStartDate = newStartDate || today;
+    setEarliestDate(finalStartDate);
+    setLatestDate(newEndDate || '');
 
-    if (nextDate && latestDate && nextDate > latestDate) {
-      setLatestDate(nextDate);
-    }
-  };
-
-  const handleLatestDateChange = (dates: string[]) => {
-    const nextDate = dates[dates.length - 1] || '';
-    setLatestDate(nextDate);
-
-    if (nextDate && earliestDate && nextDate < earliestDate) {
-      setEarliestDate(nextDate);
+    if (newEndDate && finalStartDate > newEndDate) {
+      setLatestDate(finalStartDate);
     }
   };
 
@@ -96,8 +89,8 @@ export default function DateOptimizerPage() {
             earliestDate={earliestDate}
             latestDate={latestDate}
             preferredDays={preferredDays}
-            onEarliestDateChange={handleEarliestDateChange}
-            onLatestDateChange={handleLatestDateChange}
+            onEarliestDateChange={setEarliestDate}
+            onLatestDateChange={setLatestDate}
             onPreferredDaysChange={setPreferredDays}
           />
 

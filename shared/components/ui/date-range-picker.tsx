@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { cn } from '../lib/utils';
 import { Button } from './button';
@@ -162,7 +162,7 @@ export function DateRangePicker({
   };
 
   const renderCalendarDays = () => {
-    const cells: JSX.Element[] = [];
+    const cells: React.ReactElement[] = [];
 
     for (let i = 0; i < firstDayOffset; i += 1) {
       cells.push(<div key={`empty-${i}`} className="w-8 h-8" />);

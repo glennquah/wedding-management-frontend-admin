@@ -357,7 +357,7 @@ export function useDateOptimizer() {
           const adjustedStart = applyOffset(start, offset);
           const adjustedEnd = applyOffset(normalizedEnd, offset);
 
-          let current = new Date(
+          const current = new Date(
             Date.UTC(
               adjustedStart.getUTCFullYear(),
               adjustedStart.getUTCMonth(),

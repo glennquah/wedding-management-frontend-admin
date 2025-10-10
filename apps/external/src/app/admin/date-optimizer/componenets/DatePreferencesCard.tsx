@@ -1,13 +1,19 @@
 import { DateRangePicker, ItemRankingList } from '@shared/components';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@shared/components/ui/card';
 import { Calendar } from 'lucide-react';
 
 interface DatePreferencesCardProps {
   earliestDate: string;
   latestDate: string;
   preferredDays: string[];
-  onEarliestDateChange: (dates: string[]) => void;
-  onLatestDateChange: (dates: string[]) => void;
+  onEarliestDateChange: (date: string) => void;
+  onLatestDateChange: (date: string) => void;
   onPreferredDaysChange: (days: string[]) => void;
 }
 
@@ -37,17 +43,8 @@ export function DatePreferencesCard({
               endDate: latestDate || undefined,
             }}
             onChange={(range) => {
-              if (range.startDate) {
-                onEarliestDateChange([range.startDate]);
-              } else {
-                onEarliestDateChange([]);
-              }
-
-              if (range.endDate) {
-                onLatestDateChange([range.endDate]);
-              } else {
-                onLatestDateChange([]);
-              }
+              onEarliestDateChange(range.startDate || '');
+              onLatestDateChange(range.endDate || '');
             }}
             placeholder="Select date range"
             className="w-full"
@@ -56,7 +53,15 @@ export function DatePreferencesCard({
         <div>
           <ItemRankingList
             selectedItems={preferredDays}
-            availableItems={['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']}
+            availableItems={[
+              'Monday',
+              'Tuesday',
+              'Wednesday',
+              'Thursday',
+              'Friday',
+              'Saturday',
+              'Sunday',
+            ]}
             onItemsChange={onPreferredDaysChange}
             label="Preferred Days"
             description="Drag to reorder. Days at the top will be prioritized when analyzing dates."

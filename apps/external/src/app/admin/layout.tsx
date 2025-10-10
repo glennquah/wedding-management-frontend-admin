@@ -29,6 +29,8 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { Toaster } from 'sonner';
 
+const allowedRoutesWithoutWedding = ['/admin', '/admin/account', '/admin/create-wedding'];
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { fetchUserMainWedding, fetchUserWeddings, loading } = useWeddingManager();
   const { selectedWeddingId, hasHydrated, weddings } = useWeddingStore();
@@ -50,10 +52,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [hasHydrated, selectedWeddingId, fetchUserMainWedding, fetchUserWeddings]);
 
   useEffect(() => {
-    const allowedRoutesWithoutWedding = ['/admin', '/admin/account', '/admin/create-wedding'];
     // Only redirect if store is hydrated to avoid redirecting during initial load
     if (
-      hasHydrated &&
       hasHydrated &&
       hasNoWedding &&
       pathname &&
@@ -61,7 +61,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     ) {
       router.push('/admin');
     }
-  }, [hasHydrated, hasNoWedding, pathname, router, allowedRoutesWithoutWedding]);
+  }, [hasHydrated, hasNoWedding, pathname, router]);
 
   console.log('Session status:', status, 'Session data:', session);
 
