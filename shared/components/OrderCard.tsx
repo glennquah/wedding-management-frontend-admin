@@ -20,7 +20,7 @@ interface OrderCardProps {
   weddingName?: string;
   coupleNames?: string[];
   adminEmail?: string;
-  onDelete?: (orderId: number) => void;
+  onDelete?: (orderId: number, listingId?: number) => void;
   onPayNow?: (orderId: number) => void;
   onConfirm?: (orderId: number) => void;
   onReject?: (orderId: number) => void;
@@ -397,7 +397,7 @@ export function OrderCard({
         description={`Are you sure you want to delete this order? This will cancel your booking and cannot be undone.`}
         onConfirm={() => {
           if (onDelete) {
-            onDelete(order.id);
+            onDelete(order.id, listings[0]?.listing.id);
           }
           setShowDeleteModal(false);
         }}

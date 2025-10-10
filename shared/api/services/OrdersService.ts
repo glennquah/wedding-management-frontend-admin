@@ -167,6 +167,29 @@ export class OrdersService {
         });
     }
     /**
+     * Delete a single listing from an order
+     * @param orderId
+     * @param listingId
+     * @returns any The order listing has been deleted.
+     * @throws ApiError
+     */
+    public static orderControllerDeleteListing(
+        orderId: number,
+        listingId: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/orders/{orderId}/listings/{listingId}',
+            path: {
+                'orderId': orderId,
+                'listingId': listingId,
+            },
+            errors: {
+                404: `Order or listing not found.`,
+            },
+        });
+    }
+    /**
      * Vendor confirms an order
      * @param id
      * @returns OrderResponseDto The order has been successfully confirmed by the vendor.

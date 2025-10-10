@@ -74,14 +74,16 @@ export function useOrders(selectedWeddingId?: number) {
     if (selectedWeddingId) fetchOrders();
   }, [selectedWeddingId]);
 
-  const handleDeleteOrder = async (orderId: number) => {
+  const handleDeleteOrder = async (orderId: number, listingId?: number) => {
     try {
-      await OrdersService.orderControllerDelete(orderId);
-      toast.success('Order deleted successfully');
+      if (listingId) {
+        await OrdersService.orderControllerDeleteListing(orderId, listingId);
+        toast.success('Order deleted successfully');
+      }
       fetchOrders();
     } catch (err) {
-      console.error('Error deleting order:', err);
-      toast.error('Failed to delete order. Please try again.');
+      console.error('Error deleting order or listing:', err);
+      toast.error('Failed to delete order or listing. Please try again.');
     }
   };
 
