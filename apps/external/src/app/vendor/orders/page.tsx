@@ -41,15 +41,12 @@ export default function VendorOrdersPage() {
   const OrderListingList = ({ orderListings }: { orderListings: OrderListing[] }) => (
     <div className="grid grid-cols-1 gap-4 mt-6">
       {orderListings.map((ol, index) => {
-        // Get the wedding info
         const wedding = weddings[ol.order.weddingId];
 
-        // Build display name from mainCouple (wedding couple names)
-        let weddingName = wedding?.name || 'Customer';
+        const weddingName = wedding?.name || 'Customer';
         let adminEmail: string | undefined;
         let coupleNames: string[] = [];
 
-        // Get emails from all main couple members
         if (wedding?.mainCouple && Array.isArray(wedding.mainCouple) && wedding.mainCouple.length > 0) {
           coupleNames = wedding.mainCouple.map((admin) => admin.name).filter(Boolean);
           const emails = wedding.mainCouple.map(admin => admin.email).filter(Boolean);
