@@ -31,7 +31,7 @@ export function OrderCard({ order, listings, vendorName, vendorId, vendorEmail, 
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-SG', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -39,14 +39,14 @@ export function OrderCard({ order, listings, vendorName, vendorId, vendorEmail, 
   };
 
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('en-US', {
+    return new Date(dateString).toLocaleTimeString('en-SG', {
       hour: '2-digit',
       minute: '2-digit',
     });
   };
 
   const formatSlotDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-SG', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
@@ -151,7 +151,7 @@ export function OrderCard({ order, listings, vendorName, vendorId, vendorEmail, 
                     {hasImages ? (
                       <Carousel className="w-full h-full">
                         <CarouselContent>
-                          {listing.imageUrls!.map((imageUrl: string, index: number) => (
+                          {listing.imageUrls?.map((imageUrl: string, index: number) => (
                             <CarouselItem key={index}>
                               <div className="relative w-24 h-24">
                                 <Image
@@ -237,7 +237,7 @@ export function OrderCard({ order, listings, vendorName, vendorId, vendorEmail, 
                   {hasImages ? (
                     <Carousel className="w-full h-full">
                       <CarouselContent>
-                        {listing.imageUrls!.map((imageUrl: string, index: number) => (
+                        {listing.imageUrls?.map((imageUrl: string, index: number) => (
                           <CarouselItem key={index}>
                             <div className="relative w-24 h-24">
                               <Image
