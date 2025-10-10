@@ -81,7 +81,8 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
   const [partnerName, setPartnerName] = useState('');
   const [partnerEmail, setPartnerEmail] = useState('');
   const [isInvitingPartner, setIsInvitingPartner] = useState(false);
-  const [partnerToRemove, setPartnerToRemove] = useState<number | null>(null);
+  const [partnerPendingRemoval, setPartnerPendingRemoval] = useState<Collaborator | null>(null);
+  const [isRemovingPartner, setIsRemovingPartner] = useState(false);
 
   // Collaborator state
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
@@ -147,7 +148,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           );
           // Filter out the partner from collaborators list
           const filteredCollaborators = collaboratorsList.filter(
-            (c) => !partner || c.id !== partner.id
+            (c) => !partner || c.id !== partner.id,
           );
           setCollaborators(
             filteredCollaborators.map((c) => ({
@@ -178,18 +179,6 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
       try {
         await updateWeddingProfile();
 
-        // Remove partner if marked for deletion
-        if (partnerToRemove !== null) {
-          try {
-            await AdminsService.adminControllerRemovePartner(weddingData.id, partnerToRemove);
-            setPartnerToRemove(null);
-            toast.success('Partner removed successfully');
-          } catch (error) {
-            console.error(`Error removing partner ${partnerToRemove}:`, error);
-            toast.error('Failed to remove partner. Please try again.');
-          }
-        }
-
         // Remove collaborators that were marked for deletion
         if (collaboratorsToRemove.length > 0) {
           for (const collaboratorId of collaboratorsToRemove) {
@@ -214,7 +203,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     handleCancel();
     resetWeddingForm();
     // Reset partner to remove
-    setPartnerToRemove(null);
+    setPartnerPendingRemoval(null);
     // Reset partner input fields
     setPartnerName('');
     setPartnerEmail('');
@@ -247,7 +236,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           );
           // Filter out the partner from collaborators list
           const filteredCollaborators = collaboratorsList.filter(
-            (c) => !partner || c.id !== partner.id
+            (c) => !partner || c.id !== partner.id,
           );
           setCollaborators(
             filteredCollaborators.map((c) => ({
@@ -417,11 +406,49 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     }
   };
 
-  const handleRemovePartner = (id: number) => {
-    // Mark partner for removal (will be removed on save)
-    setPartnerToRemove(id);
-    // Remove from local state immediately for UI feedback
-    setPartner(null);
+  const handleRemovePartner = (partnerToRemove: Collaborator) => {
+    setPartnerPendingRemoval(partnerToRemove);
+  };
+
+  const closePartnerRemovalModal = () => {
+    setPartnerPendingRemoval(null);
+  };
+
+  const handleConfirmRemovePartner = () => {
+    if (!weddingData?.id || !partnerPendingRemoval) {
+      return;
+    }
+
+    setIsRemovingPartner(true);
+    const partnerId = partnerPendingRemoval.id;
+
+    void (async () => {
+      try {
+        await AdminsService.adminControllerRemovePartner(weddingData.id, partnerId);
+        toast.success('Partner removed successfully');
+        setPartner(null);
+        closePartnerRemovalModal();
+      } catch (error) {
+        console.error(`Error removing partner ${partnerId}:`, error);
+        toast.error('Failed to remove partner. Please try again.');
+      } finally {
+        setIsRemovingPartner(false);
+      }
+    })();
+  };
+
+  const handleCancelRemovePartner = () => {
+    if (isRemovingPartner) {
+      return;
+    }
+
+    closePartnerRemovalModal();
+  };
+
+  const handlePartnerRemovalModalChange = (open: boolean) => {
+    if (!open) {
+      handleCancelRemovePartner();
+    }
   };
 
   const handleRemoveCollaborator = (id: number) => {
@@ -434,12 +461,13 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
   // Filter guests based on search
   const filteredGuestsForCollaborator = guests.filter(
     (guest) =>
-      collaboratorSearch.trim() !== '' &&
-      !collaborators.some((c) => c.id === guest.id) &&
-      !partner ||
-      (partner && guest.email !== partner.email) &&
-      (guest.name.toLowerCase().includes(collaboratorSearch.toLowerCase()) ||
-        (guest.email && guest.email.toLowerCase().includes(collaboratorSearch.toLowerCase()))),
+      (collaboratorSearch.trim() !== '' &&
+        !collaborators.some((c) => c.id === guest.id) &&
+        !partner) ||
+      (partner &&
+        guest.email !== partner.email &&
+        (guest.name.toLowerCase().includes(collaboratorSearch.toLowerCase()) ||
+          (guest.email && guest.email.toLowerCase().includes(collaboratorSearch.toLowerCase())))),
   );
 
   const renderUserFields = () => {
@@ -964,10 +992,12 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
                   </div>
                   {isEditing && (
                     <Button
+                      type="button"
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0"
-                      onClick={() => handleRemovePartner(partner.id)}
+                      onClick={() => handleRemovePartner(partner)}
+                      disabled={isRemovingPartner}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
@@ -1127,6 +1157,17 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           </div>
         </div>
       )}
+
+      <DeleteConfirmationModal
+        open={partnerPendingRemoval !== null}
+        onOpenChange={handlePartnerRemovalModalChange}
+        title="Remove Partner"
+        itemName={partnerPendingRemoval ? partnerPendingRemoval.name : 'this partner'}
+        description="Removing this partner will revoke their access to your shared wedding planning workspace."
+        onConfirm={handleConfirmRemovePartner}
+        onCancel={handleCancelRemovePartner}
+        isLoading={isRemovingPartner}
+      />
 
       <DeleteConfirmationModal
         open={showDeleteModal}

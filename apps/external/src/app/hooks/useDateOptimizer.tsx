@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useWeddingManager } from './useWeddingManager';
 import {
@@ -302,6 +302,27 @@ export function useDateOptimizer() {
     [selectedWeddingId, session, keyAttendees, mainCouple, selectedMonth, setupAuth],
   );
 
+  const parseOffsetMinutes = useMemo(
+    () =>
+      (isoString: string | undefined | null): number | undefined => {
+        if (!isoString) return undefined;
+        if (isoString.endsWith('Z')) return 0;
+
+        const match = isoString.match(/([+-])(\d{2}):?(\d{2})$/);
+        if (!match) return undefined;
+
+        const sign = match[1] === '+' ? 1 : -1;
+        const hours = parseInt(match[2], 10);
+        const minutes = parseInt(match[3], 10);
+        return sign * (hours * 60 + minutes);
+      },
+    [],
+  );
+
+  const applyOffset = useCallback((date: Date, offsetMinutes: number) => {
+    return new Date(date.getTime() + offsetMinutes * 60 * 1000);
+  }, []);
+
   // Run analysis
   const handleRunAnalysis = useCallback(async () => {
     if (!selectedWeddingId || !session?.backendTokens?.accessToken) return;
@@ -326,13 +347,29 @@ export function useDateOptimizer() {
 
           const start = new Date(slot.start);
           const end = new Date(slot.end);
+          const offset = parseOffsetMinutes(slot.start) ?? parseOffsetMinutes(slot.end) ?? 0;
+          const normalizedEnd = new Date(end);
+          // Treat end timestamps as exclusive so midnight endpoints don't mark the next day.
+          if (normalizedEnd.getTime() > start.getTime()) {
+            normalizedEnd.setMilliseconds(normalizedEnd.getMilliseconds() - 1);
+          }
 
-          // Get the date part in UTC to establish a baseline
+          const adjustedStart = applyOffset(start, offset);
+          const adjustedEnd = applyOffset(normalizedEnd, offset);
+
           let current = new Date(
-            Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()),
+            Date.UTC(
+              adjustedStart.getUTCFullYear(),
+              adjustedStart.getUTCMonth(),
+              adjustedStart.getUTCDate(),
+            ),
           );
           const endDate = new Date(
-            Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate()),
+            Date.UTC(
+              adjustedEnd.getUTCFullYear(),
+              adjustedEnd.getUTCMonth(),
+              adjustedEnd.getUTCDate(),
+            ),
           );
 
           // Iterate through each day the event touches, in a timezone-agnostic way
@@ -426,6 +463,8 @@ export function useDateOptimizer() {
     earliestDate,
     latestDate,
     preferredDays,
+    parseOffsetMinutes,
+    applyOffset,
   ]);
 
   // Add key attendee

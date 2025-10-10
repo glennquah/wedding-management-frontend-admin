@@ -10,6 +10,7 @@ export { default as ImageUploadWidget } from './CloudinaryUploadWidget';
 // Utilities
 export { cn } from './lib/utils';
 // Notification Templates
+export { ItemRankingList } from './ItemRankingList';
 export {
   AddNotificationTemplateDialog,
   NotificationTemplateDetailView,
@@ -39,7 +40,6 @@ export { DatePicker, type DateWithPeriod, type TimePeriod } from './ui/date-pick
 export { DatePickerWithPeriods } from './ui/date-picker-with-periods';
 export { DateRangePicker, type DateRange } from './ui/date-range-picker';
 export { DeleteConfirmationModal } from './ui/delete-confirmation-modal';
-export { ItemRankingList } from './ItemRankingList';
 export {
   Dialog,
   DialogContent,
