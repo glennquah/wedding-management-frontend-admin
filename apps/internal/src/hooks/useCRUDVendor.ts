@@ -142,6 +142,7 @@ export function useVendorManager() {
 
       const updateData: UpdateVendorDto = {
         name: editingVendor.name,
+        email: editingVendor.email,
         vendorWebsite: editingVendor.vendorWebsite,
         uenNumber: editingVendor.uenNumber,
         bio: editingVendor.bio,

@@ -7,6 +7,7 @@ export {
 // Tables
 export { AdminTable } from './AdminTable';
 export { default as ImageUploadWidget } from './CloudinaryUploadWidget';
+export { OrderCard } from './OrderCard';
 // Utilities
 export { cn } from './lib/utils';
 // Notification Templates

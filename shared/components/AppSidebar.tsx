@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronUp, LogOut, Settings, User, UserCircle } from 'lucide-react';
+import { ChevronUp, ClipboardList, LogOut, User, UserCircle } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -33,9 +33,9 @@ const profileItems = [
     icon: User,
   },
   {
-    title: 'Billing',
-    href: '/billing',
-    icon: Settings,
+    title: 'Orders',
+    href: '/orders',
+    icon: ClipboardList,
   },
 ];
 

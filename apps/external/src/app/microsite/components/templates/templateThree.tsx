@@ -9,6 +9,7 @@ import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
 import { GuestResponseDto, MicrositeResponseDto } from '@wedding/api-types';
 import { Cormorant_Garamond, Nunito } from 'next/font/google';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 // Clean, professional heading + friendly body
 const serif = Cormorant_Garamond({ subsets: ['latin'], weight: ['600', '700'] });
@@ -18,6 +19,8 @@ interface TemplateThreeProps {
   micrositeData: MicrositeResponseDto;
   rsvpRef: RefObject<HTMLDivElement | null>;
   guestDetails: GuestResponseDto | null;
+  isWeddingLive: boolean;
+  micrositeSlug: string;
   handleConfirmGuestAttendance: (allergies?: string[]) => Promise<void>;
 }
 
@@ -37,9 +40,13 @@ export default function TemplateThree({
   micrositeData,
   rsvpRef,
   guestDetails,
+  isWeddingLive,
+  micrositeSlug,
   handleConfirmGuestAttendance,
 }: TemplateThreeProps) {
   const isMobile = useIsMobileScreen();
+  const router = useRouter();
+
   // Food allergies state
   const [selectedAllergies, setSelectedAllergies] = useState<string[]>([]);
 
@@ -100,6 +107,17 @@ export default function TemplateThree({
         isDark ? 'dark bg-zinc-950 text-zinc-50' : 'bg-[#FFF7EC] text-zinc-900'
       }`}
     >
+      {isWeddingLive && micrositeSlug && (
+        <div className="absolute top-4 right-4 z-50">
+          <Button
+            onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
+            className="rounded-full bg-[#EADBC8] hover:bg-[#E5D4BE] text-stone-900 border border-stone-300"
+          >
+            View Album
+          </Button>
+        </div>
+      )}
+
       {/* Party Mode (dark) switch */}
       <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
         <div className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-zinc-300 dark:border-zinc-700 bg-white/80 dark:bg-zinc-900/80 backdrop-blur px-3 py-2 shadow-sm">

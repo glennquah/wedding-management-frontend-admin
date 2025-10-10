@@ -171,11 +171,11 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
   const handleEnhancedSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // First handle the profile update
-    await handleSubmit(e);
+    // First handle the profile update with wedding validation
+    const isProfileUpdateSuccessful = await handleSubmit(e, weddingFormData);
 
-    // Then update wedding data if admin and wedding exists
-    if (targetUserRole === UserRole.ADMIN && weddingData) {
+    // Only update wedding data if profile update was successful and user is admin with wedding data
+    if (isProfileUpdateSuccessful && targetUserRole === UserRole.ADMIN && weddingData) {
       try {
         await updateWeddingProfile();
 
@@ -194,6 +194,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
         }
       } catch (error) {
         console.error('Error updating wedding profile:', error);
+        toast.error('Failed to update wedding details');
       }
     }
   };
@@ -477,27 +478,39 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
       <>
         {/* Base User Fields */}
         <div className="space-y-2">
-          <label className="text-sm font-medium">Name</label>
+          <label className="text-sm font-medium">Name*</label>
           {isEditing ? (
-            <Input
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              placeholder="Enter your name"
-            />
+            <>
+              <Input
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                placeholder="Enter your name"
+                className={validationErrors.name ? 'border-red-500' : ''}
+              />
+              {validationErrors.name && (
+                <p className="text-red-500 text-sm">{validationErrors.name}</p>
+              )}
+            </>
           ) : (
             <p className="p-3 bg-muted rounded-md">{userData.name}</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Email</label>
+          <label className="text-sm font-medium">Email*</label>
           {isEditing ? (
-            <Input
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              placeholder="Enter your email"
-            />
+            <>
+              <Input
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                placeholder="Enter your email"
+                className={validationErrors.email ? 'border-red-500' : ''}
+              />
+              {validationErrors.email && (
+                <p className="text-red-500 text-sm">{validationErrors.email}</p>
+              )}
+            </>
           ) : (
             <p className="p-3 bg-muted rounded-md">{userData.email}</p>
           )}
@@ -615,16 +628,21 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Service Offered</label>
+              <label className="text-sm font-medium">Service Offered*</label>
               {isEditing ? (
-                <SingleSelectDropdown
-                  options={Object.values(WeddingService)}
-                  selected={formData.serviceOffered}
-                  setSelected={(selected) =>
-                    handleInputChange('serviceOffered', selected as WeddingService)
-                  }
-                  placeholder="Select Wedding Service"
-                />
+                <>
+                  <SingleSelectDropdown
+                    options={Object.values(WeddingService)}
+                    selected={formData.serviceOffered}
+                    setSelected={(selected) =>
+                      handleInputChange('serviceOffered', selected as WeddingService)
+                    }
+                    placeholder="Select Wedding Service"
+                  />
+                  {validationErrors.serviceOffered && (
+                    <p className="text-red-500 text-sm">{validationErrors.serviceOffered}</p>
+                  )}
+                </>
               ) : (
                 <div className="relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between">
                   <span>
@@ -639,16 +657,21 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Style Offered</label>
+              <label className="text-sm font-medium">Style Offered*</label>
               {isEditing ? (
-                <SingleSelectDropdown
-                  options={Object.values(WeddingStyle)}
-                  selected={formData.styleOffered}
-                  setSelected={(selected) =>
-                    handleInputChange('styleOffered', selected as WeddingStyle)
-                  }
-                  placeholder="Select Wedding Style"
-                />
+                <>
+                  <SingleSelectDropdown
+                    options={Object.values(WeddingStyle)}
+                    selected={formData.styleOffered}
+                    setSelected={(selected) =>
+                      handleInputChange('styleOffered', selected as WeddingStyle)
+                    }
+                    placeholder="Select Wedding Style"
+                  />
+                  {validationErrors.styleOffered && (
+                    <p className="text-red-500 text-sm">{validationErrors.styleOffered}</p>
+                  )}
+                </>
               ) : (
                 <div className="relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between">
                   <span>
@@ -663,16 +686,21 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Wedding Types</label>
+              <label className="text-sm font-medium">Wedding Types*</label>
               {isEditing ? (
-                <MultiSelectDropdown
-                  options={Object.values(WeddingType)}
-                  selected={formData.weddingTypes}
-                  setSelected={(selected) =>
-                    handleInputChange('weddingTypes', selected as WeddingType[])
-                  }
-                  placeholder="Select Wedding Types"
-                />
+                <>
+                  <MultiSelectDropdown
+                    options={Object.values(WeddingType)}
+                    selected={formData.weddingTypes}
+                    setSelected={(selected) =>
+                      handleInputChange('weddingTypes', selected as WeddingType[])
+                    }
+                    placeholder="Select Wedding Types"
+                  />
+                  {validationErrors.weddingTypes && (
+                    <p className="text-red-500 text-sm">{validationErrors.weddingTypes}</p>
+                  )}
+                </>
               ) : (
                 <div className="relative rounded-md p-3 min-h-[36px] w-full text-left bg-muted flex items-center justify-between">
                   <span>
@@ -785,13 +813,18 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Wedding Name</label>
+            <label className="text-sm font-medium">Wedding Name*</label>
             {isEditing ? (
-              <Input
-                value={weddingFormData.name}
-                onChange={(e) => handleWeddingInputChange('name', e.target.value)}
-                placeholder="Enter wedding name"
-              />
+              <>
+                <Input
+                  value={weddingFormData.name}
+                  onChange={(e) => handleWeddingInputChange('name', e.target.value)}
+                  placeholder="Enter wedding name"
+                />
+                {validationErrors.weddingName && (
+                  <p className="text-red-500 text-sm">{validationErrors.weddingName}</p>
+                )}
+              </>
             ) : (
               <p className="p-3 bg-muted rounded-md">{weddingData.name}</p>
             )}
@@ -826,16 +859,21 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Wedding Type</label>
+            <label className="text-sm font-medium">Wedding Type*</label>
             {isEditing ? (
-              <SingleSelectDropdown
-                options={Object.values(WeddingType)}
-                selected={weddingFormData.weddingType}
-                setSelected={(selected) =>
-                  handleWeddingInputChange('weddingType', selected as WeddingType)
-                }
-                placeholder="Select Wedding Type"
-              />
+              <>
+                <SingleSelectDropdown
+                  options={Object.values(WeddingType)}
+                  selected={weddingFormData.weddingType}
+                  setSelected={(selected) =>
+                    handleWeddingInputChange('weddingType', selected as WeddingType)
+                  }
+                  placeholder="Select Wedding Type"
+                />
+                {validationErrors.weddingType && (
+                  <p className="text-red-500 text-sm">{validationErrors.weddingType}</p>
+                )}
+              </>
             ) : (
               <div className="relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between">
                 <span>
@@ -848,16 +886,21 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Budget Range</label>
+            <label className="text-sm font-medium">Budget Range*</label>
             {isEditing ? (
-              <SingleSelectDropdown
-                options={Object.values(BudgetBucket)}
-                selected={weddingFormData.budgetBucket}
-                setSelected={(selected) =>
-                  handleWeddingInputChange('budgetBucket', selected as BudgetBucket)
-                }
-                placeholder="Select Budget Range"
-              />
+              <>
+                <SingleSelectDropdown
+                  options={Object.values(BudgetBucket)}
+                  selected={weddingFormData.budgetBucket}
+                  setSelected={(selected) =>
+                    handleWeddingInputChange('budgetBucket', selected as BudgetBucket)
+                  }
+                  placeholder="Select Budget Range"
+                />
+                {validationErrors.budgetBucket && (
+                  <p className="text-red-500 text-sm">{validationErrors.budgetBucket}</p>
+                )}
+              </>
             ) : (
               <div className="relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between">
                 <span>
@@ -870,16 +913,21 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Guest Count</label>
+            <label className="text-sm font-medium">Guest Count*</label>
             {isEditing ? (
-              <SingleSelectDropdown
-                options={Object.values(GuestCountBucket)}
-                selected={weddingFormData.guestCountBucket}
-                setSelected={(selected) =>
-                  handleWeddingInputChange('guestCountBucket', selected as GuestCountBucket)
-                }
-                placeholder="Select Guest Count Range"
-              />
+              <>
+                <SingleSelectDropdown
+                  options={Object.values(GuestCountBucket)}
+                  selected={weddingFormData.guestCountBucket}
+                  setSelected={(selected) =>
+                    handleWeddingInputChange('guestCountBucket', selected as GuestCountBucket)
+                  }
+                  placeholder="Select Guest Count Range"
+                />
+                {validationErrors.guestCountBucket && (
+                  <p className="text-red-500 text-sm">{validationErrors.guestCountBucket}</p>
+                )}
+              </>
             ) : (
               <div className="relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between">
                 <span>
@@ -892,16 +940,21 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Preferred Style</label>
+            <label className="text-sm font-medium">Preferred Style*</label>
             {isEditing ? (
-              <SingleSelectDropdown
-                options={Object.values(WeddingStyle)}
-                selected={weddingFormData.preferredStyle}
-                setSelected={(selected) =>
-                  handleWeddingInputChange('preferredStyle', selected as WeddingStyle)
-                }
-                placeholder="Select Wedding Style"
-              />
+              <>
+                <SingleSelectDropdown
+                  options={Object.values(WeddingStyle)}
+                  selected={weddingFormData.preferredStyle}
+                  setSelected={(selected) =>
+                    handleWeddingInputChange('preferredStyle', selected as WeddingStyle)
+                  }
+                  placeholder="Select Wedding Style"
+                />
+                {validationErrors.preferredStyle && (
+                  <p className="text-red-500 text-sm">{validationErrors.preferredStyle}</p>
+                )}
+              </>
             ) : (
               <div className="relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between">
                 <span>
@@ -914,16 +967,21 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Preferred Services</label>
+            <label className="text-sm font-medium">Preferred Services*</label>
             {isEditing ? (
-              <MultiSelectDropdown
-                options={Object.values(WeddingService)}
-                selected={weddingFormData.preferredServices}
-                setSelected={(selected) =>
-                  handleWeddingInputChange('preferredServices', selected as WeddingService[])
-                }
-                placeholder="Select Preferred Services"
-              />
+              <>
+                <MultiSelectDropdown
+                  options={Object.values(WeddingService)}
+                  selected={weddingFormData.preferredServices}
+                  setSelected={(selected) =>
+                    handleWeddingInputChange('preferredServices', selected as WeddingService[])
+                  }
+                  placeholder="Select Preferred Services"
+                />
+                {validationErrors.preferredServices && (
+                  <p className="text-red-500 text-sm">{validationErrors.preferredServices}</p>
+                )}
+              </>
             ) : (
               <div className="relative rounded-md p-3 min-h-[36px] w-full text-left bg-muted flex items-center justify-between">
                 <span>

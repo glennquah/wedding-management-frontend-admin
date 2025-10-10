@@ -1,17 +1,16 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { toast } from 'sonner';
+import { useCallback, useState } from 'react';
 import {
   AdminsService,
-  WeddingResponseDto,
-  WeddingsService,
-  UpdateWeddingDto,
-  WeddingType,
   BudgetBucket,
   GuestCountBucket,
-  WeddingStyle,
+  UpdateWeddingDto,
+  WeddingResponseDto,
   WeddingService,
+  WeddingsService,
+  WeddingStyle,
+  WeddingType,
 } from '../api';
 
 interface WeddingFormData {
@@ -87,13 +86,13 @@ export const useWeddingProfile = () => {
     const updateData: UpdateWeddingDto = {};
 
     if (weddingFormData.name !== weddingData.name) updateData.name = weddingFormData.name;
-    if (weddingFormData.date !== weddingData.date) updateData.date = weddingFormData.date;
-    if (weddingFormData.location !== weddingData.location) updateData.location = weddingFormData.location;
+    if (weddingFormData.date !== (weddingData.date || '')) updateData.date = weddingFormData.date;
+    if (weddingFormData.location !== (weddingData.location || '')) updateData.location = weddingFormData.location;
     if (weddingFormData.weddingType !== weddingData.weddingType) updateData.weddingType = weddingFormData.weddingType;
     if (weddingFormData.budgetBucket !== weddingData.budgetBucket) updateData.budgetBucket = weddingFormData.budgetBucket;
     if (weddingFormData.guestCountBucket !== weddingData.guestCountBucket) updateData.guestCountBucket = weddingFormData.guestCountBucket;
     if (weddingFormData.preferredStyle !== weddingData.preferredStyle) updateData.preferredStyle = weddingFormData.preferredStyle;
-    if (JSON.stringify(weddingFormData.preferredServices) !== JSON.stringify(weddingData.preferredServices)) {
+    if (JSON.stringify(weddingFormData.preferredServices) !== JSON.stringify(weddingData.preferredServices || [])) {
       updateData.preferredServices = weddingFormData.preferredServices;
     }
 

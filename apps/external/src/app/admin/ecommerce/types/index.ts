@@ -59,6 +59,7 @@ export interface AvailabilityCardProps {
   itemsPerPage: number;
   selectedSlots?: AvailabilitySlotDto[];
   onSlotToggle?: (slot: AvailabilitySlotDto) => void;
+  slotsInCart?: AvailabilitySlotDto[];
 }
 
 export interface VendorCardProps {
@@ -67,6 +68,7 @@ export interface VendorCardProps {
 
 export interface BackButtonProps {
   onBack: () => void;
+  label?: string;
 }
 
 export interface PaginationState {

@@ -2,25 +2,20 @@
 
 import * as React from 'react';
 
+import { useCartStore, useWeddingStore } from '@/app/store/sessionStore';
+import { CartItemResponseDto } from '@shared/api';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Clock, ShoppingCart, X } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import useIsMobileScreen from '../../hooks/useIsMobileScreen';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Drawer, DrawerClose, DrawerContent, DrawerTrigger } from '../ui/drawer';
 import { Separator } from '../ui/separator';
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '../ui/sheet';
-import { useCartStore, useWeddingStore } from '@/app/store/sessionStore';
-import { CartItemResponseDto } from '@shared/api';
-import { AnimatePresence, motion } from 'framer-motion';
-import { ShoppingCart, X } from 'lucide-react';
-import { useSession } from 'next-auth/react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 
-/*
-TODO:
-1) define href for Continue Shopping button
-2) define href for link to indiv listing
-*/
 export function Cart() {
   const { cartItems, removeItem, clearCart, fetchCart, createOrder } = useCartStore();
   const { selectedWeddingId } = useWeddingStore();
@@ -38,7 +33,22 @@ export function Cart() {
   }, []);
 
   const totalItems = cartItems.length;
-  const subtotal = cartItems.reduce((acc, item) => acc + item.price, 0);
+  const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.selectedSlots.length), 0);
+
+  const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString('en-SG', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const formatSlotDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-SG', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
 
   React.useEffect(() => {
     if (!session?.user.id) return;
@@ -175,9 +185,31 @@ export function Cart() {
                             <span className="sr-only">Remove item</span>
                           </button>
                         </div>
+
+                        {/* Selected Slots */}
+                        {item.selectedSlots && item.selectedSlots.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            <div className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              <span>{item.selectedSlots.length} slot{item.selectedSlots.length > 1 ? 's' : ''} chosen:</span>
+                            </div>
+                            <div className="space-y-1 max-h-20 overflow-y-auto">
+                              {item.selectedSlots.map((slot, idx) => (
+                                <div key={idx} className="text-xs text-gray-600 pl-4">
+                                  {formatSlotDate(slot.startTime)} • {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div className="mt-2 flex justify-end">
-                        <div className="text-sm font-medium">${item.price.toFixed(2)}</div>
+                      <div className="mt-2 flex justify-between items-end">
+                        <div className="text-xs text-muted-foreground">
+                          ${item.price.toFixed(2)} × {item.selectedSlots.length}
+                        </div>
+                        <div className="text-sm font-medium">
+                          ${(item.price * item.selectedSlots.length).toFixed(2)}
+                        </div>
                       </div>
                     </div>
                   </motion.div>

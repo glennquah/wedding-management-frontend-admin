@@ -5,6 +5,7 @@ import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
   Calendar,
+  Camera,
   CheckSquare,
   Clock,
   LayoutDashboard,
@@ -84,6 +85,12 @@ export default function AdminSidebar() {
           title: 'Microsite',
           href: '/microsite',
           icon: PaintRoller,
+          disabled: !hasWedding,
+        },
+        {
+          title: 'Album Invite',
+          href: '/album',
+          icon: Camera,
           disabled: !hasWedding,
         },
         {
