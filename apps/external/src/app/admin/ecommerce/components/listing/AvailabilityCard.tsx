@@ -10,7 +10,8 @@ export function AvailabilityCard({
   onNextPage,
   itemsPerPage,
   selectedSlots = [],
-  onSlotToggle
+  onSlotToggle,
+  slotsInCart = []
 }: AvailabilityCardProps) {
   if (availabilities.length === 0) return null;
 
@@ -21,6 +22,14 @@ export function AvailabilityCard({
 
   const isSlotSelected = (slot: typeof availabilities[0]) => {
     return selectedSlots.some(s =>
+      s.startTime === slot.startTime &&
+      s.endTime === slot.endTime &&
+      s.date === slot.date
+    );
+  };
+
+  const isSlotInCart = (slot: typeof availabilities[0]) => {
+    return slotsInCart.some(s =>
       s.startTime === slot.startTime &&
       s.endTime === slot.endTime &&
       s.date === slot.date
@@ -45,15 +54,18 @@ export function AvailabilityCard({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
           {currentAvailabilities.map((slot, index) => {
             const selected = isSlotSelected(slot);
+            const inCart = isSlotInCart(slot);
             return (
               <div
                 key={startIndex + index}
-                className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                  selected
-                    ? 'bg-blue-100 border-blue-500'
-                    : 'bg-gray-50 hover:bg-gray-100'
+                className={`p-3 border rounded-lg transition-colors ${
+                  inCart
+                    ? 'bg-gray-200 border-gray-400 cursor-not-allowed opacity-60'
+                    : selected
+                    ? 'bg-blue-100 border-blue-500 cursor-pointer'
+                    : 'bg-gray-50 hover:bg-gray-100 cursor-pointer'
                 }`}
-                onClick={() => onSlotToggle?.(slot)}
+                onClick={() => !inCart && onSlotToggle?.(slot)}
               >
                 <div className="text-sm text-muted-foreground">
                   {slot.date && new Date(slot.date).toLocaleDateString('en-SG', {
@@ -72,8 +84,11 @@ export function AvailabilityCard({
                     minute: '2-digit'
                   })}
                 </div>
-                {selected && (
+                {selected && !inCart && (
                   <div className="text-xs text-blue-600 font-medium mt-1">✓ Selected</div>
+                )}
+                {inCart && (
+                  <div className="text-xs text-gray-600 font-medium mt-1">🛒 In Cart</div>
                 )}
               </div>
             );

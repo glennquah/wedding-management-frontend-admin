@@ -25,5 +25,9 @@ export type UpdateGuestDto = {
      */
     primaryGuestId?: number;
     confirmationStatus?: ConfirmationStatus;
+    /**
+     * Check-in timestamp
+     */
+    checkInTime?: string;
 };
 
