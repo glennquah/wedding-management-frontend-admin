@@ -2,13 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { OrderStatus } from './OrderStatus';
 export type OrderResponseDto = {
     /**
      * Unique identifier for the order
      */
     id: number;
-    orderStatus: OrderStatus;
     /**
      * Total amount for the order
      */
@@ -38,7 +36,7 @@ export type OrderResponseDto = {
      */
     updatedAt: string;
     /**
-     * Listings included in this order
+     * Listings included in this order with their booking status
      */
     listings?: Array<string>;
     /**

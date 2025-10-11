@@ -16,6 +16,8 @@ export default function OrdersPage() {
     toPayOrderListings,
     paidOrderListings,
     completedOrderListings,
+    confirmedOrderListings,
+    cancelledOrderListings,
   } = useOrders(selectedWeddingId ?? undefined);
 
   if (isLoading) {
@@ -87,8 +89,22 @@ export default function OrdersPage() {
             value="confirmed"
             className="px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
           >
-            <span className="md:hidden">Done ({completedOrderListings.length})</span>
-            <span className="hidden md:block">Confirmed ({completedOrderListings.length})</span>
+            <span className="md:hidden">Done ({confirmedOrderListings.length})</span>
+            <span className="hidden md:block">Confirmed ({confirmedOrderListings.length})</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="cancelled"
+            className="px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+          >
+            <span className="md:hidden">Cancelled ({cancelledOrderListings.length})</span>
+            <span className="hidden md:block">Cancelled ({cancelledOrderListings.length})</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="completed"
+            className="px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+          >
+            <span className="md:hidden">Completed ({completedOrderListings.length})</span>
+            <span className="hidden md:block">Completed ({completedOrderListings.length})</span>
           </TabsTrigger>
         </TabsList>
 
@@ -117,10 +133,26 @@ export default function OrdersPage() {
         </TabsContent>
 
         <TabsContent value="confirmed">
+          {confirmedOrderListings.length > 0 ? (
+            <OrderListingList orderListings={confirmedOrderListings} />
+          ) : (
+            <EmptyState message="No confirmed orders yet." />
+          )}
+        </TabsContent>
+
+        <TabsContent value="cancelled">
+          {cancelledOrderListings.length > 0 ? (
+            <OrderListingList orderListings={cancelledOrderListings} />
+          ) : (
+            <EmptyState message="No cancelled orders." />
+          )}
+        </TabsContent>
+
+        <TabsContent value="completed">
           {completedOrderListings.length > 0 ? (
             <OrderListingList orderListings={completedOrderListings} />
           ) : (
-            <EmptyState message="No confirmed orders yet." />
+            <EmptyState message="No completed orders yet." />
           )}
         </TabsContent>
       </Tabs>

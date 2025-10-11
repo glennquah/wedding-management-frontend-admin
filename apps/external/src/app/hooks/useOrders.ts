@@ -1,18 +1,26 @@
 import {
-    AvailabilitySlotDto,
-    ListingResponseDto,
-    OrderResponseDto,
-    OrderStatus,
-    OrdersService,
-    PaymentsService,
-    VendorResponseDto,
-    VendorsService,
+  AvailabilitySlotDto,
+  ListingResponseDto,
+  OrderResponseDto,
+  OrderStatus,
+  OrdersService,
+  PaymentsService,
+  VendorResponseDto,
+  VendorsService,
 } from '@shared/api';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-export type ListingWithBookedSlots = ListingResponseDto & { bookedSlots?: AvailabilitySlotDto[] };
-export type OrderListing = { order: OrderResponseDto; listing: ListingWithBookedSlots; bookedSlots?: AvailabilitySlotDto[] };
+export type ListingWithBookedSlots = ListingResponseDto & {
+  bookedSlots?: AvailabilitySlotDto[];
+  bookingStatus?: OrderStatus;
+};
+export type OrderListing = {
+  order: OrderResponseDto;
+  listing: ListingWithBookedSlots;
+  bookedSlots?: AvailabilitySlotDto[];
+  bookingStatus?: OrderStatus;
+};
 
 export function useOrders(selectedWeddingId?: number) {
   const [orders, setOrders] = useState<OrderResponseDto[]>([]);
@@ -74,14 +82,16 @@ export function useOrders(selectedWeddingId?: number) {
     if (selectedWeddingId) fetchOrders();
   }, [selectedWeddingId]);
 
-  const handleDeleteOrder = async (orderId: number) => {
+  const handleDeleteOrder = async (orderId: number, listingId?: number) => {
     try {
-      await OrdersService.orderControllerDelete(orderId);
-      toast.success('Order deleted successfully');
+      if (listingId) {
+        await OrdersService.orderControllerDeleteListing(orderId, listingId);
+        toast.success('Order deleted successfully');
+      }
       fetchOrders();
     } catch (err) {
-      console.error('Error deleting order:', err);
-      toast.error('Failed to delete order. Please try again.');
+      console.error('Error deleting order or listing:', err);
+      toast.error('Failed to delete order or listing. Please try again.');
     }
   };
 
@@ -106,7 +116,12 @@ export function useOrders(selectedWeddingId?: number) {
       if (order.listings && isListingWithBookedSlotsArray(order.listings)) {
         const listings = order.listings as unknown as ListingWithBookedSlots[];
         listings.forEach(listingData => {
-          orderListings.push({ order, listing: listingData, bookedSlots: listingData.bookedSlots });
+          orderListings.push({
+            order,
+            listing: listingData,
+            bookedSlots: listingData.bookedSlots,
+            bookingStatus: listingData.bookingStatus,
+          });
         });
       }
     });
@@ -116,13 +131,16 @@ export function useOrders(selectedWeddingId?: number) {
   const filterOrderListingsByStatus = (status?: OrderStatus) => {
     const all = getOrderListingsFlat();
     if (!status) return all;
-    return all.filter(ol => ol.order.orderStatus === status);
+    // Filter by bookingStatus on the listing level, not order level
+    return all.filter(ol => ol.bookingStatus === status);
   };
 
   const allOrderListings = getOrderListingsFlat();
   const toPayOrderListings = filterOrderListingsByStatus(OrderStatus.PENDING);
   const paidOrderListings = filterOrderListingsByStatus(OrderStatus.PAID);
   const completedOrderListings = filterOrderListingsByStatus(OrderStatus.COMPLETED);
+  const confirmedOrderListings = filterOrderListingsByStatus(OrderStatus.CONFIRMED);
+  const cancelledOrderListings = filterOrderListingsByStatus(OrderStatus.CANCELLED);
 
   return {
     orders,
@@ -135,5 +153,7 @@ export function useOrders(selectedWeddingId?: number) {
     toPayOrderListings,
     paidOrderListings,
     completedOrderListings,
+    confirmedOrderListings,
+    cancelledOrderListings,
   };
 }
