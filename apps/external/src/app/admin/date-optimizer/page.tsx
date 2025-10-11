@@ -28,6 +28,7 @@ export default function DateOptimizerPage() {
     preferredDays,
     dateRecommendations,
     earliestDate,
+    wedding,
     latestDate,
 
     // Modal states
@@ -38,6 +39,7 @@ export default function DateOptimizerPage() {
     handleAddKeyAttendee,
     handleRemoveKeyAttendee,
     handleRequestCalendarAccess,
+    handleSelectDate,
     setPreferredDays,
     setEarliestDate,
     setLatestDate,
@@ -60,17 +62,6 @@ export default function DateOptimizerPage() {
 
   const handleCancelDelete = () => {
     setAttendeeToDelete(null);
-  };
-
-  const handleDateChange = (newStartDate: string | undefined, newEndDate: string | undefined) => {
-    const today = new Date().toISOString().split('T')[0];
-    const finalStartDate = newStartDate || today;
-    setEarliestDate(finalStartDate);
-    setLatestDate(newEndDate || '');
-
-    if (newEndDate && finalStartDate > newEndDate) {
-      setLatestDate(finalStartDate);
-    }
   };
 
   return (
@@ -128,6 +119,8 @@ export default function DateOptimizerPage() {
         <DateRecommendationsSection
           hasRunAnalysis={hasRunAnalysis}
           dateRecommendations={dateRecommendations}
+          selectedWeddingDate={wedding?.date}
+          onSelectDate={handleSelectDate}
         />
 
         {/* Delete Confirmation Modal */}

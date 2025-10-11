@@ -34,7 +34,7 @@ export type DateRecommendation = DateRecommendationDto;
 
 export function useDateOptimizer() {
   const { data: session } = useSession();
-  const { selectedWeddingId } = useWeddingManager();
+  const { selectedWeddingId, refetch, wedding } = useWeddingManager();
 
   // State
   const [guests, setGuests] = useState<GuestResponseDto[]>([]);
@@ -582,6 +582,33 @@ export function useDateOptimizer() {
     [selectedWeddingId, session, setupAuth],
   );
 
+  // Select a recommended date
+  const handleSelectDate = useCallback(
+    async (recommendation: DateRecommendation) => {
+      if (!selectedWeddingId || !session?.backendTokens?.accessToken) {
+        toast.error('Could not select date. Please try again.');
+        return;
+      }
+
+      try {
+        setupAuth();
+        await WeddingsService.weddingControllerSetWeddingDate(selectedWeddingId, {
+          date: recommendation.date,
+        });
+
+        await refetch();
+
+        toast.success(
+          `Wedding date successfully set to ${new Date(recommendation.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}!`,
+        );
+      } catch (error) {
+        console.error('Error setting wedding date:', error);
+        toast.error('Failed to set wedding date.');
+      }
+    },
+    [selectedWeddingId, session, setupAuth, refetch],
+  );
+
   // Modal controls
   const openAddAttendeeModal = useCallback(() => {
     setIsAddAttendeeModalOpen(true);
@@ -624,6 +651,7 @@ export function useDateOptimizer() {
     dateRecommendations,
     earliestDate,
     latestDate,
+    wedding,
 
     // Modal states
     isAddAttendeeModalOpen,
@@ -634,6 +662,7 @@ export function useDateOptimizer() {
     handleRemoveKeyAttendee,
     handleRequestCalendarAccess,
     resetAnalysis,
+    handleSelectDate,
     handleMonthChange,
     setPreferredDays,
     setEarliestDate,

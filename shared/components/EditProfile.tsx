@@ -834,13 +834,15 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
             <label className="text-sm font-medium">Wedding Date</label>
             {isEditing ? (
               <Input
-                type="datetime-local"
+                type="date"
                 value={weddingFormData.date}
                 onChange={(e) => handleWeddingInputChange('date', e.target.value)}
               />
             ) : (
               <p className="p-3 bg-muted rounded-md">
-                {weddingData.date ? new Date(weddingData.date).toLocaleDateString() : 'Not set'}
+                {weddingData.date
+                  ? new Date(weddingData.date).toLocaleDateString('en-GB')
+                  : 'Not set'}
               </p>
             )}
           </div>
