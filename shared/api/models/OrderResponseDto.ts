@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { OrderStatus } from './OrderStatus';
 export type OrderResponseDto = {
     /**
      * Unique identifier for the order
@@ -15,6 +16,7 @@ export type OrderResponseDto = {
      * Currency code for the order
      */
     currency: string;
+    status: OrderStatus;
     /**
      * Date when the order was purchased
      */

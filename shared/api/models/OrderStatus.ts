@@ -3,12 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Status of the order
+ * Current status of the order
  */
 export enum OrderStatus {
     PENDING = 'PENDING',
-    PAID = 'PAID',
     CONFIRMED = 'CONFIRMED',
+    PAID = 'PAID',
     CANCELLED = 'CANCELLED',
     COMPLETED = 'COMPLETED',
 }

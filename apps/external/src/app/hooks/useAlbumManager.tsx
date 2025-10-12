@@ -68,8 +68,8 @@ export function useAlbumManager(opts: ManagerOptions) {
 
       if (!data.secure_url) throw new Error('Failed to upload QR code to Cloudinary');
       return data.secure_url as string;
-    } catch (err) {
-      toast.error('Failed to upload QR code.');
+    } catch (err: unknown) {
+      toast.error('Failed to upload QR code.', { description: String(err) });
       return null;
     }
   };

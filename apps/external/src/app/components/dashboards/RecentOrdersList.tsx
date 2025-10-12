@@ -84,8 +84,8 @@ export const RecentOrdersList = ({ orders, isLoading }: RecentOrdersListProps) =
                       })}
                     </TableCell>
                     <TableCell>
-                      <Badge className={getStatusColor(order.orderStatus)} variant="secondary">
-                        {order.orderStatus}
+                      <Badge className={getStatusColor(order.status)} variant="secondary">
+                        {order.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right font-semibold">
