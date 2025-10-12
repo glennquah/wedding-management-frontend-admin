@@ -50,7 +50,7 @@ export type { MicrositeLoginDto } from './models/MicrositeLoginDto';
 export type { MicrositeResponseDto } from './models/MicrositeResponseDto';
 export type { NotificationDetailsDto } from './models/NotificationDetailsDto';
 export type { OrderListingDto } from './models/OrderListingDto';
-export type { OrderResponseDto } from './models/OrderResponseDto';
+export { OrderResponseDto } from './models/OrderResponseDto';
 export { OrderStatus } from './models/OrderStatus';
 export type { PaymentResponseDto } from './models/PaymentResponseDto';
 export { PaymentStatus } from './models/PaymentStatus';

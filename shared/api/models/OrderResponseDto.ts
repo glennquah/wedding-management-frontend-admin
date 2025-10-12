@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { OrderStatus } from './OrderStatus';
 export type OrderResponseDto = {
     /**
      * Unique identifier for the order
@@ -16,7 +15,10 @@ export type OrderResponseDto = {
      * Currency code for the order
      */
     currency: string;
-    status: OrderStatus;
+    /**
+     * Current status of the order
+     */
+    status: OrderResponseDto.status;
     /**
      * Date when the order was purchased
      */
@@ -46,4 +48,16 @@ export type OrderResponseDto = {
      */
     payments?: Array<string>;
 };
+export namespace OrderResponseDto {
+    /**
+     * Current status of the order
+     */
+    export enum status {
+        PENDING = 'PENDING',
+        CONFIRMED = 'CONFIRMED',
+        PAID = 'PAID',
+        CANCELLED = 'CANCELLED',
+        COMPLETED = 'COMPLETED',
+    }
+}
 
