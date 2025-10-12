@@ -93,7 +93,7 @@ export const BudgetLineChart = ({
               <ChartTooltip
                 content={
                   <ChartTooltipContent
-                    formatter={(value, name) => (
+                    formatter={(value: number, name: string) => (
                       <>
                         {name === 'spending' ? 'Spending: ' : 'Budget: '}
                         {currency}
