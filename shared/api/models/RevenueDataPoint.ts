@@ -2,17 +2,17 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type MonthlyRevenueData = {
+export type RevenueDataPoint = {
     /**
-     * Month in YYYY-MM format
+     * Period label (YYYY-MM-DD for daily breakdown, YYYY-MM for monthly breakdown)
      */
-    month: string;
+    period: string;
     /**
-     * Revenue for the month
+     * Revenue for the period
      */
     revenue: number;
     /**
-     * Number of orders in the month
+     * Number of orders in the period
      */
     orderCount: number;
 };

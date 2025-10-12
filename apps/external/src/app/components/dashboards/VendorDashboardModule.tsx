@@ -29,6 +29,7 @@ const VendorDashboardModule = () => {
   const [isLoadingBookings, setIsLoadingBookings] = useState(false);
   const [isLoadingRevenueOverTime, setIsLoadingRevenueOverTime] = useState(false);
   const [isLoadingTopProducts, setIsLoadingTopProducts] = useState(false);
+  const [revenuePeriod, setRevenuePeriod] = useState<'MONTHLY' | 'YEARLY' | 'ALL'>('YEARLY');
 
   // Fetch revenue and bookings data
   useEffect(() => {
@@ -63,7 +64,10 @@ const VendorDashboardModule = () => {
     const fetchRevenueOverTime = async () => {
       setIsLoadingRevenueOverTime(true);
       try {
-        const data = await AnalyticsService.analyticsControllerGetVendorRevenueOverTime(vendorId);
+        const data = await AnalyticsService.analyticsControllerGetVendorRevenueOverTime(
+          vendorId,
+          revenuePeriod,
+        );
         setRevenueOverTime(data);
       } catch (error) {
         console.error('Error fetching revenue over time:', error);
@@ -73,7 +77,7 @@ const VendorDashboardModule = () => {
     };
 
     fetchRevenueOverTime();
-  }, [vendorId]);
+  }, [vendorId, revenuePeriod]);
 
   // Fetch top products
   useEffect(() => {
@@ -145,6 +149,8 @@ const VendorDashboardModule = () => {
           <VendorRevenueLineChart
             revenueOverTime={revenueOverTime}
             isLoading={isLoadingRevenueOverTime}
+            period={revenuePeriod}
+            onPeriodChange={setRevenuePeriod}
           />
           <VendorTopProductsChart topProducts={topProducts} isLoading={isLoadingTopProducts} />
         </div>

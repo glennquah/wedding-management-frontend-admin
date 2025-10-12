@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 
-import { MonthlyRevenueData } from '@shared/api';
+import { RevenueOverTimeResponseDto } from '@shared/api';
 import {
   Card,
   CardContent,
@@ -11,31 +11,54 @@ import {
   CardTitle,
 } from '@shared/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@shared/components/ui/chart';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@shared/components/ui/select';
 import { Line, LineChart, XAxis, YAxis } from 'recharts';
 
 interface VendorRevenueLineChartProps {
-  revenueOverTime?: {
-    monthlyData: MonthlyRevenueData[];
-    currency: string;
-  };
+  revenueOverTime?: RevenueOverTimeResponseDto;
   isLoading?: boolean;
+  period?: 'MONTHLY' | 'YEARLY' | 'ALL';
+  onPeriodChange?: (period: 'MONTHLY' | 'YEARLY' | 'ALL') => void;
 }
 
 export const VendorRevenueLineChart = ({
   revenueOverTime,
   isLoading,
+  period = 'MONTHLY',
+  onPeriodChange,
 }: VendorRevenueLineChartProps) => {
   const chartData = useMemo(() => {
-    if (!revenueOverTime?.monthlyData || revenueOverTime.monthlyData.length === 0) return [];
+    if (!revenueOverTime?.data || revenueOverTime.data.length === 0) return [];
 
     // Format the data for the chart
-    return revenueOverTime.monthlyData.map((item) => {
-      const date = new Date(item.month + '-01');
-      return {
-        month: date.toLocaleDateString('en-US', {
+    return revenueOverTime.data.map((item) => {
+      let label = item.period;
+
+      // Format based on period type
+      if (revenueOverTime.periodType === 'MONTHLY') {
+        // MONTHLY returns daily data (YYYY-MM-DD)
+        const date = new Date(item.period);
+        label = date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        });
+      } else if (revenueOverTime.periodType === 'YEARLY' || revenueOverTime.periodType === 'ALL') {
+        // YEARLY and ALL return monthly data (YYYY-MM)
+        const date = new Date(item.period + '-01');
+        label = date.toLocaleDateString('en-US', {
           month: 'short',
           year: '2-digit',
-        }),
+        });
+      }
+
+      return {
+        period: label,
         revenue: item.revenue,
         orderCount: item.orderCount,
       };
@@ -52,8 +75,28 @@ export const VendorRevenueLineChart = ({
   return (
     <Card className="bg-transparent border-brand-200">
       <CardHeader>
-        <CardTitle>Revenue Over Time</CardTitle>
-        <CardDescription>Monthly revenue performance</CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Revenue Over Time</CardTitle>
+            <CardDescription>
+              {period === 'MONTHLY'
+                ? 'Daily breakdown for current month'
+                : period === 'YEARLY'
+                  ? 'Monthly breakdown for current year'
+                  : 'Monthly breakdown for all time'}
+            </CardDescription>
+          </div>
+          <Select value={period} onValueChange={onPeriodChange}>
+            <SelectTrigger className="w-[130px] border-black">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="MONTHLY">Monthly</SelectItem>
+              <SelectItem value="YEARLY">Yearly</SelectItem>
+              <SelectItem value="ALL">All Time</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent className="h-[300px]">
         {isLoading ? (
@@ -68,7 +111,7 @@ export const VendorRevenueLineChart = ({
           <ChartContainer config={chartConfig} className="h-full w-full">
             <LineChart data={chartData}>
               <XAxis
-                dataKey="month"
+                dataKey="period"
                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
                 tickLine={{ stroke: 'hsl(var(--muted-foreground))' }}
               />
@@ -80,7 +123,11 @@ export const VendorRevenueLineChart = ({
               <ChartTooltip
                 content={
                   <ChartTooltipContent
-                    formatter={(value: number, name: string, item: any) => (
+                    formatter={(
+                      value: number,
+                      _name: string,
+                      item: { payload: { orderCount: number } },
+                    ) => (
                       <>
                         <div className="font-semibold">
                           Revenue: {revenueOverTime?.currency}

@@ -99,19 +99,24 @@ export class AnalyticsService {
     }
     /**
      * Get vendor revenue over time
-     * Returns monthly revenue data for a vendor, suitable for line charts.
+     * Returns revenue data for a vendor: MONTHLY (current month by days), YEARLY (current year by months), ALL (all time by months).
      * @param vendorId
+     * @param period Time period: MONTHLY=daily breakdown for current month, YEARLY=monthly breakdown for current year, ALL=monthly breakdown for all time (default: MONTHLY)
      * @returns RevenueOverTimeResponseDto Revenue over time retrieved successfully
      * @throws ApiError
      */
     public static analyticsControllerGetVendorRevenueOverTime(
         vendorId: number,
+        period?: 'MONTHLY' | 'YEARLY' | 'ALL',
     ): CancelablePromise<RevenueOverTimeResponseDto> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/analytics/vendor/{vendorId}/revenue-over-time',
             path: {
                 'vendorId': vendorId,
+            },
+            query: {
+                'period': period,
             },
             errors: {
                 404: `Vendor not found`,

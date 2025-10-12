@@ -2,15 +2,29 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { MonthlyRevenueData } from './MonthlyRevenueData';
+import type { RevenueDataPoint } from './RevenueDataPoint';
 export type RevenueOverTimeResponseDto = {
     /**
-     * Monthly revenue data
+     * Revenue data points over time
      */
-    monthlyData: Array<MonthlyRevenueData>;
+    data: Array<RevenueDataPoint>;
+    /**
+     * Period type
+     */
+    periodType: RevenueOverTimeResponseDto.periodType;
     /**
      * Currency code
      */
     currency: string;
 };
+export namespace RevenueOverTimeResponseDto {
+    /**
+     * Period type
+     */
+    export enum periodType {
+        MONTHLY = 'MONTHLY',
+        YEARLY = 'YEARLY',
+        ALL = 'ALL',
+    }
+}
 

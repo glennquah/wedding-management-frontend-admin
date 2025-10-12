@@ -21,19 +21,14 @@ interface VendorTopProductsChartProps {
   isLoading?: boolean;
 }
 
-export const VendorTopProductsChart = ({
-  topProducts,
-  isLoading,
-}: VendorTopProductsChartProps) => {
+export const VendorTopProductsChart = ({ topProducts, isLoading }: VendorTopProductsChartProps) => {
   const chartData = useMemo(() => {
     if (!topProducts?.topProducts || topProducts.topProducts.length === 0) return [];
 
     // Format the data for the chart - truncate long names
     return topProducts.topProducts.map((item) => ({
       name:
-        item.listingName.length > 15
-          ? item.listingName.substring(0, 15) + '...'
-          : item.listingName,
+        item.listingName.length > 15 ? item.listingName.substring(0, 15) + '...' : item.listingName,
       fullName: item.listingName,
       revenue: item.revenue,
       bookingCount: item.bookingCount,
@@ -81,7 +76,11 @@ export const VendorTopProductsChart = ({
               <ChartTooltip
                 content={
                   <ChartTooltipContent
-                    formatter={(value: number, name: string, item: any) => (
+                    formatter={(
+                      value: number,
+                      _name: string,
+                      item: { payload: { fullName: string; bookingCount: number } },
+                    ) => (
                       <>
                         <div className="font-semibold text-xs mb-1">{item.payload.fullName}</div>
                         <div className="text-sm">
