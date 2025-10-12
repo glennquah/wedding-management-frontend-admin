@@ -223,4 +223,44 @@ export class GuestsService {
             },
         });
     }
+    /**
+     * Check in a guest
+     * @param id
+     * @returns GuestResponseDto The guest has been checked in.
+     * @throws ApiError
+     */
+    public static guestControllerCheckIn(
+        id: number,
+    ): CancelablePromise<GuestResponseDto> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/guests/{id}/check-in',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Guest not found.`,
+            },
+        });
+    }
+    /**
+     * Remove guest check-in
+     * @param id
+     * @returns GuestResponseDto The guest check-in has been removed.
+     * @throws ApiError
+     */
+    public static guestControllerRemoveCheckIn(
+        id: number,
+    ): CancelablePromise<GuestResponseDto> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/guests/{id}/check-in',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Guest not found.`,
+            },
+        });
+    }
 }

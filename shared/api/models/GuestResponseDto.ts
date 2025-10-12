@@ -42,6 +42,10 @@ export type GuestResponseDto = {
      */
     attendance?: boolean;
     /**
+     * Check-in timestamp
+     */
+    checkInTime?: string;
+    /**
      * List of accompanying guests
      */
     accompanyingGuests?: Array<GuestResponseDto>;
