@@ -1,5 +1,6 @@
 'use client';
 
+import { VendorRevenueCard } from './VendorRevenueCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { CheckCircle, Clock, Package } from 'lucide-react';
 
@@ -11,20 +12,32 @@ interface VendorBookingsCardsProps {
     completedBookings: number;
     cancelledBookings: number;
   };
-  isLoading?: boolean;
+  revenueData?: {
+    mtd: number;
+    ytd: number;
+    allTime: number;
+    currency: string;
+  };
+  isLoadingBookings?: boolean;
+  isLoadingRevenue?: boolean;
 }
 
-export const VendorBookingsCards = ({ bookingsData, isLoading }: VendorBookingsCardsProps) => {
+export const VendorBookingsCards = ({
+  bookingsData,
+  revenueData,
+  isLoadingBookings,
+  isLoadingRevenue,
+}: VendorBookingsCardsProps) => {
   return (
-    <>
+    <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
       {/* Pending Bookings Card */}
       <Card className="bg-transparent border-brand-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Pending Bookings</CardTitle>
+          <CardTitle className="text-xs font-medium">Pending Bookings</CardTitle>
           <Clock className="h-4 w-4 text-yellow-600" />
         </CardHeader>
         <CardContent className="pt-0">
-          {isLoading ? (
+          {isLoadingBookings ? (
             <div className="text-2xl font-bold">Loading...</div>
           ) : bookingsData ? (
             <>
@@ -40,11 +53,11 @@ export const VendorBookingsCards = ({ bookingsData, isLoading }: VendorBookingsC
       {/* Confirmed Bookings Card */}
       <Card className="bg-transparent border-brand-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Confirmed Bookings</CardTitle>
+          <CardTitle className="text-xs font-medium">Confirmed Bookings</CardTitle>
           <CheckCircle className="h-4 w-4 text-green-600" />
         </CardHeader>
         <CardContent className="pt-0">
-          {isLoading ? (
+          {isLoadingBookings ? (
             <div className="text-2xl font-bold">Loading...</div>
           ) : bookingsData ? (
             <>
@@ -60,11 +73,11 @@ export const VendorBookingsCards = ({ bookingsData, isLoading }: VendorBookingsC
       {/* Completed Bookings Card */}
       <Card className="bg-transparent border-brand-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Completed Bookings</CardTitle>
+          <CardTitle className="text-xs font-medium">Completed Bookings</CardTitle>
           <Package className="h-4 w-4 text-blue-600" />
         </CardHeader>
         <CardContent className="pt-0">
-          {isLoading ? (
+          {isLoadingBookings ? (
             <div className="text-2xl font-bold">Loading...</div>
           ) : bookingsData ? (
             <>
@@ -78,6 +91,9 @@ export const VendorBookingsCards = ({ bookingsData, isLoading }: VendorBookingsC
           )}
         </CardContent>
       </Card>
-    </>
+
+      {/* Revenue Card */}
+      <VendorRevenueCard revenueData={revenueData} isLoading={isLoadingRevenue} />
+    </div>
   );
 };

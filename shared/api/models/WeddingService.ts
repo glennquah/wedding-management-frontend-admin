@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Service category
+ * Preferred wedding services
  */
 export enum WeddingService {
     VENUE = 'VENUE',

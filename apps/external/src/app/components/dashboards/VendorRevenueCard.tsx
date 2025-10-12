@@ -51,7 +51,7 @@ export const VendorRevenueCard = ({ revenueData, isLoading }: VendorRevenueCardP
     <Card className="bg-transparent border-brand-200">
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
         <div className="flex items-center gap-2">
-          <CardTitle className="text-sm font-medium">Revenue</CardTitle>
+          <CardTitle className="text-xs font-medium">Revenue</CardTitle>
         </div>
         <Tabs
           value={selectedPeriod}

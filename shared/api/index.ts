@@ -17,7 +17,6 @@ export type { BroadcastRsvpInvitationDto } from './models/BroadcastRsvpInvitatio
 export { BudgetBucket } from './models/BudgetBucket';
 export type { CartItemResponseDto } from './models/CartItemResponseDto';
 export type { CartResponseDto } from './models/CartResponseDto';
-export type { CategoryRevenueData } from './models/CategoryRevenueData';
 export type { CheckoutSessionResponseDto } from './models/CheckoutSessionResponseDto';
 export { ConfirmationStatus } from './models/ConfirmationStatus';
 export type { ConfirmGuestDto } from './models/ConfirmGuestDto';
@@ -58,7 +57,6 @@ export type { PaymentResponseDto } from './models/PaymentResponseDto';
 export { PaymentStatus } from './models/PaymentStatus';
 export type { RequestResetPasswordDto } from './models/RequestResetPasswordDto';
 export type { ResetPasswordDto } from './models/ResetPasswordDto';
-export type { RevenueByCategoryResponseDto } from './models/RevenueByCategoryResponseDto';
 export type { RevenueOverTimeResponseDto } from './models/RevenueOverTimeResponseDto';
 export type { RsvpCountResponseDto } from './models/RsvpCountResponseDto';
 export type { ScheduleItemDto } from './models/ScheduleItemDto';

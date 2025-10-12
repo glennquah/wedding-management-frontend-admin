@@ -3,7 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { GuestCountResponseDto } from '../models/GuestCountResponseDto';
-import type { RevenueByCategoryResponseDto } from '../models/RevenueByCategoryResponseDto';
 import type { RevenueOverTimeResponseDto } from '../models/RevenueOverTimeResponseDto';
 import type { RsvpCountResponseDto } from '../models/RsvpCountResponseDto';
 import type { SpendingResponseDto } from '../models/SpendingResponseDto';
@@ -139,27 +138,6 @@ export class AnalyticsService {
             },
             query: {
                 'limit': limit,
-            },
-            errors: {
-                404: `Vendor not found`,
-            },
-        });
-    }
-    /**
-     * Get vendor revenue by category
-     * Returns revenue breakdown by service category for a vendor, suitable for pie charts.
-     * @param vendorId
-     * @returns RevenueByCategoryResponseDto Revenue by category retrieved successfully
-     * @throws ApiError
-     */
-    public static analyticsControllerGetVendorRevenueByCategory(
-        vendorId: number,
-    ): CancelablePromise<RevenueByCategoryResponseDto> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/analytics/vendor/{vendorId}/revenue-by-category',
-            path: {
-                'vendorId': vendorId,
             },
             errors: {
                 404: `Vendor not found`,

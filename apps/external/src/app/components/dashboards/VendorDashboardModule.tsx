@@ -4,13 +4,10 @@ import { useEffect, useState } from 'react';
 
 import { useVendorSession } from '../../../contexts/VendorSessionContext';
 import { VendorBookingsCards } from './VendorBookingsCards';
-import { VendorRevenueCard } from './VendorRevenueCard';
 import { VendorRevenueLineChart } from './VendorRevenueLineChart';
-import { VendorRevenuePieChart } from './VendorRevenuePieChart';
 import { VendorTopProductsChart } from './VendorTopProductsChart';
 import {
   AnalyticsService,
-  RevenueByCategoryResponseDto,
   RevenueOverTimeResponseDto,
   VendorBookingsResponseDto,
   VendorRevenueResponseDto,
@@ -28,15 +25,10 @@ const VendorDashboardModule = () => {
   const [bookings, setBookings] = useState<VendorBookingsResponseDto | undefined>();
   const [revenueOverTime, setRevenueOverTime] = useState<RevenueOverTimeResponseDto | undefined>();
   const [topProducts, setTopProducts] = useState<VendorTopProductsResponseDto | undefined>();
-  const [revenueByCategory, setRevenueByCategory] = useState<
-    RevenueByCategoryResponseDto | undefined
-  >();
-
   const [isLoadingRevenue, setIsLoadingRevenue] = useState(false);
   const [isLoadingBookings, setIsLoadingBookings] = useState(false);
   const [isLoadingRevenueOverTime, setIsLoadingRevenueOverTime] = useState(false);
   const [isLoadingTopProducts, setIsLoadingTopProducts] = useState(false);
-  const [isLoadingRevenueByCategory, setIsLoadingRevenueByCategory] = useState(false);
 
   // Fetch revenue and bookings data
   useEffect(() => {
@@ -102,25 +94,6 @@ const VendorDashboardModule = () => {
     fetchTopProducts();
   }, [vendorId]);
 
-  // Fetch revenue by category
-  useEffect(() => {
-    if (!vendorId) return;
-
-    const fetchRevenueByCategory = async () => {
-      setIsLoadingRevenueByCategory(true);
-      try {
-        const data = await AnalyticsService.analyticsControllerGetVendorRevenueByCategory(vendorId);
-        setRevenueByCategory(data);
-      } catch (error) {
-        console.error('Error fetching revenue by category:', error);
-      } finally {
-        setIsLoadingRevenueByCategory(false);
-      }
-    };
-
-    fetchRevenueByCategory();
-  }, [vendorId]);
-
   if (isVendorLoading) {
     return (
       <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground py-6">
@@ -157,27 +130,23 @@ const VendorDashboardModule = () => {
           description="Manage your listings, orders, and business analytics"
         />
 
-        {/* First Row - Bookings Cards and Revenue Card */}
-        <div className="grid gap-4 md:grid-cols-4 mb-6">
-          <VendorBookingsCards bookingsData={bookings} isLoading={isLoadingBookings} />
-          <VendorRevenueCard revenueData={revenue} isLoading={isLoadingRevenue} />
+        {/* First Row - Bookings and Revenue Cards */}
+        <div className="mb-6">
+          <VendorBookingsCards
+            bookingsData={bookings}
+            revenueData={revenue}
+            isLoadingBookings={isLoadingBookings}
+            isLoadingRevenue={isLoadingRevenue}
+          />
         </div>
 
-        {/* Second Row - Revenue Over Time Chart */}
-        <div className="mb-6">
+        {/* Second Row - Charts */}
+        <div className="grid gap-6 md:grid-cols-2 mb-6">
           <VendorRevenueLineChart
             revenueOverTime={revenueOverTime}
             isLoading={isLoadingRevenueOverTime}
           />
-        </div>
-
-        {/* Fourth Row - Top Products and Revenue by Category */}
-        <div className="grid gap-6 md:grid-cols-2 mb-6">
           <VendorTopProductsChart topProducts={topProducts} isLoading={isLoadingTopProducts} />
-          <VendorRevenuePieChart
-            revenueByCategory={revenueByCategory}
-            isLoading={isLoadingRevenueByCategory}
-          />
         </div>
       </div>
     </div>
