@@ -1,22 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+
+import VendorDashboardModule from '../components/dashboards/VendorDashboardModule';
 import { VendorsService } from '@shared/api';
 import { Button } from '@shared/components/ui/button';
 import { AlertCircle, Sparkles } from 'lucide-react';
-import { ImageUploadWidget } from '@shared/components';
-import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/ui/card';
-import { Activity, CreditCard, DollarSign, Users } from 'lucide-react';
-import { CldImage } from 'next-cloudinary';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export default function VendorDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [hasVendorDetails, setHasVendorDetails] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -29,7 +26,11 @@ export default function VendorDashboard() {
         const vendor = await VendorsService.vendorControllerGetVendor(session.user.id);
 
         // Check if vendor has completed their profile with service details
-        const hasDetails = !!(vendor.serviceOffered && vendor.styleOffered && vendor.weddingTypes?.length);
+        const hasDetails = !!(
+          vendor.serviceOffered &&
+          vendor.styleOffered &&
+          vendor.weddingTypes?.length
+        );
         setHasVendorDetails(hasDetails);
       } catch (error) {
         console.error('Error checking vendor details:', error);
@@ -65,10 +66,14 @@ export default function VendorDashboard() {
                 Complete Your Vendor Profile
               </h2>
               <p className="text-gray-700 mb-2">
-                Hello, <span className="font-semibold">{session.user?.name || session.user?.email}</span> 👋
+                Hello,{' '}
+                <span className="font-semibold">{session.user?.name || session.user?.email}</span>{' '}
+                👋
               </p>
               <p className="text-gray-600 mt-4">
-                Before you can access your dashboard and start creating listings, we need you to complete your vendor profile. This includes your service offerings, style preferences, and the types of weddings you cater to!
+                Before you can access your dashboard and start creating listings, we need you to
+                complete your vendor profile. This includes your service offerings, style
+                preferences, and the types of weddings you cater to!
               </p>
             </div>
             <Button
@@ -95,76 +100,8 @@ export default function VendorDashboard() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-6 pt-12">
-      <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-
-      {/* Example: Upload widget */}
-      <ImageUploadWidget
-        onUpload={(url) => {
-          setUploadedImageUrl(url);
-        }}
-        maxImageWidth={500}
-      />
-
-      {/* Example: Image Uploaded */}
-      <div className="mt-4">
-        {uploadedImageUrl ? (
-          <CldImage
-            width={300}
-            height={300}
-            src={uploadedImageUrl}
-            sizes="100vw"
-            alt="Uploaded image"
-            className="rounded-lg shadow"
-          />
-        ) : (
-          <p>No image uploaded yet.</p>
-        )}
-      </div>
-
-      {/* Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Orders</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+2350</div>
-            <p className="text-xs text-muted-foreground">+180.1% from last month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Listings</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">+19% from last month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Now</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+573</div>
-            <p className="text-xs text-muted-foreground">+201 since last hour</p>
-          </CardContent>
-        </Card>
-      </div>
+    <div className="mx-auto">
+      <VendorDashboardModule />
     </div>
   );
 }
