@@ -3,8 +3,13 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { GuestCountResponseDto } from '../models/GuestCountResponseDto';
+import type { RevenueByCategoryResponseDto } from '../models/RevenueByCategoryResponseDto';
+import type { RevenueOverTimeResponseDto } from '../models/RevenueOverTimeResponseDto';
 import type { RsvpCountResponseDto } from '../models/RsvpCountResponseDto';
 import type { SpendingResponseDto } from '../models/SpendingResponseDto';
+import type { VendorBookingsResponseDto } from '../models/VendorBookingsResponseDto';
+import type { VendorRevenueResponseDto } from '../models/VendorRevenueResponseDto';
+import type { VendorTopProductsResponseDto } from '../models/VendorTopProductsResponseDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -69,6 +74,116 @@ export class AnalyticsService {
             },
             errors: {
                 404: `Wedding not found`,
+            },
+        });
+    }
+    /**
+     * Get vendor revenue analytics
+     * Returns MTD (Month-to-Date), YTD (Year-to-Date), and all-time revenue for a vendor.
+     * @param vendorId
+     * @returns VendorRevenueResponseDto Vendor revenue retrieved successfully
+     * @throws ApiError
+     */
+    public static analyticsControllerGetVendorRevenue(
+        vendorId: number,
+    ): CancelablePromise<VendorRevenueResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/analytics/vendor/{vendorId}/revenue',
+            path: {
+                'vendorId': vendorId,
+            },
+            errors: {
+                404: `Vendor not found`,
+            },
+        });
+    }
+    /**
+     * Get vendor revenue over time
+     * Returns monthly revenue data for a vendor, suitable for line charts.
+     * @param vendorId
+     * @returns RevenueOverTimeResponseDto Revenue over time retrieved successfully
+     * @throws ApiError
+     */
+    public static analyticsControllerGetVendorRevenueOverTime(
+        vendorId: number,
+    ): CancelablePromise<RevenueOverTimeResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/analytics/vendor/{vendorId}/revenue-over-time',
+            path: {
+                'vendorId': vendorId,
+            },
+            errors: {
+                404: `Vendor not found`,
+            },
+        });
+    }
+    /**
+     * Get vendor top selling products
+     * Returns the top selling products (listings) for a vendor, sorted by revenue.
+     * @param vendorId
+     * @param limit
+     * @returns VendorTopProductsResponseDto Top products retrieved successfully
+     * @throws ApiError
+     */
+    public static analyticsControllerGetVendorTopProducts(
+        vendorId: number,
+        limit: number,
+    ): CancelablePromise<VendorTopProductsResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/analytics/vendor/{vendorId}/top-products',
+            path: {
+                'vendorId': vendorId,
+            },
+            query: {
+                'limit': limit,
+            },
+            errors: {
+                404: `Vendor not found`,
+            },
+        });
+    }
+    /**
+     * Get vendor revenue by category
+     * Returns revenue breakdown by service category for a vendor, suitable for pie charts.
+     * @param vendorId
+     * @returns RevenueByCategoryResponseDto Revenue by category retrieved successfully
+     * @throws ApiError
+     */
+    public static analyticsControllerGetVendorRevenueByCategory(
+        vendorId: number,
+    ): CancelablePromise<RevenueByCategoryResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/analytics/vendor/{vendorId}/revenue-by-category',
+            path: {
+                'vendorId': vendorId,
+            },
+            errors: {
+                404: `Vendor not found`,
+            },
+        });
+    }
+    /**
+     * Get vendor bookings count
+     * Returns total bookings count and breakdown by status (pending, confirmed, completed, cancelled).
+     * @param vendorId
+     * @returns VendorBookingsResponseDto Bookings count retrieved successfully
+     * @throws ApiError
+     */
+    public static analyticsControllerGetVendorBookings(
+        vendorId: number,
+    ): CancelablePromise<VendorBookingsResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/analytics/vendor/{vendorId}/bookings',
+            path: {
+                'vendorId': vendorId,
+            },
+            errors: {
+                404: `Vendor not found`,
             },
         });
     }
