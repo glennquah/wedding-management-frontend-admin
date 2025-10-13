@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { WeddingsService } from '@shared/api/services/WeddingsService';
 import { WeddingPublicResponseDto } from '@shared/api/models/WeddingPublicResponseDto';
-import { GuestMinimalDto } from '@shared/api/models/GuestMinimalDto';
 import {
   Select,
   SelectContent,
@@ -28,7 +27,6 @@ export default function CashGiftPage() {
   const [selectedGuestId, setSelectedGuestId] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchWedding = async () => {
@@ -85,7 +83,12 @@ export default function CashGiftPage() {
     }
 
     // Navigate to QR page with guest and amount data
-    const selectedGuest = wedding?.guests?.find(g => g.id === parseInt(selectedGuestId));
+    if (!wedding) {
+      toast.error('Wedding data not found');
+      return;
+    }
+
+    const selectedGuest = wedding.guests?.find(g => g.id === parseInt(selectedGuestId));
     if (!selectedGuest) {
       toast.error('Selected guest not found');
       return;
@@ -184,7 +187,7 @@ export default function CashGiftPage() {
             </div>
 
             {/* Submit Button */}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full">
               Continue to Payment
             </Button>
           </form>
