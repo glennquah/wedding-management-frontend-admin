@@ -117,7 +117,7 @@ export const useWeddingProfile = () => {
     if (apiDate && apiDate !== (weddingData.date || '')) {
       updateData.date = apiDate;
     } else if (!apiDate && weddingData.date) {
-      updateData.date = null;
+      updateData.date = undefined;
     }
     if (weddingFormData.location !== (weddingData.location || '')) updateData.location = weddingFormData.location;
     if (weddingFormData.weddingType !== weddingData.weddingType) updateData.weddingType = weddingFormData.weddingType;

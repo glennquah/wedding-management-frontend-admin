@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useWeddingManager } from './useWeddingManager';
 import {
@@ -51,12 +51,18 @@ export function useDateOptimizer() {
   const [earliestDate, setEarliestDate] = useState<string>('');
   const [latestDate, setLatestDate] = useState<string>('');
 
-  // Authentication setup
-  const setupAuth = useCallback(() => {
-    if (session?.backendTokens?.accessToken) {
-      OpenAPI.TOKEN = session.backendTokens.accessToken;
-    }
+  // Use ref to access latest session without triggering re-renders
+  const sessionRef = useRef(session);
+  useEffect(() => {
+    sessionRef.current = session;
   }, [session]);
+
+  // Authentication setup - stable function
+  const setupAuth = useCallback(() => {
+    if (sessionRef.current?.backendTokens?.accessToken) {
+      OpenAPI.TOKEN = sessionRef.current.backendTokens.accessToken;
+    }
+  }, []);
 
   // Check calendar connection status for an attendee or admin
   const checkCalendarStatus = useCallback(
@@ -67,7 +73,7 @@ export function useDateOptimizer() {
       isConnected: boolean;
       accessStatus: CalendarConnectionStatusDto.accessStatus;
     }> => {
-      if (!session?.backendTokens?.accessToken) {
+      if (!sessionRef.current?.backendTokens?.accessToken) {
         return {
           isConnected: false,
           accessStatus: CalendarConnectionStatusDto.accessStatus.NOT_REQUESTED,
@@ -89,12 +95,12 @@ export function useDateOptimizer() {
         };
       }
     },
-    [session, setupAuth],
+    [setupAuth],
   );
 
   // Fetch collaborators, guests, and key attendees
   const fetchData = useCallback(async () => {
-    if (!selectedWeddingId || !session?.backendTokens?.accessToken) return;
+    if (!selectedWeddingId || !sessionRef.current?.backendTokens?.accessToken) return;
 
     try {
       setLoading(true);
@@ -151,11 +157,11 @@ export function useDateOptimizer() {
     } finally {
       setLoading(false);
     }
-  }, [selectedWeddingId, session, setupAuth, checkCalendarStatus]);
+  }, [selectedWeddingId, setupAuth, checkCalendarStatus]);
 
   // Fetch saved preferences
   const fetchPreferences = useCallback(async () => {
-    if (!selectedWeddingId || !session?.backendTokens?.accessToken) return;
+    if (!selectedWeddingId || !sessionRef.current?.backendTokens?.accessToken) return;
 
     try {
       setupAuth();
@@ -182,13 +188,15 @@ export function useDateOptimizer() {
       setLatestDate('2025-12-31');
       setPreferredDays(['Friday', 'Saturday', 'Sunday']);
     }
-  }, [selectedWeddingId, session, setupAuth]);
+  }, [selectedWeddingId, setupAuth]);
 
   // Fetch data on mount
   useEffect(() => {
-    fetchData();
-    fetchPreferences();
-  }, [fetchData, fetchPreferences]);
+    if (selectedWeddingId && session?.backendTokens?.accessToken) {
+      fetchData();
+      fetchPreferences();
+    }
+  }, [selectedWeddingId, session?.backendTokens?.accessToken, fetchData, fetchPreferences]);
 
   // Auto-save preferences when they change (debounced)
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
@@ -240,7 +248,7 @@ export function useDateOptimizer() {
   // Fetch availability data for the selected month
   const fetchAvailability = useCallback(
     async (startDate?: string, endDate?: string) => {
-      if (!selectedWeddingId || !session?.backendTokens?.accessToken) return [];
+      if (!selectedWeddingId || !sessionRef.current?.backendTokens?.accessToken) return [];
       if (keyAttendees.length === 0 && mainCouple.length === 0) return [];
 
       try {
@@ -299,7 +307,7 @@ export function useDateOptimizer() {
         setIsLoadingAvailability(false);
       }
     },
-    [selectedWeddingId, session, keyAttendees, mainCouple, selectedMonth, setupAuth],
+    [selectedWeddingId, keyAttendees, mainCouple, selectedMonth, setupAuth],
   );
 
   const parseOffsetMinutes = useMemo(
@@ -325,7 +333,7 @@ export function useDateOptimizer() {
 
   // Run analysis
   const handleRunAnalysis = useCallback(async () => {
-    if (!selectedWeddingId || !session?.backendTokens?.accessToken) return;
+    if (!selectedWeddingId || !sessionRef.current?.backendTokens?.accessToken) return;
 
     setHasRunAnalysis(true);
     setIsLoadingAvailability(true);
@@ -455,7 +463,6 @@ export function useDateOptimizer() {
     }
   }, [
     selectedWeddingId,
-    session,
     setupAuth,
     fetchAvailability,
     mainCouple,
@@ -470,7 +477,7 @@ export function useDateOptimizer() {
   // Add key attendee
   const handleAddKeyAttendee = useCallback(
     async (attendee: GuestResponseDto) => {
-      if (!selectedWeddingId || !session?.backendTokens?.accessToken) return;
+      if (!selectedWeddingId || !sessionRef.current?.backendTokens?.accessToken) return;
 
       try {
         setupAuth();
@@ -497,13 +504,13 @@ export function useDateOptimizer() {
         toast.error('Failed to add key attendee');
       }
     },
-    [selectedWeddingId, session, setupAuth, checkCalendarStatus],
+    [selectedWeddingId, setupAuth, checkCalendarStatus],
   );
 
   // Remove key attendee
   const handleRemoveKeyAttendee = useCallback(
     async (id: number) => {
-      if (!selectedWeddingId || !session?.backendTokens?.accessToken) return;
+      if (!selectedWeddingId || !sessionRef.current?.backendTokens?.accessToken) return;
 
       try {
         setupAuth();
@@ -531,13 +538,13 @@ export function useDateOptimizer() {
         toast.error('Failed to remove key attendee');
       }
     },
-    [selectedWeddingId, session, setupAuth, keyAttendees],
+    [selectedWeddingId, setupAuth, keyAttendees],
   );
 
   // Request calendar access
   const handleRequestCalendarAccess = useCallback(
     async (attendee: KeyAttendee | MainCouplePartner, isAdmin: boolean = false) => {
-      if (!selectedWeddingId || !session?.backendTokens?.accessToken) {
+      if (!selectedWeddingId || !sessionRef.current?.backendTokens?.accessToken) {
         toast.error('Unable to request calendar access');
         return;
       }
@@ -579,13 +586,13 @@ export function useDateOptimizer() {
         toast.error('Failed to send calendar access request');
       }
     },
-    [selectedWeddingId, session, setupAuth],
+    [selectedWeddingId, setupAuth],
   );
 
   // Select a recommended date
   const handleSelectDate = useCallback(
     async (recommendation: DateRecommendation) => {
-      if (!selectedWeddingId || !session?.backendTokens?.accessToken) {
+      if (!selectedWeddingId || !sessionRef.current?.backendTokens?.accessToken) {
         toast.error('Could not select date. Please try again.');
         return;
       }
@@ -606,7 +613,7 @@ export function useDateOptimizer() {
         toast.error('Failed to set wedding date.');
       }
     },
-    [selectedWeddingId, session, setupAuth, refetch],
+    [selectedWeddingId, setupAuth, refetch],
   );
 
   // Modal controls
@@ -632,10 +639,10 @@ export function useDateOptimizer() {
 
   // Refetch availability when month changes
   useEffect(() => {
-    if (hasRunAnalysis) {
+    if (hasRunAnalysis && selectedWeddingId && session?.backendTokens?.accessToken) {
       fetchAvailability();
     }
-  }, [selectedMonth, hasRunAnalysis, fetchAvailability]);
+  }, [selectedMonth, hasRunAnalysis, selectedWeddingId, session?.backendTokens?.accessToken, fetchAvailability]);
 
   return {
     // Data

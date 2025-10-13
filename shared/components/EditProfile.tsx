@@ -9,7 +9,6 @@ import {
   AuthService,
   BudgetBucket,
   GuestCountBucket,
-  GuestResponseDto,
   RequestResetPasswordDto,
   UserRole,
   VendorResponseDto,
@@ -86,11 +85,14 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
 
   // Collaborator state
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
-  const [collaboratorSearch, setCollaboratorSearch] = useState('');
-  const [showCollaboratorDropdown, setShowCollaboratorDropdown] = useState(false);
   const [isInvitingCollaborator, setIsInvitingCollaborator] = useState(false);
+  const [collaboratorName, setCollaboratorName] = useState('');
+  const [collaboratorEmail, setCollaboratorEmail] = useState('');
   const [collaboratorsToRemove, setCollaboratorsToRemove] = useState<number[]>([]);
 
+  const [collaboratorPendingRemoval, setCollaboratorPendingRemoval] = useState<Collaborator | null>(
+    null,
+  );
   // Determine the actual user ID and role to fetch
   const targetUserId = userId;
   const targetUserRole = userRole;
@@ -276,6 +278,29 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     }
   };
 
+  const handleRemoveCollaboratorClick = (collaborator: Collaborator) => {
+    setCollaboratorPendingRemoval(collaborator);
+  };
+
+  const closeCollaboratorRemovalModal = () => {
+    setCollaboratorPendingRemoval(null);
+  };
+
+  const handleConfirmRemoveCollaborator = () => {
+    if (!collaboratorPendingRemoval) return;
+
+    // Mark collaborator for removal (will be removed on save)
+    setCollaboratorsToRemove([...collaboratorsToRemove, collaboratorPendingRemoval.id]);
+    // Remove from local state immediately for UI feedback
+    setCollaborators(collaborators.filter((c) => c.id !== collaboratorPendingRemoval.id));
+
+    closeCollaboratorRemovalModal();
+  };
+
+  const handleCancelRemoveCollaborator = () => {
+    closeCollaboratorRemovalModal();
+  };
+
   // Handle partner invitation
   const handleInvitePartner = async () => {
     // Prevent double-clicking
@@ -348,21 +373,41 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
   };
 
   // Handle collaborator invitation
-  const handleInviteCollaborator = async (guest: GuestResponseDto) => {
+  const handleInviteCollaborator = async () => {
     // Prevent double-clicking
     if (isInvitingCollaborator) {
       return;
     }
 
-    // Check if already added
-    if (collaborators.some((c) => c.email === guest.email)) {
-      toast.error('This guest is already added as a collaborator');
+    if (!collaboratorName.trim()) {
+      toast.error('Collaborator name is required');
+      return;
+    }
+    if (!collaboratorEmail.trim()) {
+      toast.error('Collaborator email is required');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(collaboratorEmail)) {
+      toast.error('Please enter a valid email address');
       return;
     }
 
-    // Check if guest has email
-    if (!guest.email) {
-      toast.error('Guest must have an email address to be invited as a collaborator');
+    // Check if already added
+    if (collaborators.some((c) => c.email === collaboratorEmail)) {
+      toast.error('This person is already a collaborator.');
+      return;
+    }
+
+    // Check if it's the partner's email
+    if (partner && partner.email === collaboratorEmail) {
+      toast.error('This person is already the partner.');
+      return;
+    }
+
+    // Check if it's the current user's email
+    if (userData && userData.email === collaboratorEmail) {
+      toast.error('You cannot add yourself as a collaborator.');
       return;
     }
 
@@ -375,9 +420,8 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
 
     try {
       const response = await AdminsService.adminControllerInviteCollaborator({
-        guestId: guest.id,
-        email: guest.email,
-        name: guest.name,
+        email: collaboratorEmail.trim(),
+        name: collaboratorName.trim(),
         weddingId: weddingData.id,
       });
 
@@ -389,14 +433,14 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
       };
 
       setCollaborators([...collaborators, newCollaborator]);
-      setCollaboratorSearch('');
-      setShowCollaboratorDropdown(false);
+      setCollaboratorName('');
+      setCollaboratorEmail('');
 
       if (response.existingAccount) {
-        toast.success(`${guest.name} has been added as a collaborator (existing account)`);
+        toast.success(`${collaboratorName} has been added as a collaborator (existing account)`);
       } else {
         toast.success(
-          `Account created for ${guest.name}. An invitation email will be sent shortly.`,
+          `Account created for ${collaboratorName}. An invitation email will be sent shortly.`,
         );
       }
     } catch (error) {
@@ -452,24 +496,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     }
   };
 
-  const handleRemoveCollaborator = (id: number) => {
-    // Mark collaborator for removal (will be removed on save)
-    setCollaboratorsToRemove([...collaboratorsToRemove, id]);
-    // Remove from local state immediately for UI feedback
-    setCollaborators(collaborators.filter((c) => c.id !== id));
-  };
-
   // Filter guests based on search
-  const filteredGuestsForCollaborator = guests.filter(
-    (guest) =>
-      (collaboratorSearch.trim() !== '' &&
-        !collaborators.some((c) => c.id === guest.id) &&
-        !partner) ||
-      (partner &&
-        guest.email !== partner.email &&
-        (guest.name.toLowerCase().includes(collaboratorSearch.toLowerCase()) ||
-          (guest.email && guest.email.toLowerCase().includes(collaboratorSearch.toLowerCase())))),
-  );
 
   const renderUserFields = () => {
     if (!userData) return null;
@@ -1071,40 +1098,38 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
             <label className="text-sm font-medium">Collaborators</label>
 
             {isEditing && (
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Search guests by name or email..."
-                  value={collaboratorSearch}
-                  onChange={(e) => {
-                    setCollaboratorSearch(e.target.value);
-                    setShowCollaboratorDropdown(e.target.value.trim() !== '');
-                  }}
-                  onFocus={() => setShowCollaboratorDropdown(collaboratorSearch.trim() !== '')}
-                  className="text-sm"
-                  disabled={isInvitingCollaborator}
-                />
-                {showCollaboratorDropdown &&
-                  filteredGuestsForCollaborator.length > 0 &&
-                  !isInvitingCollaborator && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 overflow-y-auto">
-                      {filteredGuestsForCollaborator.map((guest) => (
-                        <div
-                          key={guest.id}
-                          className="p-2 hover:bg-muted cursor-pointer border-b last:border-b-0"
-                          onClick={() => handleInviteCollaborator(guest)}
-                        >
-                          <p className="font-medium text-sm">{guest.name}</p>
-                          {guest.email && (
-                            <p className="text-xs text-muted-foreground">{guest.email}</p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                {isInvitingCollaborator && (
-                  <p className="text-xs text-muted-foreground mt-1">Adding collaborator...</p>
-                )}
+              <div className="space-y-3">
+                <div>
+                  <Input
+                    type="text"
+                    placeholder="Collaborator's name"
+                    value={collaboratorName}
+                    onChange={(e) => setCollaboratorName(e.target.value)}
+                    className="text-sm"
+                    disabled={isInvitingCollaborator}
+                  />
+                </div>
+                <div>
+                  <Input
+                    type="email"
+                    placeholder="Collaborator's email"
+                    value={collaboratorEmail}
+                    onChange={(e) => setCollaboratorEmail(e.target.value)}
+                    className="text-sm"
+                    disabled={isInvitingCollaborator}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={handleInviteCollaborator}
+                  disabled={
+                    isInvitingCollaborator || !collaboratorName.trim() || !collaboratorEmail.trim()
+                  }
+                  className="w-full"
+                  size="sm"
+                >
+                  {isInvitingCollaborator ? 'Adding Collaborator...' : 'Add Collaborator'}
+                </Button>
               </div>
             )}
 
@@ -1127,10 +1152,11 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
                     </div>
                     {isEditing && (
                       <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0"
-                        onClick={() => handleRemoveCollaborator(collaborator.id)}
+                        onClick={() => handleRemoveCollaboratorClick(collaborator)}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
@@ -1200,13 +1226,14 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           {renderWeddingFields()}
 
           <div className="absolute top-0 right-4 flex gap-3">
-            <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
+            <Button type="button" onClick={() => setIsEditing(true)}>Edit Profile</Button>
             {targetUserRole !== UserRole.SUPERADMIN && (
               <>
-                <Button variant="secondary" onClick={() => sendResetPasswordEmail()}>
+                <Button type="button" variant="secondary" onClick={() => sendResetPasswordEmail()}>
                   Reset Password
                 </Button>
                 <Button
+                  type="button"
                   className="bg-destructive text-base-white"
                   onClick={() => setShowDeleteModal(true)}
                 >
@@ -1230,8 +1257,22 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
       />
 
       <DeleteConfirmationModal
+        open={collaboratorPendingRemoval !== null}
+        onOpenChange={(open) => !open && handleCancelRemoveCollaborator()}
+        title="Remove Collaborator"
+        itemName={collaboratorPendingRemoval ? collaboratorPendingRemoval.name : ''}
+        description={`Are you sure you want to remove ${collaboratorPendingRemoval?.name} from this wedding? Their access will be revoked.`}
+        onConfirm={handleConfirmRemoveCollaborator}
+        onCancel={handleCancelRemoveCollaborator}
+      />
+
+      <DeleteConfirmationModal
         open={showDeleteModal}
-        onOpenChange={setShowDeleteModal}
+        onOpenChange={(open) => {
+          if (!open) {
+            handleCancelDelete();
+          }
+        }}
         title="Delete Profile"
         itemName="your profile"
         onConfirm={handleDeleteProfile}

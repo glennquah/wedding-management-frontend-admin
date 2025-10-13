@@ -103,7 +103,7 @@ export default function DateOptimizerPage() {
         <GuestSearchModal
           isOpen={isAddAttendeeModalOpen}
           onClose={closeAddAttendeeModal}
-          guests={guests}
+          guests={guests.filter((g) => g.email)}
           onSelectGuest={handleAddKeyAttendee}
           excludedGuestIds={keyAttendees.map((a) => a.id)}
         />

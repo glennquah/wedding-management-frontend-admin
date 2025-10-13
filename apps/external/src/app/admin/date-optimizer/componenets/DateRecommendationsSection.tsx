@@ -96,12 +96,26 @@ export function DateRecommendationsSection({
                   <div>
                     <h4 className="font-semibold text-sm mb-2 text-amber-600">Considerations</h4>
                     <ul className="space-y-1">
-                      {rec.cons.map((con: string, i: number) => (
-                        <li key={i} className="text-sm flex items-start gap-2">
-                          <XCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                          {con}
-                        </li>
-                      ))}
+                      {rec.cons.map((con: string, i: number) => {
+                        // Check if this is an "unavailable" consideration and enhance it with names
+                        const unavailableMatch = con.match(/(\d+)\s+key\s+attendees?\s+unavailable/i);
+                        if (unavailableMatch && rec.unavailable_attendees && rec.unavailable_attendees.length > 0) {
+                          return (
+                            <li key={i} className="text-sm flex items-start gap-2">
+                              <XCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                              <span>
+                                {unavailableMatch[1]} key attendee{unavailableMatch[1] === '1' ? '' : 's'} ({rec.unavailable_attendees.join(', ')}) unavailable
+                              </span>
+                            </li>
+                          );
+                        }
+                        return (
+                          <li key={i} className="text-sm flex items-start gap-2">
+                            <XCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                            {con}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 </div>
