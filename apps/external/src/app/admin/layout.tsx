@@ -40,8 +40,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { data: session, status } = useSession();
 
   // Route protection: redirect to dashboard if no wedding and trying to access protected routes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const allowedRoutesWithoutWedding = ['/admin', '/admin/account', '/admin/create-wedding'];
   const hasNoWedding = !selectedWeddingId && (!weddings || weddings.length === 0);
 
   useEffect(() => {

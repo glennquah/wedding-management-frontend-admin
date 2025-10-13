@@ -73,7 +73,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
     ) {
       router.push('/vendor');
     }
-  }, [vendorOnboardingStatus, hasVendorDetails, pathname, router, allowedRoutesWithoutDetails]);
+  }, [vendorOnboardingStatus, hasVendorDetails, pathname, router]);
 
   if (status === 'loading' || isCheckingDetails) {
     return (
