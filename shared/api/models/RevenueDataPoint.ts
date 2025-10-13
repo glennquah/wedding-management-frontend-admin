@@ -15,5 +15,9 @@ export type RevenueDataPoint = {
      * Number of orders in the period
      */
     orderCount: number;
+    /**
+     * Whether this data point is a predicted value
+     */
+    isPredictedValue: boolean;
 };
 
