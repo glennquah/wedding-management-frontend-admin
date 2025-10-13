@@ -1,10 +1,11 @@
 'use client';
 
+import { Suspense, useEffect, useState } from 'react';
+
 import { useCartStore } from '@/app/store/sessionStore';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
 
 interface PaymentDetails {
   sessionId: string;
@@ -33,6 +34,7 @@ function PaymentSuccessContent() {
         setError('No session ID provided');
       }
     }, 1500);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
   if (loading) {
@@ -66,9 +68,7 @@ function PaymentSuccessContent() {
             </svg>
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Payment Verification Failed
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Payment Verification Failed</h1>
 
           <p className="text-gray-600 mb-6">
             {error || 'Unable to verify your payment. Please contact support.'}
@@ -104,18 +104,11 @@ function PaymentSuccessContent() {
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 13l4 4L19 7"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          Payment Successful!
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">Payment Successful!</h1>
 
         <p className="text-gray-600 mb-6">
           Thank you for your payment. Your booking has been confirmed.
@@ -127,9 +120,7 @@ function PaymentSuccessContent() {
             <p className="text-sm text-gray-600">
               Your payment has been processed successfully by Stripe.
             </p>
-            <p className="text-xs text-gray-400 mt-2 font-mono break-all">
-              Session: {sessionId}
-            </p>
+            <p className="text-xs text-gray-400 mt-2 font-mono break-all">Session: {sessionId}</p>
           </div>
         )}
 
@@ -155,11 +146,13 @@ function PaymentSuccessContent() {
 
 export default function PaymentSuccessPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+        </div>
+      }
+    >
       <PaymentSuccessContent />
     </Suspense>
   );

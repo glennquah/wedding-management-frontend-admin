@@ -19,6 +19,7 @@ interface WeddingFormData {
   location: string;
   weddingType: WeddingType;
   budgetBucket: BudgetBucket;
+  allocatedBudget: number;
   guestCountBucket: GuestCountBucket;
   preferredStyle: WeddingStyle;
   preferredServices: WeddingService[];
@@ -33,6 +34,7 @@ export const useWeddingProfile = () => {
     location: '',
     weddingType: WeddingType.WESTERN,
     budgetBucket: BudgetBucket.MEDIUM,
+    allocatedBudget: 0,
     guestCountBucket: GuestCountBucket.MEDIUM,
     preferredStyle: WeddingStyle.MODERN,
     preferredServices: [],
@@ -67,6 +69,7 @@ export const useWeddingProfile = () => {
       location: wedding.location || '',
       weddingType: wedding.weddingType,
       budgetBucket: wedding.budgetBucket,
+      allocatedBudget: wedding.allocatedBudget || 0,
       guestCountBucket: wedding.guestCountBucket,
       preferredStyle: wedding.preferredStyle,
       preferredServices: wedding.preferredServices || [],
@@ -90,6 +93,7 @@ export const useWeddingProfile = () => {
     if (weddingFormData.location !== (weddingData.location || '')) updateData.location = weddingFormData.location;
     if (weddingFormData.weddingType !== weddingData.weddingType) updateData.weddingType = weddingFormData.weddingType;
     if (weddingFormData.budgetBucket !== weddingData.budgetBucket) updateData.budgetBucket = weddingFormData.budgetBucket;
+    if (weddingFormData.allocatedBudget !== (weddingData.allocatedBudget || 0)) updateData.allocatedBudget = weddingFormData.allocatedBudget;
     if (weddingFormData.guestCountBucket !== weddingData.guestCountBucket) updateData.guestCountBucket = weddingFormData.guestCountBucket;
     if (weddingFormData.preferredStyle !== weddingData.preferredStyle) updateData.preferredStyle = weddingFormData.preferredStyle;
     if (JSON.stringify(weddingFormData.preferredServices) !== JSON.stringify(weddingData.preferredServices || [])) {

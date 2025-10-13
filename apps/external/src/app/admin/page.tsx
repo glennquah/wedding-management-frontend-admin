@@ -1,10 +1,11 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import AdminDashboardModule from '../components/dashboards/AdminDashboardModule';
 import { useWeddingStore } from '@/app/store/sessionStore';
 import { Button } from '@shared/components/ui/button';
 import { AlertCircle, Sparkles } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export default function UserDashboardPage() {
   const { data: session, status } = useSession();
@@ -36,10 +37,14 @@ export default function UserDashboardPage() {
                 Welcome! Let&apos;s Set Up Your Wedding
               </h2>
               <p className="text-gray-700 mb-2">
-                Hello, <span className="font-semibold">{session.user?.name || session.user?.email}</span> 👋
+                Hello,{' '}
+                <span className="font-semibold">{session.user?.name || session.user?.email}</span>{' '}
+                👋
               </p>
               <p className="text-gray-600 mt-4">
-                Before you can access your dashboard and planning tools, we need to set up your wedding details. This will help us provide personalized vendor recommendations, budget planning, guest management, and much more!
+                Before you can access your dashboard and planning tools, we need to set up your
+                wedding details. This will help us provide personalized vendor recommendations,
+                budget planning, guest management, and much more!
               </p>
             </div>
             <Button
@@ -66,22 +71,8 @@ export default function UserDashboardPage() {
   }
 
   return (
-    <main className="max-w-4xl mx-auto mt-8 p-8">
-      {/* Dashboard Content */}
-      <div className="bg-white rounded-xl shadow p-8">
-        <h1 className="text-3xl font-bold mb-4">Welcome to your Dashboard!</h1>
-        <p className="mb-2">
-          Hello, <span className="font-semibold">{session.user?.name || session.user?.email}</span> 👋
-        </p>
-        <div className="mt-6">
-          <h2 className="text-xl font-semibold mb-2">Your Dummy Stats</h2>
-          <ul className="list-disc pl-6">
-            <li>Events planned: 3</li>
-            <li>Vendors contacted: 7</li>
-            <li>Tasks completed: 12</li>
-          </ul>
-        </div>
-      </div>
+    <main className="mx-auto">
+      <AdminDashboardModule />
     </main>
   );
 }
