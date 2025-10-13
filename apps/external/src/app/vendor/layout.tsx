@@ -10,6 +10,8 @@ import { useEffect, useState } from 'react';
 import { VendorSessionProvider } from '../../contexts/VendorSessionContext';
 import VendorSidebar from '../components/layout/VendorSidebar';
 
+const allowedRoutesWithoutDetails = ['/vendor', '/vendor/account'];
+
 export default function VendorLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -45,8 +47,6 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
 
   // Route protection: prioritize PENDING/REJECTED status check over details check
   useEffect(() => {
-    const allowedRoutesWithoutDetails = ['/vendor', '/vendor/account'];
-
     // If vendor is PENDING, redirect to pending page
     if (vendorOnboardingStatus === 'PENDING' && pathname !== '/vendor/pending') {
       router.push('/vendor/pending');
