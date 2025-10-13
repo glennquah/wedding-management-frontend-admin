@@ -178,7 +178,7 @@ export default function CashGiftPage() {
                   placeholder="0.00"
                   value={amount}
                   onChange={handleAmountChange}
-                  className="pl-7"
+                  className="pl-8"
                 />
               </div>
               <p className="text-xs text-muted-foreground">
