@@ -109,7 +109,7 @@ export default function VendorGratitude({ onComplete, onDelete }: VendorGratitud
   }
 
   return (
-    <div className="w-full bg-gradient-to-b from-white to-brand-100 text-foreground py-6">
+    <div className="w-full text-foreground py-6">
       <div className="relative container mx-auto px-4 pt-4 md:pt-6">
         {(isVendorUpdateMode || vendorFormData) && (
           <PageHeader
