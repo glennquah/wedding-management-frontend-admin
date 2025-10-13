@@ -224,6 +224,7 @@ export default function GuestListPage() {
         <DeleteConfirmationModal
           open={showConfirmDialog}
           onOpenChange={closeConfirmDialog}
+          title="Confirm Changes"
           itemName="attendance changes"
           description={ATTENDANCE_MESSAGES.APPLY_CHANGES_CONFIRMATION(attendanceChanges.size)}
           onConfirm={handleApplyChanges}
