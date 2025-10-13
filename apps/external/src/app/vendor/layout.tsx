@@ -44,10 +44,9 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
   }, [session]);
 
   // Route protection: prioritize PENDING/REJECTED status check over details check
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const allowedRoutesWithoutDetails = ['/vendor', '/vendor/account'];
-
   useEffect(() => {
+    const allowedRoutesWithoutDetails = ['/vendor', '/vendor/account'];
+
     // If vendor is PENDING, redirect to pending page
     if (vendorOnboardingStatus === 'PENDING' && pathname !== '/vendor/pending') {
       router.push('/vendor/pending');
@@ -64,7 +63,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
     if (vendorOnboardingStatus === 'ONBOARDED' && hasVendorDetails === false && pathname && !allowedRoutesWithoutDetails.includes(pathname)) {
       router.push('/vendor');
     }
-  }, [vendorOnboardingStatus, hasVendorDetails, pathname, router, allowedRoutesWithoutDetails]);
+  }, [vendorOnboardingStatus, hasVendorDetails, pathname, router]);
 
   if (status === 'loading' || isCheckingDetails) {
     return (
