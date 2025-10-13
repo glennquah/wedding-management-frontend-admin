@@ -25,5 +25,9 @@ export type UpdateWeddingDto = {
     guestCountBucket?: GuestCountBucket;
     preferredStyle?: WeddingStyle;
     preferredServices?: Array<WeddingService>;
+    /**
+     * Allocated budget for the wedding
+     */
+    allocatedBudget?: number;
 };
 

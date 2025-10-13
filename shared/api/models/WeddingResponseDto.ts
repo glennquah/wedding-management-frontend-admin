@@ -47,5 +47,9 @@ export type WeddingResponseDto = {
      * Last update timestamp
      */
     updatedAt: string;
+    /**
+     * Allocated budget for the wedding
+     */
+    allocatedBudget?: number;
 };
 

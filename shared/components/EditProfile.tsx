@@ -905,6 +905,31 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           </div>
 
           <div className="space-y-2">
+            <label className="text-sm font-medium">Allocated Budget*</label>
+            {isEditing ? (
+              <>
+                <Input
+                  type="number"
+                  value={weddingFormData.allocatedBudget || ''}
+                  onChange={(e) =>
+                    handleWeddingInputChange('allocatedBudget', parseFloat(e.target.value) || 0)
+                  }
+                  placeholder="Enter your allocated budget"
+                  min="0"
+                  step="100"
+                />
+                {validationErrors.allocatedBudget && (
+                  <p className="text-red-500 text-sm">{validationErrors.allocatedBudget}</p>
+                )}
+              </>
+            ) : (
+              <p className="p-3 bg-muted rounded-md">
+                ${weddingData.allocatedBudget ? weddingData.allocatedBudget.toLocaleString() : '0'}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
             <label className="text-sm font-medium">Guest Count*</label>
             {isEditing ? (
               <>
@@ -1189,7 +1214,9 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           {renderWeddingFields()}
 
           <div className="absolute top-0 right-4 flex gap-3">
-            <Button type="button" onClick={() => setIsEditing(true)}>Edit Profile</Button>
+            <Button type="button" onClick={() => setIsEditing(true)}>
+              Edit Profile
+            </Button>
             {targetUserRole !== UserRole.SUPERADMIN && (
               <>
                 <Button type="button" variant="secondary" onClick={() => sendResetPasswordEmail()}>
