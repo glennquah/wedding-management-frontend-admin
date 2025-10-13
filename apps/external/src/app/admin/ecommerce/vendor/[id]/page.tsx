@@ -25,9 +25,19 @@ export default function VendorPage() {
     router.back();
   };
 
-  // Determine back button label based on where user came from
-  const backLabel = from === 'listing' ? 'Back to Listing' : 'Back to Marketplace';
-
+  let backLabel: string;
+  switch (from) {
+    case 'listing':
+      backLabel = 'Back to Listing';
+      break;
+    case 'orders':
+      backLabel = 'Back to Orders';
+      break;
+    default:
+      backLabel = 'Back to Marketplace';
+      break;
+  }
+  
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">

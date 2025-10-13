@@ -1,12 +1,12 @@
 'use client';
 
-import { signOut, useWeddingStore } from '../../store/sessionStore';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
   Calendar,
   Camera,
   CheckSquare,
+  ClipboardList,
   Clock,
   LayoutDashboard,
   ListTodo,
@@ -15,6 +15,7 @@ import {
   ShoppingCart,
   Users,
 } from 'lucide-react';
+import { signOut, useWeddingStore } from '../../store/sessionStore';
 
 export default function AdminSidebar() {
   const { weddings } = useWeddingStore();
@@ -61,6 +62,12 @@ export default function AdminSidebar() {
           title: 'Guest List',
           href: '/guest-list',
           icon: Users,
+          disabled: !hasWedding,
+        },
+        {
+          title: 'Orders',
+          href: '/orders',
+          icon: ClipboardList,
           disabled: !hasWedding,
         },
         {

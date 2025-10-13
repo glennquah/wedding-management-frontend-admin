@@ -27,7 +27,7 @@ function PaymentSuccessContent() {
       setLoading(false);
       if (sessionId) {
         if (session?.user.id) {
-          clearCart(session.user.id);
+          clearCart(session.user.id, true);
         }
         setPaymentDetails({ sessionId });
       } else {
@@ -133,7 +133,7 @@ function PaymentSuccessContent() {
           </Link>
 
           <Link
-            href="/admin/payment"
+            href="/admin/ecommerce"
             className="block w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-200 transition-colors"
           >
             Make Another Booking
