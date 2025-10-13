@@ -44,9 +44,9 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
   }, [session]);
 
   // Route protection: prioritize PENDING/REJECTED status check over details check
-  const allowedRoutesWithoutDetails = useMemo(() => ['/vendor', '/vendor/account'], []);
-
   useEffect(() => {
+    const allowedRoutesWithoutDetails = ['/vendor', '/vendor/account'];
+
     // If vendor is PENDING, redirect to pending page
     if (vendorOnboardingStatus === 'PENDING' && pathname !== '/vendor/pending') {
       router.push('/vendor/pending');

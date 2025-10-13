@@ -23,7 +23,7 @@ type AccompanyingGuestData = {
   confirmationStatus: ConfirmationStatus;
 };
 
-type GuestFormData = Partial<CreateGuestDto> & {
+export type GuestFormData = Partial<CreateGuestDto> & {
   id?: number;
   accompanyingGuests?: AccompanyingGuestData[];
   sendRsvpEmail?: boolean;
