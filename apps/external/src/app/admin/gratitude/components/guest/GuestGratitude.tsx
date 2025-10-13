@@ -29,6 +29,7 @@ export default function GuestGratitude({ onComplete, onDelete }: GuestGratitudeP
 
   const {
     selectedWeddingId,
+    selectedWedding,
     guestCard,
     guestFormData,
     isGuestUpdateMode,
@@ -198,6 +199,7 @@ export default function GuestGratitude({ onComplete, onDelete }: GuestGratitudeP
                   guestFormData.guestCardPhotoURL ||
                   'https://res.cloudinary.com/dnyxxyolp/image/upload/v1760014682/wedding-couple_cmxtra.webp'
                 }
+                selectedWeddingDate={selectedWedding?.date || 'December 25, 2025'}
               />
             </div>
             <p className="text-sm text-muted-foreground mb-3 italic text-center mt-4">

@@ -91,7 +91,8 @@ export default function GratitudeCardFlow() {
                   ${completed.includes(step) ? 'border border-green-500 text-green-700' : ''}
                 `}
               >
-                Step {idx + 1}
+                {/* Step {idx + 1} */}
+                {step}
                 {completed.includes(step) && (
                   <Check className="w-4 h-4 ml-1 inline text-green-600" />
                 )}

@@ -8,6 +8,8 @@ import {
   GratitudeCardResponseDto,
   GratitudeCardService,
   UpdateGratitudeCardDto,
+  WeddingResponseDto,
+  WeddingsService,
 } from '@shared/api';
 import { toast } from 'sonner';
 
@@ -18,6 +20,7 @@ interface UseGratitudeCardManagerReturn {
   collaboratorFormData: UpdateGratitudeCardDto;
   vendorFormData: UpdateGratitudeCardDto;
   selectedWeddingId: number | null;
+  selectedWedding: WeddingResponseDto | null;
   isLoading: boolean;
   isSubmitting: boolean;
   isDeleteDialogOpen: boolean;
@@ -48,6 +51,7 @@ interface UseGratitudeCardManagerReturn {
 
 export const useGratitudeCardManager = (): UseGratitudeCardManagerReturn => {
   const selectedWeddingId = useWeddingStore((state) => state.selectedWeddingId);
+  const [selectedWedding, setSelectedWedding] = useState<WeddingResponseDto | null>(null);
 
   const [guestCard, setGuestCard] = useState<GratitudeCardResponseDto | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -289,8 +293,6 @@ export const useGratitudeCardManager = (): UseGratitudeCardManagerReturn => {
       const card =
         await GratitudeCardService.gratitudeCardControllerGetGratitudeCardByWeddingId(weddingId);
 
-      console.log(card);
-
       if (card) {
         setGuestCard(card);
         setGuestFormData({
@@ -313,6 +315,11 @@ export const useGratitudeCardManager = (): UseGratitudeCardManagerReturn => {
           recipient: 'vendor',
         });
         setIsGuestUpdateMode(true);
+
+        if (selectedWeddingId) {
+          const selectedWedding = await WeddingsService.weddingControllerFindOne(selectedWeddingId);
+          setSelectedWedding(selectedWedding);
+        }
       } else {
         setGuestCard(null);
         setIsGuestUpdateMode(false);
@@ -333,6 +340,7 @@ export const useGratitudeCardManager = (): UseGratitudeCardManagerReturn => {
     collaboratorFormData,
     vendorFormData,
     selectedWeddingId,
+    selectedWedding,
     isLoading,
     isSubmitting,
     isDeleteDialogOpen,

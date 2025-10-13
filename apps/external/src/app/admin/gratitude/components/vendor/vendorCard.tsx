@@ -9,9 +9,10 @@ const playfair = Playfair_Display({ subsets: ['latin'], weight: ['500'] });
 interface VendorCardProps {
   message: string;
   signOff: string;
+  selectedWeddingDate: string;
 }
 
-export const VendorCard = ({ message, signOff }: VendorCardProps) => {
+export const VendorCard = ({ message, signOff, selectedWeddingDate }: VendorCardProps) => {
   return (
     <div className="relative flex flex-col items-center justify-start w-[420px] h-[420px] bg-gradient-to-b from-[#fffdfa] to-[#fdf7f2] rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.1)] border border-[#e8dfd1] py-6">
       {/* Thank You Image */}
@@ -44,7 +45,13 @@ export const VendorCard = ({ message, signOff }: VendorCardProps) => {
           <br />
           <span className="font-semibold text-[#b7935b]">{signOff}</span>
           <br />
-          <span className="text-xs text-gray-500">DECEMBER 25, 2025</span>
+          <span className="text-xs text-gray-500 uppercase">
+            {new Date(selectedWeddingDate).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </span>
         </p>
 
         <div className="mt-3 mx-auto w-[30%] border-t border-[#e0cda9]" />

@@ -17,9 +17,10 @@ interface GuestCardProps {
   message: string;
   signOff: string;
   photoUrl: string;
+  selectedWeddingDate: string;
 }
 
-export const GuestCard = ({ message, signOff, photoUrl }: GuestCardProps) => {
+export const GuestCard = ({ message, signOff, photoUrl, selectedWeddingDate }: GuestCardProps) => {
   return (
     <div className="relative flex w-[720px] h-[500px] overflow-hidden rounded-xl bg-white shadow-md">
       {/* Left text section */}
@@ -30,6 +31,14 @@ export const GuestCard = ({ message, signOff, photoUrl }: GuestCardProps) => {
           {message}
         </p>
         <p className={`${greatVibes.className} mt-8 text-gray-600 text-[24px] italic`}>{signOff}</p>
+        <br />
+        <span className="text-xs text-gray-500 uppercase">
+          {new Date(selectedWeddingDate).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </span>
       </div>
 
       {/* Right image section */}

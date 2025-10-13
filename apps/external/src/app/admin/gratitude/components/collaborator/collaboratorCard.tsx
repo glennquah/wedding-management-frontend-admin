@@ -2,9 +2,15 @@ interface CollaboratorCardProps {
   message: string;
   signOff: string;
   photoUrl: string;
+  selectedWeddingDate: string;
 }
 
-export const CollaboratorCard = ({ message, signOff, photoUrl }: CollaboratorCardProps) => {
+export const CollaboratorCard = ({
+  message,
+  signOff,
+  photoUrl,
+  selectedWeddingDate,
+}: CollaboratorCardProps) => {
   return (
     <div className="relative flex w-[620px] h-[500px] items-start justify-center">
       <div className="relative w-full max-w-[900px] rounded-xl shadow-lg overflow-hidden bg-white border border-transparent">
@@ -39,6 +45,13 @@ export const CollaboratorCard = ({ message, signOff, photoUrl }: CollaboratorCar
             {signOff}
           </p>
           <p className="font-script text-[20px] mt-2 text-gold">Love you</p>
+          <span className="text-xs text-gray-500 uppercase mt-2">
+            {new Date(selectedWeddingDate).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </span>
         </div>
       </div>
 

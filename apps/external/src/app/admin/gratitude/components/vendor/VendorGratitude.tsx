@@ -29,6 +29,7 @@ export default function VendorGratitude({ onComplete, onDelete }: VendorGratitud
 
   const {
     selectedWeddingId,
+    selectedWedding,
     guestCard,
     vendorFormData,
     isVendorUpdateMode,
@@ -200,6 +201,7 @@ export default function VendorGratitude({ onComplete, onDelete }: VendorGratitud
                   vendorFormData.vendorCardMessage ||
                   'Thank you for helping to make our special day even more memorable with your culinary expertise.'
                 }
+                selectedWeddingDate={selectedWedding?.date || 'December 25, 2025'}
               />
             </div>
             <p className="text-sm text-muted-foreground mb-3 mt-3 italic text-center">

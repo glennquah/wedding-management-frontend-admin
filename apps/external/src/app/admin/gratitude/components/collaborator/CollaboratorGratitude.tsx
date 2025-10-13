@@ -32,6 +32,7 @@ export default function CollaboratorGratitude({
 
   const {
     selectedWeddingId,
+    selectedWedding,
     guestCard,
     collaboratorFormData,
     isCollaboratorUpdateMode,
@@ -211,9 +212,12 @@ export default function CollaboratorGratitude({
                   collaboratorFormData.collaboratorCardPhotoURL ||
                   'https://res.cloudinary.com/dnyxxyolp/image/upload/v1760014682/wedding-couple_cmxtra.webp'
                 }
+                selectedWeddingDate={selectedWedding?.date || 'December 25, 2025'}
               />
             </div>
-            <p className="text-sm text-muted-foreground mb-3 italic text-center">Live Preview</p>
+            <p className="text-sm text-muted-foreground mt-3 mb-3 italic text-center">
+              Live Preview
+            </p>
           </div>
         </div>
       </div>
