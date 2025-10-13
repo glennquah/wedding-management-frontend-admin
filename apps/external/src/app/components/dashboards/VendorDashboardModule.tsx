@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { useVendorSession } from '../../../contexts/VendorSessionContext';
 import { VendorBookingsCards } from './VendorBookingsCards';
+import { VendorPieChart } from './VendorPieChart';
 import { VendorRevenueLineChart } from './VendorRevenueLineChart';
 import { VendorTopProductsChart } from './VendorTopProductsChart';
 import {
@@ -145,13 +146,17 @@ const VendorDashboardModule = () => {
         </div>
 
         {/* Second Row - Charts */}
-        <div className="grid gap-6 md:grid-cols-2 mb-6">
+        <div className="grid gap-6 mb-6">
           <VendorRevenueLineChart
             revenueOverTime={revenueOverTime}
             isLoading={isLoadingRevenueOverTime}
             period={revenuePeriod}
             onPeriodChange={setRevenuePeriod}
           />
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 mb-6">
+          <VendorPieChart topProducts={topProducts} isLoading={isLoadingTopProducts} />
           <VendorTopProductsChart topProducts={topProducts} isLoading={isLoadingTopProducts} />
         </div>
       </div>

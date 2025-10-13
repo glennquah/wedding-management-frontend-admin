@@ -200,13 +200,29 @@ export const VendorRevenueLineChart = ({
                   }) => {
                     // Only render visible dot if there's a predictedRevenue value
                     if (!props.payload?.predictedRevenue) {
-                      return <circle cx={props.cx} cy={props.cy} r={0} fill="transparent" />;
+                      return (
+                        <circle
+                          key={`empty-dot-${props.index}`}
+                          cx={props.cx}
+                          cy={props.cy}
+                          r={0}
+                          fill="transparent"
+                        />
+                      );
                     }
 
                     const firstPredictedIndex = chartData.findIndex((item) => item.isPredicted);
                     const isConnectionPoint = props.index === firstPredictedIndex - 1;
                     const fill = isConnectionPoint ? '#10b981' : '#3b82f6';
-                    return <circle cx={props.cx} cy={props.cy} r={4} fill={fill} />;
+                    return (
+                      <circle
+                        key={`predicted-dot-${props.index}`}
+                        cx={props.cx}
+                        cy={props.cy}
+                        r={4}
+                        fill={fill}
+                      />
+                    );
                   }}
                   connectNulls
                 />

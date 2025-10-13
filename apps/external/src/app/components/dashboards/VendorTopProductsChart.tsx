@@ -10,7 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@shared/components/ui/card';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@shared/components/ui/chart';
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@shared/components/ui/chart';
 import { Bar, BarChart, XAxis, YAxis } from 'recharts';
 
 interface VendorTopProductsChartProps {
@@ -25,22 +30,28 @@ export const VendorTopProductsChart = ({ topProducts, isLoading }: VendorTopProd
   const chartData = useMemo(() => {
     if (!topProducts?.topProducts || topProducts.topProducts.length === 0) return [];
 
-    // Format the data for the chart - truncate long names
-    return topProducts.topProducts.map((item) => ({
-      name:
+    // Format the data for the chart
+    return topProducts.topProducts.map((item, index) => ({
+      product:
         item.listingName.length > 15 ? item.listingName.substring(0, 15) + '...' : item.listingName,
       fullName: item.listingName,
       revenue: item.revenue,
       bookingCount: item.bookingCount,
+      fill: `var(--chart-${(index % 5) + 1})`,
     }));
   }, [topProducts]);
 
-  const chartConfig = {
-    revenue: {
-      label: 'Revenue',
-      color: '#3b82f6',
-    },
-  };
+  const chartConfig = useMemo(() => {
+    const config: ChartConfig = {};
+    chartData.forEach((item, index) => {
+      const safeKey = `product${index}`;
+      config[safeKey] = {
+        label: item.fullName,
+        color: `var(--chart-${(index % 5) + 1})`,
+      };
+    });
+    return config;
+  }, [chartData]);
 
   return (
     <Card className="bg-transparent border-brand-200">
@@ -61,7 +72,7 @@ export const VendorTopProductsChart = ({ topProducts, isLoading }: VendorTopProd
           <ChartContainer config={chartConfig} className="h-full w-full">
             <BarChart data={chartData}>
               <XAxis
-                dataKey="name"
+                dataKey="product"
                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
                 tickLine={{ stroke: 'hsl(var(--muted-foreground))' }}
                 angle={-45}
@@ -76,6 +87,7 @@ export const VendorTopProductsChart = ({ topProducts, isLoading }: VendorTopProd
               <ChartTooltip
                 content={
                   <ChartTooltipContent
+                    hideLabel
                     formatter={(
                       value: number,
                       _name: string,
@@ -96,7 +108,7 @@ export const VendorTopProductsChart = ({ topProducts, isLoading }: VendorTopProd
                   />
                 }
               />
-              <Bar dataKey="revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="revenue" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ChartContainer>
         )}
