@@ -113,59 +113,61 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     }
   }, [targetUserRole, userData, fetchMainWedding]);
 
+  // Reusable function to fetch partner
+  const fetchPartner = async () => {
+    if (weddingData?.id && userData) {
+      try {
+        const mainCouple = await WeddingsService.weddingControllerGetMainCouple(weddingData.id);
+        // Filter out the current user to get the partner
+        const partnerData = mainCouple.find((member) => member.id !== userData.id);
+        if (partnerData && partnerData.id && partnerData.name && partnerData.email) {
+          setPartner({
+            id: partnerData.id,
+            name: partnerData.name,
+            email: partnerData.email,
+            accountCreated: true,
+          });
+        } else {
+          setPartner(null);
+        }
+      } catch (error) {
+        console.error('Error fetching partner:', error);
+      }
+    }
+  };
+
+  // Reusable function to fetch collaborators
+  const fetchCollaborators = async () => {
+    if (weddingData?.id) {
+      try {
+        const collaboratorsList = await AdminsService.adminControllerGetCollaborators(
+          weddingData.id,
+        );
+        // Filter out the partner from collaborators list
+        const filteredCollaborators = collaboratorsList.filter(
+          (c) => !partner || c.id !== partner.id,
+        );
+        setCollaborators(
+          filteredCollaborators.map((c) => ({
+            id: c.id,
+            name: c.name,
+            email: c.email,
+            accountCreated: true, // If they're in the system, account exists
+          })),
+        );
+      } catch (error) {
+        console.error('Error fetching collaborators:', error);
+      }
+    }
+  };
+
   // Fetch partner (main couple) when wedding data is loaded
   useEffect(() => {
-    const fetchPartner = async () => {
-      if (weddingData?.id && userData) {
-        try {
-          const mainCouple = await WeddingsService.weddingControllerGetMainCouple(weddingData.id);
-          // Filter out the current user to get the partner
-          const partnerData = mainCouple.find((member) => member.id !== userData.id);
-          if (partnerData && partnerData.id && partnerData.name && partnerData.email) {
-            setPartner({
-              id: partnerData.id,
-              name: partnerData.name,
-              email: partnerData.email,
-              accountCreated: true,
-            });
-          } else {
-            setPartner(null);
-          }
-        } catch (error) {
-          console.error('Error fetching partner:', error);
-        }
-      }
-    };
-
     fetchPartner();
   }, [weddingData?.id, userData]);
 
   // Fetch collaborators when wedding data is loaded
   useEffect(() => {
-    const fetchCollaborators = async () => {
-      if (weddingData?.id) {
-        try {
-          const collaboratorsList = await AdminsService.adminControllerGetCollaborators(
-            weddingData.id,
-          );
-          // Filter out the partner from collaborators list
-          const filteredCollaborators = collaboratorsList.filter(
-            (c) => !partner || c.id !== partner.id,
-          );
-          setCollaborators(
-            filteredCollaborators.map((c) => ({
-              id: c.id,
-              name: c.name,
-              email: c.email,
-              accountCreated: true, // If they're in the system, account exists
-            })),
-          );
-        } catch (error) {
-          console.error('Error fetching collaborators:', error);
-        }
-      }
-    };
-
     fetchCollaborators();
   }, [weddingData?.id, partner]);
 
@@ -214,45 +216,6 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     setCollaboratorsToRemove([]);
     // Restore partner and collaborators list by refetching
     if (weddingData?.id && userData) {
-      const fetchPartner = async () => {
-        try {
-          const mainCouple = await WeddingsService.weddingControllerGetMainCouple(weddingData.id);
-          const partnerData = mainCouple.find((member) => member.id !== userData.id);
-          if (partnerData && partnerData.id && partnerData.name && partnerData.email) {
-            setPartner({
-              id: partnerData.id,
-              name: partnerData.name,
-              email: partnerData.email,
-              accountCreated: true,
-            });
-          } else {
-            setPartner(null);
-          }
-        } catch (error) {
-          console.error('Error fetching partner:', error);
-        }
-      };
-      const fetchCollaborators = async () => {
-        try {
-          const collaboratorsList = await AdminsService.adminControllerGetCollaborators(
-            weddingData.id,
-          );
-          // Filter out the partner from collaborators list
-          const filteredCollaborators = collaboratorsList.filter(
-            (c) => !partner || c.id !== partner.id,
-          );
-          setCollaborators(
-            filteredCollaborators.map((c) => ({
-              id: c.id,
-              name: c.name,
-              email: c.email,
-              accountCreated: true,
-            })),
-          );
-        } catch (error) {
-          console.error('Error fetching collaborators:', error);
-        }
-      };
       fetchPartner();
       fetchCollaborators();
     }

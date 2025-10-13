@@ -163,6 +163,8 @@ export function DateRangePicker({
 
   const renderCalendarDays = () => {
     const cells: React.ReactElement[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     for (let i = 0; i < firstDayOffset; i += 1) {
       cells.push(<div key={`empty-${i}`} className="w-8 h-8" />);
@@ -174,7 +176,7 @@ export function DateRangePicker({
       const isSelectedStart = startDateObj && isSameDay(date, startDateObj);
       const isSelectedEnd = endDateObj && isSameDay(date, endDateObj);
       const inRange = isWithinRange(date);
-      const isPast = isBefore(date, new Date(new Date().setHours(0, 0, 0, 0)));
+      const isPast = isBefore(date, today);
 
       cells.push(
         <button

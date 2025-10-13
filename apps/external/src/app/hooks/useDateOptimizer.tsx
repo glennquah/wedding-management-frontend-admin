@@ -646,9 +646,13 @@ export function useDateOptimizer() {
     if (hasRunAnalysis && selectedWeddingId && session?.backendTokens?.accessToken) {
       fetchAvailability();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedMonth, hasRunAnalysis, selectedWeddingId, session?.backendTokens?.accessToken]); // Intentionally omit fetchAvailability
-
+  }, [
+    selectedMonth,
+    hasRunAnalysis,
+    selectedWeddingId,
+    session?.backendTokens?.accessToken,
+    fetchAvailability,
+  ]);
   return {
     // Data
     guests,
