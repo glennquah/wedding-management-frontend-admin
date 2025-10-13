@@ -136,11 +136,15 @@ export function useWeddingManager() {
   }, [setupAuth, selectedWeddingId, setMainWeddingId, setSelectedWeddingId, setWeddings]);
 
   // Initialize when session is available
+  // Use a ref to track if we've already initialized to prevent infinite loops
+  const hasInitialized = useRef(false);
+
   useEffect(() => {
-    if (status === 'authenticated' && session) {
+    if (status === 'authenticated' && session && !hasInitialized.current) {
+      hasInitialized.current = true;
       fetchWedding();
     }
-  }, [status, session, fetchWedding]);
+  }, [status, session]); // Remove fetchWedding from dependencies to prevent loop
 
   return {
     wedding,

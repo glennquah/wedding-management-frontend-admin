@@ -191,12 +191,16 @@ export function useDateOptimizer() {
   }, [selectedWeddingId, setupAuth]);
 
   // Fetch data on mount
+  // Use a ref to prevent infinite loops
+  const dataFetched = useRef(false);
+
   useEffect(() => {
-    if (selectedWeddingId && session?.backendTokens?.accessToken) {
+    if (selectedWeddingId && session?.backendTokens?.accessToken && !dataFetched.current) {
+      dataFetched.current = true;
       fetchData();
       fetchPreferences();
     }
-  }, [selectedWeddingId, session?.backendTokens?.accessToken, fetchData, fetchPreferences]);
+  }, [selectedWeddingId, session?.backendTokens?.accessToken]); // Remove fetchData and fetchPreferences from dependencies
 
   // Auto-save preferences when they change (debounced)
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
@@ -642,7 +646,8 @@ export function useDateOptimizer() {
     if (hasRunAnalysis && selectedWeddingId && session?.backendTokens?.accessToken) {
       fetchAvailability();
     }
-  }, [selectedMonth, hasRunAnalysis, selectedWeddingId, session?.backendTokens?.accessToken, fetchAvailability]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMonth, hasRunAnalysis, selectedWeddingId, session?.backendTokens?.accessToken]); // Intentionally omit fetchAvailability
 
   return {
     // Data
