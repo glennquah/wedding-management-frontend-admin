@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 
 import CollaboratorGratitude from './components/collaborator/CollaboratorGratitude';
 import GuestGratitude from './components/guest/GuestGratitude';
+import VendorGratitude from './components/vendor/VendorGratitude';
 import { useGratitudeCardManager } from '@/app/hooks/useGratitudeCardManager';
-import { Button, PageHeader, Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
+import { PageHeader, Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
 import { Check } from 'lucide-react';
 
 const steps = ['Guest Card', 'Collaborator Card', 'Vendor Card'] as const;
@@ -113,12 +114,10 @@ export default function GratitudeCardFlow() {
           </TabsContent>
 
           <TabsContent value="Vendor Card">
-            <div className="p-6">
-              <p className="text-lg mb-4">Step 3: Final review and publish 🎉</p>
-              <Button variant="destructive" onClick={() => handleRevert('Vendor Card')}>
-                Delete Card
-              </Button>
-            </div>
+            <VendorGratitude
+              onComplete={() => handleComplete('Vendor Card')}
+              onDelete={() => handleRevert('Vendor Card')}
+            />
           </TabsContent>
         </Tabs>
       </div>

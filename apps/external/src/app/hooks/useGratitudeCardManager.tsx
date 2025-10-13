@@ -24,11 +24,13 @@ interface UseGratitudeCardManagerReturn {
   isDeleting: boolean;
   isGuestUpdateMode: boolean;
   isCollaboratorUpdateMode: boolean;
+  isVendorUpdateMode: boolean;
 
   // Functions
   handleSubmit: (e: React.FormEvent, recipient: string) => Promise<void>;
   handleDeleteGuest: (selectedWeddingId: number) => Promise<void>;
   handleDeleteCollaborator: (selectedWeddingId: number) => Promise<void>;
+  handleDeleteVendor: (selectedWeddingId: number) => Promise<void>;
   handleFetchExistingCard: (selectedWeddingId: number) => Promise<void>;
 
   // State setters
@@ -38,6 +40,7 @@ interface UseGratitudeCardManagerReturn {
   setIsDeleteDialogOpen: (v: boolean) => void;
   setIsGuestUpdateMode: (v: boolean) => void;
   setIsCollaboratorUpdateMode: (v: boolean) => void;
+  setIsVendorUpdateMode: (v: boolean) => void;
   setGuestFormData: React.Dispatch<React.SetStateAction<CreateGratitudeCardDto>>;
   setCollaboratorFormData: React.Dispatch<React.SetStateAction<UpdateGratitudeCardDto>>;
   setVendorFormData: React.Dispatch<React.SetStateAction<UpdateGratitudeCardDto>>;
@@ -51,6 +54,7 @@ export const useGratitudeCardManager = (): UseGratitudeCardManagerReturn => {
   const [isLoading, setIsLoading] = useState(true);
   const [isGuestUpdateMode, setIsGuestUpdateMode] = useState(false);
   const [isCollaboratorUpdateMode, setIsCollaboratorUpdateMode] = useState(false);
+  const [isVendorUpdateMode, setIsVendorUpdateMode] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -232,10 +236,47 @@ export const useGratitudeCardManager = (): UseGratitudeCardManagerReturn => {
         collaboratorCardPhotoURL: '',
         recipient: 'collaborator',
       });
-      setIsCollaboratorUpdateMode(false);
       setGuestCard(null);
     } catch {
       toast.error('Failed to delete gratitude card.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteVendor = async (selectedWeddingId: number): Promise<void> => {
+    if (!guestCard) {
+      toast.error('No gratitude card to delete.');
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const updateData = {
+        weddingId: selectedWeddingId,
+        signOffName: vendorFormData.signOffName,
+        vendorCardMessage: '',
+        recipient: 'vendor',
+      };
+      const updatedCard = await GratitudeCardService.gratitudeCardControllerUpdateGratitudeCard(
+        guestCard.id,
+        updateData,
+      );
+
+      setGuestCard(updatedCard);
+
+      toast.success('Vendor card deleted successfully!');
+      setIsDeleteDialogOpen(false);
+
+      setVendorFormData({
+        weddingId: selectedWeddingId || 0,
+        signOffName: '',
+        vendorCardMessage: '',
+        recipient: 'vendor',
+      });
+      setGuestCard(null);
+    } catch {
+      toast.error('Failed to delete vendor card.');
     } finally {
       setIsDeleting(false);
     }
@@ -247,6 +288,8 @@ export const useGratitudeCardManager = (): UseGratitudeCardManagerReturn => {
     try {
       const card =
         await GratitudeCardService.gratitudeCardControllerGetGratitudeCardByWeddingId(weddingId);
+
+      console.log(card);
 
       if (card) {
         setGuestCard(card);
@@ -266,7 +309,7 @@ export const useGratitudeCardManager = (): UseGratitudeCardManagerReturn => {
         setVendorFormData({
           weddingId,
           signOffName: card.signOffName || '',
-          vendorCardMessage: card.guestCardMessage || '',
+          vendorCardMessage: card.vendorCardMessage || '',
           recipient: 'vendor',
         });
         setIsGuestUpdateMode(true);
@@ -296,11 +339,13 @@ export const useGratitudeCardManager = (): UseGratitudeCardManagerReturn => {
     isDeleting,
     isGuestUpdateMode,
     isCollaboratorUpdateMode,
+    isVendorUpdateMode,
 
     // Functions
     handleSubmit,
     handleDeleteGuest,
     handleDeleteCollaborator,
+    handleDeleteVendor,
     handleFetchExistingCard,
 
     // State setters
@@ -310,6 +355,7 @@ export const useGratitudeCardManager = (): UseGratitudeCardManagerReturn => {
     setIsDeleteDialogOpen,
     setIsGuestUpdateMode,
     setIsCollaboratorUpdateMode,
+    setIsVendorUpdateMode,
     setGuestFormData,
     setCollaboratorFormData,
     setVendorFormData,
