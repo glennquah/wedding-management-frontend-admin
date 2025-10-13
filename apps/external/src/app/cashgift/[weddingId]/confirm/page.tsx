@@ -19,7 +19,7 @@ interface CashGiftData {
 export default function ConfirmCashGiftPage() {
   const params = useParams();
   const router = useRouter();
-  const weddingId = parseInt(params.weddingId as string);
+  const weddingId = params ? parseInt(params.weddingId as string) : null;
 
   const [cashGiftData, setCashGiftData] = useState<CashGiftData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,6 +27,13 @@ export default function ConfirmCashGiftPage() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
   useEffect(() => {
+    // Check if weddingId is valid
+    if (!weddingId) {
+      toast.error('Invalid wedding ID');
+      router.push('/not-found');
+      return;
+    }
+
     // Retrieve data from sessionStorage
     const dataString = sessionStorage.getItem('cashGiftData');
 

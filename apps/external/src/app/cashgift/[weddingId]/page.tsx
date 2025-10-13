@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 export default function CashGiftPage() {
   const params = useParams();
   const router = useRouter();
-  const weddingId = parseInt(params.weddingId as string);
+  const weddingId = params ? parseInt(params.weddingId as string) : NaN;
 
   const [wedding, setWedding] = useState<WeddingPublicResponseDto | null>(null);
   const [loading, setLoading] = useState(true);
