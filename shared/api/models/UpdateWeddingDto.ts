@@ -29,5 +29,9 @@ export type UpdateWeddingDto = {
      * Allocated budget for the wedding
      */
     allocatedBudget?: number;
+    /**
+     * PayNow QR code link for the wedding
+     */
+    paynowQR?: string;
 };
 

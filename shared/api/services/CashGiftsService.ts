@@ -2,86 +2,86 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CreateGiftDto } from '../models/CreateGiftDto';
-import type { GiftResponseDto } from '../models/GiftResponseDto';
+import type { CashGiftResponseDto } from '../models/CashGiftResponseDto';
+import type { CreateCashGiftDto } from '../models/CreateCashGiftDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
-export class GiftsService {
+export class CashGiftsService {
     /**
-     * Create a new gift record for a wedding
+     * Create a new cash gift record for a wedding (public endpoint)
      * @param requestBody
-     * @returns GiftResponseDto The gift record has been successfully created.
+     * @returns CashGiftResponseDto The cash gift record has been successfully created.
      * @throws ApiError
      */
-    public static giftControllerCreate(
-        requestBody: CreateGiftDto,
-    ): CancelablePromise<GiftResponseDto> {
+    public static cashGiftControllerCreate(
+        requestBody: CreateCashGiftDto,
+    ): CancelablePromise<CashGiftResponseDto> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/gifts',
+            url: '/cash-gifts',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
                 400: `Bad request.`,
-                404: `Wedding not found.`,
+                404: `Wedding or guest not found.`,
             },
         });
     }
     /**
-     * Get all gifts for a specific wedding
+     * Get all cash gifts for a specific wedding
      * @param weddingId
-     * @returns GiftResponseDto List of gifts for the wedding
+     * @returns CashGiftResponseDto List of cash gifts for the wedding
      * @throws ApiError
      */
-    public static giftControllerGetGiftsByWedding(
+    public static cashGiftControllerGetCashGiftsByWedding(
         weddingId: number,
-    ): CancelablePromise<Array<GiftResponseDto>> {
+    ): CancelablePromise<Array<CashGiftResponseDto>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/gifts/wedding/{weddingId}',
+            url: '/cash-gifts/wedding/{weddingId}',
             path: {
                 'weddingId': weddingId,
             },
         });
     }
     /**
-     * Get a gift by ID
+     * Get a cash gift by ID
      * @param id
-     * @returns GiftResponseDto The gift details
+     * @returns CashGiftResponseDto The cash gift details
      * @throws ApiError
      */
-    public static giftControllerGetGift(
+    public static cashGiftControllerGetCashGift(
         id: number,
-    ): CancelablePromise<GiftResponseDto> {
+    ): CancelablePromise<CashGiftResponseDto> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/gifts/{id}',
+            url: '/cash-gifts/{id}',
             path: {
                 'id': id,
             },
             errors: {
-                404: `Gift not found.`,
+                404: `Cash gift not found.`,
             },
         });
     }
     /**
-     * Delete a gift record
+     * Delete a cash gift record
      * @param id
-     * @returns any The gift record has been successfully deleted.
+     * @returns any The cash gift record has been successfully deleted.
      * @throws ApiError
      */
-    public static giftControllerDelete(
+    public static cashGiftControllerDelete(
         id: number,
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/gifts/{id}',
+            url: '/cash-gifts/{id}',
             path: {
                 'id': id,
             },
             errors: {
-                404: `Gift not found.`,
+                404: `Cash gift not found.`,
             },
         });
     }

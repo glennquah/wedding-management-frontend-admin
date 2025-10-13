@@ -14,6 +14,7 @@ const publicPages = [
   '/the-big-day',
   '/for-businesses',
   '/guest-&-vendor',
+  '/cashgift',
 ];
 
 export default withAuth(

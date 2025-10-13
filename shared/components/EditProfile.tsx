@@ -27,6 +27,8 @@ import { Input } from './ui/form/input';
 import { MultiSelectDropdown } from './ui/form/multiSelectDropdown';
 import { SingleSelectDropdown } from './ui/form/singleSelectDropdown';
 import { Skeleton } from './ui/skeleton';
+import { ImageUploadWidget } from './index';
+import { CldImage } from 'next-cloudinary';
 import { ChevronDown, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -1009,6 +1011,52 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
                     : 'Not set'}
                 </span>
                 <ChevronDown className="ml-2 w-4 h-4 text-gray-400" />
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">PayNow QR Code</label>
+            {isEditing ? (
+              <div className="space-y-4">
+                <ImageUploadWidget
+                  onUpload={(url) => handleWeddingInputChange('paynowQR', url)}
+                  maxImageWidth={800}
+                  buttonText="Upload PayNow QR Code"
+                />
+                {weddingFormData.paynowQR && (
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-700 mb-2">Current QR code:</p>
+                    <CldImage
+                      width={200}
+                      height={200}
+                      src={weddingFormData.paynowQR}
+                      sizes="200px"
+                      alt="PayNow QR Code"
+                      className="rounded-lg shadow-sm border"
+                    />
+                  </div>
+                )}
+                <p className="text-xs text-gray-500">
+                  Upload your PayNow QR code image. This will be used for Ang Bao payments. Recommended size: 500x500px minimum.
+                </p>
+              </div>
+            ) : (
+              <div>
+                {weddingData.paynowQR ? (
+                  <div className="mt-2">
+                    <CldImage
+                      width={200}
+                      height={200}
+                      src={weddingData.paynowQR}
+                      sizes="200px"
+                      alt="PayNow QR Code"
+                      className="rounded-lg shadow-sm border"
+                    />
+                  </div>
+                ) : (
+                  <p className="p-3 bg-muted rounded-md">Not set</p>
+                )}
               </div>
             )}
           </div>

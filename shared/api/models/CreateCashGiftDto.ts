@@ -2,17 +2,17 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type CreateGiftDto = {
+export type CreateCashGiftDto = {
     /**
-     * The name of the guest who gave the gift
+     * The ID of the guest who gave the cash gift
      */
-    guestName: string;
+    guestId: number;
     /**
-     * The amount of the gift
+     * The amount of the cash gift
      */
     amount: number;
     /**
-     * The ID of the wedding this gift belongs to
+     * The ID of the wedding this cash gift belongs to
      */
     weddingId: number;
 };
