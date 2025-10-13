@@ -7,9 +7,9 @@ import MicrositeLogin from '../components/MicrositeLogin';
 import TemplateOne from '../components/templates/templateOne';
 import TemplateThree from '../components/templates/templateThree';
 import TemplateTwo from '../components/templates/templateTwo';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-type PageProps = {
+export type PageProps = {
   params: Promise<{ micrositeSlug: string }>;
 };
 
@@ -20,6 +20,12 @@ export default function MicrositePage({ params }: PageProps) {
     [resolvedParams.micrositeSlug],
   );
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Extract query parameters for auto-fill
+  const initialPassword = searchParams?.get('password') || '';
+  const initialFirstName = searchParams?.get('firstName') || '';
+  const initialLastName = searchParams?.get('lastName') || '';
 
   // Use the microsite manager hook
   const {
@@ -28,9 +34,11 @@ export default function MicrositePage({ params }: PageProps) {
     micrositeError,
     guestDetails,
     hasAccess,
+    isWeddingLive,
     fetchMicrositeData,
     handleMicrositeLogin,
     handleConfirmGuestAttendance,
+    checkWeddingStatus,
     setHasAccess,
   } = useMicrositeManager();
 
@@ -43,6 +51,12 @@ export default function MicrositePage({ params }: PageProps) {
     setHasAccess(false);
     fetchMicrositeData(decodedPlanName);
   }, [decodedPlanName, fetchMicrositeData, setHasAccess]);
+
+  useEffect(() => {
+    if (micrositeData) {
+      checkWeddingStatus();
+    }
+  }, [micrositeData]);
 
   const rsvpRef = useRef<HTMLDivElement | null>(null);
 
@@ -77,6 +91,9 @@ export default function MicrositePage({ params }: PageProps) {
         micrositeData={micrositeData}
         decodedPlanName={decodedPlanName}
         handleMicrositeLogin={handleMicrositeLogin}
+        initialFirstName={initialFirstName}
+        initialLastName={initialLastName}
+        initialPassword={initialPassword}
       />
     );
   }
@@ -86,6 +103,8 @@ export default function MicrositePage({ params }: PageProps) {
       micrositeData={micrositeData}
       rsvpRef={rsvpRef}
       guestDetails={guestDetails}
+      isWeddingLive={isWeddingLive}
+      micrositeSlug={decodedPlanName}
       handleConfirmGuestAttendance={handleConfirmGuestAttendance}
     />
   ) : micrositeData.templateNumber === 2 ? (
@@ -93,6 +112,8 @@ export default function MicrositePage({ params }: PageProps) {
       micrositeData={micrositeData}
       rsvpRef={rsvpRef}
       guestDetails={guestDetails}
+      isWeddingLive={isWeddingLive}
+      micrositeSlug={decodedPlanName}
       handleConfirmGuestAttendance={handleConfirmGuestAttendance}
     />
   ) : (
@@ -100,6 +121,8 @@ export default function MicrositePage({ params }: PageProps) {
       micrositeData={micrositeData}
       rsvpRef={rsvpRef}
       guestDetails={guestDetails}
+      isWeddingLive={isWeddingLive}
+      micrositeSlug={decodedPlanName}
       handleConfirmGuestAttendance={handleConfirmGuestAttendance}
     />
   );

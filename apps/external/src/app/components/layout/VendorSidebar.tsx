@@ -7,9 +7,9 @@ import AppSidebar from '@shared/components/AppSidebar';
 import {
   CalendarDays,
   CircleDollarSign,
+  ClipboardList,
   FileSpreadsheet,
-  LayoutDashboard,
-  Users,
+  LayoutDashboard
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 
@@ -65,9 +65,9 @@ export default function VendorSidebar() {
       sectionHeader: 'Management',
       items: [
         {
-          title: 'Customers',
-          href: '/customers',
-          icon: Users,
+          title: 'Manage Orders',
+          href: '/orders',
+          icon: ClipboardList,
           disabled: !hasVendorDetails,
         },
         {

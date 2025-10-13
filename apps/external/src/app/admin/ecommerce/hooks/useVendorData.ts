@@ -1,5 +1,17 @@
+import { ListingResponseDto, ListingsService, VendorResponseDto, VendorsService } from '@shared/api';
 import { useEffect, useState } from 'react';
-import { ListingResponseDto, VendorResponseDto, VendorsService, ListingsService } from '@shared/api';
+
+export interface VendorWithScore {
+  id: number;
+  name: string;
+  serviceOffered: string;
+  styleOffered: string;
+  rating: number;
+  bio?: string;
+  final_score: number;
+  cheapestListing?: ListingResponseDto | null;
+  startingPrice?: number | null;
+}
 
 interface UseVendorDataReturn {
   vendor: VendorResponseDto | null;

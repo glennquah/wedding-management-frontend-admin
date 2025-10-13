@@ -4,13 +4,16 @@ import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
   Calendar,
+  Camera,
   CheckSquare,
+  ClipboardList,
   Clock,
   LayoutDashboard,
   ListTodo,
   MapPin,
   PaintRoller,
   ShoppingCart,
+  Sparkles,
   Users,
 } from 'lucide-react';
 import { signOut, useWeddingStore } from '../../store/sessionStore';
@@ -63,6 +66,12 @@ export default function AdminSidebar() {
           disabled: !hasWedding,
         },
         {
+          title: 'Orders',
+          href: '/orders',
+          icon: ClipboardList,
+          disabled: !hasWedding,
+        },
+        {
           title: 'Seating Arrangement',
           href: '/seating-arrangement',
           icon: MapPin,
@@ -75,9 +84,20 @@ export default function AdminSidebar() {
           disabled: !hasWedding,
         },
         {
+          title: 'Date Optimizer',
+          href: '/date-optimizer',
+          icon: Sparkles,
+        },
+        {
           title: 'Microsite',
           href: '/microsite',
           icon: PaintRoller,
+          disabled: !hasWedding,
+        },
+        {
+          title: 'Album Invite',
+          href: '/album',
+          icon: Camera,
           disabled: !hasWedding,
         },
         {

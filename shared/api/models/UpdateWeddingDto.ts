@@ -26,8 +26,8 @@ export type UpdateWeddingDto = {
     preferredStyle?: WeddingStyle;
     preferredServices?: Array<WeddingService>;
     /**
-     * PayNow QR code link
+     * Allocated budget for the wedding
      */
-    paynowQR?: string;
+    allocatedBudget?: number;
 };
 
