@@ -68,8 +68,8 @@ export default function SeatingArrangementPage() {
     <Button
       onClick={exportToPDF}
       disabled={isExporting}
-      variant="default"
-      className="flex items-center gap-2"
+      variant="outline"
+      className="flex items-center gap-2 border-primary text-primary hover:bg-primary hover:text-white"
       data-testid="export-pdf-button"
     >
       {isExporting ? (

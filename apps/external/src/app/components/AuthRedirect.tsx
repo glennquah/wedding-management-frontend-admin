@@ -12,9 +12,14 @@ export function AuthRedirect() {
   const pathname = usePathname();
 
   useEffect(() => {
+    // Don't redirect while session is loading
+    if (status === 'loading') {
+      return;
+    }
+
     if (session?.user) {
       // Define public paths that should not trigger role-based redirects
-      const publicPaths = ['/login', '/forgot-password', '/reset-password'];
+      const publicPaths = ['/', '/login', '/forgot-password', '/reset-password', '/get-started', '/essentials', '/the-big-day', '/for-businesses', '/guest-&-vendor'];
 
       if (pathname && publicPaths.includes(pathname)) {
         return;

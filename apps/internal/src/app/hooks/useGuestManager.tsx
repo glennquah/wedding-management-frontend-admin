@@ -8,16 +8,14 @@ import {
   UpdateGuestDto,
 } from '@wedding/api-types';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-type GuestFormData = Partial<CreateGuestDto> & {
+export type GuestFormData = Partial<CreateGuestDto> & {
   id?: number;
   accompanyingGuestNames?: string[];
 };
 
 export function useGuestManager() {
-  const router = useRouter();
   const { data: session, status } = useSession();
 
   // Core data

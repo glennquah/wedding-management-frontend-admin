@@ -185,7 +185,7 @@ export default function SharedModal({
             <div className="fixed inset-x-0 bottom-0 z-40 overflow-hidden bg-gradient-to-b from-black/0 to-black/60">
               <motion.div className="mx-auto mt-6 mb-6 flex aspect-[3/2] h-14">
                 <AnimatePresence initial={false}>
-                  {(filteredImages || []).map(({ image_url, format, id }) => (
+                  {(filteredImages || []).map(({ image_url, id }) => (
                     <motion.button
                       key={id}
                       initial={{ width: '0%', x: `${Math.max((index - 1) * -100, 15 * -100)}%` }}

@@ -26,7 +26,7 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token, req }) => {
+      authorized: () => {
         // Allow the middleware to run - we'll handle auth logic in the middleware function
         return true;
       },

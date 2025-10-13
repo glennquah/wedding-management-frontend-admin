@@ -13,6 +13,7 @@ import {
   MapPin,
   PaintRoller,
   ShoppingCart,
+  Sparkles,
   Users,
 } from 'lucide-react';
 import { signOut, useWeddingStore } from '../../store/sessionStore';
@@ -81,6 +82,11 @@ export default function AdminSidebar() {
           href: '/timeline',
           icon: Calendar,
           disabled: !hasWedding,
+        },
+        {
+          title: 'Date Optimizer',
+          href: '/date-optimizer',
+          icon: Sparkles,
         },
         {
           title: 'Microsite',
