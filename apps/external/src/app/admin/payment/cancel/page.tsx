@@ -15,7 +15,7 @@ export default function PaymentCancelPage() {
   useEffect(() => {
     setTimeout(() => {
         if (session?.user.id) {
-          clearCart(session.user.id);
+          clearCart(session.user.id, true); 
         }
     }, 1000);
   }, [session]);

@@ -126,6 +126,26 @@ export class OrdersService {
         });
     }
     /**
+     * Get orders by vendor ID
+     * @param vendorId
+     * @returns OrderResponseDto List of orders containing listings from this vendor.
+     * @throws ApiError
+     */
+    public static orderControllerFindByVendor(
+        vendorId: number,
+    ): CancelablePromise<Array<OrderResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/orders/vendor/{vendorId}',
+            path: {
+                'vendorId': vendorId,
+            },
+            errors: {
+                404: `Vendor not found.`,
+            },
+        });
+    }
+    /**
      * Cancel an order
      * @param id
      * @returns OrderResponseDto The order has been successfully cancelled.
@@ -143,6 +163,79 @@ export class OrdersService {
             errors: {
                 400: `Order cannot be cancelled.`,
                 404: `Order not found.`,
+            },
+        });
+    }
+    /**
+     * Delete a single listing from an order
+     * @param orderId
+     * @param listingId
+     * @returns any The order listing has been deleted.
+     * @throws ApiError
+     */
+    public static orderControllerDeleteListing(
+        orderId: number,
+        listingId: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/orders/{orderId}/listings/{listingId}',
+            path: {
+                'orderId': orderId,
+                'listingId': listingId,
+            },
+            errors: {
+                404: `Order or listing not found.`,
+            },
+        });
+    }
+    /**
+     * Vendor confirms a specific listing in an order
+     * @param orderId
+     * @param listingId
+     * @returns OrderResponseDto The listing has been successfully confirmed by the vendor.
+     * @throws ApiError
+     */
+    public static orderControllerVendorConfirmListing(
+        orderId: number,
+        listingId: number,
+    ): CancelablePromise<OrderResponseDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/orders/{orderId}/listings/{listingId}/vendor-confirm',
+            path: {
+                'orderId': orderId,
+                'listingId': listingId,
+            },
+            errors: {
+                400: `Listing cannot be confirmed.`,
+                403: `Vendor does not own this listing.`,
+                404: `Order or listing not found.`,
+            },
+        });
+    }
+    /**
+     * Vendor rejects a specific listing in an order and triggers partial refund
+     * @param orderId
+     * @param listingId
+     * @returns OrderResponseDto The listing has been successfully rejected by the vendor and partial refund processed.
+     * @throws ApiError
+     */
+    public static orderControllerVendorRejectListing(
+        orderId: number,
+        listingId: number,
+    ): CancelablePromise<OrderResponseDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/orders/{orderId}/listings/{listingId}/vendor-reject',
+            path: {
+                'orderId': orderId,
+                'listingId': listingId,
+            },
+            errors: {
+                400: `Listing cannot be rejected.`,
+                403: `Vendor does not own this listing.`,
+                404: `Order or listing not found.`,
             },
         });
     }

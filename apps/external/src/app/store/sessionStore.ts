@@ -129,7 +129,7 @@ interface CartState {
   fetchCart: (adminId: number) => Promise<void>;
   addItem: (adminId: number, item: CartItem, selectedSlots: AvailabilitySlotDto[]) => Promise<void>;
   removeItem: (adminId: number, listingId: number) => Promise<void>;
-  clearCart: (adminId: number) => Promise<void>;
+  clearCart: (adminId: number, silent?: boolean) => Promise<void>;
   deleteCart: (adminId: number) => Promise<void>;
 }
 
@@ -198,10 +198,12 @@ export const useCartStore = create<CartState>()(
         toast.success('Item removed from cart');
       },
 
-      clearCart: async (adminId: number) => {
+      clearCart: async (adminId: number, silent = false) => {
         const res = await CartService.cartControllerClearCart(adminId);
         set({ cartItems: res.items });
-        toast.success('Cart cleared');
+        if (!silent) {
+          toast.success('Cart cleared');
+        }
       },
 
       deleteCart: async (adminId: number) => {

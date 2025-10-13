@@ -26,7 +26,7 @@ function PaymentSuccessContent() {
       setLoading(false);
       if (sessionId) {
         if (session?.user.id) {
-          clearCart(session.user.id);
+          clearCart(session.user.id, true);
         }
         setPaymentDetails({ sessionId });
       } else {
