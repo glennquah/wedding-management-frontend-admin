@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@shared/components/ui/button';
 import { BackButton } from '../../components/ui';
 import {
@@ -37,8 +37,21 @@ export default function ListingPage() {
     itemsPerPage: 4
   });
 
-  const { addItem } = useCartStore();
+  const { addItem, fetchCart, cartItems } = useCartStore();
   const [selectedSlots, setSelectedSlots] = useState<AvailabilitySlotDto[]>([]);
+
+  // Fetch cart items when the component mounts
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchCart(Number(session.user.id));
+    }
+  }, [session?.user?.id, fetchCart]);
+
+  // Get slots that are already in cart for this listing
+  const slotsInCart = useMemo(() => {
+    const cartItem = cartItems.find(item => item.listingId === parseInt(listingId));
+    return cartItem?.selectedSlots || [];
+  }, [cartItems, listingId]);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   const handleBack = () => {
@@ -145,6 +158,7 @@ export default function ListingPage() {
             itemsPerPage={4}
             selectedSlots={selectedSlots}
             onSlotToggle={toggleSlotSelection}
+            slotsInCart={slotsInCart}
           />
 
           {vendor && <VendorCard vendor={vendor} />}

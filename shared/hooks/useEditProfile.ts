@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react';
 
+import { toast } from 'sonner';
 import {
   AdminResponseDto,
   AdminsService,
@@ -17,7 +18,6 @@ import {
   WeddingStyle,
   WeddingType,
 } from '../api';
-import { toast } from 'sonner';
 
 type UserData = AdminResponseDto | SuperAdminResponseDto | VendorResponseDto;
 
@@ -159,8 +159,59 @@ export const useEditProfile = ({ userId, userRole, onProfileUpdate }: UseEditPro
     [validationErrors],
   );
 
-  const validateForm = useCallback(() => {
+  const validateForm = useCallback((weddingFormData?: any) => {
     const errors: { [key: string]: string } = {};
+
+    // Validate required user fields
+    if (!formData.name.trim()) {
+      errors.name = 'Name is required';
+    }
+
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
+    }
+
+    // Validate wedding fields if wedding data is provided (for admin users)
+    if (userRole === UserRole.ADMIN && weddingFormData) {
+      if (!weddingFormData.name?.trim()) {
+        errors.weddingName = 'Wedding name is required';
+      }
+
+      if (!weddingFormData.preferredServices || weddingFormData.preferredServices.length === 0) {
+        errors.preferredServices = 'At least one preferred service must be selected';
+      }
+
+      if (!weddingFormData.weddingType) {
+        errors.weddingType = 'Wedding type is required';
+      }
+
+      if (!weddingFormData.budgetBucket) {
+        errors.budgetBucket = 'Budget range is required';
+      }
+
+      if (!weddingFormData.guestCountBucket) {
+        errors.guestCountBucket = 'Guest count is required';
+      }
+
+      if (!weddingFormData.preferredStyle) {
+        errors.preferredStyle = 'Preferred style is required';
+      }
+    }
+
+    // Validate vendor required fields
+    if (userRole === UserRole.VENDOR) {
+      if (!formData.serviceOffered) {
+        errors.serviceOffered = 'Service offered is required';
+      }
+
+      if (!formData.styleOffered) {
+        errors.styleOffered = 'Style offered is required';
+      }
+
+      if (!formData.weddingTypes || formData.weddingTypes.length === 0) {
+        errors.weddingTypes = 'At least one wedding type must be selected';
+      }
+    }
 
     // Validate venue capacity
     if (userRole === UserRole.VENDOR && formData.serviceOffered === WeddingService.VENUE) {
@@ -253,12 +304,12 @@ export const useEditProfile = ({ userId, userRole, onProfileUpdate }: UseEditPro
   }, [userId, userRole, userData, formData, populateFormData]);
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
+    async (e: React.FormEvent, weddingFormData?: any): Promise<boolean> => {
       e.preventDefault();
 
-      if (!validateForm()) {
-        toast.error('Please fix the validation errors before submitting');
-        return;
+      if (!validateForm(weddingFormData)) {
+        toast.error(validationErrors ? 'Please fix the validation errors before submitting' : 'Please fix the validation errors');
+        return false;
       }
 
       try {
@@ -268,9 +319,11 @@ export const useEditProfile = ({ userId, userRole, onProfileUpdate }: UseEditPro
         setValidationErrors({});
         toast.success('Profile updated successfully');
         onProfileUpdate?.();
+        return true;
       } catch (error) {
         console.error('Error updating profile:', error);
         toast.error('Failed to update profile');
+        return false;
       } finally {
         setIsSaving(false);
       }

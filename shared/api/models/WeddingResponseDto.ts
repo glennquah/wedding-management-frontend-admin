@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AdminResponseDto } from './AdminResponseDto';
 import type { BudgetBucket } from './BudgetBucket';
 import type { GuestCountBucket } from './GuestCountBucket';
 import type { GuestResponseDto } from './GuestResponseDto';
@@ -13,6 +14,10 @@ export type WeddingResponseDto = {
      * Wedding ID
      */
     id: number;
+    /**
+     * The ID of the couple getting married
+     */
+    mainCouple: Array<AdminResponseDto>;
     /**
      * The name of the wedding
      */
@@ -42,5 +47,9 @@ export type WeddingResponseDto = {
      * Last update timestamp
      */
     updatedAt: string;
+    /**
+     * Allocated budget for the wedding
+     */
+    allocatedBudget?: number;
 };
 

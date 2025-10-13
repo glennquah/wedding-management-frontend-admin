@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 
-import AdminSidebar from '../components/layout/AdminSidebar';
 import { useWeddingManager } from '@/app/hooks/useWeddingManager';
 import { useWeddingStore } from '@/app/store/sessionStore';
 import { UserRole, WeddingResponseDto } from '@shared/api';
@@ -28,6 +27,7 @@ import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { Toaster } from 'sonner';
+import AdminSidebar from '../components/layout/AdminSidebar';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { fetchUserMainWedding, fetchUserWeddings, loading } = useWeddingManager();
@@ -38,7 +38,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { data: session, status } = useSession();
 
   // Route protection: redirect to dashboard if no wedding and trying to access protected routes
-  const allowedRoutesWithoutWedding = useMemo(() => ['/admin', '/admin/account', '/admin/create-wedding'], []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const allowedRoutesWithoutWedding = ['/admin', '/admin/account', '/admin/create-wedding'];
   const hasNoWedding = !selectedWeddingId && (!weddings || weddings.length === 0);
 
   useEffect(() => {

@@ -29,6 +29,8 @@ export default function MicrositePreviewPage() {
             micrositeData={data}
             rsvpRef={rsvpRef}
             guestDetails={null}
+            isWeddingLive={false}
+            micrositeSlug={'temp'}
             handleConfirmGuestAttendance={async () => {}}
           />
         );
@@ -38,6 +40,8 @@ export default function MicrositePreviewPage() {
             micrositeData={data}
             rsvpRef={rsvpRef}
             guestDetails={null}
+            isWeddingLive={false}
+            micrositeSlug={'temp'}
             handleConfirmGuestAttendance={async () => {}}
           />
         );
@@ -47,6 +51,8 @@ export default function MicrositePreviewPage() {
             micrositeData={data}
             rsvpRef={rsvpRef}
             guestDetails={null}
+            isWeddingLive={false}
+            micrositeSlug={'temp'}
             handleConfirmGuestAttendance={async () => {}}
           />
         );
