@@ -29,7 +29,7 @@ export const BroadcastCollaboratorGratitudeDialog = ({
 }: BroadcastRsvpDialogProps) => {
   const [isBroadcasting, setIsBroadcasting] = useState(false);
 
-  // Handler for broadcasting RSVP invitations
+  // Handler for broadcasting collaborator gratitude cards
   const handleBroadcast = async () => {
     setIsBroadcasting(true);
     try {

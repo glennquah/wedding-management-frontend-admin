@@ -8,7 +8,7 @@ export type UpdateGratitudeCardDto = {
      */
     weddingId: number;
     /**
-     * Card recipeint
+     * Card recipient
      */
     recipient: string;
     /**

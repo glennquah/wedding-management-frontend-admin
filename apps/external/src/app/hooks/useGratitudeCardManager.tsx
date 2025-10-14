@@ -240,7 +240,6 @@ export const useGratitudeCardManager = (): UseGratitudeCardManagerReturn => {
         collaboratorCardPhotoURL: '',
         recipient: 'collaborator',
       });
-      setGuestCard(null);
     } catch {
       toast.error('Failed to delete gratitude card.');
     } finally {
@@ -278,7 +277,6 @@ export const useGratitudeCardManager = (): UseGratitudeCardManagerReturn => {
         vendorCardMessage: '',
         recipient: 'vendor',
       });
-      setGuestCard(null);
     } catch {
       toast.error('Failed to delete vendor card.');
     } finally {
@@ -286,52 +284,56 @@ export const useGratitudeCardManager = (): UseGratitudeCardManagerReturn => {
     }
   };
 
-  const handleFetchExistingCard = useCallback(async (weddingId: number) => {
-    if (!weddingId) return;
-    setIsLoading(true);
-    try {
-      const card =
-        await GratitudeCardService.gratitudeCardControllerGetGratitudeCardByWeddingId(weddingId);
+  const handleFetchExistingCard = useCallback(
+    async (weddingId: number) => {
+      if (!weddingId) return;
+      setIsLoading(true);
+      try {
+        const card =
+          await GratitudeCardService.gratitudeCardControllerGetGratitudeCardByWeddingId(weddingId);
 
-      if (card) {
-        setGuestCard(card);
-        setGuestFormData({
-          weddingId,
-          signOffName: card.signOffName || '',
-          guestCardMessage: card.guestCardMessage || '',
-          guestCardPhotoURL: card.guestCardPhotoURL || '',
-        });
-        setCollaboratorFormData({
-          weddingId,
-          signOffName: card.signOffName || '',
-          collaboratorCardMessage: card.collaboratorCardMessage || '',
-          collaboratorCardPhotoURL: card.collaboratorCardPhotoURL || '',
-          recipient: 'collaborator',
-        });
-        setVendorFormData({
-          weddingId,
-          signOffName: card.signOffName || '',
-          vendorCardMessage: card.vendorCardMessage || '',
-          recipient: 'vendor',
-        });
-        setIsGuestUpdateMode(true);
+        if (card) {
+          setGuestCard(card);
+          setGuestFormData({
+            weddingId,
+            signOffName: card.signOffName || '',
+            guestCardMessage: card.guestCardMessage || '',
+            guestCardPhotoURL: card.guestCardPhotoURL || '',
+          });
+          setCollaboratorFormData({
+            weddingId,
+            signOffName: card.signOffName || '',
+            collaboratorCardMessage: card.collaboratorCardMessage || '',
+            collaboratorCardPhotoURL: card.collaboratorCardPhotoURL || '',
+            recipient: 'collaborator',
+          });
+          setVendorFormData({
+            weddingId,
+            signOffName: card.signOffName || '',
+            vendorCardMessage: card.vendorCardMessage || '',
+            recipient: 'vendor',
+          });
+          setIsGuestUpdateMode(true);
 
-        if (selectedWeddingId) {
-          const selectedWedding = await WeddingsService.weddingControllerFindOne(selectedWeddingId);
-          setSelectedWedding(selectedWedding);
+          if (selectedWeddingId) {
+            const selectedWedding =
+              await WeddingsService.weddingControllerFindOne(selectedWeddingId);
+            setSelectedWedding(selectedWedding);
+          }
+        } else {
+          setGuestCard(null);
+          setIsGuestUpdateMode(false);
         }
-      } else {
+      } catch (err) {
+        console.error(err);
         setGuestCard(null);
         setIsGuestUpdateMode(false);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error(err);
-      setGuestCard(null);
-      setIsGuestUpdateMode(false);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    [selectedWeddingId],
+  );
 
   return {
     // State
