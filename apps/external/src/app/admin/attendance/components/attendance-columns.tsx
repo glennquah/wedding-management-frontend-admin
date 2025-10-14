@@ -1,4 +1,3 @@
-import { Button } from '@shared/components/ui/button';
 import { Checkbox } from '@shared/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
 import { GuestResponseDto } from '@shared/api';
@@ -13,21 +12,9 @@ const EMAIL_TRUNCATE_LENGTH = 12;
  * Props for attendance columns configuration
  */
 interface AttendanceColumnsProps {
-  guests: GuestResponseDto[];
   onToggleAttendance: (guest: GuestResponseDto) => void;
   hasAttendanceChange: (guestId: number) => boolean;
-  onOpenAccompanyingGuestDialog: (primaryGuestId: number) => void;
 }
-
-/**
- * Get the count of accompanying guests for a primary guest
- */
-const getAccompanyingGuestsCount = (
-  guests: GuestResponseDto[],
-  primaryGuestId: number,
-): number => {
-  return guests.filter((g) => g.primaryGuestId === primaryGuestId).length;
-};
 
 /**
  * Truncate email if it exceeds the maximum length
@@ -84,34 +71,6 @@ const AllergiesCell = React.memo<{ allergies?: string }>(({ allergies }) => (
 AllergiesCell.displayName = 'AllergiesCell';
 
 /**
- * Accompanying guests cell component
- */
-interface AccompanyingGuestsCellProps {
-  count: number;
-  onOpenDialog: () => void;
-}
-
-const AccompanyingGuestsCell = React.memo<AccompanyingGuestsCellProps>(
-  ({ count, onOpenDialog }) => {
-    if (count === 0) {
-      return <div className="text-sm text-foreground">0 guests</div>;
-    }
-
-    return (
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onOpenDialog}
-        className="h-auto p-1 text-xs font-normal justify-start whitespace-nowrap min-w-0 hover:bg-brand-50 hover:text-brand-700"
-      >
-        +{count}
-      </Button>
-    );
-  },
-);
-AccompanyingGuestsCell.displayName = 'AccompanyingGuestsCell';
-
-/**
  * Attendance checkbox cell component
  */
 interface AttendanceCellProps {
@@ -133,10 +92,8 @@ AttendanceCell.displayName = 'AttendanceCell';
  * Generate column definitions for the attendance table
  */
 export const getAttendanceColumns = ({
-  guests,
   onToggleAttendance,
   hasAttendanceChange,
-  onOpenAccompanyingGuestDialog,
 }: AttendanceColumnsProps): ColumnDef<GuestResponseDto>[] => {
   const columns: ColumnDef<GuestResponseDto>[] = [
     {
@@ -153,21 +110,6 @@ export const getAttendanceColumns = ({
       accessorKey: 'email',
       header: 'Email',
       cell: ({ row }) => <EmailCell email={row.getValue('email')} />,
-    },
-    {
-      id: 'accompanyingGuests',
-      header: 'Accompanying Guests',
-      cell: ({ row }) => {
-        const guest = row.original;
-        const count = getAccompanyingGuestsCount(guests, guest.id);
-
-        return (
-          <AccompanyingGuestsCell
-            count={count}
-            onOpenDialog={() => onOpenAccompanyingGuestDialog(guest.id)}
-          />
-        );
-      },
     },
     {
       accessorKey: 'allergies',

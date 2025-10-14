@@ -7,7 +7,6 @@ import { FormDialog } from '@shared/components/ui/form/form-dialog';
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
 import React, { useMemo } from 'react';
 import { useGuestManager } from '../../hooks/useGuestManager';
-import { AccompanyingGuestAttendanceDialog } from './components/accompanying-guest-attendance-dialog';
 import { getAttendanceColumns } from './components/attendance-columns';
 import { AttendanceStats } from './components/AttendanceStats';
 import { useAddGuestFormFields, useEditGuestFormFields } from './components/GuestFormFields';
@@ -28,7 +27,6 @@ export default function GuestListPage() {
   const {
     guests,
     wedding,
-    primaryGuests,
     existingGroups,
     isLoading,
     getGuestCapacityInfo,
@@ -62,23 +60,14 @@ export default function GuestListPage() {
     [guests],
   );
 
-  const confirmedPrimaryGuests = useMemo(
-    () => primaryGuests.filter((guest) => guest.confirmationStatus === ConfirmationStatus.CONFIRMED),
-    [primaryGuests],
-  );
-
   // Attendance management hook
   const {
     attendanceChanges,
     showConfirmDialog,
     isApplyingChanges,
-    accompanyingGuestDialog,
     handleToggleAttendance,
     hasAttendanceChange,
     handleApplyChanges,
-    handleOpenAccompanyingGuestDialog,
-    handleCloseAccompanyingGuestDialog,
-    handleApplyAccompanyingGuestChanges,
     openConfirmDialog,
     closeConfirmDialog,
   } = useAttendanceManager(confirmedGuests, fetchGuests);
@@ -87,12 +76,10 @@ export default function GuestListPage() {
   const columns = useMemo(
     () =>
       getAttendanceColumns({
-        guests: confirmedGuests,
         onToggleAttendance: handleToggleAttendance,
         hasAttendanceChange,
-        onOpenAccompanyingGuestDialog: handleOpenAccompanyingGuestDialog,
       }),
-    [confirmedGuests, handleToggleAttendance, hasAttendanceChange, handleOpenAccompanyingGuestDialog],
+    [handleToggleAttendance, hasAttendanceChange],
   );
 
   // Memoized form fields
@@ -178,7 +165,7 @@ export default function GuestListPage() {
         {/* Apply Changes Button */}
         {attendanceChanges.size > 0 && (
           <div className="mb-4 flex justify-end">
-            <Button onClick={openConfirmDialog} className="bg-brand-600 hover:bg-brand-700 text-white">
+            <Button onClick={openConfirmDialog}>
               {BUTTON_LABELS.APPLY_CHANGES(attendanceChanges.size)}
             </Button>
           </div>
@@ -186,7 +173,7 @@ export default function GuestListPage() {
 
         {/* Guest List Table */}
         <DataTable
-          data={confirmedPrimaryGuests}
+          data={confirmedGuests}
           columns={columns}
           searchableColumns={[{ id: 'name', placeholder: 'Search by name...' }]}
           enableSelection={false}
@@ -230,15 +217,6 @@ export default function GuestListPage() {
           onConfirm={handleApplyChanges}
           onCancel={closeConfirmDialog}
           confirmButtonText={isApplyingChanges ? BUTTON_LABELS.APPLYING : BUTTON_LABELS.CONFIRM}
-        />
-
-        {/* Accompanying Guest Attendance Dialog */}
-        <AccompanyingGuestAttendanceDialog
-          open={accompanyingGuestDialog.open}
-          onOpenChange={handleCloseAccompanyingGuestDialog}
-          accompanyingGuests={accompanyingGuestDialog.guests}
-          onApplyChanges={handleApplyAccompanyingGuestChanges}
-          isApplying={isApplyingChanges}
         />
       </div>
     </div>

@@ -1,7 +1,6 @@
 import { GuestResponseDto, GuestsService } from '@shared/api';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
-import { AccompanyingDialogState } from '../types';
 
 /**
  * Custom hook to manage attendance state and operations
@@ -13,10 +12,6 @@ export function useAttendanceManager(
   const [attendanceChanges, setAttendanceChanges] = useState<Set<number>>(new Set());
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isApplyingChanges, setIsApplyingChanges] = useState(false);
-  const [accompanyingGuestDialog, setAccompanyingGuestDialog] = useState<AccompanyingDialogState>({
-    open: false,
-    guests: [],
-  });
 
   // Toggle attendance for a guest (optimistic update)
   const handleToggleAttendance = useCallback((guest: GuestResponseDto) => {
@@ -85,75 +80,6 @@ export function useAttendanceManager(
     }
   }, [attendanceChanges, fetchGuests, confirmedGuests]);
 
-  // Open accompanying guest attendance dialog
-  const handleOpenAccompanyingGuestDialog = useCallback(
-    (primaryGuestId: number) => {
-      const accompanyingGuestsList = confirmedGuests.filter(
-        (g) => g.primaryGuestId === primaryGuestId,
-      );
-      setAccompanyingGuestDialog({
-        open: true,
-        guests: accompanyingGuestsList,
-      });
-    },
-    [confirmedGuests],
-  );
-
-  // Close accompanying guest attendance dialog
-  const handleCloseAccompanyingGuestDialog = useCallback(() => {
-    setAccompanyingGuestDialog({ open: false, guests: [] });
-  }, []);
-
-  // Apply accompanying guest attendance changes
-  const handleApplyAccompanyingGuestChanges = useCallback(
-    async (guestIds: number[]) => {
-      setIsApplyingChanges(true);
-      try {
-        const results = await Promise.all(
-          guestIds.map(async (guestId) => {
-            // Find the guest to determine if we're marking present or absent
-            const guest = confirmedGuests.find((g) => g.id === guestId);
-            if (!guest) return null;
-
-            const isMarkingPresent = !guest.attendance;
-
-            // First toggle attendance
-            await GuestsService.guestControllerMarkAttendance(guestId);
-
-            // Then update checkInTime accordingly
-            if (isMarkingPresent) {
-              await GuestsService.guestControllerCheckIn(guestId);
-            } else {
-              await GuestsService.guestControllerRemoveCheckIn(guestId);
-            }
-
-            return { isMarkingPresent, guestName: guest.name };
-          }),
-        );
-
-        // Show success toasts for each change
-        results.forEach((result) => {
-          if (result) {
-            if (result.isMarkingPresent) {
-              toast.success('Attendance marked successfully');
-            } else {
-              toast.success('Attendance unmarked successfully');
-            }
-          }
-        });
-
-        handleCloseAccompanyingGuestDialog();
-        await fetchGuests();
-      } catch (error) {
-        console.error('Failed to apply accompanying guest attendance changes:', error);
-        toast.error('Failed to update attendance');
-      } finally {
-        setIsApplyingChanges(false);
-      }
-    },
-    [fetchGuests, handleCloseAccompanyingGuestDialog, confirmedGuests],
-  );
-
   // Show confirm dialog
   const openConfirmDialog = useCallback(() => {
     setShowConfirmDialog(true);
@@ -169,15 +95,11 @@ export function useAttendanceManager(
     attendanceChanges,
     showConfirmDialog,
     isApplyingChanges,
-    accompanyingGuestDialog,
 
     // Handlers
     handleToggleAttendance,
     hasAttendanceChange,
     handleApplyChanges,
-    handleOpenAccompanyingGuestDialog,
-    handleCloseAccompanyingGuestDialog,
-    handleApplyAccompanyingGuestChanges,
     openConfirmDialog,
     closeConfirmDialog,
   };
