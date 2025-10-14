@@ -7,6 +7,8 @@ import {
   GuestCountBucket,
   GuestResponseDto,
   GuestsService,
+  MicrositeResponseDto,
+  MicrositeService,
   OpenAPI,
   UpdateGuestDto,
   WeddingResponseDto,
@@ -21,9 +23,10 @@ type AccompanyingGuestData = {
   confirmationStatus: ConfirmationStatus;
 };
 
-type GuestFormData = Partial<CreateGuestDto> & {
+export type GuestFormData = Partial<CreateGuestDto> & {
   id?: number;
   accompanyingGuests?: AccompanyingGuestData[];
+  sendRsvpEmail?: boolean;
 };
 
 type GuestFormSetter = (guest: GuestFormData) => void;
@@ -37,6 +40,7 @@ const getDefaultNewGuest = (weddingId: number): GuestFormData => ({
   weddingId,
   primaryGuestId: undefined,
   accompanyingGuests: [],
+  sendRsvpEmail: false,
 });
 
 // Guest count bucket capacity mappings
@@ -60,6 +64,7 @@ export function useGuestManager() {
   // Core guest data
   const [guests, setGuests] = useState<GuestResponseDto[]>([]);
   const [wedding, setWedding] = useState<WeddingResponseDto | null>(null);
+  const [microsite, setMicrosite] = useState<MicrositeResponseDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -103,6 +108,23 @@ export function useGuestManager() {
         console.error('Error fetching user wedding:', err);
         toast.error('Failed to fetch wedding information');
         return null;
+      }
+    },
+    [setupAuth],
+  );
+
+  // Fetch microsite for the wedding
+  const fetchMicrosite = useCallback(
+    async (weddingId: number) => {
+      try {
+        setupAuth();
+        const micrositeData =
+          await MicrositeService.micrositeControllerGetMicrositeByWeddingId(weddingId);
+        setMicrosite(micrositeData);
+      } catch {
+        // Microsite not found is expected if not created yet
+        console.log('No microsite found for wedding:', weddingId);
+        setMicrosite(null);
       }
     },
     [setupAuth],
@@ -363,6 +385,7 @@ export function useGuestManager() {
         confirmationStatus: ConfirmationStatus.PENDING,
         weddingId: currentWeddingId!,
         primaryGuestId: undefined,
+        sendEmail: newGuest.sendRsvpEmail || false,
       };
 
       const accompanyingGuestsData: CreateGuestDto[] = [];
@@ -392,13 +415,9 @@ export function useGuestManager() {
       setNewGuest(getDefaultNewGuest(currentWeddingId!));
       setIsAddingGuest(false);
 
-      // Show email modal for the newly added guest
-      setEmailModalGuest({
-        name: primaryGuestData.name!,
-        email: primaryGuestData.email!,
-      });
-
-      toast.success('Guest added successfully!');
+      toast.success(
+        `Guest added successfully!${newGuest.sendRsvpEmail ? ' RSVP email sent.' : ' No email sent.'}`,
+      );
     } catch (err) {
       toast.error('Failed to add guest. Please try again.');
       console.error('Error adding guest:', err);
@@ -575,13 +594,15 @@ export function useGuestManager() {
     if (currentWeddingId) {
       setNewGuest(getDefaultNewGuest(currentWeddingId));
       fetchGuests();
+      fetchMicrosite(currentWeddingId);
     }
-  }, [currentWeddingId, fetchGuests]);
+  }, [currentWeddingId, fetchGuests, fetchMicrosite]);
 
   return {
     // Core data
     guests,
     wedding,
+    microsite,
     primaryGuests,
     existingGroups,
     isLoading,

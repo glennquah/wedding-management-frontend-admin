@@ -73,7 +73,7 @@ export default function CreateAlbumInvitePage() {
     };
 
     fetchExistingAlbum();
-  }, [selectedWeddingId]);
+  }, [handleFetchExistingAlbum, selectedWeddingId]);
 
   const handleInputChange = <K extends keyof CreateAlbumDto>(
     field: K,

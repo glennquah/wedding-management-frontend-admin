@@ -1,8 +1,50 @@
 'use client';
 
+import { useCartStore } from '@/app/store/sessionStore';
+import { PaymentsService } from '@shared/api';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 export default function PaymentCancelPage() {
+  const { order, clearCart } = useCartStore();
+  const { data: session } = useSession();
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+        if (session?.user.id) {
+          clearCart(session.user.id, true); 
+        }
+    }, 1000);
+  }, [session]);
+
+  const handleRetryPayment = async () => {
+    if (!order) {
+      toast.error('No order found. Please create a new order.');
+      return;
+    }
+
+    try {
+      setIsRetrying(true);
+
+      // Create checkout session and redirect to Stripe
+      const checkoutData = await PaymentsService.paymentControllerCreateCheckoutSession({
+        orderId: order.id,
+        successUrl: `${window.location.origin}/admin/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${window.location.origin}/admin/payment/cancel`
+      });
+
+      // Redirect to Stripe Checkout
+      window.location.href = checkoutData.url;
+    } catch (error) {
+      console.error('Error retrying payment:', error);
+      toast.error('Failed to retry payment. Please try again.');
+      setIsRetrying(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8 text-center">
@@ -31,18 +73,19 @@ export default function PaymentCancelPage() {
         </p>
 
         <div className="space-y-3">
-          <Link
-            href="/admin/payment"
-            className="block w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+          <button
+            onClick={handleRetryPayment}
+            disabled={isRetrying || !order}
+            className="block w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
-            Try Again
-          </Link>
+            {isRetrying ? 'Redirecting to payment...' : 'Try Again'}
+          </button>
 
           <Link
-            href="/admin/dashboard"
+            href="/admin/orders"
             className="block w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-200 transition-colors"
           >
-            Back to Dashboard
+            Go to Orders
           </Link>
         </div>
       </div>

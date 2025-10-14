@@ -1,14 +1,15 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
+import { VendorSessionProvider } from '../../contexts/VendorSessionContext';
+import VendorSidebar from '../components/layout/VendorSidebar';
 import { UserRole, VendorsService } from '@shared/api';
 import NavigationBar from '@shared/components/NavigationBar';
 import { SidebarProvider } from '@shared/components/ui/sidebar';
 import { Toaster } from '@shared/components/ui/sonner';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { VendorSessionProvider } from '../../contexts/VendorSessionContext';
-import VendorSidebar from '../components/layout/VendorSidebar';
 
 export default function VendorLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
@@ -28,7 +29,11 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
         const vendor = await VendorsService.vendorControllerGetVendor(session.user.id);
         setVendorOnboardingStatus(vendor.onboardingStatus);
 
-        const hasDetails = !!(vendor.serviceOffered && vendor.styleOffered && vendor.weddingTypes?.length);
+        const hasDetails = !!(
+          vendor.serviceOffered &&
+          vendor.styleOffered &&
+          vendor.weddingTypes?.length
+        );
         setHasVendorDetails(hasDetails);
       } catch (error) {
         console.error('Error checking vendor details:', error);
@@ -44,9 +49,9 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
   }, [session]);
 
   // Route protection: prioritize PENDING/REJECTED status check over details check
-  const allowedRoutesWithoutDetails = ['/vendor', '/vendor/account'];
-
   useEffect(() => {
+    const allowedRoutesWithoutDetails = ['/vendor', '/vendor/account'];
+
     // If vendor is PENDING, redirect to pending page
     if (vendorOnboardingStatus === 'PENDING' && pathname !== '/vendor/pending') {
       router.push('/vendor/pending');
@@ -60,10 +65,15 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
     }
 
     // If vendor is ONBOARDED but has no details, allow access to /vendor and /vendor/account only
-    if (vendorOnboardingStatus === 'ONBOARDED' && hasVendorDetails === false && pathname && !allowedRoutesWithoutDetails.includes(pathname)) {
+    if (
+      vendorOnboardingStatus === 'ONBOARDED' &&
+      hasVendorDetails === false &&
+      pathname &&
+      !allowedRoutesWithoutDetails.includes(pathname)
+    ) {
       router.push('/vendor');
     }
-  }, [vendorOnboardingStatus, hasVendorDetails, pathname, router]);
+  }, [vendorOnboardingStatus, hasVendorDetails, pathname, router, allowedRoutesWithoutDetails]);
 
   if (status === 'loading' || isCheckingDetails) {
     return (
