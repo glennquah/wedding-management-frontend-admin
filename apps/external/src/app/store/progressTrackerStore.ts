@@ -19,7 +19,15 @@ export type ChecklistItem = {
   completed?: boolean;
 };
 
-export type ChatbotStage = 'introduction' | 'planning' | 'generated';
+export type ChatbotStage =
+  | 'GETTING_STARTED'
+  | 'INITIAL_PLANNING'
+  | 'CREATING_THE_FOUNDATION'
+  | 'DETAILED_PLANNING'
+  | 'DURING_THE_WEDDING'
+  | 'AFTER_THE_WEDDING'
+  | 'ADDITIONAL_DETAILS'
+  | 'CHECKLIST_GENERATED';
 
 export type ChatMessage = {
   id: string;
@@ -315,7 +323,7 @@ const defaultWelcomeMessage: ChatMessage = {
 };
 
 const emptyProgressTrackerData = (weddingId?: number): ProgressTrackerData => ({
-  stage: 'introduction',
+  stage: 'GETTING_STARTED',
   checklist: defaultChecklist,
   categoryIntro: {
     currentCategoryIndex: 0,
@@ -530,7 +538,7 @@ export const useProgressTrackerStore = create<ProgressTrackerStore>()(
               ...categoryIntro,
               isIntroductionComplete: true,
             },
-            stage: 'planning',
+            stage: 'ADDITIONAL_DETAILS',
           });
           get().addMessage(weddingId, {
             id: crypto.randomUUID(),

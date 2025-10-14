@@ -10,7 +10,7 @@ export const DEFAULT_LINK_PATTERNS: LinkPattern[] = [
   { text: 'Guest List Tool', href: '/admin/guest-list' },
   { text: 'Microsite Builder', href: '/admin/microsite' },
   { text: 'AI Scheduler Tool', href: '/admin/scheduler' },
-  { text: 'E-commerce Platform', href: '/admin/shop' },
+  { text: 'E-commerce Platform', href: '/admin/ecommerce' },
   { text: 'Photo Album Invite Card Builder', href: '/admin/album' },
   { text: 'Seating Arrangement Tool', href: '/admin/seating' },
   { text: 'Budget Tracking Feature', href: '/admin/dashboard' },

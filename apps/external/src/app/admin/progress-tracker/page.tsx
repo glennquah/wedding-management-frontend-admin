@@ -9,113 +9,117 @@ import {
 } from '../../store/progressTrackerStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components/ui/tabs';
 import { PageHeader } from '@shared/components/ui/page-header';
-import { Button } from '@shared/components/ui/button';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
-import { Input } from '@shared/components/ui/form/input';
+import { DeleteConfirmationModal } from '@shared/components';
+import FormField from '@shared/components/FormField';
 import { SingleSelectDropdown } from '@shared/components/ui/form/singleSelectDropdown';
-import { DeleteConfirmationModal } from '@shared/components/ui/delete-confirmation-modal';
-import { Plus } from 'lucide-react';
 import Chat from './components/chat';
 import TimelineOverview from './components/TimelineOverview';
 import ChecklistTable from './components/ChecklistTable';
-import { WeddingResponseDto } from '@shared/api';
-import { useProgressTrackerManager } from '../../hooks/useProgressTrackerManager';
+import { WeddingResponseDto, CreateChecklistItemDto } from '@shared/api';
 import { useSidebar } from '@shared/components/ui/sidebar';
+import { useProgressTrackerManager } from '../../hooks/useProgressTrackerManager';
+import { Plus } from 'lucide-react';
 
 export default function Home() {
-  const { selectedWeddingId, weddings } = useWeddingStore();
-  const { ensureDraft, hasHydrated } = useProgressTrackerStore();
+  const { selectedWeddingId, weddings, firstPurchaseMade } = useWeddingStore();
+  const { ensureDraft, hasHydrated, setStage } = useProgressTrackerStore();
   const {
     fetchChecklistFromBackend,
-    isSubmitting,
+    handleNextCategory,
+    // Modal state
     isAddingItem,
+    isSubmitting,
     editingItem,
     deleteConfirmItem,
+    // Form data
     newItem,
     setNewItem,
     setEditingItem,
-    handleAddItem: hookHandleAddItem,
-    handleEditItem,
-    handleUpdateItem: hookHandleUpdateItem,
-    confirmDeleteItem: hookConfirmDeleteItem,
-    toggleItemCompletion: hookToggleItemCompletion,
+    // Modal handlers
     openAddItemModal,
     closeAddItemModal,
     closeEditItemModal,
     openDeleteConfirmModal,
     closeDeleteConfirmModal,
-  } = useProgressTrackerManager(selectedWeddingId);
-
-  // Wrapper functions to update local state after operations
-  const handleAddItem = async () => {
-    const updatedChecklist = await hookHandleAddItem();
-    if (updatedChecklist) {
-      setBackendChecklist(updatedChecklist);
-    }
-  };
-
-  const handleUpdateItem = async () => {
-    const updatedChecklist = await hookHandleUpdateItem();
-    if (updatedChecklist) {
-      setBackendChecklist(updatedChecklist);
-    }
-  };
-
-  const confirmDeleteItem = async () => {
-    const updatedChecklist = await hookConfirmDeleteItem();
-    if (updatedChecklist) {
-      setBackendChecklist(updatedChecklist);
-    }
-  };
-
-  const toggleItemCompletion = async (itemId: string, completed: boolean) => {
-    const updatedChecklist = await hookToggleItemCompletion(itemId, completed);
-    if (updatedChecklist) {
-      setBackendChecklist(updatedChecklist);
-    }
-  };
-
-  // Get wedding-specific progress data to access stage
+    // CRUD handlers
+    handleAddItem,
+    handleEditItem,
+    handleUpdateItem,
+    confirmDeleteItem,
+    toggleItemCompletion,
+  } = useProgressTrackerManager(selectedWeddingId); // Get wedding-specific data
   const progressData = useProgressTrackerStore((s) =>
     typeof selectedWeddingId === 'number'
       ? (s.drafts[selectedWeddingId]?.data ?? createEmptyProgressTrackerData(selectedWeddingId))
       : createEmptyProgressTrackerData(0),
   );
 
-  const [selectedWedding, setSelectedWedding] = useState<WeddingResponseDto | null>(null);
-  const [backendChecklist, setBackendChecklist] = useState<ChecklistItem[] | null>(null);
-  const [isLoadingChecklist, setIsLoadingChecklist] = useState(false);
-  const [checklistError, setChecklistError] = useState<string | null>(null);
-  const { setOpen } = useSidebar();
+  // Categories for progressive reveal
+  const categories = [
+    'Getting Started',
+    'Initial Planning',
+    'Creating the Foundation',
+    'Detailed Planning',
+    'During the Wedding',
+    'After the Wedding',
+    'Additional Details',
+  ];
 
-  // Create a wrapper function to handle state updates
-  const handleFetchChecklist = async (weddingId: number) => {
-    try {
-      setIsLoadingChecklist(true);
-      setChecklistError(null);
+  // Function to determine which checklist items should be visible
+  const getVisibleChecklistItems = () => {
+    // Map current stage to category index
+    const stageToIndex = {
+      GETTING_STARTED: 0,
+      INITIAL_PLANNING: 1,
+      CREATING_THE_FOUNDATION: 2,
+      DETAILED_PLANNING: 3,
+      DURING_THE_WEDDING: 4,
+      AFTER_THE_WEDDING: 5,
+      ADDITIONAL_DETAILS: 6,
+      CHECKLIST_GENERATED: 6, // Show all categories
+    };
 
-      const result = await fetchChecklistFromBackend(weddingId);
-      setBackendChecklist(result);
-      return result;
-    } catch (error) {
-      console.error('Error fetching checklist:', error);
-      setChecklistError('Failed to load checklist. Please try again.');
-      setBackendChecklist(null);
-      return null;
-    } finally {
-      setIsLoadingChecklist(false);
+    const currentStageIndex = stageToIndex[progressData.stage] ?? 0;
+
+    // If CHECKLIST_GENERATED, show all items
+    if (progressData.stage === 'CHECKLIST_GENERATED') {
+      return progressData.checklist;
     }
+
+    // Show items from categories up to and including current stage
+    const visibleCategories = categories.slice(0, currentStageIndex + 1);
+    return progressData.checklist.filter((item) => visibleCategories.includes(item.category));
   };
 
-  // Ensure draft exists for selected wedding and fetch checklist from backend
+  const visibleChecklistItems = getVisibleChecklistItems();
+
+  const [selectedWedding, setSelectedWedding] = useState<WeddingResponseDto | null>(null);
+  const { setOpen } = useSidebar();
+
+  // Ensure draft exists for selected wedding and handle backend fetching
   useEffect(() => {
     if (!hasHydrated) return;
     if (typeof selectedWeddingId === 'number') {
       ensureDraft(selectedWeddingId);
-      // Fetch checklist from backend
-      handleFetchChecklist(selectedWeddingId);
+
+      // Always attempt to fetch existing checklist from backend (unconditional)
+      fetchChecklistFromBackend(selectedWeddingId)
+        .then((backendChecklist) => {
+          if (!backendChecklist || backendChecklist.length === 0) {
+            // No backend checklist found, start from GETTING_STARTED
+            console.log('No backend checklist found, starting from GETTING_STARTED stage');
+            setStage(selectedWeddingId, 'GETTING_STARTED');
+          }
+          // If backend checklist exists, fetchChecklistFromBackend already handles setting the stage
+        })
+        .catch((error) => {
+          console.error('Error fetching backend checklist:', error);
+          // On error, start from GETTING_STARTED stage
+          setStage(selectedWeddingId, 'GETTING_STARTED');
+        });
     }
-  }, [selectedWeddingId, ensureDraft, hasHydrated, progressData.stage]);
+  }, [selectedWeddingId, ensureDraft, hasHydrated, setStage]);
 
   useEffect(() => {
     if (selectedWeddingId && weddings.length > 0) {
@@ -141,40 +145,37 @@ export default function Home() {
     return description;
   };
 
-  const hasBackendChecklist = backendChecklist && backendChecklist.length > 0;
+  // Wrapper function to match expected type signature
+  const handleToggleCompletion = async (itemId: string, completed: boolean): Promise<void> => {
+    await toggleItemCompletion(itemId, completed);
+  };
 
-  // Categories for checklist items
-  const categories = [
-    'Getting Started',
-    'Initial Planning',
-    'Creating the Foundation',
-    'Detailed Planning',
-    'During the Wedding',
-    'After the Wedding',
-    'Additional Details',
-  ];
-
-  // Form fields for adding new checklist item
-  const addItemFormFields = [
+  // Form fields for add/edit item modals
+  const getItemFormFields = (
+    item: Partial<CreateChecklistItemDto>,
+    setItem: React.Dispatch<React.SetStateAction<Partial<CreateChecklistItemDto>>>,
+  ) => [
     <div key="title" className="md:col-span-2">
-      <label className="text-foreground mb-1 block text-sm font-medium">Title *</label>
-      <Input
+      <FormField
+        label="Title *"
+        id="title"
         type="text"
-        value={newItem.title || ''}
-        onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
-        placeholder="Task title"
+        value={item.title || ''}
+        onChange={(e) => setItem({ ...item, title: e.target.value })}
         required
+        placeholder="Task title"
       />
     </div>,
 
     <div key="description" className="md:col-span-2">
-      <label className="text-foreground mb-1 block text-sm font-medium">Description *</label>
-      <Input
-        type="text"
-        value={newItem.description || ''}
-        onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-        placeholder="Task description"
+      <FormField
+        label="Description *"
+        id="description"
+        type="textarea"
+        value={item.description || ''}
+        onChange={(e) => setItem({ ...item, description: e.target.value })}
         required
+        placeholder="Task description"
       />
     </div>,
 
@@ -182,187 +183,243 @@ export default function Home() {
       <SingleSelectDropdown
         label="Category *"
         options={categories}
-        selected={newItem.category || ''}
-        setSelected={(category) => setNewItem({ ...newItem, category })}
+        selected={item.category || ''}
+        setSelected={(category) => setItem({ ...item, category })}
         placeholder="Select category"
       />
     </div>,
 
     <div key="monthsBeforeWedding" className="md:col-span-1">
-      <label className="text-foreground mb-1 block text-sm font-medium">
-        Months Before Wedding
-      </label>
-      <Input
+      <FormField
+        label="Months Before Wedding"
+        id="monthsBeforeWedding"
         type="number"
-        value={newItem.monthsBeforeWedding || 0}
-        onChange={(e) =>
-          setNewItem({ ...newItem, monthsBeforeWedding: parseInt(e.target.value) || 0 })
-        }
+        value={item.monthsBeforeWedding?.toString() || ''}
+        onChange={(e) => setItem({ ...item, monthsBeforeWedding: parseInt(e.target.value) || 0 })}
         placeholder="0"
-        min="-36"
-        max="36"
+        min="0"
       />
     </div>,
   ];
 
-  // Form fields for editing checklist item
-  const editItemFormFields = editingItem
-    ? [
-        <div key="title" className="md:col-span-2">
-          <label className="text-foreground mb-1 block text-sm font-medium">Title *</label>
-          <Input
-            type="text"
-            value={editingItem.title || ''}
-            onChange={(e) => setEditingItem({ ...editingItem, title: e.target.value })}
-            placeholder="Task title"
-            required
-          />
-        </div>,
+  const getEditItemFormFields = (
+    item: ChecklistItem,
+    setItem: React.Dispatch<React.SetStateAction<ChecklistItem | null>>,
+  ) => [
+    <div key="title" className="md:col-span-2">
+      <FormField
+        label="Title *"
+        id="title"
+        type="text"
+        value={item.title || ''}
+        onChange={(e) => setItem({ ...item, title: e.target.value })}
+        required
+        placeholder="Task title"
+      />
+    </div>,
 
-        <div key="description" className="md:col-span-2">
-          <label className="text-foreground mb-1 block text-sm font-medium">Description *</label>
-          <Input
-            type="text"
-            value={editingItem.description || ''}
-            onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
-            placeholder="Task description"
-            required
-          />
-        </div>,
+    <div key="description" className="md:col-span-2">
+      <FormField
+        label="Description *"
+        id="description"
+        type="textarea"
+        value={item.description || ''}
+        onChange={(e) => setItem({ ...item, description: e.target.value })}
+        required
+        placeholder="Task description"
+      />
+    </div>,
 
-        <div key="category" className="md:col-span-1">
-          <SingleSelectDropdown
-            label="Category *"
-            options={categories}
-            selected={editingItem.category || ''}
-            setSelected={(category) => setEditingItem({ ...editingItem, category })}
-            placeholder="Select category"
-          />
-        </div>,
+    <div key="category" className="md:col-span-1">
+      <SingleSelectDropdown
+        label="Category *"
+        options={categories}
+        selected={item.category || ''}
+        setSelected={(category) => setItem({ ...item, category })}
+        placeholder="Select category"
+      />
+    </div>,
 
-        <div key="monthsBeforeWedding" className="md:col-span-1">
-          <label className="text-foreground mb-1 block text-sm font-medium">
-            Months Before Wedding
-          </label>
-          <Input
-            type="number"
-            value={editingItem.monthsBeforeWedding || 0}
-            onChange={(e) =>
-              setEditingItem({ ...editingItem, monthsBeforeWedding: parseInt(e.target.value) || 0 })
-            }
-            placeholder="0"
-            min="-36"
-            max="36"
-          />
-        </div>,
-      ]
-    : [];
+    <div key="monthsBeforeWedding" className="md:col-span-1">
+      <FormField
+        label="Months Before Wedding"
+        id="monthsBeforeWedding"
+        type="number"
+        value={item.monthsBeforeWedding?.toString() || ''}
+        onChange={(e) => setItem({ ...item, monthsBeforeWedding: parseInt(e.target.value) || 0 })}
+        placeholder="0"
+        min="0"
+      />
+    </div>,
+  ];
 
   return (
     <main className="to-brand-100 text-foreground flex min-h-screen w-full flex-col bg-gradient-to-b from-white px-4 py-8">
       <PageHeader
         title="Wedding Planning Progress Tracker"
         description={getHeaderDescription()}
-        buttonText={hasBackendChecklist ? 'Add Checklist Item' : undefined}
-        onButtonClick={hasBackendChecklist ? openAddItemModal : undefined}
-        buttonIcon={hasBackendChecklist ? <Plus className="h-4 w-4" /> : undefined}
-        isButtonDisabled={isSubmitting}
+        buttonText="Add Checklist Item"
+        onButtonClick={openAddItemModal}
+        buttonIcon={<Plus className="h-4 w-4" />}
+        isButtonDisabled={progressData.stage !== 'CHECKLIST_GENERATED'}
       />
 
       <Tabs defaultValue="timeline" className="flex w-full flex-1 flex-col overflow-hidden">
         <TabsList className="grid w-full flex-shrink-0 grid-cols-2">
-          <TabsTrigger value="timeline">Timeline Overview</TabsTrigger>
-          <TabsTrigger value="checklist">Checklist Table</TabsTrigger>
+          <TabsTrigger value="timeline">
+            Timeline Overview
+            {progressData.stage !== 'CHECKLIST_GENERATED' && (
+              <span className="ml-2 rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-700">
+                {visibleChecklistItems.length} items
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="checklist">
+            Checklist Table
+            {progressData.stage !== 'CHECKLIST_GENERATED' && (
+              <span className="ml-2 rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-700">
+                {visibleChecklistItems.length} items
+              </span>
+            )}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="timeline" className="mt-6 flex-1 overflow-x-hidden overflow-y-hidden">
-          {isLoadingChecklist ? (
-            <div className="flex items-center justify-center py-8">
-              <p>Loading your checklist...</p>
+          {visibleChecklistItems.length > 0 ? (
+            <div className="flex h-full flex-col gap-4">
+              {progressData.stage !== 'CHECKLIST_GENERATED' && (
+                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-600">📋</span>
+                    <p className="text-sm text-blue-700">
+                      <strong>Progressive Planning:</strong> Timeline items unlock as you progress
+                      through each planning stage.
+                      <span className="ml-1 font-medium">
+                        Current stage:{' '}
+                        {progressData.stage
+                          .replace(/_/g, ' ')
+                          .toLowerCase()
+                          .replace(/\b\w/g, (l) => l.toUpperCase())}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              )}
+              <div
+                className="animate-fade-in flex-1"
+                key={`timeline-${visibleChecklistItems.length}`}
+              >
+                <TimelineOverview
+                  checklist={visibleChecklistItems}
+                  selectedWedding={selectedWedding}
+                />
+              </div>
             </div>
-          ) : checklistError ? (
-            <div className="py-8 text-center">
-              <p className="mb-4 text-red-600">Error loading checklist: {checklistError}</p>
-              <p className="text-gray-600">
-                Please try the Planning Assistant to create a new checklist.
-              </p>
-            </div>
-          ) : hasBackendChecklist ? (
-            <TimelineOverview checklist={backendChecklist} selectedWedding={selectedWedding} />
           ) : (
-            <div className="text-sm text-gray-600">
-              Complete the wedding planner guide through our chatbot assistant to generate your
-              personalized timeline.
+            <div className="flex h-full flex-col items-center justify-center py-12 text-center">
+              <div className="mb-4 text-6xl">📋</div>
+              <h3 className="mb-2 text-lg font-semibold text-gray-800">
+                Timeline Will Appear Here
+              </h3>
+              <p className="max-w-md text-sm text-gray-600">
+                Start a conversation with the Planning Assistant to begin revealing your wedding
+                planning timeline. Items will appear as you progress through each category.
+              </p>
             </div>
           )}
         </TabsContent>
 
         <TabsContent value="checklist" className="mt-6 flex-1 overflow-auto">
-          {isLoadingChecklist ? (
-            <div className="flex items-center justify-center py-8">
-              <p>Loading your checklist...</p>
+          {visibleChecklistItems.length > 0 ? (
+            <div className="flex h-full flex-col gap-4">
+              {progressData.stage !== 'CHECKLIST_GENERATED' && (
+                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-600">✅</span>
+                    <p className="text-sm text-blue-700">
+                      <strong>Progressive Planning:</strong> Checklist items unlock as you progress
+                      through each planning stage.
+                      <span className="ml-1 font-medium">
+                        Current stage:{' '}
+                        {progressData.stage
+                          .replace(/_/g, ' ')
+                          .toLowerCase()
+                          .replace(/\b\w/g, (l) => l.toUpperCase())}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              )}
+              <div
+                className="animate-fade-in flex-1"
+                key={`checklist-${visibleChecklistItems.length}`}
+              >
+                <ChecklistTable
+                  checklist={visibleChecklistItems}
+                  onEditItem={handleEditItem}
+                  onDeleteItem={openDeleteConfirmModal}
+                  onToggleCompletion={handleToggleCompletion}
+                />
+              </div>
             </div>
-          ) : checklistError ? (
-            <div className="py-8 text-center">
-              <p className="mb-4 text-red-600">Error loading checklist: {checklistError}</p>
-              <p className="text-gray-600">
-                Please try the Planning Assistant to create a new checklist.
-              </p>
-            </div>
-          ) : hasBackendChecklist ? (
-            <ChecklistTable
-              checklist={backendChecklist}
-              onEditItem={handleEditItem}
-              onDeleteItem={openDeleteConfirmModal}
-              onToggleCompletion={toggleItemCompletion}
-            />
           ) : (
-            <div className="text-sm text-gray-600">
-              Complete the wedding planner guide through our chatbot assistant to generate your
-              personalized checklist.
+            <div className="flex h-full flex-col items-center justify-center py-12 text-center">
+              <div className="mb-4 text-6xl">✅</div>
+              <h3 className="mb-2 text-lg font-semibold text-gray-800">
+                Checklist Will Appear Here
+              </h3>
+              <p className="max-w-md text-sm text-gray-600">
+                Start a conversation with the Planning Assistant to begin revealing your wedding
+                planning checklist. Items will appear as you progress through each category.
+              </p>
             </div>
           )}
         </TabsContent>
-
-        <Chat selectedWedding={selectedWedding} />
       </Tabs>
 
-      {/* Add Checklist Item Modal */}
+      <Chat
+        selectedWedding={selectedWedding}
+        currentStage={progressData.stage}
+        firstPurchaseMade={firstPurchaseMade}
+        onNextCategory={handleNextCategory}
+      />
+
+      {/* Add Item Modal */}
       <FormDialog
         open={isAddingItem}
-        onOpenChange={(open) => !open && closeAddItemModal()}
-        title="Add Checklist Item"
-        formFields={addItemFormFields}
+        onOpenChange={closeAddItemModal}
+        title="Add New Checklist Item"
+        isSubmitting={isSubmitting}
         onSubmit={handleAddItem}
         onCancel={closeAddItemModal}
         submitButtonText="Add Item"
-        isSubmitting={isSubmitting}
+        formFields={getItemFormFields(newItem, setNewItem)}
         noOfColumns={2}
       />
 
-      {/* Edit Checklist Item Modal */}
-      <FormDialog
-        open={!!editingItem}
-        onOpenChange={(open) => !open && closeEditItemModal()}
-        title="Edit Checklist Item"
-        formFields={editItemFormFields}
-        onSubmit={handleUpdateItem}
-        onCancel={closeEditItemModal}
-        submitButtonText="Update Item"
-        isSubmitting={isSubmitting}
-        noOfColumns={2}
-      />
+      {/* Edit Item Modal */}
+      {editingItem && (
+        <FormDialog
+          open={!!editingItem}
+          onOpenChange={closeEditItemModal}
+          title="Edit Checklist Item"
+          isSubmitting={isSubmitting}
+          onSubmit={handleUpdateItem}
+          onCancel={closeEditItemModal}
+          submitButtonText="Update Item"
+          formFields={getEditItemFormFields(editingItem, setEditingItem)}
+          noOfColumns={2}
+        />
+      )}
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         open={!!deleteConfirmItem}
-        onOpenChange={(open) => !open && closeDeleteConfirmModal()}
-        title="Delete Checklist Item"
+        onOpenChange={closeDeleteConfirmModal}
         itemName={deleteConfirmItem?.title || 'this item'}
         description={`Are you sure you want to delete "${deleteConfirmItem?.title}"? This action cannot be undone.`}
         onConfirm={confirmDeleteItem}
         onCancel={closeDeleteConfirmModal}
-        isLoading={isSubmitting}
       />
     </main>
   );

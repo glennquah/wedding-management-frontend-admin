@@ -41,9 +41,9 @@ export type CreateVendorDto = {
      * Rating of the vendor
      */
     rating?: number;
-    serviceOffered: WeddingService;
-    styleOffered: WeddingStyle;
-    weddingTypes: Array<WeddingType>;
+    serviceOffered?: WeddingService;
+    styleOffered?: WeddingStyle;
+    weddingTypes?: Array<WeddingType>;
     /**
      * Capacity the vendor can handle for venue
      */

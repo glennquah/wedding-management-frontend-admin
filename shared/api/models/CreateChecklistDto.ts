@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { CreateChatMessageDto } from './CreateChatMessageDto';
 import type { CreateChecklistItemDto } from './CreateChecklistItemDto';
 export type CreateChecklistDto = {
     /**
@@ -12,5 +13,9 @@ export type CreateChecklistDto = {
      * Array of checklist items
      */
     items: Array<CreateChecklistItemDto>;
+    /**
+     * Initial chat messages for the checklist
+     */
+    chatHistory?: Array<CreateChatMessageDto>;
 };
 

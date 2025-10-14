@@ -17,7 +17,7 @@ import {
 import { signOut, useWeddingStore } from '../../store/sessionStore';
 
 export default function AdminSidebar() {
-  const { weddings } = useWeddingStore();
+  const { weddings, firstPurchaseMade } = useWeddingStore();
   const hasWedding = weddings && weddings.length > 0;
 
   const tabs = [
@@ -45,7 +45,7 @@ export default function AdminSidebar() {
           title: 'Notification Templates',
           href: '/notification-templates',
           icon: BellDot,
-          disabled: !hasWedding,
+          disabled: !hasWedding || !firstPurchaseMade,
         },
       ],
     },
@@ -68,30 +68,31 @@ export default function AdminSidebar() {
           title: 'Seating Arrangement',
           href: '/seating-arrangement',
           icon: MapPin,
-          disabled: !hasWedding,
+          disabled: !hasWedding || !firstPurchaseMade,
         },
         {
           title: 'Timeline',
           href: '/timeline',
           icon: Calendar,
-          disabled: !hasWedding,
+          disabled: !hasWedding || !firstPurchaseMade,
         },
         {
           title: 'Date Optimizer',
           href: '/date-optimizer',
           icon: Sparkles,
+          disabled: !hasWedding,
         },
         {
           title: 'Microsite',
           href: '/microsite',
           icon: PaintRoller,
-          disabled: !hasWedding,
+          disabled: !hasWedding || !firstPurchaseMade,
         },
         {
           title: 'Album Invite',
           href: '/album',
           icon: Camera,
-          disabled: !hasWedding,
+          disabled: !hasWedding || !firstPurchaseMade,
         },
       ],
     },

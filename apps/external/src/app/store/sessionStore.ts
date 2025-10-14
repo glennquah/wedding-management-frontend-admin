@@ -73,11 +73,14 @@ interface WeddingState {
   mainWeddingId?: number | null;
   weddings: WeddingResponseDto[];
   hasHydrated: boolean;
+  firstPurchaseMade: boolean;
   setSelectedWeddingId: (id: number | null) => void;
   setMainWeddingId: (id: number | null) => void;
   setWeddings: (weddings: WeddingResponseDto[]) => void;
   clearWeddings: () => void;
   setHasHydrated: (hasHydrated: boolean) => void;
+  setFirstPurchaseMade: (firstPurchaseMade: boolean) => void;
+  checkFirstPurchaseMade: () => Promise<void>;
   reset: () => void;
 }
 
@@ -88,11 +91,28 @@ export const useWeddingStore = create<WeddingState>()(
       mainWeddingId: null,
       weddings: [],
       hasHydrated: false,
+      firstPurchaseMade: false,
       setSelectedWeddingId: (id: number | null) => set({ selectedWeddingId: id }),
       setMainWeddingId: (id: number | null) => set({ mainWeddingId: id }),
       setWeddings: (weddings: WeddingResponseDto[]) => set({ weddings }),
       clearWeddings: () => set({ weddings: [], selectedWeddingId: null, mainWeddingId: null }),
       setHasHydrated: (hasHydrated: boolean) => set({ hasHydrated }),
+      setFirstPurchaseMade: (firstPurchaseMade: boolean) => set({ firstPurchaseMade }),
+      checkFirstPurchaseMade: async () => {
+        const weddingId = get().selectedWeddingId;
+        if (!weddingId) {
+          set({ firstPurchaseMade: false });
+          return;
+        }
+        try {
+          const orders = await OrdersService.orderControllerFindByWedding(weddingId);
+          const hasPurchases = orders && orders.length > 0;
+          set({ firstPurchaseMade: hasPurchases });
+        } catch (error) {
+          console.error('Failed to check purchase status:', error);
+          set({ firstPurchaseMade: false });
+        }
+      },
       reset: () => {
         set(store.getInitialState());
       },
@@ -161,6 +181,8 @@ export const useCartStore = create<CartState>()(
           });
 
           set({ order });
+
+          useWeddingStore.getState().setFirstPurchaseMade(true);
 
           const checkoutData = await PaymentsService.paymentControllerCreateCheckoutSession({
             orderId: order.id,

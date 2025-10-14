@@ -97,6 +97,26 @@ export class AdminsService {
         });
     }
     /**
+     * Set a wedding as the main wedding for the logged-in admin
+     * @param weddingId
+     * @returns AdminResponseDto The wedding has been set as the main wedding.
+     * @throws ApiError
+     */
+    public static adminControllerSetMainWedding(
+        weddingId: number,
+    ): CancelablePromise<AdminResponseDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/admins/set-main-wedding/{weddingId}',
+            path: {
+                'weddingId': weddingId,
+            },
+            errors: {
+                404: `Wedding or admin not found.`,
+            },
+        });
+    }
+    /**
      * Get an admin by ID
      * @param id
      * @returns AdminResponseDto The admin details

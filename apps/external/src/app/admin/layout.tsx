@@ -33,7 +33,7 @@ const allowedRoutesWithoutWedding = ['/admin', '/admin/account', '/admin/create-
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { fetchUserMainWedding, fetchUserWeddings, loading } = useWeddingManager();
-  const { selectedWeddingId, hasHydrated, weddings } = useWeddingStore();
+  const { selectedWeddingId, hasHydrated, weddings, checkFirstPurchaseMade } = useWeddingStore();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -52,6 +52,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
     }
   }, [hasHydrated, selectedWeddingId, fetchUserMainWedding, fetchUserWeddings]);
+
+  // Check purchase status when wedding is selected
+  useEffect(() => {
+    if (selectedWeddingId && hasHydrated) {
+      checkFirstPurchaseMade();
+    }
+  }, [selectedWeddingId, hasHydrated, checkFirstPurchaseMade]);
 
   useEffect(() => {
     // Only redirect if store is hydrated to avoid redirecting during initial load
@@ -92,12 +99,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <SidebarProvider defaultOpen={true}>
       <AdminSidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col">
         <NavigationBar
           notificationRoute="/admin/notifications"
           additionalTabs={
             !hasNoWedding && (
-              <div className="flex items-center gap-4 ml-auto">
+              <div className="ml-auto flex items-center gap-4">
                 <Cart />
                 <WeddingSelector />
               </div>
@@ -132,9 +139,9 @@ export function WeddingSelector() {
         <Button
           variant="darkOutline"
           size="sm"
-          className="h-8 gap-2 px-2 no-underline border-gray-300/80"
+          className="h-8 gap-2 border-gray-300/80 px-2 no-underline"
         >
-          <div className="h-6 w-6 rounded-full text-primary flex items-center justify-center">
+          <div className="text-primary flex h-6 w-6 items-center justify-center rounded-full">
             <Gem size={14} />
           </div>
           <span className="text-sm">{displayWeddingName}</span>
@@ -181,23 +188,22 @@ export function SelectWeddingPage() {
   const weddings = useWeddingStore((state) => state.weddings);
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-brand-50 to-gray-50 py-12">
+    <div className="from-brand-50 relative flex min-h-screen flex-col items-center justify-center bg-gradient-to-b to-gray-50 py-12">
       <Image
         src="/images/valentines-day-background.jpg"
         alt="Welcome"
         fill
-        className="absolute inset-0 object-cover z-10 opacity-5"
+        className="absolute inset-0 z-10 object-cover opacity-5"
       />
-      <h1 className="text-2xl font-bold mb-8">Select Your Wedding</h1>
+      <h1 className="mb-8 text-2xl font-bold">Select Your Wedding</h1>
       <div
-        className={`grid gap-6 w-full max-w-4xl justify-center
-                ${weddings.length > 1 ? 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(16rem,1fr))]' : 'grid-cols-1'} z-20`}
+        className={`grid w-full max-w-4xl justify-center gap-6 ${weddings.length > 1 ? 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(16rem,1fr))]' : 'grid-cols-1'} z-20`}
       >
         {weddings &&
           weddings.map((wedding: WeddingResponseDto, index: number) => (
             <Card
               key={wedding.id}
-              className="cursor-pointer hover:ring-2 hover:shadow-xl hover:scale-105 transition-all duration-200"
+              className="cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-xl hover:ring-2"
               onClick={() => selectWedding(Number(wedding.id))}
             >
               <CardHeader>

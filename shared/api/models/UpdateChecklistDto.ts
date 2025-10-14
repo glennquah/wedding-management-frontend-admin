@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { CreateChatMessageDto } from './CreateChatMessageDto';
 import type { CreateChecklistItemDto } from './CreateChecklistItemDto';
 export type UpdateChecklistDto = {
     /**
@@ -9,8 +10,31 @@ export type UpdateChecklistDto = {
      */
     weddingId?: number;
     /**
-     * Array of checklist items
+     * Complete array of checklist items to replace existing items
      */
     items?: Array<CreateChecklistItemDto>;
+    /**
+     * Initial chat messages for the checklist
+     */
+    chatHistory?: Array<CreateChatMessageDto>;
+    /**
+     * Current stage of the checklist progression
+     */
+    currentStage?: UpdateChecklistDto.currentStage;
 };
+export namespace UpdateChecklistDto {
+    /**
+     * Current stage of the checklist progression
+     */
+    export enum currentStage {
+        GETTING_STARTED = 'GETTING_STARTED',
+        INITIAL_PLANNING = 'INITIAL_PLANNING',
+        CREATING_THE_FOUNDATION = 'CREATING_THE_FOUNDATION',
+        DETAILED_PLANNING = 'DETAILED_PLANNING',
+        DURING_THE_WEDDING = 'DURING_THE_WEDDING',
+        AFTER_THE_WEDDING = 'AFTER_THE_WEDDING',
+        ADDITIONAL_DETAILS = 'ADDITIONAL_DETAILS',
+        CHECKLIST_GENERATED = 'CHECKLIST_GENERATED',
+    }
+}
 

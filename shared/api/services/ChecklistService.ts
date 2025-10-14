@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ChatMessageResponseDto } from '../models/ChatMessageResponseDto';
 import type { ChecklistItemResponseDto } from '../models/ChecklistItemResponseDto';
 import type { ChecklistResponseDto } from '../models/ChecklistResponseDto';
 import type { CreateChecklistDto } from '../models/CreateChecklistDto';
@@ -130,6 +131,55 @@ export class ChecklistService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/checklist/wedding/{weddingId}',
+            path: {
+                'weddingId': weddingId,
+            },
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Checklist not found for this wedding`,
+            },
+        });
+    }
+    /**
+     * Update checklist by wedding ID - for updating items and stage progression
+     * Updates checklist items and current stage. Used for saving state on Next Category clicks.
+     * @param weddingId Wedding ID
+     * @param requestBody
+     * @returns ChecklistResponseDto Checklist updated successfully
+     * @throws ApiError
+     */
+    public static checklistControllerUpdateByWeddingId(
+        weddingId: number,
+        requestBody: UpdateChecklistDto,
+    ): CancelablePromise<ChecklistResponseDto> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/checklist/wedding/{weddingId}',
+            path: {
+                'weddingId': weddingId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Checklist not found for this wedding`,
+            },
+        });
+    }
+    /**
+     * Get chat history for checklist by wedding ID
+     * @param weddingId Wedding ID
+     * @returns ChatMessageResponseDto Chat history retrieved successfully
+     * @throws ApiError
+     */
+    public static checklistControllerGetChatHistoryByWeddingId(
+        weddingId: number,
+    ): CancelablePromise<Array<ChatMessageResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/checklist/wedding/{weddingId}/chat-history',
             path: {
                 'weddingId': weddingId,
             },

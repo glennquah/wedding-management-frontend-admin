@@ -2,21 +2,32 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { useProgressTrackerManager } from '../../../hooks/useProgressTrackerManager';
-import {
-  useProgressTrackerStore,
-  createEmptyProgressTrackerData,
-} from '../../../store/progressTrackerStore';
-import { useWeddingStore } from '../../../store/sessionStore';
-import ChatTabContent from './ChatTabContent';
 import { Button } from '@shared/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@shared/components/ui/card';
 import { Input } from '@shared/components/ui/form/input';
-import { Bot, MessageCircle, Send, X, ArrowRight, Wand } from 'lucide-react';
+import { ArrowRight, Bot, MessageCircle, Send, Wand, X } from 'lucide-react';
+import { useProgressTrackerManager } from '../../../hooks/useProgressTrackerManager';
+import {
+  createEmptyProgressTrackerData,
+  useProgressTrackerStore,
+  ChatbotStage,
+} from '../../../store/progressTrackerStore';
+import { useWeddingStore } from '../../../store/sessionStore';
+import ChatTabContent from './ChatTabContent';
 
-type ChatProps = { selectedWedding?: any | null };
+type ChatProps = {
+  selectedWedding?: any | null;
+  currentStage: ChatbotStage;
+  firstPurchaseMade: boolean;
+  onNextCategory: () => void;
+};
 
-export default function Chat({ selectedWedding }: ChatProps) {
+export default function Chat({
+  selectedWedding,
+  currentStage,
+  firstPurchaseMade,
+  onNextCategory,
+}: ChatProps) {
   const { selectedWeddingId } = useWeddingStore();
 
   // Get wedding-specific data
@@ -26,10 +37,10 @@ export default function Chat({ selectedWedding }: ChatProps) {
       : createEmptyProgressTrackerData(0),
   );
 
-  const [open, setOpen] = useState(progressData.stage !== 'generated');
+  const [open, setOpen] = useState(currentStage !== 'CHECKLIST_GENERATED');
   const viewportRef = useRef<HTMLDivElement | null>(null);
 
-  const { isLoading, handleNextCategory, handleChecklist, handleWeddingAssistant } =
+  const { isLoading, handleChecklist, handleWeddingAssistant } =
     useProgressTrackerManager(selectedWeddingId);
 
   const [input, setInput] = useState('');
@@ -45,21 +56,30 @@ export default function Chat({ selectedWedding }: ChatProps) {
     el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
   }, [progressData.messages]);
 
+  // Button logic based on current stage
   const showNextButton =
-    progressData.stage === 'introduction' &&
-    progressData.categoryIntro &&
-    !progressData.categoryIntro.isIntroductionComplete;
-  const showPlanningButton =
-    progressData.stage === 'planning' &&
-    progressData.categoryIntro &&
-    progressData.categoryIntro.isIntroductionComplete;
-  const showSendButton = progressData.stage === 'generated';
+    currentStage !== 'CHECKLIST_GENERATED' && currentStage !== 'ADDITIONAL_DETAILS';
+  const showGenerateButton = currentStage === 'ADDITIONAL_DETAILS';
+  const showSendButton = currentStage === 'CHECKLIST_GENERATED';
+
+  // Check if we're transitioning from INITIAL_PLANNING to CREATING_THE_FOUNDATION and disable button if no first purchase
+  const shouldDisableNextButton = currentStage === 'INITIAL_PLANNING' && !firstPurchaseMade;
+
+  // Get button label
+  const getButtonLabel = () => {
+    if (currentStage === 'ADDITIONAL_DETAILS') {
+      return 'Generate Checklist';
+    }
+    return 'Next Category';
+  };
 
   // Debug logging
-  console.log('Debug - Stage:', progressData.stage);
-  console.log('Debug - CategoryIntro:', progressData.categoryIntro);
+  console.log('Debug - Current Stage:', currentStage);
   console.log('Debug - Show Next Button:', showNextButton);
+  console.log('Debug - Show Generate Button:', showGenerateButton);
   console.log('Debug - Show Send Button:', showSendButton);
+  console.log('Debug - First Purchase Made:', firstPurchaseMade);
+  console.log('Debug - Should Disable Next Button:', shouldDisableNextButton);
 
   return (
     <div className="fixed right-6 bottom-6 z-50">
@@ -75,8 +95,8 @@ export default function Chat({ selectedWedding }: ChatProps) {
       )}
 
       {open && (
-        <div className="w-[1000px] max-w-[92vw]">
-          <Card className="border-primary/30 flex h-[80vh] flex-col border-2 bg-white shadow-xl">
+        <div className="w-[800px] max-w-[80vw]">
+          <Card className="border-primary/30 flex h-[60vh] flex-col border-2 bg-white shadow-xl">
             <CardHeader className="flex flex-shrink-0 flex-row items-center justify-between space-y-0 rounded-t-xl border-b border-gray-300 bg-white px-4 py-3">
               <div className="flex items-center gap-2">
                 <span className="bg-brand-500 inline-flex h-8 w-8 items-center justify-center rounded-full text-white">
@@ -87,9 +107,9 @@ export default function Chat({ selectedWedding }: ChatProps) {
                     Wedding Planner Assistant
                   </span>
                   <span className="text-xs text-black/60 dark:text-white/60">
-                    {progressData.stage === 'introduction'
-                      ? 'Learning about your wedding checklist'
-                      : 'Here to customize your wedding planning'}
+                    {currentStage === 'CHECKLIST_GENERATED'
+                      ? 'Here to help with your wedding planning'
+                      : 'Guiding you through your wedding checklist'}
                   </span>
                 </div>
               </div>
@@ -110,30 +130,40 @@ export default function Chat({ selectedWedding }: ChatProps) {
                 messages={progressData.messages}
                 isLoading={isLoading}
                 loadingText={
-                  progressData.stage === 'introduction'
-                    ? 'Preparing next category...'
-                    : progressData.stage === 'planning'
-                      ? 'Updating your checklist...'
-                      : 'Let me think...'
+                  currentStage === 'ADDITIONAL_DETAILS'
+                    ? 'Generating your personalized checklist...'
+                    : currentStage === 'CHECKLIST_GENERATED'
+                      ? 'Let me think...'
+                      : 'Preparing next category...'
                 }
               />
             </CardContent>
 
             <CardFooter className="flex-shrink-0 px-4 pt-0 pb-4">
               {showNextButton && (
-                <div className="flex w-full justify-center">
+                <div className="flex w-full flex-col items-center gap-2">
                   <Button
-                    onClick={handleNextCategory}
-                    disabled={isLoading}
-                    className="bg-brand-500 hover:bg-brand-700 text-white"
+                    onClick={onNextCategory}
+                    disabled={isLoading || shouldDisableNextButton}
+                    className="bg-brand-500 hover:bg-brand-700 text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    title={
+                      shouldDisableNextButton
+                        ? 'Make your first purchase to unlock Creating the Foundation stage'
+                        : undefined
+                    }
                   >
                     <ArrowRight className="mr-2 h-4 w-4" />
-                    Next Category
+                    {getButtonLabel()}
                   </Button>
+                  {shouldDisableNextButton && (
+                    <p className="text-center text-xs text-gray-500">
+                      Complete your first purchase to continue to the next stage
+                    </p>
+                  )}
                 </div>
               )}
 
-              {showPlanningButton && (
+              {showGenerateButton && (
                 <form
                   className="flex w-full items-center gap-2"
                   onSubmit={(e) => {

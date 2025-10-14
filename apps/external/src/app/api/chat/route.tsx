@@ -16,7 +16,7 @@ export type ChecklistItem = z.infer<typeof ChecklistItemSchema>;
 
 export const ChecklistResponseSchema = z.object({
   message: z.string(),
-  checklist: z.array(ChecklistItemSchema).min(1).max(50),
+  checklist: z.array(ChecklistItemSchema).min(0).max(20), // Allow 0-20 new items
 });
 export type ChecklistResponse = z.infer<typeof ChecklistResponseSchema>;
 
@@ -74,23 +74,25 @@ export async function POST(req: Request) {
             temperature: 0.2,
             system:
               'You are a professional wedding planning assistant for Knotly. You help couples customize their wedding planning checklist by adding relevant items based on their specific needs, preferences, and requirements.\n\n' +
-              'INSTRUCTIONS:\n' +
+              'CRITICAL INSTRUCTIONS:\n' +
               "Based on the user's input and requirements, please:\n" +
-              '1. Keep ALL existing checklist items unchanged\n' +
-              "2. Add new relevant checklist items that address the user's specific needs\n" +
-              '3. Ensure each new item has a unique ID, title, description, appropriate category, and monthsBeforeWedding value\n' +
-              '4. Categories should be one of: "Getting Started", "Initial Planning", "Creating the Foundation", "Detailed Planning", "During the Wedding", "After the Wedding", "Additional Details"\n' +
-              '5. monthsBeforeWedding should be a realistic timeline (-36 to 36 months; negative values represent months after the wedding day)\n' +
-              "6. Provide a helpful response message explaining what you've added\n\n" +
+              '1. ONLY return NEW checklist items that should be ADDED to the existing checklist\n' +
+              '2. DO NOT include any existing checklist items in your response\n' +
+              "3. ONLY generate items that are relevant to the user's specific request\n" +
+              '4. Each new item must have a unique ID, title, description, appropriate category, and monthsBeforeWedding value\n' +
+              '5. Categories should be one of: "Getting Started", "Initial Planning", "Creating the Foundation", "Detailed Planning", "During the Wedding", "After the Wedding", "Additional Details"\n' +
+              '6. monthsBeforeWedding should be a realistic timeline (-36 to 36 months; negative values represent months after the wedding day)\n' +
+              "7. Provide a helpful response message explaining what you've added\n\n" +
+              'IMPORTANT: Your response should contain ONLY the NEW items to be added, not the entire checklist!\n\n' +
               'RESPONSE FORMAT:\n' +
               'You MUST return a JSON object with this EXACT structure:\n' +
               '{\n' +
-              '  "message": "string - Your helpful explanation of what was added",\n' +
+              '  "message": "string - Your helpful explanation of what NEW items were added",\n' +
               '  "checklist": [\n' +
               '    {\n' +
-              '      "id": "string - Unique identifier",\n' +
-              '      "title": "string - Item title",\n' +
-              '      "description": "string - Detailed description",\n' +
+              '      "id": "string - Unique identifier for NEW item",\n' +
+              '      "title": "string - NEW item title",\n' +
+              '      "description": "string - Detailed description of NEW item",\n' +
               '      "category": "string - Must be one of the 7 categories listed above",\n' +
               '      "monthsBeforeWedding": number - Integer between -36 to 36 months,\n' +
               '      "completed": false\n' +
@@ -98,14 +100,13 @@ export async function POST(req: Request) {
               '  ]\n' +
               '}\n\n' +
               'REQUIREMENTS:\n' +
-              '- The checklist array must contain between 1 and 50 items\n' +
-              '- Include ALL existing items plus new ones\n' +
+              '- Return ONLY NEW items (1-20 items maximum per request)\n' +
               '- Each item\'s "id" must be a string\n' +
               '- Each item\'s "monthsBeforeWedding" must be an integer between -36 to 36\n' +
               '- Each item\'s "completed" should be false for new items\n' +
               '- Do not include any extra fields not specified in the schema\n' +
               '- Do not wrap the response in markdown code blocks\n\n' +
-              `EXISTING CHECKLIST (${checklist?.length || 0} items):\n${JSON.stringify(checklist, null, 2)}`,
+              `EXISTING CHECKLIST (${checklist?.length || 0} items - DO NOT INCLUDE THESE):\n${JSON.stringify(checklist, null, 2)}`,
             prompt: `User's request: ${userText}`,
             schema: ChecklistResponseSchema,
           }),
