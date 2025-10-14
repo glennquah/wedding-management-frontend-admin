@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
 import { CashGiftsService } from '@shared/api/services/CashGiftsService';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { Button } from '@shared/components/ui/button';
-import { toast } from 'sonner';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/ui/card';
 import Image from 'next/image';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 interface CashGiftData {
   weddingId: number;
@@ -152,9 +152,9 @@ export default function ConfirmCashGiftPage() {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">PayNow QR Code</CardTitle>
+          <CardTitle className="text-2xl text-center">PayLah QR Code</CardTitle>
           <CardDescription className="text-center">
-            Please scan to PayNow ${cashGiftData.amount.toFixed(2)}
+            Please scan to PayLah ${cashGiftData.amount.toFixed(2)}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
