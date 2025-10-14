@@ -58,16 +58,15 @@ export function useAttendanceManager(
         }),
       );
 
-      // Show success toasts for each change
-      results.forEach((result) => {
-        if (result) {
-          if (result.isMarkingPresent) {
-            toast.success('Attendance marked successfully');
-          } else {
-            toast.success('Attendance unmarked successfully');
-          }
-        }
-      });
+      // Count successful changes
+      const successfulChanges = results.filter((result) => result !== null).length;
+
+      // Show single success toast
+      if (successfulChanges > 0) {
+        toast.success(
+          `Successfully updated attendance for ${successfulChanges} guest${successfulChanges === 1 ? '' : 's'}`
+        );
+      }
 
       setAttendanceChanges(new Set());
       setShowConfirmDialog(false);
