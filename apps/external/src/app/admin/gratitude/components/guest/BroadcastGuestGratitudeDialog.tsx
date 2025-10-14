@@ -35,7 +35,7 @@ export const BroadcastGuestGratitudeDialog = ({
     try {
       await EmailNotificationService.emailNotificationControllerBroadcastGuestGratitude(weddingId);
 
-      toast.success(`Guest gratitude cards sent to guests!`);
+      toast.success('Guest gratitude cards sent to guests!');
       onOpenChange(false);
       onComplete?.();
     } catch (error) {

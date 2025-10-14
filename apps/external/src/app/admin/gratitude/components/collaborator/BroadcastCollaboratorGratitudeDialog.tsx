@@ -37,7 +37,7 @@ export const BroadcastCollaboratorGratitudeDialog = ({
         weddingId,
       );
 
-      toast.success(`Collaborator gratitude cards sent to collaborators!`);
+      toast.success('Collaborator gratitude cards sent to collaborators!');
       onOpenChange(false);
       onComplete?.();
     } catch (error) {
