@@ -4,10 +4,6 @@
 /* eslint-disable */
 export type InviteCollaboratorDto = {
     /**
-     * Guest ID to invite as collaborator
-     */
-    guestId: number;
-    /**
      * Email of the guest being invited
      */
     email: string;

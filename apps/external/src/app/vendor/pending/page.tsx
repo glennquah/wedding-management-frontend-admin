@@ -46,10 +46,12 @@ export default function VendorPendingPage() {
             <Card className="bg-brand-50 border-brand-200">
               <CardContent className="pt-6">
                 <p className="text-gray-700 text-center mb-4">
-                  Thank you for registering with us! Your vendor account has been submitted and is currently being reviewed by our team.
+                  Thank you for registering with us! Your vendor account has been submitted and is
+                  currently being reviewed by our team.
                 </p>
                 <p className="text-gray-600 text-center text-sm">
-                  We&apos;ll carefully review your information to ensure the best experience for our couples. This process typically takes 1-2 business days.
+                  We&apos;ll carefully review your information to ensure the best experience for our
+                  couples. This process typically takes 1-2 business days.
                 </p>
               </CardContent>
             </Card>
@@ -62,7 +64,9 @@ export default function VendorPendingPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900">Account Created</h3>
-                  <p className="text-sm text-gray-600">Your vendor account has been successfully created.</p>
+                  <p className="text-sm text-gray-600">
+                    Your vendor account has been successfully created.
+                  </p>
                 </div>
               </div>
 
@@ -72,7 +76,9 @@ export default function VendorPendingPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900">Under Review</h3>
-                  <p className="text-sm text-gray-600">Our team is reviewing your application and credentials.</p>
+                  <p className="text-sm text-gray-600">
+                    Our team is reviewing your application and credentials.
+                  </p>
                 </div>
               </div>
 
@@ -83,7 +89,9 @@ export default function VendorPendingPage() {
                 <div>
                   <h3 className="font-semibold text-gray-900">Email Notification</h3>
                   <p className="text-sm text-gray-600">
-                    You&apos;ll receive an email at <span className="font-medium text-brand-600">{session?.user?.email}</span> once approved.
+                    You&apos;ll receive an email at{' '}
+                    <span className="font-medium text-brand-600">{session?.user?.email}</span> once
+                    approved.
                   </p>
                 </div>
               </div>
@@ -94,7 +102,10 @@ export default function VendorPendingPage() {
               <CardContent className="pt-6">
                 <p className="text-sm text-brand-800 text-center">
                   <strong>Need help?</strong> Contact us at{' '}
-                  <a href="mailto:support@knotly.com" className="underline font-medium text-brand-600 hover:text-brand-700">
+                  <a
+                    href="mailto:support@knotly.com"
+                    className="underline font-medium text-brand-600 hover:text-brand-700"
+                  >
                     support@knotly.com
                   </a>
                 </p>

@@ -1,17 +1,17 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 import { VendorsService } from '@shared/api';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   CalendarDays,
   CircleDollarSign,
+  ClipboardList,
   FileSpreadsheet,
-  LayoutDashboard,
-  Settings,
-  Users,
+  LayoutDashboard
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
 
 export default function VendorSidebar() {
   const { data: session } = useSession();
@@ -23,7 +23,11 @@ export default function VendorSidebar() {
         if (!session?.user?.id) return;
 
         const vendor = await VendorsService.vendorControllerGetVendor(session.user.id);
-        const hasDetails = !!(vendor.serviceOffered && vendor.styleOffered && vendor.weddingTypes?.length);
+        const hasDetails = !!(
+          vendor.serviceOffered &&
+          vendor.styleOffered &&
+          vendor.weddingTypes?.length
+        );
         setHasVendorDetails(hasDetails);
       } catch (error) {
         console.error('Error checking vendor details:', error);
@@ -61,9 +65,9 @@ export default function VendorSidebar() {
       sectionHeader: 'Management',
       items: [
         {
-          title: 'Customers',
-          href: '/customers',
-          icon: Users,
+          title: 'Manage Orders',
+          href: '/orders',
+          icon: ClipboardList,
           disabled: !hasVendorDetails,
         },
         {
@@ -86,7 +90,7 @@ export default function VendorSidebar() {
     <AppSidebar
       tabs={tabs}
       signOut={() => signOut({ callbackUrl: window.location.origin, redirect: false })}
-      basePath='vendor'
+      basePath="vendor"
     />
   );
 }

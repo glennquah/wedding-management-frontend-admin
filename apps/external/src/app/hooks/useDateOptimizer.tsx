@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useWeddingManager } from './useWeddingManager';
 import {
@@ -34,7 +34,7 @@ export type DateRecommendation = DateRecommendationDto;
 
 export function useDateOptimizer() {
   const { data: session } = useSession();
-  const { selectedWeddingId } = useWeddingManager();
+  const { selectedWeddingId, refetch, wedding } = useWeddingManager();
 
   // State
   const [guests, setGuests] = useState<GuestResponseDto[]>([]);
@@ -51,12 +51,18 @@ export function useDateOptimizer() {
   const [earliestDate, setEarliestDate] = useState<string>('');
   const [latestDate, setLatestDate] = useState<string>('');
 
-  // Authentication setup
-  const setupAuth = useCallback(() => {
-    if (session?.backendTokens?.accessToken) {
-      OpenAPI.TOKEN = session.backendTokens.accessToken;
-    }
+  // Use ref to access latest session without triggering re-renders
+  const sessionRef = useRef(session);
+  useEffect(() => {
+    sessionRef.current = session;
   }, [session]);
+
+  // Authentication setup - stable function
+  const setupAuth = useCallback(() => {
+    if (sessionRef.current?.backendTokens?.accessToken) {
+      OpenAPI.TOKEN = sessionRef.current.backendTokens.accessToken;
+    }
+  }, []);
 
   // Check calendar connection status for an attendee or admin
   const checkCalendarStatus = useCallback(
@@ -67,7 +73,7 @@ export function useDateOptimizer() {
       isConnected: boolean;
       accessStatus: CalendarConnectionStatusDto.accessStatus;
     }> => {
-      if (!session?.backendTokens?.accessToken) {
+      if (!sessionRef.current?.backendTokens?.accessToken) {
         return {
           isConnected: false,
           accessStatus: CalendarConnectionStatusDto.accessStatus.NOT_REQUESTED,
@@ -89,12 +95,12 @@ export function useDateOptimizer() {
         };
       }
     },
-    [session, setupAuth],
+    [setupAuth],
   );
 
   // Fetch collaborators, guests, and key attendees
   const fetchData = useCallback(async () => {
-    if (!selectedWeddingId || !session?.backendTokens?.accessToken) return;
+    if (!selectedWeddingId || !sessionRef.current?.backendTokens?.accessToken) return;
 
     try {
       setLoading(true);
@@ -151,11 +157,11 @@ export function useDateOptimizer() {
     } finally {
       setLoading(false);
     }
-  }, [selectedWeddingId, session, setupAuth, checkCalendarStatus]);
+  }, [selectedWeddingId, setupAuth, checkCalendarStatus]);
 
   // Fetch saved preferences
   const fetchPreferences = useCallback(async () => {
-    if (!selectedWeddingId || !session?.backendTokens?.accessToken) return;
+    if (!selectedWeddingId || !sessionRef.current?.backendTokens?.accessToken) return;
 
     try {
       setupAuth();
@@ -182,13 +188,19 @@ export function useDateOptimizer() {
       setLatestDate('2025-12-31');
       setPreferredDays(['Friday', 'Saturday', 'Sunday']);
     }
-  }, [selectedWeddingId, session, setupAuth]);
+  }, [selectedWeddingId, setupAuth]);
 
   // Fetch data on mount
+  // Use a ref to prevent infinite loops
+  const dataFetched = useRef(false);
+
   useEffect(() => {
-    fetchData();
-    fetchPreferences();
-  }, [fetchData, fetchPreferences]);
+    if (selectedWeddingId && session?.backendTokens?.accessToken && !dataFetched.current) {
+      dataFetched.current = true;
+      fetchData();
+      fetchPreferences();
+    }
+  }, [selectedWeddingId, session?.backendTokens?.accessToken]); // Remove fetchData and fetchPreferences from dependencies
 
   // Auto-save preferences when they change (debounced)
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
@@ -240,7 +252,7 @@ export function useDateOptimizer() {
   // Fetch availability data for the selected month
   const fetchAvailability = useCallback(
     async (startDate?: string, endDate?: string) => {
-      if (!selectedWeddingId || !session?.backendTokens?.accessToken) return [];
+      if (!selectedWeddingId || !sessionRef.current?.backendTokens?.accessToken) return [];
       if (keyAttendees.length === 0 && mainCouple.length === 0) return [];
 
       try {
@@ -253,7 +265,10 @@ export function useDateOptimizer() {
 
         if (startDate && endDate) {
           start = new Date(startDate);
+          start.setUTCHours(0, 0, 0, 0);
+
           end = new Date(endDate);
+          end.setUTCHours(23, 59, 59, 999);
         } else {
           // Get start and end dates for the month (with buffer)
           start = new Date(selectedMonth);
@@ -296,12 +311,33 @@ export function useDateOptimizer() {
         setIsLoadingAvailability(false);
       }
     },
-    [selectedWeddingId, session, keyAttendees, mainCouple, selectedMonth, setupAuth],
+    [selectedWeddingId, keyAttendees, mainCouple, selectedMonth, setupAuth],
   );
+
+  const parseOffsetMinutes = useMemo(
+    () =>
+      (isoString: string | undefined | null): number | undefined => {
+        if (!isoString) return undefined;
+        if (isoString.endsWith('Z')) return 0;
+
+        const match = isoString.match(/([+-])(\d{2}):?(\d{2})$/);
+        if (!match) return undefined;
+
+        const sign = match[1] === '+' ? 1 : -1;
+        const hours = parseInt(match[2], 10);
+        const minutes = parseInt(match[3], 10);
+        return sign * (hours * 60 + minutes);
+      },
+    [],
+  );
+
+  const applyOffset = useCallback((date: Date, offsetMinutes: number) => {
+    return new Date(date.getTime() + offsetMinutes * 60 * 1000);
+  }, []);
 
   // Run analysis
   const handleRunAnalysis = useCallback(async () => {
-    if (!selectedWeddingId || !session?.backendTokens?.accessToken) return;
+    if (!selectedWeddingId || !sessionRef.current?.backendTokens?.accessToken) return;
 
     setHasRunAnalysis(true);
     setIsLoadingAvailability(true);
@@ -316,15 +352,49 @@ export function useDateOptimizer() {
       const unavailabilityMap: Record<number, string[]> = {};
 
       for (const attendee of freshAvailabilityData) {
-        const unavailableDates = attendee.busySlots
-          .map((slot) => {
-            // Extract date part only (YYYY-MM-DD)
-            return slot.start?.split('T')[0] || '';
-          })
-          .filter(Boolean);
-        // Remove duplicates
-        unavailabilityMap[attendee.attendeeId] = [...new Set(unavailableDates)];
+        const unavailableDates = new Set<string>();
+
+        for (const slot of attendee.busySlots) {
+          if (!slot.start || !slot.end) continue;
+
+          const start = new Date(slot.start);
+          const end = new Date(slot.end);
+          const offset = parseOffsetMinutes(slot.start) ?? parseOffsetMinutes(slot.end) ?? 0;
+          const normalizedEnd = new Date(end);
+          // Treat end timestamps as exclusive so midnight endpoints don't mark the next day.
+          if (normalizedEnd.getTime() > start.getTime()) {
+            normalizedEnd.setMilliseconds(normalizedEnd.getMilliseconds() - 1);
+          }
+
+          const adjustedStart = applyOffset(start, offset);
+          const adjustedEnd = applyOffset(normalizedEnd, offset);
+
+          const current = new Date(
+            Date.UTC(
+              adjustedStart.getUTCFullYear(),
+              adjustedStart.getUTCMonth(),
+              adjustedStart.getUTCDate(),
+            ),
+          );
+          const endDate = new Date(
+            Date.UTC(
+              adjustedEnd.getUTCFullYear(),
+              adjustedEnd.getUTCMonth(),
+              adjustedEnd.getUTCDate(),
+            ),
+          );
+
+          // Iterate through each day the event touches, in a timezone-agnostic way
+          while (current <= endDate) {
+            const unavailableDate = current.toISOString().slice(0, 10);
+            unavailableDates.add(unavailableDate);
+            current.setUTCDate(current.getUTCDate() + 1);
+          }
+        }
+
+        unavailabilityMap[attendee.attendeeId] = Array.from(unavailableDates);
       }
+      console.log('Final unavailability map:', JSON.stringify(unavailabilityMap, null, 2));
 
       // Separate main couple and key attendees
       const mainCoupleUnavailability = mainCouple.map((partner) => ({
@@ -397,7 +467,6 @@ export function useDateOptimizer() {
     }
   }, [
     selectedWeddingId,
-    session,
     setupAuth,
     fetchAvailability,
     mainCouple,
@@ -405,12 +474,14 @@ export function useDateOptimizer() {
     earliestDate,
     latestDate,
     preferredDays,
+    parseOffsetMinutes,
+    applyOffset,
   ]);
 
   // Add key attendee
   const handleAddKeyAttendee = useCallback(
     async (attendee: GuestResponseDto) => {
-      if (!selectedWeddingId || !session?.backendTokens?.accessToken) return;
+      if (!selectedWeddingId || !sessionRef.current?.backendTokens?.accessToken) return;
 
       try {
         setupAuth();
@@ -437,13 +508,13 @@ export function useDateOptimizer() {
         toast.error('Failed to add key attendee');
       }
     },
-    [selectedWeddingId, session, setupAuth, checkCalendarStatus],
+    [selectedWeddingId, setupAuth, checkCalendarStatus],
   );
 
   // Remove key attendee
   const handleRemoveKeyAttendee = useCallback(
     async (id: number) => {
-      if (!selectedWeddingId || !session?.backendTokens?.accessToken) return;
+      if (!selectedWeddingId || !sessionRef.current?.backendTokens?.accessToken) return;
 
       try {
         setupAuth();
@@ -471,13 +542,13 @@ export function useDateOptimizer() {
         toast.error('Failed to remove key attendee');
       }
     },
-    [selectedWeddingId, session, setupAuth, keyAttendees],
+    [selectedWeddingId, setupAuth, keyAttendees],
   );
 
   // Request calendar access
   const handleRequestCalendarAccess = useCallback(
     async (attendee: KeyAttendee | MainCouplePartner, isAdmin: boolean = false) => {
-      if (!selectedWeddingId || !session?.backendTokens?.accessToken) {
+      if (!selectedWeddingId || !sessionRef.current?.backendTokens?.accessToken) {
         toast.error('Unable to request calendar access');
         return;
       }
@@ -519,7 +590,34 @@ export function useDateOptimizer() {
         toast.error('Failed to send calendar access request');
       }
     },
-    [selectedWeddingId, session, setupAuth],
+    [selectedWeddingId, setupAuth],
+  );
+
+  // Select a recommended date
+  const handleSelectDate = useCallback(
+    async (recommendation: DateRecommendation) => {
+      if (!selectedWeddingId || !sessionRef.current?.backendTokens?.accessToken) {
+        toast.error('Could not select date. Please try again.');
+        return;
+      }
+
+      try {
+        setupAuth();
+        await WeddingsService.weddingControllerSetWeddingDate(selectedWeddingId, {
+          date: recommendation.date,
+        });
+
+        await refetch();
+
+        toast.success(
+          `Wedding date successfully set to ${new Date(recommendation.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}!`,
+        );
+      } catch (error) {
+        console.error('Error setting wedding date:', error);
+        toast.error('Failed to set wedding date.');
+      }
+    },
+    [selectedWeddingId, setupAuth, refetch],
   );
 
   // Modal controls
@@ -545,11 +643,16 @@ export function useDateOptimizer() {
 
   // Refetch availability when month changes
   useEffect(() => {
-    if (hasRunAnalysis) {
+    if (hasRunAnalysis && selectedWeddingId && session?.backendTokens?.accessToken) {
       fetchAvailability();
     }
-  }, [selectedMonth, hasRunAnalysis, fetchAvailability]);
-
+  }, [
+    selectedMonth,
+    hasRunAnalysis,
+    selectedWeddingId,
+    session?.backendTokens?.accessToken,
+    fetchAvailability,
+  ]);
   return {
     // Data
     guests,
@@ -564,6 +667,7 @@ export function useDateOptimizer() {
     dateRecommendations,
     earliestDate,
     latestDate,
+    wedding,
 
     // Modal states
     isAddAttendeeModalOpen,
@@ -574,6 +678,7 @@ export function useDateOptimizer() {
     handleRemoveKeyAttendee,
     handleRequestCalendarAccess,
     resetAnalysis,
+    handleSelectDate,
     handleMonthChange,
     setPreferredDays,
     setEarliestDate,

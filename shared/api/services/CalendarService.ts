@@ -35,12 +35,14 @@ export class CalendarService {
      * Get Google OAuth authorization URL for a user (admin or guest)
      * @param userId
      * @param isAdmin Whether the user is an admin (true) or guest (false)
+     * @param returnUrl URL path to redirect to after OAuth callback (e.g., /admin/date-optimizer)
      * @returns any Authorization URL generated
      * @throws ApiError
      */
     public static calendarControllerGetAuthUrl(
         userId: number,
         isAdmin?: boolean,
+        returnUrl?: string,
     ): CancelablePromise<{
         authUrl?: string;
     }> {
@@ -52,6 +54,7 @@ export class CalendarService {
             },
             query: {
                 'isAdmin': isAdmin,
+                'returnUrl': returnUrl,
             },
         });
     }

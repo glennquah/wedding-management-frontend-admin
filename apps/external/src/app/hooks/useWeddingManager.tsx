@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useWeddingStore } from '@/app/store/sessionStore';
 import { AdminsService, OpenAPI, WeddingResponseDto, WeddingsService } from '@shared/api';
@@ -20,12 +20,18 @@ export function useWeddingManager() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Authentication setup
-  const setupAuth = useCallback(() => {
-    if (session?.backendTokens?.accessToken) {
-      OpenAPI.TOKEN = session.backendTokens.accessToken;
-    }
+  // Use ref to access latest session without triggering re-renders
+  const sessionRef = useRef(session);
+  useEffect(() => {
+    sessionRef.current = session;
   }, [session]);
+
+  // Authentication setup - stable function
+  const setupAuth = useCallback(() => {
+    if (sessionRef.current?.backendTokens?.accessToken) {
+      OpenAPI.TOKEN = sessionRef.current.backendTokens.accessToken;
+    }
+  }, []);
 
   // Fetch all user weddings
   const fetchUserWeddings = useCallback(async () => {
@@ -130,11 +136,15 @@ export function useWeddingManager() {
   }, [setupAuth, selectedWeddingId, setMainWeddingId, setSelectedWeddingId, setWeddings]);
 
   // Initialize when session is available
+  // Use a ref to track if we've already initialized to prevent infinite loops
+  const hasInitialized = useRef(false);
+
   useEffect(() => {
-    if (status === 'authenticated' && session) {
+    if (status === 'authenticated' && session && !hasInitialized.current) {
+      hasInitialized.current = true;
       fetchWedding();
     }
-  }, [status, session, fetchWedding]);
+  }, [status, session]); // Remove fetchWedding from dependencies to prevent loop
 
   return {
     wedding,

@@ -9,7 +9,6 @@ import {
   AuthService,
   BudgetBucket,
   GuestCountBucket,
-  GuestResponseDto,
   RequestResetPasswordDto,
   UserRole,
   VendorResponseDto,
@@ -81,15 +80,19 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
   const [partnerName, setPartnerName] = useState('');
   const [partnerEmail, setPartnerEmail] = useState('');
   const [isInvitingPartner, setIsInvitingPartner] = useState(false);
-  const [partnerToRemove, setPartnerToRemove] = useState<number | null>(null);
+  const [partnerPendingRemoval, setPartnerPendingRemoval] = useState<Collaborator | null>(null);
+  const [isRemovingPartner, setIsRemovingPartner] = useState(false);
 
   // Collaborator state
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
-  const [collaboratorSearch, setCollaboratorSearch] = useState('');
-  const [showCollaboratorDropdown, setShowCollaboratorDropdown] = useState(false);
   const [isInvitingCollaborator, setIsInvitingCollaborator] = useState(false);
+  const [collaboratorName, setCollaboratorName] = useState('');
+  const [collaboratorEmail, setCollaboratorEmail] = useState('');
   const [collaboratorsToRemove, setCollaboratorsToRemove] = useState<number[]>([]);
 
+  const [collaboratorPendingRemoval, setCollaboratorPendingRemoval] = useState<Collaborator | null>(
+    null,
+  );
   // Determine the actual user ID and role to fetch
   const targetUserId = userId;
   const targetUserRole = userRole;
@@ -110,59 +113,61 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     }
   }, [targetUserRole, userData, fetchMainWedding]);
 
+  // Reusable function to fetch partner
+  const fetchPartner = async () => {
+    if (weddingData?.id && userData) {
+      try {
+        const mainCouple = await WeddingsService.weddingControllerGetMainCouple(weddingData.id);
+        // Filter out the current user to get the partner
+        const partnerData = mainCouple.find((member) => member.id !== userData.id);
+        if (partnerData && partnerData.id && partnerData.name && partnerData.email) {
+          setPartner({
+            id: partnerData.id,
+            name: partnerData.name,
+            email: partnerData.email,
+            accountCreated: true,
+          });
+        } else {
+          setPartner(null);
+        }
+      } catch (error) {
+        console.error('Error fetching partner:', error);
+      }
+    }
+  };
+
+  // Reusable function to fetch collaborators
+  const fetchCollaborators = async () => {
+    if (weddingData?.id) {
+      try {
+        const collaboratorsList = await AdminsService.adminControllerGetCollaborators(
+          weddingData.id,
+        );
+        // Filter out the partner from collaborators list
+        const filteredCollaborators = collaboratorsList.filter(
+          (c) => !partner || c.id !== partner.id,
+        );
+        setCollaborators(
+          filteredCollaborators.map((c) => ({
+            id: c.id,
+            name: c.name,
+            email: c.email,
+            accountCreated: true, // If they're in the system, account exists
+          })),
+        );
+      } catch (error) {
+        console.error('Error fetching collaborators:', error);
+      }
+    }
+  };
+
   // Fetch partner (main couple) when wedding data is loaded
   useEffect(() => {
-    const fetchPartner = async () => {
-      if (weddingData?.id && userData) {
-        try {
-          const mainCouple = await WeddingsService.weddingControllerGetMainCouple(weddingData.id);
-          // Filter out the current user to get the partner
-          const partnerData = mainCouple.find((member) => member.id !== userData.id);
-          if (partnerData && partnerData.id && partnerData.name && partnerData.email) {
-            setPartner({
-              id: partnerData.id,
-              name: partnerData.name,
-              email: partnerData.email,
-              accountCreated: true,
-            });
-          } else {
-            setPartner(null);
-          }
-        } catch (error) {
-          console.error('Error fetching partner:', error);
-        }
-      }
-    };
-
     fetchPartner();
   }, [weddingData?.id, userData]);
 
   // Fetch collaborators when wedding data is loaded
   useEffect(() => {
-    const fetchCollaborators = async () => {
-      if (weddingData?.id) {
-        try {
-          const collaboratorsList = await AdminsService.adminControllerGetCollaborators(
-            weddingData.id,
-          );
-          // Filter out the partner from collaborators list
-          const filteredCollaborators = collaboratorsList.filter(
-            (c) => !partner || c.id !== partner.id
-          );
-          setCollaborators(
-            filteredCollaborators.map((c) => ({
-              id: c.id,
-              name: c.name,
-              email: c.email,
-              accountCreated: true, // If they're in the system, account exists
-            })),
-          );
-        } catch (error) {
-          console.error('Error fetching collaborators:', error);
-        }
-      }
-    };
-
     fetchCollaborators();
   }, [weddingData?.id, partner]);
 
@@ -170,25 +175,13 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
   const handleEnhancedSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // First handle the profile update
-    await handleSubmit(e);
+    // First handle the profile update with wedding validation
+    const isProfileUpdateSuccessful = await handleSubmit(e, weddingFormData);
 
-    // Then update wedding data if admin and wedding exists
-    if (targetUserRole === UserRole.ADMIN && weddingData) {
+    // Only update wedding data if profile update was successful and user is admin with wedding data
+    if (isProfileUpdateSuccessful && targetUserRole === UserRole.ADMIN && weddingData) {
       try {
         await updateWeddingProfile();
-
-        // Remove partner if marked for deletion
-        if (partnerToRemove !== null) {
-          try {
-            await AdminsService.adminControllerRemovePartner(weddingData.id, partnerToRemove);
-            setPartnerToRemove(null);
-            toast.success('Partner removed successfully');
-          } catch (error) {
-            console.error(`Error removing partner ${partnerToRemove}:`, error);
-            toast.error('Failed to remove partner. Please try again.');
-          }
-        }
 
         // Remove collaborators that were marked for deletion
         if (collaboratorsToRemove.length > 0) {
@@ -205,6 +198,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
         }
       } catch (error) {
         console.error('Error updating wedding profile:', error);
+        toast.error('Failed to update wedding details');
       }
     }
   };
@@ -214,7 +208,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     handleCancel();
     resetWeddingForm();
     // Reset partner to remove
-    setPartnerToRemove(null);
+    setPartnerPendingRemoval(null);
     // Reset partner input fields
     setPartnerName('');
     setPartnerEmail('');
@@ -222,45 +216,6 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     setCollaboratorsToRemove([]);
     // Restore partner and collaborators list by refetching
     if (weddingData?.id && userData) {
-      const fetchPartner = async () => {
-        try {
-          const mainCouple = await WeddingsService.weddingControllerGetMainCouple(weddingData.id);
-          const partnerData = mainCouple.find((member) => member.id !== userData.id);
-          if (partnerData && partnerData.id && partnerData.name && partnerData.email) {
-            setPartner({
-              id: partnerData.id,
-              name: partnerData.name,
-              email: partnerData.email,
-              accountCreated: true,
-            });
-          } else {
-            setPartner(null);
-          }
-        } catch (error) {
-          console.error('Error fetching partner:', error);
-        }
-      };
-      const fetchCollaborators = async () => {
-        try {
-          const collaboratorsList = await AdminsService.adminControllerGetCollaborators(
-            weddingData.id,
-          );
-          // Filter out the partner from collaborators list
-          const filteredCollaborators = collaboratorsList.filter(
-            (c) => !partner || c.id !== partner.id
-          );
-          setCollaborators(
-            filteredCollaborators.map((c) => ({
-              id: c.id,
-              name: c.name,
-              email: c.email,
-              accountCreated: true,
-            })),
-          );
-        } catch (error) {
-          console.error('Error fetching collaborators:', error);
-        }
-      };
       fetchPartner();
       fetchCollaborators();
     }
@@ -284,6 +239,29 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
       console.error('Failed to send password reset email:', error);
       toast.error('Failed to send password reset email. Please try again.');
     }
+  };
+
+  const handleRemoveCollaboratorClick = (collaborator: Collaborator) => {
+    setCollaboratorPendingRemoval(collaborator);
+  };
+
+  const closeCollaboratorRemovalModal = () => {
+    setCollaboratorPendingRemoval(null);
+  };
+
+  const handleConfirmRemoveCollaborator = () => {
+    if (!collaboratorPendingRemoval) return;
+
+    // Mark collaborator for removal (will be removed on save)
+    setCollaboratorsToRemove([...collaboratorsToRemove, collaboratorPendingRemoval.id]);
+    // Remove from local state immediately for UI feedback
+    setCollaborators(collaborators.filter((c) => c.id !== collaboratorPendingRemoval.id));
+
+    closeCollaboratorRemovalModal();
+  };
+
+  const handleCancelRemoveCollaborator = () => {
+    closeCollaboratorRemovalModal();
   };
 
   // Handle partner invitation
@@ -358,21 +336,41 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
   };
 
   // Handle collaborator invitation
-  const handleInviteCollaborator = async (guest: GuestResponseDto) => {
+  const handleInviteCollaborator = async () => {
     // Prevent double-clicking
     if (isInvitingCollaborator) {
       return;
     }
 
-    // Check if already added
-    if (collaborators.some((c) => c.email === guest.email)) {
-      toast.error('This guest is already added as a collaborator');
+    if (!collaboratorName.trim()) {
+      toast.error('Collaborator name is required');
+      return;
+    }
+    if (!collaboratorEmail.trim()) {
+      toast.error('Collaborator email is required');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(collaboratorEmail)) {
+      toast.error('Please enter a valid email address');
       return;
     }
 
-    // Check if guest has email
-    if (!guest.email) {
-      toast.error('Guest must have an email address to be invited as a collaborator');
+    // Check if already added
+    if (collaborators.some((c) => c.email === collaboratorEmail)) {
+      toast.error('This person is already a collaborator.');
+      return;
+    }
+
+    // Check if it's the partner's email
+    if (partner && partner.email === collaboratorEmail) {
+      toast.error('This person is already the partner.');
+      return;
+    }
+
+    // Check if it's the current user's email
+    if (userData && userData.email === collaboratorEmail) {
+      toast.error('You cannot add yourself as a collaborator.');
       return;
     }
 
@@ -385,9 +383,8 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
 
     try {
       const response = await AdminsService.adminControllerInviteCollaborator({
-        guestId: guest.id,
-        email: guest.email,
-        name: guest.name,
+        email: collaboratorEmail.trim(),
+        name: collaboratorName.trim(),
         weddingId: weddingData.id,
       });
 
@@ -399,14 +396,14 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
       };
 
       setCollaborators([...collaborators, newCollaborator]);
-      setCollaboratorSearch('');
-      setShowCollaboratorDropdown(false);
+      setCollaboratorName('');
+      setCollaboratorEmail('');
 
       if (response.existingAccount) {
-        toast.success(`${guest.name} has been added as a collaborator (existing account)`);
+        toast.success(`${collaboratorName} has been added as a collaborator (existing account)`);
       } else {
         toast.success(
-          `Account created for ${guest.name}. An invitation email will be sent shortly.`,
+          `Account created for ${collaboratorName}. An invitation email will be sent shortly.`,
         );
       }
     } catch (error) {
@@ -417,30 +414,52 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     }
   };
 
-  const handleRemovePartner = (id: number) => {
-    // Mark partner for removal (will be removed on save)
-    setPartnerToRemove(id);
-    // Remove from local state immediately for UI feedback
-    setPartner(null);
+  const handleRemovePartner = (partnerToRemove: Collaborator) => {
+    setPartnerPendingRemoval(partnerToRemove);
   };
 
-  const handleRemoveCollaborator = (id: number) => {
-    // Mark collaborator for removal (will be removed on save)
-    setCollaboratorsToRemove([...collaboratorsToRemove, id]);
-    // Remove from local state immediately for UI feedback
-    setCollaborators(collaborators.filter((c) => c.id !== id));
+  const closePartnerRemovalModal = () => {
+    setPartnerPendingRemoval(null);
+  };
+
+  const handleConfirmRemovePartner = () => {
+    if (!weddingData?.id || !partnerPendingRemoval) {
+      return;
+    }
+
+    setIsRemovingPartner(true);
+    const partnerId = partnerPendingRemoval.id;
+
+    void (async () => {
+      try {
+        await AdminsService.adminControllerRemovePartner(weddingData.id, partnerId);
+        toast.success('Partner removed successfully');
+        setPartner(null);
+        closePartnerRemovalModal();
+      } catch (error) {
+        console.error(`Error removing partner ${partnerId}:`, error);
+        toast.error('Failed to remove partner. Please try again.');
+      } finally {
+        setIsRemovingPartner(false);
+      }
+    })();
+  };
+
+  const handleCancelRemovePartner = () => {
+    if (isRemovingPartner) {
+      return;
+    }
+
+    closePartnerRemovalModal();
+  };
+
+  const handlePartnerRemovalModalChange = (open: boolean) => {
+    if (!open) {
+      handleCancelRemovePartner();
+    }
   };
 
   // Filter guests based on search
-  const filteredGuestsForCollaborator = guests.filter(
-    (guest) =>
-      collaboratorSearch.trim() !== '' &&
-      !collaborators.some((c) => c.id === guest.id) &&
-      !partner ||
-      (partner && guest.email !== partner.email) &&
-      (guest.name.toLowerCase().includes(collaboratorSearch.toLowerCase()) ||
-        (guest.email && guest.email.toLowerCase().includes(collaboratorSearch.toLowerCase()))),
-  );
 
   const renderUserFields = () => {
     if (!userData) return null;
@@ -449,27 +468,39 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
       <>
         {/* Base User Fields */}
         <div className="space-y-2">
-          <label className="text-sm font-medium">Name</label>
+          <label className="text-sm font-medium">Name*</label>
           {isEditing ? (
-            <Input
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              placeholder="Enter your name"
-            />
+            <>
+              <Input
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                placeholder="Enter your name"
+                className={validationErrors.name ? 'border-red-500' : ''}
+              />
+              {validationErrors.name && (
+                <p className="text-red-500 text-sm">{validationErrors.name}</p>
+              )}
+            </>
           ) : (
             <p className="p-3 bg-muted rounded-md">{userData.name}</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Email</label>
+          <label className="text-sm font-medium">Email*</label>
           {isEditing ? (
-            <Input
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              placeholder="Enter your email"
-            />
+            <>
+              <Input
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                placeholder="Enter your email"
+                className={validationErrors.email ? 'border-red-500' : ''}
+              />
+              {validationErrors.email && (
+                <p className="text-red-500 text-sm">{validationErrors.email}</p>
+              )}
+            </>
           ) : (
             <p className="p-3 bg-muted rounded-md">{userData.email}</p>
           )}
@@ -555,16 +586,21 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Service Offered</label>
+              <label className="text-sm font-medium">Service Offered*</label>
               {isEditing ? (
-                <SingleSelectDropdown
-                  options={Object.values(WeddingService)}
-                  selected={formData.serviceOffered}
-                  setSelected={(selected) =>
-                    handleInputChange('serviceOffered', selected as WeddingService)
-                  }
-                  placeholder="Select Wedding Service"
-                />
+                <>
+                  <SingleSelectDropdown
+                    options={Object.values(WeddingService)}
+                    selected={formData.serviceOffered}
+                    setSelected={(selected) =>
+                      handleInputChange('serviceOffered', selected as WeddingService)
+                    }
+                    placeholder="Select Wedding Service"
+                  />
+                  {validationErrors.serviceOffered && (
+                    <p className="text-red-500 text-sm">{validationErrors.serviceOffered}</p>
+                  )}
+                </>
               ) : (
                 <div className="relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between">
                   <span>
@@ -579,16 +615,21 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Style Offered</label>
+              <label className="text-sm font-medium">Style Offered*</label>
               {isEditing ? (
-                <SingleSelectDropdown
-                  options={Object.values(WeddingStyle)}
-                  selected={formData.styleOffered}
-                  setSelected={(selected) =>
-                    handleInputChange('styleOffered', selected as WeddingStyle)
-                  }
-                  placeholder="Select Wedding Style"
-                />
+                <>
+                  <SingleSelectDropdown
+                    options={Object.values(WeddingStyle)}
+                    selected={formData.styleOffered}
+                    setSelected={(selected) =>
+                      handleInputChange('styleOffered', selected as WeddingStyle)
+                    }
+                    placeholder="Select Wedding Style"
+                  />
+                  {validationErrors.styleOffered && (
+                    <p className="text-red-500 text-sm">{validationErrors.styleOffered}</p>
+                  )}
+                </>
               ) : (
                 <div className="relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between">
                   <span>
@@ -603,16 +644,21 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Wedding Types</label>
+              <label className="text-sm font-medium">Wedding Types*</label>
               {isEditing ? (
-                <MultiSelectDropdown
-                  options={Object.values(WeddingType)}
-                  selected={formData.weddingTypes}
-                  setSelected={(selected) =>
-                    handleInputChange('weddingTypes', selected as WeddingType[])
-                  }
-                  placeholder="Select Wedding Types"
-                />
+                <>
+                  <MultiSelectDropdown
+                    options={Object.values(WeddingType)}
+                    selected={formData.weddingTypes}
+                    setSelected={(selected) =>
+                      handleInputChange('weddingTypes', selected as WeddingType[])
+                    }
+                    placeholder="Select Wedding Types"
+                  />
+                  {validationErrors.weddingTypes && (
+                    <p className="text-red-500 text-sm">{validationErrors.weddingTypes}</p>
+                  )}
+                </>
               ) : (
                 <div className="relative rounded-md p-3 min-h-[36px] w-full text-left bg-muted flex items-center justify-between">
                   <span>
@@ -725,13 +771,18 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Wedding Name</label>
+            <label className="text-sm font-medium">Wedding Name*</label>
             {isEditing ? (
-              <Input
-                value={weddingFormData.name}
-                onChange={(e) => handleWeddingInputChange('name', e.target.value)}
-                placeholder="Enter wedding name"
-              />
+              <>
+                <Input
+                  value={weddingFormData.name}
+                  onChange={(e) => handleWeddingInputChange('name', e.target.value)}
+                  placeholder="Enter wedding name"
+                />
+                {validationErrors.weddingName && (
+                  <p className="text-red-500 text-sm">{validationErrors.weddingName}</p>
+                )}
+              </>
             ) : (
               <p className="p-3 bg-muted rounded-md">{weddingData.name}</p>
             )}
@@ -741,13 +792,15 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
             <label className="text-sm font-medium">Wedding Date</label>
             {isEditing ? (
               <Input
-                type="datetime-local"
+                type="date"
                 value={weddingFormData.date}
                 onChange={(e) => handleWeddingInputChange('date', e.target.value)}
               />
             ) : (
               <p className="p-3 bg-muted rounded-md">
-                {weddingData.date ? new Date(weddingData.date).toLocaleDateString() : 'Not set'}
+                {weddingData.date
+                  ? new Date(weddingData.date).toLocaleDateString('en-GB')
+                  : 'Not set'}
               </p>
             )}
           </div>
@@ -766,16 +819,21 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Wedding Type</label>
+            <label className="text-sm font-medium">Wedding Type*</label>
             {isEditing ? (
-              <SingleSelectDropdown
-                options={Object.values(WeddingType)}
-                selected={weddingFormData.weddingType}
-                setSelected={(selected) =>
-                  handleWeddingInputChange('weddingType', selected as WeddingType)
-                }
-                placeholder="Select Wedding Type"
-              />
+              <>
+                <SingleSelectDropdown
+                  options={Object.values(WeddingType)}
+                  selected={weddingFormData.weddingType}
+                  setSelected={(selected) =>
+                    handleWeddingInputChange('weddingType', selected as WeddingType)
+                  }
+                  placeholder="Select Wedding Type"
+                />
+                {validationErrors.weddingType && (
+                  <p className="text-red-500 text-sm">{validationErrors.weddingType}</p>
+                )}
+              </>
             ) : (
               <div className="relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between">
                 <span>
@@ -788,16 +846,21 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Budget Range</label>
+            <label className="text-sm font-medium">Budget Range*</label>
             {isEditing ? (
-              <SingleSelectDropdown
-                options={Object.values(BudgetBucket)}
-                selected={weddingFormData.budgetBucket}
-                setSelected={(selected) =>
-                  handleWeddingInputChange('budgetBucket', selected as BudgetBucket)
-                }
-                placeholder="Select Budget Range"
-              />
+              <>
+                <SingleSelectDropdown
+                  options={Object.values(BudgetBucket)}
+                  selected={weddingFormData.budgetBucket}
+                  setSelected={(selected) =>
+                    handleWeddingInputChange('budgetBucket', selected as BudgetBucket)
+                  }
+                  placeholder="Select Budget Range"
+                />
+                {validationErrors.budgetBucket && (
+                  <p className="text-red-500 text-sm">{validationErrors.budgetBucket}</p>
+                )}
+              </>
             ) : (
               <div className="relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between">
                 <span>
@@ -810,16 +873,46 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Guest Count</label>
+            <label className="text-sm font-medium">Allocated Budget*</label>
             {isEditing ? (
-              <SingleSelectDropdown
-                options={Object.values(GuestCountBucket)}
-                selected={weddingFormData.guestCountBucket}
-                setSelected={(selected) =>
-                  handleWeddingInputChange('guestCountBucket', selected as GuestCountBucket)
-                }
-                placeholder="Select Guest Count Range"
-              />
+              <>
+                <Input
+                  type="number"
+                  value={weddingFormData.allocatedBudget || ''}
+                  onChange={(e) =>
+                    handleWeddingInputChange('allocatedBudget', parseFloat(e.target.value) || 0)
+                  }
+                  placeholder="Enter your allocated budget"
+                  min="0"
+                  step="100"
+                />
+                {validationErrors.allocatedBudget && (
+                  <p className="text-red-500 text-sm">{validationErrors.allocatedBudget}</p>
+                )}
+              </>
+            ) : (
+              <p className="p-3 bg-muted rounded-md">
+                ${weddingData.allocatedBudget ? weddingData.allocatedBudget.toLocaleString() : '0'}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Guest Count*</label>
+            {isEditing ? (
+              <>
+                <SingleSelectDropdown
+                  options={Object.values(GuestCountBucket)}
+                  selected={weddingFormData.guestCountBucket}
+                  setSelected={(selected) =>
+                    handleWeddingInputChange('guestCountBucket', selected as GuestCountBucket)
+                  }
+                  placeholder="Select Guest Count Range"
+                />
+                {validationErrors.guestCountBucket && (
+                  <p className="text-red-500 text-sm">{validationErrors.guestCountBucket}</p>
+                )}
+              </>
             ) : (
               <div className="relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between">
                 <span>
@@ -832,16 +925,21 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Preferred Style</label>
+            <label className="text-sm font-medium">Preferred Style*</label>
             {isEditing ? (
-              <SingleSelectDropdown
-                options={Object.values(WeddingStyle)}
-                selected={weddingFormData.preferredStyle}
-                setSelected={(selected) =>
-                  handleWeddingInputChange('preferredStyle', selected as WeddingStyle)
-                }
-                placeholder="Select Wedding Style"
-              />
+              <>
+                <SingleSelectDropdown
+                  options={Object.values(WeddingStyle)}
+                  selected={weddingFormData.preferredStyle}
+                  setSelected={(selected) =>
+                    handleWeddingInputChange('preferredStyle', selected as WeddingStyle)
+                  }
+                  placeholder="Select Wedding Style"
+                />
+                {validationErrors.preferredStyle && (
+                  <p className="text-red-500 text-sm">{validationErrors.preferredStyle}</p>
+                )}
+              </>
             ) : (
               <div className="relative rounded-md p-3 h-9 w-full text-left bg-muted flex items-center justify-between">
                 <span>
@@ -854,16 +952,21 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Preferred Services</label>
+            <label className="text-sm font-medium">Preferred Services*</label>
             {isEditing ? (
-              <MultiSelectDropdown
-                options={Object.values(WeddingService)}
-                selected={weddingFormData.preferredServices}
-                setSelected={(selected) =>
-                  handleWeddingInputChange('preferredServices', selected as WeddingService[])
-                }
-                placeholder="Select Preferred Services"
-              />
+              <>
+                <MultiSelectDropdown
+                  options={Object.values(WeddingService)}
+                  selected={weddingFormData.preferredServices}
+                  setSelected={(selected) =>
+                    handleWeddingInputChange('preferredServices', selected as WeddingService[])
+                  }
+                  placeholder="Select Preferred Services"
+                />
+                {validationErrors.preferredServices && (
+                  <p className="text-red-500 text-sm">{validationErrors.preferredServices}</p>
+                )}
+              </>
             ) : (
               <div className="relative rounded-md p-3 min-h-[36px] w-full text-left bg-muted flex items-center justify-between">
                 <span>
@@ -932,10 +1035,12 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
                   </div>
                   {isEditing && (
                     <Button
+                      type="button"
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0"
-                      onClick={() => handleRemovePartner(partner.id)}
+                      onClick={() => handleRemovePartner(partner)}
+                      disabled={isRemovingPartner}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
@@ -949,40 +1054,38 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
             <label className="text-sm font-medium">Collaborators</label>
 
             {isEditing && (
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Search guests by name or email..."
-                  value={collaboratorSearch}
-                  onChange={(e) => {
-                    setCollaboratorSearch(e.target.value);
-                    setShowCollaboratorDropdown(e.target.value.trim() !== '');
-                  }}
-                  onFocus={() => setShowCollaboratorDropdown(collaboratorSearch.trim() !== '')}
-                  className="text-sm"
-                  disabled={isInvitingCollaborator}
-                />
-                {showCollaboratorDropdown &&
-                  filteredGuestsForCollaborator.length > 0 &&
-                  !isInvitingCollaborator && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 overflow-y-auto">
-                      {filteredGuestsForCollaborator.map((guest) => (
-                        <div
-                          key={guest.id}
-                          className="p-2 hover:bg-muted cursor-pointer border-b last:border-b-0"
-                          onClick={() => handleInviteCollaborator(guest)}
-                        >
-                          <p className="font-medium text-sm">{guest.name}</p>
-                          {guest.email && (
-                            <p className="text-xs text-muted-foreground">{guest.email}</p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                {isInvitingCollaborator && (
-                  <p className="text-xs text-muted-foreground mt-1">Adding collaborator...</p>
-                )}
+              <div className="space-y-3">
+                <div>
+                  <Input
+                    type="text"
+                    placeholder="Collaborator's name"
+                    value={collaboratorName}
+                    onChange={(e) => setCollaboratorName(e.target.value)}
+                    className="text-sm"
+                    disabled={isInvitingCollaborator}
+                  />
+                </div>
+                <div>
+                  <Input
+                    type="email"
+                    placeholder="Collaborator's email"
+                    value={collaboratorEmail}
+                    onChange={(e) => setCollaboratorEmail(e.target.value)}
+                    className="text-sm"
+                    disabled={isInvitingCollaborator}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={handleInviteCollaborator}
+                  disabled={
+                    isInvitingCollaborator || !collaboratorName.trim() || !collaboratorEmail.trim()
+                  }
+                  className="w-full"
+                  size="sm"
+                >
+                  {isInvitingCollaborator ? 'Adding Collaborator...' : 'Add Collaborator'}
+                </Button>
               </div>
             )}
 
@@ -1005,10 +1108,11 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
                     </div>
                     {isEditing && (
                       <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0"
-                        onClick={() => handleRemoveCollaborator(collaborator.id)}
+                        onClick={() => handleRemoveCollaboratorClick(collaborator)}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
@@ -1078,25 +1182,55 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           {renderWeddingFields()}
 
           <div className="absolute top-0 right-4 flex gap-3">
-            <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
-            <Button variant="secondary" onClick={() => sendResetPasswordEmail()}>
-              Reset Password
+            <Button type="button" onClick={() => setIsEditing(true)}>
+              Edit Profile
             </Button>
             {targetUserRole !== UserRole.SUPERADMIN && (
-              <Button
-                className="bg-destructive text-base-white"
-                onClick={() => setShowDeleteModal(true)}
-              >
-                Delete Profile
-              </Button>
+              <>
+                <Button type="button" variant="secondary" onClick={() => sendResetPasswordEmail()}>
+                  Reset Password
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-destructive text-base-white"
+                  onClick={() => setShowDeleteModal(true)}
+                >
+                  Delete Profile
+                </Button>
+              </>
             )}
           </div>
         </div>
       )}
 
       <DeleteConfirmationModal
+        open={partnerPendingRemoval !== null}
+        onOpenChange={handlePartnerRemovalModalChange}
+        title="Remove Partner"
+        itemName={partnerPendingRemoval ? partnerPendingRemoval.name : 'this partner'}
+        description="Removing this partner will revoke their access to your shared wedding planning workspace."
+        onConfirm={handleConfirmRemovePartner}
+        onCancel={handleCancelRemovePartner}
+        isLoading={isRemovingPartner}
+      />
+
+      <DeleteConfirmationModal
+        open={collaboratorPendingRemoval !== null}
+        onOpenChange={(open) => !open && handleCancelRemoveCollaborator()}
+        title="Remove Collaborator"
+        itemName={collaboratorPendingRemoval ? collaboratorPendingRemoval.name : ''}
+        description={`Are you sure you want to remove ${collaboratorPendingRemoval?.name} from this wedding? Their access will be revoked.`}
+        onConfirm={handleConfirmRemoveCollaborator}
+        onCancel={handleCancelRemoveCollaborator}
+      />
+
+      <DeleteConfirmationModal
         open={showDeleteModal}
-        onOpenChange={setShowDeleteModal}
+        onOpenChange={(open) => {
+          if (!open) {
+            handleCancelDelete();
+          }
+        }}
         title="Delete Profile"
         itemName="your profile"
         onConfirm={handleDeleteProfile}

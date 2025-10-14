@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { CreateWeddingDto } from '../models/CreateWeddingDto';
 import type { DateOptimizerPreferencesDto } from '../models/DateOptimizerPreferencesDto';
+import type { SetWeddingDateDto } from '../models/SetWeddingDateDto';
 import type { UpdateWeddingDto } from '../models/UpdateWeddingDto';
 import type { WeddingResponseDto } from '../models/WeddingResponseDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -247,6 +248,30 @@ export class WeddingsService {
             path: {
                 'id': id,
             },
+            errors: {
+                404: `Wedding not found.`,
+            },
+        });
+    }
+    /**
+     * Set the official wedding date
+     * @param id
+     * @param requestBody
+     * @returns WeddingResponseDto Wedding date updated successfully.
+     * @throws ApiError
+     */
+    public static weddingControllerSetWeddingDate(
+        id: number,
+        requestBody: SetWeddingDateDto,
+    ): CancelablePromise<WeddingResponseDto> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/weddings/{id}/date',
+            path: {
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 404: `Wedding not found.`,
             },

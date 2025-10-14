@@ -1,17 +1,16 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { toast } from 'sonner';
+import { useCallback, useState } from 'react';
 import {
   AdminsService,
-  WeddingResponseDto,
-  WeddingsService,
-  UpdateWeddingDto,
-  WeddingType,
   BudgetBucket,
   GuestCountBucket,
-  WeddingStyle,
+  UpdateWeddingDto,
+  WeddingResponseDto,
   WeddingService,
+  WeddingsService,
+  WeddingStyle,
+  WeddingType,
 } from '../api';
 
 interface WeddingFormData {
@@ -20,10 +19,38 @@ interface WeddingFormData {
   location: string;
   weddingType: WeddingType;
   budgetBucket: BudgetBucket;
+  allocatedBudget: number;
   guestCountBucket: GuestCountBucket;
   preferredStyle: WeddingStyle;
   preferredServices: WeddingService[];
 }
+
+const formatDateForInput = (date?: string | null) => {
+  if (!date) return '';
+
+  const parsed = new Date(date);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return '';
+  }
+
+  // Adjust to local time, then keep only the date portion
+  const adjusted = new Date(parsed.getTime() - parsed.getTimezoneOffset() * 60000);
+
+  return adjusted.toISOString().slice(0, 10);
+};
+
+const formatDateForApi = (date: string) => {
+  if (!date) return undefined;
+
+  const parsed = new Date(`${date}T00:00:00`);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return undefined;
+  }
+
+  return parsed.toISOString();
+};
 
 export const useWeddingProfile = () => {
   const [isLoadingWedding, setIsLoadingWedding] = useState(false);
@@ -34,6 +61,7 @@ export const useWeddingProfile = () => {
     location: '',
     weddingType: WeddingType.WESTERN,
     budgetBucket: BudgetBucket.MEDIUM,
+    allocatedBudget: 0,
     guestCountBucket: GuestCountBucket.MEDIUM,
     preferredStyle: WeddingStyle.MODERN,
     preferredServices: [],
@@ -64,10 +92,11 @@ export const useWeddingProfile = () => {
   const populateWeddingFormData = useCallback((wedding: WeddingResponseDto) => {
     setWeddingFormData({
       name: wedding.name || '',
-      date: wedding.date || '',
+      date: formatDateForInput(wedding.date),
       location: wedding.location || '',
       weddingType: wedding.weddingType,
       budgetBucket: wedding.budgetBucket,
+      allocatedBudget: wedding.allocatedBudget || 0,
       guestCountBucket: wedding.guestCountBucket,
       preferredStyle: wedding.preferredStyle,
       preferredServices: wedding.preferredServices || [],
@@ -87,13 +116,19 @@ export const useWeddingProfile = () => {
     const updateData: UpdateWeddingDto = {};
 
     if (weddingFormData.name !== weddingData.name) updateData.name = weddingFormData.name;
-    if (weddingFormData.date !== weddingData.date) updateData.date = weddingFormData.date;
-    if (weddingFormData.location !== weddingData.location) updateData.location = weddingFormData.location;
+    const apiDate = formatDateForApi(weddingFormData.date);
+    if (apiDate && apiDate !== (weddingData.date || '')) {
+      updateData.date = apiDate;
+    } else if (!apiDate && weddingData.date) {
+      updateData.date = undefined;
+    }
+    if (weddingFormData.location !== (weddingData.location || '')) updateData.location = weddingFormData.location;
     if (weddingFormData.weddingType !== weddingData.weddingType) updateData.weddingType = weddingFormData.weddingType;
     if (weddingFormData.budgetBucket !== weddingData.budgetBucket) updateData.budgetBucket = weddingFormData.budgetBucket;
+    if (weddingFormData.allocatedBudget !== (weddingData.allocatedBudget || 0)) updateData.allocatedBudget = weddingFormData.allocatedBudget;
     if (weddingFormData.guestCountBucket !== weddingData.guestCountBucket) updateData.guestCountBucket = weddingFormData.guestCountBucket;
     if (weddingFormData.preferredStyle !== weddingData.preferredStyle) updateData.preferredStyle = weddingFormData.preferredStyle;
-    if (JSON.stringify(weddingFormData.preferredServices) !== JSON.stringify(weddingData.preferredServices)) {
+    if (JSON.stringify(weddingFormData.preferredServices) !== JSON.stringify(weddingData.preferredServices || [])) {
       updateData.preferredServices = weddingFormData.preferredServices;
     }
 

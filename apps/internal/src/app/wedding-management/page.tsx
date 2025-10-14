@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from 'react';
 
+import {
+  getEditWeddingFormFields,
+  getWeddingFormFields,
+} from '../components/formFields/WeddingManagement';
 import { Button, PageHeader } from '@shared/components';
 import { WeddingTable } from '@shared/components/WeddingTable';
 import { FormDialog } from '@shared/components/ui/form/form-dialog';
@@ -20,10 +24,6 @@ import { Plus } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import {
-  getEditWeddingFormFields,
-  getWeddingFormFields,
-} from '../components/formFields/WeddingManagement';
 
 export const dynamic = 'force-dynamic';
 
@@ -166,6 +166,7 @@ export default function WeddingManagementPage() {
         guestCountBucket: newWedding.guestCountBucket!,
         preferredStyle: newWedding.preferredStyle!,
         preferredServices: newWedding.preferredServices!,
+        allocatedBudget: newWedding.allocatedBudget!,
       };
 
       await WeddingsService.weddingControllerCreate(weddingData);

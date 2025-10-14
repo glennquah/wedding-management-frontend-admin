@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { AiEmailTemplateDialog } from './AiEmailTemplateDialog';
 import { EmailTemplateWithWeddingDto } from '@shared/api';
 import { NotificationDetailsService } from '@shared/api/services/NotificationDetailsService';
 import { Button } from '@shared/components/ui/button';
@@ -9,12 +10,14 @@ import { CodeEditor } from '@shared/components/ui/code-editor';
 import { DeleteConfirmationModal } from '@shared/components/ui/delete-confirmation-modal';
 import { Input } from '@shared/components/ui/form/input';
 import { Label } from '@shared/components/ui/form/label';
+import { Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 interface NotificationTemplateDetailViewProps {
   template: EmailTemplateWithWeddingDto | null;
   isLoading?: boolean;
+  weddingId?: number | null;
   onTemplateUpdated?: () => void;
   onTemplateDeleted?: () => void;
 }
@@ -22,6 +25,7 @@ interface NotificationTemplateDetailViewProps {
 export const NotificationTemplateDetailView = ({
   template,
   isLoading = false,
+  weddingId,
   onTemplateUpdated,
   onTemplateDeleted,
 }: NotificationTemplateDetailViewProps) => {
@@ -34,6 +38,7 @@ export const NotificationTemplateDetailView = ({
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showAiDialog, setShowAiDialog] = useState(false);
 
   useEffect(() => {
     if (template) {
@@ -103,6 +108,11 @@ export const NotificationTemplateDetailView = ({
     setIsEditing(false);
   };
 
+  const handleAiTemplateSuccess = (html: string, subject: string) => {
+    setHtmlContent(html);
+    setTemplateSubject(subject);
+  };
+
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -162,6 +172,15 @@ export const NotificationTemplateDetailView = ({
               <div className="flex gap-2">
                 <Button onClick={handleSave} disabled={isSaving}>
                   {isSaving ? 'Saving...' : 'Save Changes'}
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowAiDialog(true)}
+                  disabled={!weddingId}
+                  className="gap-2"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Generate AI Email Template
                 </Button>
                 <Button variant="secondary" onClick={handleCancel}>
                   Cancel
@@ -276,6 +295,16 @@ export const NotificationTemplateDetailView = ({
         itemName={template?.name || 'this template'}
         description={`Are you sure you want to delete "${template?.name}"? This action cannot be undone.`}
       />
+
+      {/* AI Email Template Generation Dialog */}
+      {weddingId && (
+        <AiEmailTemplateDialog
+          open={showAiDialog}
+          onOpenChange={setShowAiDialog}
+          weddingId={weddingId}
+          onSuccess={handleAiTemplateSuccess}
+        />
+      )}
     </div>
   );
 };

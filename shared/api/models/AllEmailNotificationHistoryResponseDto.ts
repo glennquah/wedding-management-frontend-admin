@@ -26,6 +26,7 @@ export namespace AllEmailNotificationHistoryResponseDto {
         ADMIN_SUSPENSION = 'ADMIN_SUSPENSION',
         COLLABORATOR_ADDED = 'COLLABORATOR_ADDED',
         CALENDAR_ACCESS_REQUEST = 'CALENDAR_ACCESS_REQUEST',
+        RSVP_INVITATION = 'RSVP_INVITATION',
         CUSTOM = 'CUSTOM',
     }
 }

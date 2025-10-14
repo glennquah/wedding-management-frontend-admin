@@ -28,6 +28,7 @@ export default function DateOptimizerPage() {
     preferredDays,
     dateRecommendations,
     earliestDate,
+    wedding,
     latestDate,
 
     // Modal states
@@ -38,6 +39,7 @@ export default function DateOptimizerPage() {
     handleAddKeyAttendee,
     handleRemoveKeyAttendee,
     handleRequestCalendarAccess,
+    handleSelectDate,
     setPreferredDays,
     setEarliestDate,
     setLatestDate,
@@ -62,24 +64,6 @@ export default function DateOptimizerPage() {
     setAttendeeToDelete(null);
   };
 
-  const handleEarliestDateChange = (dates: string[]) => {
-    const nextDate = dates[dates.length - 1] || '';
-    setEarliestDate(nextDate);
-
-    if (nextDate && latestDate && nextDate > latestDate) {
-      setLatestDate(nextDate);
-    }
-  };
-
-  const handleLatestDateChange = (dates: string[]) => {
-    const nextDate = dates[dates.length - 1] || '';
-    setLatestDate(nextDate);
-
-    if (nextDate && earliestDate && nextDate < earliestDate) {
-      setEarliestDate(nextDate);
-    }
-  };
-
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
       {!isMobile && <div className="mt-6 w-full"></div>}
@@ -96,8 +80,8 @@ export default function DateOptimizerPage() {
             earliestDate={earliestDate}
             latestDate={latestDate}
             preferredDays={preferredDays}
-            onEarliestDateChange={handleEarliestDateChange}
-            onLatestDateChange={handleLatestDateChange}
+            onEarliestDateChange={setEarliestDate}
+            onLatestDateChange={setLatestDate}
             onPreferredDaysChange={setPreferredDays}
           />
 
@@ -119,7 +103,7 @@ export default function DateOptimizerPage() {
         <GuestSearchModal
           isOpen={isAddAttendeeModalOpen}
           onClose={closeAddAttendeeModal}
-          guests={guests}
+          guests={guests.filter((g) => g.email)}
           onSelectGuest={handleAddKeyAttendee}
           excludedGuestIds={keyAttendees.map((a) => a.id)}
         />
@@ -135,6 +119,8 @@ export default function DateOptimizerPage() {
         <DateRecommendationsSection
           hasRunAnalysis={hasRunAnalysis}
           dateRecommendations={dateRecommendations}
+          selectedWeddingDate={wedding?.date}
+          onSelectDate={handleSelectDate}
         />
 
         {/* Delete Confirmation Modal */}

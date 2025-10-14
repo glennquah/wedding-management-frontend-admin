@@ -32,6 +32,10 @@ export type CreateGuestDto = {
      * Primary guest ID if this is an accompanying guest
      */
     primaryGuestId?: number;
+    /**
+     * Whether to send an email invitation to the guest
+     */
+    sendEmail?: boolean;
     confirmationStatus?: ConfirmationStatus;
     /**
      * Names of accompanying guests
