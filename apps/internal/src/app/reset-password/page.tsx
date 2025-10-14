@@ -9,6 +9,17 @@ import { Label } from '@shared/components/ui/form/label';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
+type ApiError = { status: number };
+
+function isApiError(error: unknown): error is ApiError {
+  if (typeof error !== 'object' || error === null) {
+    return false;
+  }
+
+  const candidate = error as Partial<ApiError>;
+  return typeof candidate.status === 'number';
+}
+
 export default function ResetPasswordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -16,13 +27,15 @@ export default function ResetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState<string | null>(null);
-  const [isCheckingToken, setIsCheckingToken] = useState(true);
 
   useEffect(() => {
+    if (!searchParams) {
+      return;
+    }
+
     // Get token from URL parameters
-    const urlToken = searchParams ? searchParams.get('token') : null;
+    const urlToken = searchParams.get('token');
     setToken(urlToken);
-    setIsCheckingToken(false);
 
     if (!urlToken) {
       toast.error('Invalid reset link. Please contact support.');
@@ -72,10 +85,11 @@ export default function ResetPasswordPage() {
 
       toast.success('Password set successfully! You can now log in with your new password.');
       router.push('/login');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Password reset error:', error);
 
-      if (error?.status === 401) {
+      // Use the type guard to check for a specific error shape
+      if (isApiError(error) && error.status === 401) {
         toast.error('Invalid or expired reset token. Please contact support.');
       } else {
         toast.error('Failed to set password. Please try again.');
@@ -84,19 +98,6 @@ export default function ResetPasswordPage() {
       setLoading(false);
     }
   };
-
-  if (isCheckingToken) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-t from-brand-200 to-brand-25 px-6">
-        <div className="w-full max-w-lg bg-white p-8 mt-[72px] rounded-2xl shadow-md">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold mb-4">Loading...</h2>
-            <p className="text-gray-600">Verifying reset link...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (!token) {
     return (

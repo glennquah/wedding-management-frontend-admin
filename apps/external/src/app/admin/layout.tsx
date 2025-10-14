@@ -31,8 +31,6 @@ import { Toaster } from 'sonner';
 
 const allowedRoutesWithoutWedding = ['/admin', '/admin/account', '/admin/create-wedding'];
 
-const allowedRoutesWithoutWedding = ['/admin', '/admin/account', '/admin/create-wedding'];
-
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { fetchUserMainWedding, fetchUserWeddings, loading } = useWeddingManager();
   const { selectedWeddingId, hasHydrated, weddings } = useWeddingStore();
