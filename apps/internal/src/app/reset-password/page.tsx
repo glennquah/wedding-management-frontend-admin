@@ -72,7 +72,6 @@ export default function ResetPasswordPage() {
 
       toast.success('Password set successfully! You can now log in with your new password.');
       router.push('/login');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error('Password reset error:', error);
 
