@@ -1,7 +1,5 @@
 import { RefObject, useEffect, useState } from 'react';
 
-import FaqAccordion from '../FaqAccordion';
-import GalleryDialog from '../GalleryDialog';
 import { Button } from '@shared/components/ui/button';
 import { MultiSelectDropdown } from '@shared/components/ui/form/multiSelectDropdown';
 import { Switch } from '@shared/components/ui/switch';
@@ -10,6 +8,8 @@ import { GuestResponseDto, MicrositeResponseDto } from '@wedding/api-types';
 import { Lora, Playfair_Display } from 'next/font/google';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import FaqAccordion from '../FaqAccordion';
+import GalleryDialog from '../GalleryDialog';
 
 // Rustic fonts
 const lora = Lora({ subsets: ['latin'] });
@@ -122,12 +122,19 @@ export default function TemplateTwo({
       </div>
 
       {isWeddingLive && micrositeSlug && (
-        <div className="absolute top-4 right-4 z-50">
+        <div className="absolute top-4 right-4 z-50 space-x-2">
           <Button
             onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
             className="rounded-full bg-amber-700 hover:bg-amber-800 text-white px-6 py-3"
           >
             View Album
+          </Button>
+
+          <Button
+                onClick={() => router.push(`/cashgift/${micrositeData?.weddingId}`)}
+                className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+              >
+                Cash Giftings
           </Button>
         </div>
       )}

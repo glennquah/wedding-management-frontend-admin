@@ -1,7 +1,5 @@
 import { RefObject, useEffect, useState } from 'react';
 
-import FaqAccordion from '../FaqAccordion';
-import GalleryDialog from '../GalleryDialog';
 import { Button } from '@shared/components/ui/button';
 import { MultiSelectDropdown } from '@shared/components/ui/form/multiSelectDropdown';
 import { Switch } from '@shared/components/ui/switch';
@@ -10,6 +8,8 @@ import { GuestResponseDto, MicrositeResponseDto } from '@wedding/api-types';
 import { Alex_Brush, Montserrat } from 'next/font/google';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import FaqAccordion from '../FaqAccordion';
+import GalleryDialog from '../GalleryDialog';
 
 // Use Montserrat for body text within this template only
 const montserrat = Montserrat({ subsets: ['latin'] });
@@ -138,12 +138,19 @@ export default function TemplateOne({
           <div className="absolute inset-0 bg-black/30 z-10" />
 
           {isWeddingLive && micrositeSlug && (
-            <div className="absolute top-4 right-4 z-50">
+            <div className="absolute top-4 right-4 z-50 space-x-2">
               <Button
                 onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
                 className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
               >
                 View Album
+              </Button>
+
+              <Button
+                onClick={() => router.push(`/cashgift/${micrositeData?.weddingId}`)}
+                className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+              >
+                tithe
               </Button>
             </div>
           )}

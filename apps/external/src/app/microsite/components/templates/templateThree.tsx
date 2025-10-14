@@ -1,7 +1,5 @@
 import { RefObject, useEffect, useMemo, useState } from 'react';
 
-import FaqAccordion from '../FaqAccordion';
-import GalleryDialog from '../GalleryDialog';
 import { Button } from '@shared/components/ui/button';
 import { MultiSelectDropdown } from '@shared/components/ui/form/multiSelectDropdown';
 import { Switch } from '@shared/components/ui/switch';
@@ -10,6 +8,8 @@ import { GuestResponseDto, MicrositeResponseDto } from '@wedding/api-types';
 import { Cormorant_Garamond, Nunito } from 'next/font/google';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import FaqAccordion from '../FaqAccordion';
+import GalleryDialog from '../GalleryDialog';
 
 // Clean, professional heading + friendly body
 const serif = Cormorant_Garamond({ subsets: ['latin'], weight: ['600', '700'] });
@@ -108,12 +108,19 @@ export default function TemplateThree({
       }`}
     >
       {isWeddingLive && micrositeSlug && (
-        <div className="absolute top-4 right-4 z-50">
+        <div className="absolute top-4 right-4 z-50 space-x-2">
           <Button
             onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
             className="rounded-full bg-[#EADBC8] hover:bg-[#E5D4BE] text-stone-900 border border-stone-300"
           >
             View Album
+          </Button>
+
+          <Button
+                onClick={() => router.push(`/cashgift/${micrositeData?.weddingId}`)}
+                className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+              >
+                Cash Giftings
           </Button>
         </div>
       )}
