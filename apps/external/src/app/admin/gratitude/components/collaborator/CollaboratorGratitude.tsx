@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 
+import { BroadcastCollaboratorGratitudeDialog } from './BroadcastCollaboratorGratitudeDialog';
 import { CollaboratorCardInformation } from './CollaboratorCardInformation';
 import { CollaboratorCard } from './collaboratorCard';
 import { useGratitudeCardManager } from '@/app/hooks/useGratitudeCardManager';
@@ -17,6 +18,7 @@ import {
   DialogTrigger,
 } from '@shared/components/ui/dialog';
 import { PageHeader } from '@shared/components/ui/page-header';
+import { Mail } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CollaboratorGratitudeProps {
@@ -28,7 +30,7 @@ export default function CollaboratorGratitude({
   onComplete,
   onDelete,
 }: CollaboratorGratitudeProps) {
-  const inviteRef = useRef<HTMLDivElement>(null);
+  const [isBroadcastDialogOpen, setIsBroadcastDialogOpen] = useState(false);
 
   const {
     selectedWeddingId,
@@ -60,6 +62,14 @@ export default function CollaboratorGratitude({
       setIsCollaboratorUpdateMode(!!guestCard.collaboratorCardMessage);
     }
   }, [guestCard]);
+
+  const handleOpenBroadcastDialog = () => {
+    if (!guestCard) {
+      toast.error('You must create a gratitude card before broadcasting.');
+      return;
+    }
+    setIsBroadcastDialogOpen(true);
+  };
 
   const handleInputChange = <K extends keyof UpdateGratitudeCardDto>(
     field: K,
@@ -98,8 +108,6 @@ export default function CollaboratorGratitude({
       toast.success(
         isCollaboratorUpdateMode ? 'Gratitude card updated!' : 'Gratitude card created!',
       );
-
-      onComplete?.();
     } catch (err) {
       toast.error('Something went wrong while saving your card.');
     } finally {
@@ -126,6 +134,10 @@ export default function CollaboratorGratitude({
                 ? 'Update your existing gratitude card for this wedding'
                 : 'Design and configure gratitude cards for your guests or collaborators'
             }
+            buttonText="Broadcast"
+            onButtonClick={handleOpenBroadcastDialog}
+            buttonIcon={<Mail className="w-4 h-4" />}
+            isButtonDisabled={isLoading || !isCollaboratorUpdateMode}
           />
         )}
 
@@ -201,25 +213,33 @@ export default function CollaboratorGratitude({
 
           {/* Right: Live Preview */}
           <div className="w-full lg:w-1/3 flex flex-col items-center">
-            <div id="print-section" ref={inviteRef}>
-              <CollaboratorCard
-                signOff={collaboratorFormData.signOffName || 'T & R'}
-                message={
-                  collaboratorFormData.collaboratorCardMessage ||
-                  'For coming to our wedding and sharing this wonderful day with us!'
-                }
-                photoUrl={
-                  collaboratorFormData.collaboratorCardPhotoURL ||
-                  'https://res.cloudinary.com/dnyxxyolp/image/upload/v1760014682/wedding-couple_cmxtra.webp'
-                }
-                selectedWeddingDate={selectedWedding?.date || 'December 25, 2025'}
-              />
-            </div>
+            <CollaboratorCard
+              signOff={collaboratorFormData.signOffName || 'T & R'}
+              message={
+                collaboratorFormData.collaboratorCardMessage ||
+                'For coming to our wedding and sharing this wonderful day with us!'
+              }
+              photoUrl={
+                collaboratorFormData.collaboratorCardPhotoURL ||
+                'https://res.cloudinary.com/dnyxxyolp/image/upload/v1760014682/wedding-couple_cmxtra.webp'
+              }
+              selectedWeddingDate={selectedWedding?.date || 'December 25, 2025'}
+            />
             <p className="text-sm text-muted-foreground mt-3 mb-3 italic text-center">
               Live Preview
             </p>
           </div>
         </div>
+
+        {/* Broadcast Dialog */}
+        {selectedWeddingId && (
+          <BroadcastCollaboratorGratitudeDialog
+            open={isBroadcastDialogOpen}
+            weddingId={selectedWeddingId}
+            onOpenChange={setIsBroadcastDialogOpen}
+            onComplete={onComplete}
+          />
+        )}
       </div>
     </div>
   );
