@@ -12,6 +12,10 @@ export type CreateSuperAdminDto = {
      * Email address of the super admin
      */
     email: string;
+    /**
+     * Password for the super admin account
+     */
+    password?: string;
     role: UserRole;
 };
 

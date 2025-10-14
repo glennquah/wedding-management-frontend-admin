@@ -2,6 +2,7 @@
 
 import { use, useEffect, useMemo, useRef, useState } from 'react';
 
+import DownloadCuratedAlbum from '../../components/DownloadCuratedAlbum';
 import MicrositeLogin from '../../components/MicrositeLogin';
 import Modal from '../../components/Modal';
 import { downloadImagesAsZip } from '../../utils/downloadPhoto';
@@ -181,7 +182,7 @@ export default function AlbumPage({ params }: PageProps) {
                   {album.coupleName} Wedding Photos
                 </h1>
 
-                <div className="flex justify-center gap-3">
+                <div className="flex justify-center gap-3 flex-wrap">
                   <ImageUploadWidget
                     folder={`${album.coupleName}-${micrositeData.weddingDate?.split('T')[0]}`}
                     onUpload={async (url) => {
@@ -202,11 +203,14 @@ export default function AlbumPage({ params }: PageProps) {
                         setImages(mappedImages);
                       } catch (err) {
                         console.error('Failed to add photo:', err);
+                        toast.error('Failed to upload photo');
                       }
                     }}
                   />
 
-                  <Button onClick={() => downloadImagesAsZip(images)}>Download Album</Button>
+                  <DownloadCuratedAlbum albumId={album.id} allPhotos={images} />
+
+                  <Button onClick={() => downloadImagesAsZip(images)}>Download All</Button>
                 </div>
 
                 {album.landingMessage && (
