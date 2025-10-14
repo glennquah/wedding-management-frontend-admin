@@ -8,7 +8,7 @@ import {
 } from '../components/ui/form/dropdown-menu';
 import { ColumnDef } from '@tanstack/react-table';
 import { ConfirmationStatus, GuestResponseDto } from '@wedding/api-types';
-import { ChevronDown, Edit2, Trash2 } from 'lucide-react';
+import { ChevronDown, Edit2, Mail, Trash2 } from 'lucide-react';
 
 // Helper functions for confirmation status
 const getConfirmationStatusVariant = (
@@ -50,6 +50,7 @@ interface GuestColumnsProps {
   guests: GuestResponseDto[];
   onEditGuest: (guest: GuestResponseDto) => void;
   onDeleteGuest: (guest: GuestResponseDto) => void;
+  onSendRsvpInvitation?: (guest: GuestResponseDto) => void;
   includeEmail?: boolean;
   showConfirmationIcon?: boolean;
   detailedAccompanyingGuests?: boolean;
@@ -59,6 +60,7 @@ export const getGuestColumns = ({
   guests,
   onEditGuest,
   onDeleteGuest,
+  onSendRsvpInvitation,
   includeEmail = false,
   showConfirmationIcon = false,
   detailedAccompanyingGuests = false,
@@ -181,6 +183,17 @@ export const getGuestColumns = ({
       const guest = row.original;
       return (
         <div className="flex items-center gap-2">
+          {onSendRsvpInvitation && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => onSendRsvpInvitation(guest)}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              title="Send RSVP Invitation"
+            >
+              <Mail className="w-4 h-4" />
+            </Button>
+          )}
           <Button size="sm" variant="ghost" onClick={() => onEditGuest(guest)}>
             <Edit2 className="w-4 h-4" />
           </Button>

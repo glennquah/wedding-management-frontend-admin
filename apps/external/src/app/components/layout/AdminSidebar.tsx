@@ -1,36 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
-import { signOut } from '../../store/sessionStore';
-import { AdminsService } from '@shared/api';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
   Calendar,
+  Camera,
+  ClipboardList,
   Clock,
   LayoutDashboard,
   MapPin,
   PaintRoller,
+  ShoppingCart,
+  Sparkles,
   Users,
 } from 'lucide-react';
+import { signOut, useWeddingStore } from '../../store/sessionStore';
 
 export default function AdminSidebar() {
-  const [hasWedding, setHasWedding] = useState<boolean>(true); // Default to true to avoid flickering
-
-  useEffect(() => {
-    const checkWedding = async () => {
-      try {
-        const { mainWeddingId } = await AdminsService.adminControllerGetMyMainWedding();
-        setHasWedding(mainWeddingId !== null);
-      } catch (error) {
-        console.error('Error checking wedding:', error);
-        setHasWedding(false);
-      }
-    };
-
-    checkWedding();
-  }, []);
+  const { weddings } = useWeddingStore();
+  const hasWedding = weddings && weddings.length > 0;
 
   const tabs = [
     {
@@ -40,6 +28,12 @@ export default function AdminSidebar() {
           title: 'Dashboard',
           href: '/',
           icon: LayoutDashboard,
+        },
+        {
+          title: 'Shop',
+          href: '/ecommerce',
+          icon: ShoppingCart,
+          disabled: !hasWedding,
         },
         {
           title: 'Progress Tracker',
@@ -65,6 +59,12 @@ export default function AdminSidebar() {
           disabled: !hasWedding,
         },
         {
+          title: 'Orders',
+          href: '/orders',
+          icon: ClipboardList,
+          disabled: !hasWedding,
+        },
+        {
           title: 'Seating Arrangement',
           href: '/seating-arrangement',
           icon: MapPin,
@@ -77,9 +77,20 @@ export default function AdminSidebar() {
           disabled: !hasWedding,
         },
         {
+          title: 'Date Optimizer',
+          href: '/date-optimizer',
+          icon: Sparkles,
+        },
+        {
           title: 'Microsite',
           href: '/microsite',
           icon: PaintRoller,
+          disabled: !hasWedding,
+        },
+        {
+          title: 'Album Invite',
+          href: '/album',
+          icon: Camera,
           disabled: !hasWedding,
         },
       ],

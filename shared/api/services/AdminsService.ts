@@ -3,7 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AdminResponseDto } from '../models/AdminResponseDto';
+import type { CollaboratorResponseDto } from '../models/CollaboratorResponseDto';
 import type { CreateAdminDto } from '../models/CreateAdminDto';
+import type { InviteCollaboratorDto } from '../models/InviteCollaboratorDto';
+import type { InvitePartnerDto } from '../models/InvitePartnerDto';
 import type { UpdateAdminDto } from '../models/UpdateAdminDto';
 import type { WeddingResponseDto } from '../models/WeddingResponseDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -238,6 +241,114 @@ export class AdminsService {
             },
             errors: {
                 404: `Admin not found.`,
+            },
+        });
+    }
+    /**
+     * Invite a guest as a collaborator to a wedding
+     * @param requestBody
+     * @returns CollaboratorResponseDto Collaborator has been successfully invited.
+     * @throws ApiError
+     */
+    public static adminControllerInviteCollaborator(
+        requestBody: InviteCollaboratorDto,
+    ): CancelablePromise<CollaboratorResponseDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/admins/invite-collaborator',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                400: `Bad request.`,
+                404: `Wedding or guest not found.`,
+            },
+        });
+    }
+    /**
+     * Get all collaborators for a wedding
+     * @param weddingId
+     * @returns AdminResponseDto List of collaborators for the wedding
+     * @throws ApiError
+     */
+    public static adminControllerGetCollaborators(
+        weddingId: number,
+    ): CancelablePromise<Array<AdminResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/admins/wedding/{weddingId}/collaborators',
+            path: {
+                'weddingId': weddingId,
+            },
+            errors: {
+                404: `Wedding not found.`,
+            },
+        });
+    }
+    /**
+     * Remove a collaborator from a wedding
+     * @param weddingId
+     * @param userId
+     * @returns any Collaborator has been successfully removed.
+     * @throws ApiError
+     */
+    public static adminControllerRemoveCollaborator(
+        weddingId: number,
+        userId: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/admins/wedding/{weddingId}/collaborator/{userId}',
+            path: {
+                'weddingId': weddingId,
+                'userId': userId,
+            },
+            errors: {
+                404: `Wedding not found.`,
+                409: `Cannot remove main couple as collaborator.`,
+            },
+        });
+    }
+    /**
+     * Invite a person as partner to the main couple
+     * @param requestBody
+     * @returns CollaboratorResponseDto Partner has been successfully invited.
+     * @throws ApiError
+     */
+    public static adminControllerInvitePartner(
+        requestBody: InvitePartnerDto,
+    ): CancelablePromise<CollaboratorResponseDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/admins/invite-partner',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                400: `Bad request.`,
+                404: `Wedding or guest not found.`,
+                409: `Main couple already has 2 members.`,
+            },
+        });
+    }
+    /**
+     * Remove a partner from the main couple
+     * @param weddingId
+     * @param userId
+     * @returns any Partner has been successfully removed from main couple.
+     * @throws ApiError
+     */
+    public static adminControllerRemovePartner(
+        weddingId: number,
+        userId: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/admins/wedding/{weddingId}/partner/{userId}',
+            path: {
+                'weddingId': weddingId,
+                'userId': userId,
+            },
+            errors: {
+                404: `Wedding or partner not found.`,
             },
         });
     }

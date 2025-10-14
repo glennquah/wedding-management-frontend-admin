@@ -9,6 +9,7 @@ import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
 import { GuestResponseDto, MicrositeResponseDto } from '@wedding/api-types';
 import { Alex_Brush, Montserrat } from 'next/font/google';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 // Use Montserrat for body text within this template only
 const montserrat = Montserrat({ subsets: ['latin'] });
@@ -19,6 +20,8 @@ interface TemplateOneProps {
   micrositeData?: MicrositeResponseDto;
   rsvpRef: RefObject<HTMLDivElement | null>;
   guestDetails?: GuestResponseDto | null;
+  isWeddingLive: boolean;
+  micrositeSlug: string;
   handleConfirmGuestAttendance?: (allergies?: string[]) => Promise<void>;
 }
 
@@ -26,9 +29,12 @@ export default function TemplateOne({
   micrositeData,
   rsvpRef,
   guestDetails,
+  isWeddingLive,
+  micrositeSlug,
   handleConfirmGuestAttendance,
 }: TemplateOneProps) {
   const isMobile = useIsMobileScreen();
+  const router = useRouter();
 
   // Food allergies state
   const [selectedAllergies, setSelectedAllergies] = useState<string[]>([]);
@@ -130,6 +136,18 @@ export default function TemplateOne({
             ))}
           </div>
           <div className="absolute inset-0 bg-black/30 z-10" />
+
+          {isWeddingLive && micrositeSlug && (
+            <div className="absolute top-4 right-4 z-50">
+              <Button
+                onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
+                className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+              >
+                View Album
+              </Button>
+            </div>
+          )}
+
           <div className="relative z-20 flex flex-col items-center justify-center text-center w-full px-6 sm:px-20 gap-3">
             <h1
               className={`${alexBrush.className} text-4xl sm:text-6xl text-base-white drop-shadow-lg`}

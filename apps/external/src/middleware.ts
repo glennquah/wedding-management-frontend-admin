@@ -41,10 +41,9 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ req }) => {
-        const { pathname } = req.nextUrl;
-        // Always authorize public pages to prevent auth errors when backend is down
-        return publicPages.some((page) => pathname.startsWith(page)) || true;
+      authorized: ({ token }) => {
+        // Always authorize to let middleware function handle the logic
+        return !!token || true;
       },
     },
     cookies: {

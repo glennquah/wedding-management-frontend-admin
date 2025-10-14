@@ -28,28 +28,31 @@ interface ImageUploadWidgetProps {
   minImageWidth?: number;
   maxImageHeight?: number;
   minImageHeight?: number;
+  folder?: string;
 }
 
 export default function ImageUploadWidget({
   onUpload,
   buttonText = 'Upload Image',
-  maxImageHeight = 300,
-  minImageHeight = 300,
-  maxImageWidth = 300,
-  minImageWidth = 300,
+  maxImageHeight = 8192,
+  maxImageWidth = 8192,
+  minImageHeight = 100,
+  minImageWidth = 100,
+  folder,
 }: ImageUploadWidgetProps) {
   const configOptions = {
     sources: allowedSources,
-    // multiple: true,
-    // maxFiles: 5,
-
-    // cropping: true,
-    // croppingAspectRatio: 1,
-
+    multiple: false, // Keep this false for single file selection
+    showAdvancedOptions: false,
+    showSkipCropButton: true,
+    showRemoveButton: false,
+    showUploadMoreButton: false,
+    clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
     maxImageHeight,
     minImageHeight,
     maxImageWidth,
     minImageWidth,
+    folder,
   };
 
   return (
@@ -57,15 +60,14 @@ export default function ImageUploadWidget({
       uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_PRESET_NAME}
       onSuccess={(result: CloudinaryUploadWidgetResults, { widget }) => {
         const info = result.info as CloudinaryUploadWidgetInfo;
-        console.log('Image URL:', info.secure_url);
-
         onUpload(info.secure_url);
 
         toast('Image upload success!');
+
+        // Close the widget after successful upload
+        widget.close();
       }}
       onError={(error, options) => {
-        console.log('Error uploading image:', error);
-
         toast('Image upload error!');
       }}
       options={configOptions}

@@ -13,6 +13,7 @@ import { signOut as nextAuthSignOut } from 'next-auth/react';
 import type { StateCreator } from 'zustand';
 import { create as actualCreate } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { toast } from 'sonner';
 
 const storeResetFns = new Set<() => void>();
 
@@ -128,7 +129,7 @@ interface CartState {
   fetchCart: (adminId: number) => Promise<void>;
   addItem: (adminId: number, item: CartItem, selectedSlots: AvailabilitySlotDto[]) => Promise<void>;
   removeItem: (adminId: number, listingId: number) => Promise<void>;
-  clearCart: (adminId: number) => Promise<void>;
+  clearCart: (adminId: number, silent?: boolean) => Promise<void>;
   deleteCart: (adminId: number) => Promise<void>;
 }
 
@@ -194,11 +195,15 @@ export const useCartStore = create<CartState>()(
       removeItem: async (adminId: number, listingId: number) => {
         const res = await CartService.cartControllerRemoveItem(adminId, listingId);
         set({ cartItems: res.items });
+        toast.success('Item removed from cart');
       },
 
-      clearCart: async (adminId: number) => {
+      clearCart: async (adminId: number, silent = false) => {
         const res = await CartService.cartControllerClearCart(adminId);
         set({ cartItems: res.items });
+        if (!silent) {
+          toast.success('Cart cleared');
+        }
       },
 
       deleteCart: async (adminId: number) => {

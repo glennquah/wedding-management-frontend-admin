@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+
 import { useWeddingManager } from '@/app/hooks/useWeddingManager';
 import { useWeddingStore } from '@/app/store/sessionStore';
 import { UserRole, WeddingResponseDto } from '@shared/api';
@@ -24,9 +26,10 @@ import { ChevronsUpDown, Gem } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import { Toaster } from 'sonner';
 import AdminSidebar from '../components/layout/AdminSidebar';
+
+const allowedRoutesWithoutWedding = ['/admin', '/admin/account', '/admin/create-wedding'];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { fetchUserMainWedding, fetchUserWeddings, loading } = useWeddingManager();
@@ -37,6 +40,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { data: session, status } = useSession();
 
   // Route protection: redirect to dashboard if no wedding and trying to access protected routes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const allowedRoutesWithoutWedding = ['/admin', '/admin/account', '/admin/create-wedding'];
   const hasNoWedding = !selectedWeddingId && (!weddings || weddings.length === 0);
 
@@ -50,10 +54,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [hasHydrated, selectedWeddingId, fetchUserMainWedding, fetchUserWeddings]);
 
   useEffect(() => {
-    if (hasNoWedding && pathname && !allowedRoutesWithoutWedding.includes(pathname)) {
+    // Only redirect if store is hydrated to avoid redirecting during initial load
+    if (
+      hasHydrated &&
+      hasNoWedding &&
+      pathname &&
+      !allowedRoutesWithoutWedding.includes(pathname)
+    ) {
       router.push('/admin');
     }
-  }, [hasNoWedding, pathname, router, allowedRoutesWithoutWedding]);
+  }, [hasHydrated, hasNoWedding, pathname, router]);
 
   console.log('Session status:', status, 'Session data:', session);
 
@@ -86,10 +96,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <NavigationBar
           notificationRoute="/admin/notifications"
           additionalTabs={
-            <div className="flex items-center gap-4 ml-auto">
-              <Cart />
-              <WeddingSelector />
-            </div>
+            !hasNoWedding && (
+              <div className="flex items-center gap-4 ml-auto">
+                <Cart />
+                <WeddingSelector />
+              </div>
+            )
           }
         />
         <main className="flex-1 overflow-y-auto">{children}</main>
@@ -132,11 +144,7 @@ export function WeddingSelector() {
       <DropdownMenuContent align="end" className="w-full">
         {mainWedding && (
           <>
-            <DropdownMenuItem disabled>
-              {mainWedding && selectedWeddingId === mainWedding.id
-                ? 'Your main wedding plan'
-                : 'Select your main wedding plan'}
-            </DropdownMenuItem>
+            <DropdownMenuItem disabled>Your main wedding plan</DropdownMenuItem>
             <DropdownMenuItem
               key={mainWedding.id}
               onClick={() => selectWedding(mainWedding.id)}
@@ -150,10 +158,7 @@ export function WeddingSelector() {
         {otherWeddings.length > 0 && (
           <>
             <DropdownMenuItem disabled>
-              {' '}
-              {mainWedding && selectedWeddingId === mainWedding.id
-                ? 'Select your other wedding plans'
-                : 'Other wedding plans'}
+              {mainWedding ? 'Other wedding plans' : 'Wedding plans'}
             </DropdownMenuItem>
             {otherWeddings.map((wedding, index) => (
               <DropdownMenuItem

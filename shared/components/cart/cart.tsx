@@ -2,24 +2,25 @@
 
 import * as React from 'react';
 
+import { useCartStore, useWeddingStore } from '@/app/store/sessionStore';
+import { CartItemResponseDto } from '@shared/api';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Clock, ShoppingCart, X } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import useIsMobileScreen from '../../hooks/useIsMobileScreen';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Drawer, DrawerClose, DrawerContent, DrawerTrigger } from '../ui/drawer';
 import { Separator } from '../ui/separator';
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '../ui/sheet';
-import { useCartStore, useWeddingStore } from '@/app/store/sessionStore';
-import { CartItemResponseDto } from '@shared/api';
-import { AnimatePresence, motion } from 'framer-motion';
-import { ShoppingCart, X } from 'lucide-react';
-import { useSession } from 'next-auth/react';
-import Image from 'next/image';
-import Link from 'next/link';
 
 export function Cart() {
   const { cartItems, removeItem, clearCart, fetchCart, createOrder } = useCartStore();
   const { selectedWeddingId } = useWeddingStore();
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   const [isOpen, setIsOpen] = React.useState(false);
   const [isMounted, setIsMounted] = React.useState(false);
@@ -32,7 +33,22 @@ export function Cart() {
   }, []);
 
   const totalItems = cartItems.length;
-  const subtotal = cartItems.reduce((acc, item) => acc + item.price, 0);
+  const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.selectedSlots.length), 0);
+
+  const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString('en-SG', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const formatSlotDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-SG', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
 
   React.useEffect(() => {
     if (!session?.user.id) return;
@@ -106,15 +122,11 @@ export function Cart() {
                 </p>
                 {isDesktop ? (
                   <SheetClose asChild>
-                    <Link href="/products">
-                      <Button>Browse Products</Button>
-                    </Link>
+                    <Button onClick={() => router.push('/admin/ecommerce')}>Browse Products</Button>
                   </SheetClose>
                 ) : (
                   <DrawerClose asChild>
-                    <Link href="/products">
-                      <Button>Browse Products</Button>
-                    </Link>
+                    <Button onClick={() => router.push('/admin/ecommerce')}>Browse Products</Button>
                   </DrawerClose>
                 )}
               </motion.div>
@@ -145,41 +157,18 @@ export function Cart() {
                     <div className="ml-4 flex flex-1 flex-col justify-between">
                       <div>
                         <div className="flex items-start justify-between">
-                          <div className="flex flex-col">
-                            <Link
-                              className={`
-        line-clamp-2 text-sm font-medium
-        group-hover:text-primary
-      `}
-                              href={`/products/${item.id}`}
-                              onClick={() => setIsOpen(false)}
-                            >
-                              {item.listingName}
-                            </Link>
-
-                            {item.selectedSlots.length > 0 && (
-                              <p className="text-[0.625rem] text-muted-foreground mt-1">
-                                {item.selectedSlots.map((slot, index) => {
-                                  const date = slot.date ? `${slot.date} ` : '';
-                                  const start = new Date(slot.startTime).toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  });
-                                  const end = new Date(slot.endTime).toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  });
-                                  return (
-                                    <span key={index}>
-                                      {date}
-                                      {start} - {end}
-                                      {index < item.selectedSlots.length - 1 ? ', ' : ''}
-                                    </span>
-                                  );
-                                })}
-                              </p>
-                            )}
-                          </div>
+                          <button
+                            className={`
+                              line-clamp-2 text-sm font-medium text-left
+                              group-hover:text-primary
+                            `}
+                            onClick={() => {
+                              router.push(`/admin/ecommerce/listing/${item.listingId}`);
+                              setIsOpen(false);
+                            }}
+                          >
+                            {item.listingName}
+                          </button>
                           <button
                             className={`
                               -mt-1 -mr-1 ml-2 rounded-full p-1
@@ -196,9 +185,31 @@ export function Cart() {
                             <span className="sr-only">Remove item</span>
                           </button>
                         </div>
+
+                        {/* Selected Slots */}
+                        {item.selectedSlots && item.selectedSlots.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            <div className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              <span>{item.selectedSlots.length} slot{item.selectedSlots.length > 1 ? 's' : ''} chosen:</span>
+                            </div>
+                            <div className="space-y-1 max-h-20 overflow-y-auto">
+                              {item.selectedSlots.map((slot, idx) => (
+                                <div key={idx} className="text-xs text-gray-600 pl-4">
+                                  {formatSlotDate(slot.startTime)} • {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div className="mt-2 flex justify-end">
-                        <div className="text-sm font-medium">${item.price.toFixed(2)}</div>
+                      <div className="mt-2 flex justify-between items-end">
+                        <div className="text-xs text-muted-foreground">
+                          ${item.price.toFixed(2)} × {item.selectedSlots.length}
+                        </div>
+                        <div className="text-sm font-medium">
+                          ${(item.price * item.selectedSlots.length).toFixed(2)}
+                        </div>
                       </div>
                     </div>
                   </motion.div>
@@ -234,11 +245,11 @@ export function Cart() {
               <div className="flex items-center justify-between">
                 {isDesktop ? (
                   <SheetClose asChild>
-                    <Button variant="secondary">Continue Shopping</Button>
+                    <Button variant="secondary" onClick={() => router.push('/admin/ecommerce')}>Continue Shopping</Button>
                   </SheetClose>
                 ) : (
                   <DrawerClose asChild>
-                    <Button variant="secondary">Continue Shopping</Button>
+                    <Button variant="secondary" onClick={() => router.push('/admin/ecommerce')}>Continue Shopping</Button>
                   </DrawerClose>
                 )}
                 <Button
