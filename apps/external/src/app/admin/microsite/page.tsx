@@ -260,6 +260,26 @@ export default function CreateMicrositePage() {
     handleSubmit(e);
   };
 
+  // Convert 12-hour time format (3:30 PM) to 24-hour format (15:30)
+  const convertTo24Hour = (time12h: string): string => {
+    const [time, modifier] = time12h.trim().split(' ');
+    let [hours, minutes] = time.split(':');
+
+    if (hours === '12') {
+      hours = '00';
+    }
+
+    if (modifier?.toUpperCase() === 'PM') {
+      hours = String(parseInt(hours, 10) + 12);
+    }
+
+    // Pad with leading zero if needed
+    hours = hours.padStart(2, '0');
+    minutes = minutes?.padStart(2, '0') || '00';
+
+    return `${hours}:${minutes}`;
+  };
+
   const handleAiGenerate = async (inputs: {
     templateNumber?: number;
     password?: string;
@@ -279,10 +299,17 @@ export default function CreateMicrositePage() {
         additionalContext: inputs.additionalDetails,
       });
 
+      // Convert schedule times from 12-hour to 24-hour format
+      const convertedSchedule = generatedContent.schedule?.map((item) => ({
+        ...item,
+        time: item.time ? convertTo24Hour(item.time) : '',
+      }));
+
       // Update form data with AI-generated content
       updateFormData(selectedWeddingId, (prev) => ({
         ...prev,
         ...generatedContent,
+        schedule: convertedSchedule,
         ...(inputs.templateNumber && { templateNumber: inputs.templateNumber }),
         ...(inputs.password && { password: inputs.password }),
       }));
