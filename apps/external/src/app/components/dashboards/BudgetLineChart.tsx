@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '@shared/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@shared/components/ui/chart';
-import { Line, LineChart, ReferenceLine, XAxis, YAxis } from 'recharts';
+import { Legend, Line, LineChart, ReferenceLine, XAxis, YAxis } from 'recharts';
 
 interface BudgetLineChartProps {
   orders: OrderResponseDto[];
@@ -90,6 +90,11 @@ export const BudgetLineChart = ({
                 tickLine={{ stroke: 'hsl(var(--muted-foreground))' }}
                 tickFormatter={(value) => `${value}`}
               />
+              <Legend
+                wrapperStyle={{ paddingTop: '10px' }}
+                iconType="line"
+                formatter={(value) => (value === 'spending' ? 'Spending' : 'Budget')}
+              />
               <ChartTooltip
                 content={
                   <ChartTooltipContent
@@ -103,11 +108,13 @@ export const BudgetLineChart = ({
                   />
                 }
               />
-              <ReferenceLine
-                y={allocatedBudget}
+              <Line
+                type="monotone"
+                dataKey="budget"
                 stroke="#ef4444"
-                strokeDasharray="3 3"
-                label={{ value: 'Budget Limit', position: 'insideTopRight' }}
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={false}
               />
               <Line
                 type="monotone"
