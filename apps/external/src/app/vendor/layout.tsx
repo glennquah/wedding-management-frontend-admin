@@ -13,6 +13,8 @@ import { usePathname, useRouter } from 'next/navigation';
 
 const ALLOWED_ROUTES_WITHOUT_DETAILS = ['/vendor', '/vendor/account'];
 
+const allowedRoutesWithoutDetails = ['/vendor', '/vendor/account'];
+
 export default function VendorLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const router = useRouter();

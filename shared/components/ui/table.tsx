@@ -229,6 +229,7 @@ function DataTable<TData>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
     onRowSelectionChange: setRowSelection,
     columnResizeMode: 'onChange',
+    autoResetPageIndex: false,
     state: {
       sorting,
       pagination,

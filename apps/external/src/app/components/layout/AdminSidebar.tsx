@@ -107,6 +107,12 @@ export default function AdminSidebar() {
           icon: ListTodo,
           disabled: !hasWedding,
         },
+        {
+          title: 'Attendance',
+          href: '/attendance',
+          icon: ClipboardList,
+          disabled: !hasWedding,
+        },
       ],
     },
     {

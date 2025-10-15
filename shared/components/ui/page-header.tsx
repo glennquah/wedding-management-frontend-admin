@@ -25,7 +25,7 @@ export function PageHeader({
     <div className="flex justify-between items-center mb-8">
       <div>
         <h3 className="text-brand-600 mb-2">{title}</h3>
-        <p className="text-muted-foreground">{description}</p>
+        <p className="text-muted-foreground whitespace-pre-line">{description}</p>
       </div>
       {(additionalActions || (buttonText && onButtonClick)) && (
         <div className="flex gap-3">
