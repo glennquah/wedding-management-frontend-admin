@@ -63,6 +63,7 @@ export type { MicrositeResponseDto } from './models/MicrositeResponseDto';
 export type { NotificationDetailsDto } from './models/NotificationDetailsDto';
 export type { OptimizeDateRequestDto } from './models/OptimizeDateRequestDto';
 export type { OptimizeDateResponseDto } from './models/OptimizeDateResponseDto';
+export { OrderListingDetailResponseDto } from './models/OrderListingDetailResponseDto';
 export type { OrderListingDto } from './models/OrderListingDto';
 export { OrderResponseDto } from './models/OrderResponseDto';
 export { OrderStatus } from './models/OrderStatus';

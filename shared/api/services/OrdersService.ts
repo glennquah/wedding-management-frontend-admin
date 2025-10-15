@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { CreateOrderDto } from '../models/CreateOrderDto';
+import type { OrderListingDetailResponseDto } from '../models/OrderListingDetailResponseDto';
 import type { OrderResponseDto } from '../models/OrderResponseDto';
 import type { UpdateOrderDto } from '../models/UpdateOrderDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -117,6 +118,46 @@ export class OrdersService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/orders/wedding/{weddingId}',
+            path: {
+                'weddingId': weddingId,
+            },
+            errors: {
+                404: `Wedding not found.`,
+            },
+        });
+    }
+    /**
+     * Get successful orders (PAID or COMPLETED) by wedding ID
+     * @param weddingId
+     * @returns OrderResponseDto List of successful orders for the wedding.
+     * @throws ApiError
+     */
+    public static orderControllerFindSuccessfulOrdersByWedding(
+        weddingId: number,
+    ): CancelablePromise<Array<OrderResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/orders/wedding/{weddingId}/successful',
+            path: {
+                'weddingId': weddingId,
+            },
+            errors: {
+                404: `Wedding not found.`,
+            },
+        });
+    }
+    /**
+     * Get detailed order listing information (listing name, date, status, amount) by wedding ID
+     * @param weddingId
+     * @returns OrderListingDetailResponseDto List of order listing details for the wedding.
+     * @throws ApiError
+     */
+    public static orderControllerGetOrderListingDetailsByWedding(
+        weddingId: number,
+    ): CancelablePromise<Array<OrderListingDetailResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/orders/wedding/{weddingId}/listing-details',
             path: {
                 'weddingId': weddingId,
             },
