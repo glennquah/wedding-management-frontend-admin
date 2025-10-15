@@ -47,6 +47,7 @@ export type { EmailTemplateResponseDto } from './models/EmailTemplateResponseDto
 export type { EmailTemplateWithWeddingDto } from './models/EmailTemplateWithWeddingDto';
 export type { FaqItemDto } from './models/FaqItemDto';
 export { GenerateAiEmailTemplateDto } from './models/GenerateAiEmailTemplateDto';
+export type { GenerateMicrositeDto } from './models/GenerateMicrositeDto';
 export type { GratitudeCardResponseDto } from './models/GratitudeCardResponseDto';
 export { GuestCountBucket } from './models/GuestCountBucket';
 export type { GuestCountResponseDto } from './models/GuestCountResponseDto';
