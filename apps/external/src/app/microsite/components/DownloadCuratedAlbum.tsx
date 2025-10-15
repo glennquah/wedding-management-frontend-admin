@@ -110,9 +110,9 @@ export default function DownloadCuratedAlbum({
 
       await downloadImagesOrganizedByPerson(
         allPhotos,
-        filteredPersons.map((cluster) => ({
+        filteredPersons.map((cluster, index) => ({
           clusterId: cluster.id,
-          label: cluster.label || `Person ${cluster.id}`,
+          label: cluster.label || `Person ${faceClusters.findIndex(c => c.id === cluster.id) + 1}`,
           photoIds: cluster.photoIds,
         })),
         includeBlurry ? undefined : blurryPhotoIds,
@@ -209,7 +209,7 @@ export default function DownloadCuratedAlbum({
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
-                  {faceClusters.map((cluster) => (
+                  {faceClusters.map((cluster, index) => (
                     <button
                       key={cluster.id}
                       onClick={() => toggleCluster(cluster.id)}
@@ -226,16 +226,15 @@ export default function DownloadCuratedAlbum({
                           height={80}
                           crop="fill"
                           gravity="face"
-                          alt={cluster.label || `Person ${cluster.id}`}
+                          alt={cluster.label || `Person ${index + 1}`}
                           className="rounded-full object-cover"
                         />
                       )}
                       <div className="text-center">
                         <p className="text-xs font-medium">
-                          {cluster.label || `Person ${cluster.id}`}
+                          {cluster.label || `Person ${index + 1}`}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {cluster.faceCount} face{cluster.faceCount !== 1 ? 's' : ''} in{' '}
                           {cluster.photoIds.length} photo{cluster.photoIds.length !== 1 ? 's' : ''}
                         </p>
                       </div>
@@ -272,12 +271,7 @@ export default function DownloadCuratedAlbum({
                 Cancel
               </Button>
               <Button onClick={handleDownload}>
-                Download{' '}
-                {selectedClusters.size > 0
-                  ? `(${faceClusters
-                      .filter((c) => selectedClusters.has(c.id))
-                      .reduce((sum, c) => sum + c.photoIds.length, 0)} photos)`
-                  : `All Photos`}
+                Download
               </Button>
             </div>
           </div>
