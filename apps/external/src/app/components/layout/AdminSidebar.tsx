@@ -1,23 +1,20 @@
 'use client';
 
+import { signOut, useWeddingStore } from '../../store/sessionStore';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
   BookOpenText,
-  Calendar,
   Camera,
-  CheckSquare,
   ClipboardList,
   Clock,
   LayoutDashboard,
-  ListTodo,
   MapPin,
   PaintRoller,
   ShoppingCart,
   Sparkles,
   Users,
 } from 'lucide-react';
-import { signOut, useWeddingStore } from '../../store/sessionStore';
 
 export default function AdminSidebar() {
   const { weddings } = useWeddingStore();
@@ -56,11 +53,6 @@ export default function AdminSidebar() {
       sectionHeader: 'Planning',
       items: [
         {
-          title: 'Checklist',
-          href: '/checklist',
-          icon: CheckSquare,
-        },
-        {
           title: 'Guest List',
           href: '/guest-list',
           icon: Users,
@@ -79,15 +71,10 @@ export default function AdminSidebar() {
           disabled: !hasWedding,
         },
         {
-          title: 'Timeline',
-          href: '/timeline',
-          icon: Calendar,
-          disabled: !hasWedding,
-        },
-        {
           title: 'Date Optimizer',
           href: '/date-optimizer',
           icon: Sparkles,
+          disabled: !hasWedding,
         },
         {
           title: 'Microsite',
@@ -99,12 +86,6 @@ export default function AdminSidebar() {
           title: 'Album Invite',
           href: '/album',
           icon: Camera,
-          disabled: !hasWedding,
-        },
-        {
-          title: 'Tasks',
-          href: '/tasks',
-          icon: ListTodo,
           disabled: !hasWedding,
         },
         {
@@ -122,6 +103,7 @@ export default function AdminSidebar() {
           title: 'Gratitude Card',
           href: '/gratitude',
           icon: BookOpenText,
+          disabled: !hasWedding,
         },
       ],
     },
