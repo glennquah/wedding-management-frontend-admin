@@ -262,6 +262,7 @@ export default function CreateMicrositePage() {
 
   const handleAiGenerate = async (inputs: {
     templateNumber?: number;
+    password?: string;
     additionalDetails?: string;
   }) => {
     if (typeof selectedWeddingId !== 'number') return;
@@ -283,6 +284,7 @@ export default function CreateMicrositePage() {
         ...prev,
         ...generatedContent,
         ...(inputs.templateNumber && { templateNumber: inputs.templateNumber }),
+        ...(inputs.password && { password: inputs.password }),
       }));
 
       toast.success('AI has generated your microsite! Review and customize as needed.');
