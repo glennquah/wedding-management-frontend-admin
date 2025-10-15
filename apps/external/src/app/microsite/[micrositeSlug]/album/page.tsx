@@ -184,7 +184,7 @@ export default function AlbumPage({ params }: PageProps) {
 
                 <div className="flex justify-center gap-3 flex-wrap">
                   <ImageUploadWidget
-                    folder={`${album.coupleName}-${micrositeData.weddingDate?.split('T')[0]}`}
+                    folder={`${album.coupleName.replace(/[^a-zA-Z0-9-]/g, '_')}-${micrositeData.weddingDate?.split('T')[0]}`}
                     onUpload={async (url) => {
                       try {
                         const updatedAlbum = await AlbumService.albumControllerAddPhoto(album.id, {
