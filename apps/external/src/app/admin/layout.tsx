@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 
+import AdminSidebar from '../components/layout/AdminSidebar';
 import { useWeddingManager } from '@/app/hooks/useWeddingManager';
 import { useWeddingStore } from '@/app/store/sessionStore';
 import { UserRole, WeddingResponseDto } from '@shared/api';
@@ -27,7 +28,6 @@ import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { Toaster } from 'sonner';
-import AdminSidebar from '../components/layout/AdminSidebar';
 
 const allowedRoutesWithoutWedding = ['/admin', '/admin/account', '/admin/create-wedding'];
 

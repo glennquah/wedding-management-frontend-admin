@@ -3,6 +3,7 @@
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
+  BookOpenText,
   Calendar,
   Camera,
   CheckSquare,
@@ -105,6 +106,22 @@ export default function AdminSidebar() {
           href: '/tasks',
           icon: ListTodo,
           disabled: !hasWedding,
+        },
+        {
+          title: 'Attendance',
+          href: '/attendance',
+          icon: ClipboardList,
+          disabled: !hasWedding,
+        },
+      ],
+    },
+    {
+      sectionHeader: 'Post Wedding',
+      items: [
+        {
+          title: 'Gratitude Card',
+          href: '/gratitude',
+          icon: BookOpenText,
         },
       ],
     },

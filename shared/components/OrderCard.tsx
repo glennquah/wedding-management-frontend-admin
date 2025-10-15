@@ -21,7 +21,7 @@ interface OrderCardProps {
   coupleNames?: string[];
   adminEmail?: string;
   onDelete?: (orderId: number, listingId?: number) => void;
-  onPayNow?: (orderId: number) => void;
+  onPayNow?: (orderId: number, listingId?: number) => void;
   onConfirm?: () => void;
   onReject?: () => void;
   viewMode?: 'admin' | 'vendor';
@@ -356,7 +356,7 @@ export function OrderCard({
             <div className="flex justify-end">
               <Button
                 className="mt-4"
-                onClick={() => onPayNow(order.id)}
+                onClick={() => onPayNow(order.id, listings[0]?.listing.id)}
                 variant="default"
               >
                 Pay Now

@@ -98,4 +98,55 @@ export class EmailNotificationService {
             mediaType: 'application/json',
         });
     }
+    /**
+     * Broadcast guest gratitude card emails to primary guests
+     * @param weddingId
+     * @returns any The guest gratitude card emails have been processed.
+     * @throws ApiError
+     */
+    public static emailNotificationControllerBroadcastGuestGratitude(
+        weddingId: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/email-notification/broadcast-guest-gratitude/{weddingId}',
+            path: {
+                'weddingId': weddingId,
+            },
+        });
+    }
+    /**
+     * Broadcast collaborator gratitude card emails to collaborators
+     * @param weddingId
+     * @returns any The collaborator gratitude card emails have been processed.
+     * @throws ApiError
+     */
+    public static emailNotificationControllerBroadcastCollaboratorGratitude(
+        weddingId: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/email-notification/broadcast-collaborator-gratitude/{weddingId}',
+            path: {
+                'weddingId': weddingId,
+            },
+        });
+    }
+    /**
+     * Broadcast vendor gratitude card emails to vendors
+     * @param weddingId
+     * @returns any The vendor gratitude card emails have been processed.
+     * @throws ApiError
+     */
+    public static emailNotificationControllerBroadcastVendorGratitude(
+        weddingId: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/email-notification/broadcast-vendor-gratitude/{weddingId}',
+            path: {
+                'weddingId': weddingId,
+            },
+        });
+    }
 }
