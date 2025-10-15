@@ -95,10 +95,11 @@ export function useOrders(selectedWeddingId?: number) {
     }
   };
 
-  const handlePayNow = async (orderId: number) => {
+  const handlePayNow = async (orderId: number, listingId?: number) => {
     try {
       const checkoutData = await PaymentsService.paymentControllerCreateCheckoutSession({
         orderId: orderId,
+        listingIds: listingId ? [listingId.toString()] : undefined,
         successUrl: `${window.location.origin}/admin/payment/success?session_id={CHECKOUT_SESSION_ID}`,
         cancelUrl: `${window.location.origin}/admin/payment/cancel`,
       });
