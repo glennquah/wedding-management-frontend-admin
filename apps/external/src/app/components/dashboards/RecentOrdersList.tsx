@@ -40,26 +40,30 @@ const getStatusColor = (status: string) => {
 };
 
 export const RecentOrdersList = ({ listingDetails, isLoading }: RecentOrdersListProps) => {
-  // Show only the 5 most recent listing details
-  const recentListings = listingDetails
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  // Show only the 5 upcoming listing details (future dates, sorted by soonest first)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const upcomingListings = listingDetails
+    .filter((listing) => new Date(listing.date) >= today)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, 5);
 
   return (
     <Card className="bg-transparent border-brand-200">
       <CardHeader>
-        <CardTitle>Recent Orders</CardTitle>
-        <CardDescription>Your latest 5 orders</CardDescription>
+        <CardTitle>Upcoming Orders</CardTitle>
+        <CardDescription>Your next 5 upcoming orders</CardDescription>
       </CardHeader>
       <CardContent className="h-[350px]">
         {isLoading ? (
           <div className="flex h-full items-center justify-center text-muted-foreground">
             Loading orders...
           </div>
-        ) : recentListings.length === 0 ? (
+        ) : upcomingListings.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
             <Package className="h-12 w-12 mb-2 opacity-50" />
-            <p>No orders yet</p>
+            <p>No upcoming orders</p>
           </div>
         ) : (
           <div className="overflow-auto h-full border rounded-md ">
@@ -74,7 +78,7 @@ export const RecentOrdersList = ({ listingDetails, isLoading }: RecentOrdersList
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentListings.map((listing) => (
+                {upcomingListings.map((listing) => (
                   <TableRow key={`${listing.orderId}-${listing.listingId}`}>
                     <TableCell className="font-medium">{listing.listingName}</TableCell>
                     <TableCell>{listing.vendorName}</TableCell>

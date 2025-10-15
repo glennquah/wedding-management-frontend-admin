@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '@shared/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@shared/components/ui/chart';
-import { Legend, Line, LineChart, ReferenceLine, XAxis, YAxis } from 'recharts';
+import { Legend, Line, LineChart, XAxis, YAxis } from 'recharts';
 
 interface BudgetLineChartProps {
   orders: OrderResponseDto[];
@@ -68,7 +68,7 @@ export const BudgetLineChart = ({
         <CardTitle>Budget Tracking</CardTitle>
         <CardDescription>Cumulative spending over time vs allocated budget</CardDescription>
       </CardHeader>
-      <CardContent className="h-[300px]">
+      <CardContent className="h-[350px]">
         {isLoading ? (
           <div className="flex h-full items-center justify-center text-muted-foreground">
             Loading chart...
