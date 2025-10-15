@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AlbumService, FaceClusterDto, ProcessingStatusDto } from '@shared/api';
 import { Button } from '@shared/components';
 import {
@@ -14,9 +14,17 @@ import {
 import { CldImage } from 'next-cloudinary';
 import { toast } from 'sonner';
 
+interface ImageProps {
+  id: number;
+  height: string;
+  width: string;
+  image_url: string;
+  format: string;
+}
+
 interface DownloadCuratedAlbumProps {
   albumId: number;
-  allPhotos: Array<{ id: number; image_url: string }>;
+  allPhotos: ImageProps[];
 }
 
 export default function DownloadCuratedAlbum({
@@ -29,17 +37,11 @@ export default function DownloadCuratedAlbum({
   const [faceClusters, setFaceClusters] = useState<FaceClusterDto[]>([]);
   const [selectedClusters, setSelectedClusters] = useState<Set<number>>(new Set());
   const [includeBlurry, setIncludeBlurry] = useState(true);
-  const [onlyWithPeople, setOnlyWithPeople] = useState(false);
   const [blurryPhotoIds, setBlurryPhotoIds] = useState<Set<number>>(new Set());
+  const [includeOthers, setIncludeOthers] = useState(true);
+  const [othersCount, setOthersCount] = useState(0);
 
-  // Fetch data when dialog opens
-  useEffect(() => {
-    if (isOpen) {
-      fetchData();
-    }
-  }, [isOpen]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
       const [status, clusters, blurryIndices] = await Promise.all([
@@ -50,13 +52,28 @@ export default function DownloadCuratedAlbum({
       setProcessingStatus(status);
       setFaceClusters(clusters);
       setBlurryPhotoIds(new Set(blurryIndices));
+
+      // Select all clusters by default
+      setSelectedClusters(new Set(clusters.map(c => c.id)));
+
+      // Calculate number of photos not in any cluster
+      const photosInClusters = new Set(clusters.flatMap(c => c.photoIds));
+      const othersPhotos = allPhotos.filter((_, idx) => !photosInClusters.has(idx));
+      setOthersCount(othersPhotos.length);
     } catch (error) {
       console.error('Failed to fetch album data:', error);
       toast.error('Failed to load album data');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [albumId, allPhotos]);
+
+  // Fetch data when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchData();
+    }
+  }, [isOpen, fetchData]);
 
   const toggleCluster = (clusterId: number) => {
     const newSelected = new Set(selectedClusters);
@@ -78,10 +95,14 @@ export default function DownloadCuratedAlbum({
 
   const handleDownload = async () => {
     try {
-      // Determine which people to include
-      const selectedPersons = selectedClusters.size > 0
-        ? faceClusters.filter((cluster) => selectedClusters.has(cluster.id))
-        : faceClusters;
+      // Check if anything is selected to download
+      if (selectedClusters.size === 0 && !includeOthers) {
+        toast.error('Please select at least one person or include "Other Photos"');
+        return;
+      }
+
+      // Determine which people to include - only selected clusters
+      const selectedPersons = faceClusters.filter((cluster) => selectedClusters.has(cluster.id));
 
       // Filter photo IDs based on blur settings
       let filteredPersons = selectedPersons;
@@ -93,29 +114,48 @@ export default function DownloadCuratedAlbum({
         })).filter((person) => person.photoIds.length > 0); // Remove persons with no non-blurry photos
       }
 
-      if (filteredPersons.length === 0 && allPhotos.length === 0) {
+      if (filteredPersons.length === 0 && !includeOthers) {
         toast.error('No photos to download');
         return;
       }
 
-      // Calculate total photos
-      const totalPhotos = filteredPersons.length > 0
-        ? new Set(filteredPersons.flatMap((p) => p.photoIds)).size
-        : allPhotos.filter((_, idx) => includeBlurry || !blurryPhotoIds.has(idx)).length;
+      // Calculate total photos including others
+      const photosInPersonFolders = new Set(filteredPersons.flatMap((p) => p.photoIds));
+      let totalPhotos = photosInPersonFolders.size;
+
+      // Add others count if includeOthers is true
+      if (includeOthers) {
+        // Get ALL photo IDs from ALL clusters (not just selected ones)
+        const allPhotoIdsInAnyClusters = new Set(faceClusters.flatMap(c => c.photoIds));
+
+        const othersPhotos = allPhotos.filter((_, idx) => {
+          // Skip if in ANY person cluster (not just selected ones)
+          if (allPhotoIdsInAnyClusters.has(idx)) return false;
+          // Skip if blurry (when filtering is enabled)
+          if (!includeBlurry && blurryPhotoIds.has(idx)) return false;
+          return true;
+        });
+        totalPhotos += othersPhotos.length;
+      }
 
       toast.success(`Organizing and downloading ${totalPhotos} photos...`);
 
       // Use organized download function
       const { downloadImagesOrganizedByPerson } = await import('../utils/downloadPhoto');
 
+      // Get ALL photo IDs from ALL clusters (not just selected ones) for "Others" calculation
+      const allPhotoIdsInAnyClusters = new Set(faceClusters.flatMap(c => c.photoIds));
+
       await downloadImagesOrganizedByPerson(
         allPhotos,
-        filteredPersons.map((cluster, index) => ({
+        filteredPersons.map((cluster) => ({
           clusterId: cluster.id,
           label: cluster.label || `Person ${faceClusters.findIndex(c => c.id === cluster.id) + 1}`,
           photoIds: cluster.photoIds,
         })),
         includeBlurry ? undefined : blurryPhotoIds,
+        includeOthers,
+        allPhotoIdsInAnyClusters,
       );
 
       setIsOpen(false);
@@ -256,6 +296,26 @@ export default function DownloadCuratedAlbum({
                     </button>
                   ))}
                 </div>
+
+                {/* Others folder option */}
+                {othersCount > 0 && (
+                  <div className="mt-4">
+                    <label className="flex items-center gap-2 cursor-pointer p-3 rounded-lg border-2 border-gray-200 hover:border-gray-300 transition-all">
+                      <input
+                        type="checkbox"
+                        checked={includeOthers}
+                        onChange={(e) => setIncludeOthers(e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <div>
+                        <span className="text-sm font-medium">Include &ldquo;Other Photos&rdquo; folder</span>
+                        <p className="text-xs text-gray-500">
+                          {othersCount} photo{othersCount !== 1 ? 's' : ''} not matched to any person
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+                )}
               </div>
             )}
 

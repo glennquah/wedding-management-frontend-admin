@@ -66,6 +66,8 @@ export async function downloadImagesOrganizedByPerson(
   allPhotos: ImageProps[],
   personFolders: PersonFolder[],
   blurryPhotoIds?: Set<number>,
+  includeOthers: boolean = true,
+  allPhotoIdsInAnyClusters?: Set<number>,
 ) {
   const zip = new JSZip();
 
@@ -107,34 +109,39 @@ export async function downloadImagesOrganizedByPerson(
     );
   }
 
-  // Create "Other Photos" folder for photos not in any person cluster
-  const otherPhotos = allPhotos.filter((_, idx) => {
-    // Skip if already in a person folder
-    if (photosInPersonFolders.has(idx)) return false;
-    // Skip if blurry (when filtering is enabled)
-    if (blurryPhotoIds && blurryPhotoIds.has(idx)) return false;
-    return true;
-  });
+  // Create "Other Photos" folder for photos not in any person cluster (if includeOthers is true)
+  if (includeOthers) {
+    // Use allPhotoIdsInAnyClusters if provided, otherwise fall back to photosInPersonFolders
+    const photoIdsToExclude = allPhotoIdsInAnyClusters || photosInPersonFolders;
 
-  if (otherPhotos.length > 0) {
-    const otherFolder = zip.folder('Other Photos');
+    const otherPhotos = allPhotos.filter((_, idx) => {
+      // Skip if in ANY person cluster (not just selected ones)
+      if (photoIdsToExclude.has(idx)) return false;
+      // Skip if blurry (when filtering is enabled)
+      if (blurryPhotoIds && blurryPhotoIds.has(idx)) return false;
+      return true;
+    });
 
-    if (otherFolder) {
-      await Promise.all(
-        otherPhotos.map(async (photo) => {
-          try {
-            const response = await fetch(photo.image_url, {
-              headers: { Origin: location.origin },
-              mode: 'cors',
-            });
-            const blob = await response.blob();
-            const extension = photo.format || 'jpg';
-            otherFolder.file(`${photo.id}.${extension}`, blob);
-          } catch (e) {
-            console.error(`Failed to fetch image ${photo.image_url}`, e);
-          }
-        }),
-      );
+    if (otherPhotos.length > 0) {
+      const otherFolder = zip.folder('Other Photos');
+
+      if (otherFolder) {
+        await Promise.all(
+          otherPhotos.map(async (photo) => {
+            try {
+              const response = await fetch(photo.image_url, {
+                headers: { Origin: location.origin },
+                mode: 'cors',
+              });
+              const blob = await response.blob();
+              const extension = photo.format || 'jpg';
+              otherFolder.file(`${photo.id}.${extension}`, blob);
+            } catch (e) {
+              console.error(`Failed to fetch image ${photo.image_url}`, e);
+            }
+          }),
+        );
+      }
     }
   }
 
