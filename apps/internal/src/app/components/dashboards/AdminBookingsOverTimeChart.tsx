@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@shared/components/ui/select';
-import { Bar, BarChart, Legend, XAxis, YAxis } from 'recharts';
+import { Legend, Line, LineChart, XAxis, YAxis } from 'recharts';
 
 interface AdminBookingsOverTimeChartProps {
   bookingsOverTime?: AdminBookingsOverTimeResponseDto;
@@ -112,7 +112,7 @@ export const AdminBookingsOverTimeChart = ({
           </div>
         ) : (
           <ChartContainer config={chartConfig} className="h-full w-full">
-            <BarChart data={chartData}>
+            <LineChart data={chartData}>
               <XAxis
                 dataKey="period"
                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
@@ -151,8 +151,14 @@ export const AdminBookingsOverTimeChart = ({
                   />
                 }
               />
-              <Bar dataKey="bookings" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-            </BarChart>
+              <Line
+                dataKey="bookings"
+                type="monotone"
+                stroke="#3b82f6"
+                strokeWidth={2}
+                dot={{ fill: '#3b82f6', r: 4 }}
+              />
+            </LineChart>
           </ChartContainer>
         )}
       </CardContent>

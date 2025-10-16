@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/ui/card';
-import { Users, Heart, Calendar, Globe, UserCheck, DollarSign, TrendingUp } from 'lucide-react';
+import { Calendar, DollarSign, Globe, Heart, TrendingUp, UserCheck, Users } from 'lucide-react';
 
 interface AdminStatsCardsProps {
   basicStats?: {
@@ -34,7 +34,7 @@ export const AdminStatsCards = ({
   };
 
   return (
-    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 grid-cols-1 md:grid-cols-4">
       {/* Total Vendors Card */}
       <Card className="bg-transparent border-brand-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

@@ -36,8 +36,11 @@ export const AdminRevenueOverTimeChart = ({
   const chartData = useMemo(() => {
     if (!revenueOverTime?.data || revenueOverTime.data.length === 0) return [];
 
+    // Find the index where predictions start
+    const firstPredictedIndex = revenueOverTime.data.findIndex((item) => item.isPredictedValue);
+
     // Format the data for the chart
-    return revenueOverTime.data.map((item) => {
+    return revenueOverTime.data.map((item, index) => {
       let label = item.period;
 
       // Format based on period type
@@ -57,18 +60,42 @@ export const AdminRevenueOverTimeChart = ({
         });
       }
 
+      // Determine revenue and predictedRevenue values
+      let revenue: number | null = item.revenue;
+      let predictedRevenue: number | null = null;
+
+      if (firstPredictedIndex !== -1) {
+        // Include the last actual value as the starting point for the predicted line
+        if (index === firstPredictedIndex - 1 || index >= firstPredictedIndex) {
+          predictedRevenue = item.revenue;
+        }
+        // Hide revenue values at and after predictions start
+        if (index >= firstPredictedIndex) {
+          revenue = null;
+        }
+      }
+
       return {
         period: label,
-        revenue: item.revenue,
+        revenue,
+        predictedRevenue,
         orderCount: item.orderCount,
+        isPredicted: item.isPredictedValue,
       };
     });
   }, [revenueOverTime]);
+
+  // Check if we have any predicted values
+  const hasPredictedValues = useMemo(() => chartData.some((item) => item.isPredicted), [chartData]);
 
   const chartConfig = {
     revenue: {
       label: 'Revenue',
       color: '#10b981',
+    },
+    predictedRevenue: {
+      label: 'Predicted',
+      color: '#3b82f6',
     },
   };
 
@@ -98,7 +125,7 @@ export const AdminRevenueOverTimeChart = ({
           </Select>
         </div>
       </CardHeader>
-      <CardContent className="h-[300px]">
+      <CardContent className="h-[350px]">
         {isLoading ? (
           <div className="flex h-full items-center justify-center text-muted-foreground">
             Loading chart...
@@ -124,6 +151,7 @@ export const AdminRevenueOverTimeChart = ({
                 wrapperStyle={{ paddingTop: '20px' }}
                 formatter={(value) => {
                   if (value === 'revenue') return 'Revenue';
+                  if (value === 'predictedRevenue') return 'Predicted';
                   return value;
                 }}
               />
@@ -133,11 +161,12 @@ export const AdminRevenueOverTimeChart = ({
                     formatter={(
                       value: number,
                       _name: string,
-                      item: { payload: { orderCount: number } },
+                      item: { payload: { orderCount: number; isPredicted: boolean } },
                     ) => (
                       <>
                         <div className="font-semibold">
-                          Revenue: {revenueOverTime?.currency}
+                          {item.payload.isPredicted ? 'Predicted Revenue' : 'Revenue'}:{' '}
+                          {revenueOverTime?.currency}
                           {Number(value).toFixed(2)}
                         </div>
                         <div className="text-xs text-muted-foreground">
@@ -156,6 +185,48 @@ export const AdminRevenueOverTimeChart = ({
                 dot={{ fill: '#10b981', r: 4 }}
                 connectNulls
               />
+              {hasPredictedValues && (
+                <Line
+                  type="monotone"
+                  dataKey="predictedRevenue"
+                  stroke="#3b82f6"
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  dot={(props: {
+                    cx?: number;
+                    cy?: number;
+                    index?: number;
+                    payload?: { predictedRevenue: number | null };
+                  }) => {
+                    // Only render visible dot if there's a predictedRevenue value
+                    if (!props.payload?.predictedRevenue) {
+                      return (
+                        <circle
+                          key={`empty-dot-${props.index}`}
+                          cx={props.cx}
+                          cy={props.cy}
+                          r={0}
+                          fill="transparent"
+                        />
+                      );
+                    }
+
+                    const firstPredictedIndex = chartData.findIndex((item) => item.isPredicted);
+                    const isConnectionPoint = props.index === firstPredictedIndex - 1;
+                    const fill = isConnectionPoint ? '#10b981' : '#3b82f6';
+                    return (
+                      <circle
+                        key={`predicted-dot-${props.index}`}
+                        cx={props.cx}
+                        cy={props.cy}
+                        r={4}
+                        fill={fill}
+                      />
+                    );
+                  }}
+                  connectNulls
+                />
+              )}
             </LineChart>
           </ChartContainer>
         )}

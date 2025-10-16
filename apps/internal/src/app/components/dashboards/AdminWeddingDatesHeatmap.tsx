@@ -16,7 +16,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@shared/components/ui/chart';
-import { Bar, BarChart, XAxis, YAxis } from 'recharts';
+import { Line, LineChart, XAxis, YAxis } from 'recharts';
 
 interface AdminWeddingDatesHeatmapProps {
   weddingDatesData?: {
@@ -84,7 +84,7 @@ export const AdminWeddingDatesHeatmap = ({
           </div>
         ) : (
           <ChartContainer config={chartConfig} className="h-full w-full">
-            <BarChart data={chartData}>
+            <LineChart data={chartData}>
               <XAxis
                 dataKey="month"
                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
@@ -113,8 +113,14 @@ export const AdminWeddingDatesHeatmap = ({
                   />
                 }
               />
-              <Bar dataKey="weddings" radius={[4, 4, 0, 0]} />
-            </BarChart>
+              <Line
+                dataKey="weddings"
+                type="monotone"
+                stroke="#10b981"
+                strokeWidth={2}
+                dot={{ fill: '#10b981', r: 4 }}
+              />
+            </LineChart>
           </ChartContainer>
         )}
       </CardContent>
