@@ -154,7 +154,7 @@ export default function CreateAlbumInvitePage() {
                 ? 'Update your existing album invite for this wedding'
                 : 'Design and configure a wedding album invite for your guests'
             }
-            buttonText="Print Invite"
+            buttonText="Export PDF"
             onButtonClick={handlePrint}
             isButtonDisabled={isSubmitting || isDeleting}
             buttonIcon={<Printer className="w-4 h-4" />}

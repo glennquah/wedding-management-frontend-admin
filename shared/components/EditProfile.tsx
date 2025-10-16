@@ -506,38 +506,6 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           )}
         </div>
 
-        {isEditing && (
-          <>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Password</label>
-              <Input
-                type="password"
-                value={formData.password}
-                onChange={(e) => handleInputChange('password', e.target.value)}
-                placeholder="Enter new password (leave blank to keep current)"
-              />
-              <p className="text-xs text-muted-foreground">
-                Leave empty to keep your current password
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Confirm Password</label>
-              <Input
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                placeholder="Re-enter new password"
-                disabled={!formData.password.trim()}
-                className={validationErrors.confirmPassword ? 'border-red-500' : ''}
-              />
-              {validationErrors.confirmPassword && (
-                <p className="text-sm text-red-500">{validationErrors.confirmPassword}</p>
-              )}
-            </div>
-          </>
-        )}
-
         <div className="space-y-2">
           <label className="text-sm font-medium">Role</label>
           <p className="p-3 bg-muted rounded-md capitalize">

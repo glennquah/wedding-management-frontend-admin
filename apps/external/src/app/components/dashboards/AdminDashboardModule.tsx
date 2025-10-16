@@ -11,6 +11,7 @@ import {
   AnalyticsService,
   GuestCountResponseDto,
   MicrositeService,
+  OrderListingDetailResponseDto,
   OrderResponseDto,
   OrdersService,
   RsvpCountResponseDto,
@@ -31,7 +32,8 @@ const AdminDashboardModule = () => {
   const [guestCount, setGuestCount] = useState<GuestCountResponseDto | undefined>();
   const [spending, setSpending] = useState<SpendingResponseDto | undefined>();
   const [rsvpCount, setRsvpCount] = useState<RsvpCountResponseDto | undefined>();
-  const [orders, setOrders] = useState<OrderResponseDto[]>([]);
+  const [listingDetails, setListingDetails] = useState<OrderListingDetailResponseDto[]>([]);
+  const [successfulOrders, setSuccessfulOrders] = useState<OrderResponseDto[]>([]);
   const [micrositeUrl, setMicrositeUrl] = useState<string | null>(null);
   const [hasSeating, setHasSeating] = useState(false);
 
@@ -89,8 +91,12 @@ const AdminDashboardModule = () => {
     const fetchOrders = async () => {
       setIsLoadingOrders(true);
       try {
-        const ordersData = await OrdersService.orderControllerFindByWedding(selectedWeddingId);
-        setOrders(ordersData);
+        const [listingDetailsData, successfulOrdersData] = await Promise.all([
+          OrdersService.orderControllerGetOrderListingDetailsByWedding(selectedWeddingId),
+          OrdersService.orderControllerFindSuccessfulOrdersByWedding(selectedWeddingId),
+        ]);
+        setListingDetails(listingDetailsData);
+        setSuccessfulOrders(successfulOrdersData);
       } catch (error) {
         console.error('Error fetching orders:', error);
       } finally {
@@ -176,12 +182,12 @@ const AdminDashboardModule = () => {
         {/* Second Row - Budget Chart and Recent Orders */}
         <div className="grid gap-6 md:grid-cols-2 mb-6">
           <BudgetLineChart
-            orders={orders}
+            orders={successfulOrders}
             allocatedBudget={spending?.allocatedBudget || 0}
             currency={spending?.currency || '$'}
             isLoading={isLoadingOrders}
           />
-          <RecentOrdersList orders={orders} isLoading={isLoadingOrders} />
+          <RecentOrdersList listingDetails={listingDetails} isLoading={isLoadingOrders} />
         </div>
 
         {/* Third Row - Wedding Tasks Checklist */}
