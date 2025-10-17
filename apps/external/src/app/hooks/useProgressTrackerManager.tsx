@@ -116,6 +116,8 @@ export function useProgressTrackerManager(weddingId?: number | null) {
 
       // Determine the new assistant message content first
       let newAssistantMessage: string;
+      let additionalMessage: string | null = null; // For ADDITIONAL_DETAILS stage
+
       if (nextStage === 'CHECKLIST_GENERATED') {
         newAssistantMessage =
           "Great! You've reviewed all the checklist categories. You can now generate your personalized checklist or continue planning with the existing items.";
@@ -128,10 +130,16 @@ export function useProgressTrackerManager(weddingId?: number | null) {
         newAssistantMessage =
           `**${nextCategoryName}**\n\n` +
           categoryItems.map((item) => `• **${item.title}**: ${item.description}`).join('\n\n') +
-          "\n\nClick 'Next Category' to continue, or 'Generate Checklist' when you're ready.";
+          "\n\nClick 'Next Category' to continue.";
+
+        // If this is ADDITIONAL_DETAILS stage, add the completion message as well
+        if (nextStage === 'ADDITIONAL_DETAILS') {
+          additionalMessage =
+            "Great! You've reviewed all the checklist categories. You can now generate your personalized checklist or continue planning with the existing items.";
+        }
       }
 
-      // Prepare chat history for backend INCLUDING the new assistant message
+      // Prepare chat history for backend INCLUDING the new assistant message(s)
       const newAssistantMsg = {
         id: crypto.randomUUID(),
         role: 'assistant' as const,
@@ -140,7 +148,18 @@ export function useProgressTrackerManager(weddingId?: number | null) {
 
       // Get current messages from store (this ensures we have the most up-to-date messages)
       const currentMessages = getCurrentMessages();
-      const updatedMessages = [...currentMessages, newAssistantMsg];
+      let updatedMessages = [...currentMessages, newAssistantMsg];
+
+      // Add the additional message if it exists (for ADDITIONAL_DETAILS stage)
+      if (additionalMessage) {
+        const additionalMsg = {
+          id: crypto.randomUUID(),
+          role: 'assistant' as const,
+          content: additionalMessage,
+        };
+        updatedMessages = [...updatedMessages, additionalMsg];
+      }
+
       const chatHistoryForBackend = updatedMessages.map((msg) => ({
         role: msg.role as CreateChatMessageDto.role,
         content: msg.content,
@@ -219,8 +238,18 @@ export function useProgressTrackerManager(weddingId?: number | null) {
         setStage(weddingId, nextStage);
       }
 
-      // Add the assistant message to local state AFTER backend save
+      // Add the assistant message(s) to local state AFTER backend save
       addMessage(weddingId, newAssistantMsg);
+
+      // Add the additional message if it exists (for ADDITIONAL_DETAILS stage)
+      if (additionalMessage) {
+        const additionalMsg = {
+          id: crypto.randomUUID(),
+          role: 'assistant' as const,
+          content: additionalMessage,
+        };
+        addMessage(weddingId, additionalMsg);
+      }
 
       console.log(`Stage progression: ${currentStage} -> ${nextStage}`);
     } catch (error) {
@@ -283,6 +312,14 @@ export function useProgressTrackerManager(weddingId?: number | null) {
                     role: 'assistant',
                     content:
                       'Welcome back! Your checklist has been generated. You can ask me anything about your wedding planning or make modifications to your checklist.',
+                  });
+                } else if (backendStage === 'ADDITIONAL_DETAILS') {
+                  // Show completion message for the final stage
+                  addMessage(targetWeddingId, {
+                    id: crypto.randomUUID(),
+                    role: 'assistant',
+                    content:
+                      "🎉 Great! You've reviewed all the checklist categories. You can now generate your personalized checklist or continue planning with the existing items.",
                   });
                 } else if (backendStage !== 'GETTING_STARTED') {
                   // For non-initial stages, show the current category content
@@ -850,7 +887,9 @@ export function useProgressTrackerManager(weddingId?: number | null) {
       const updatedChecklist = weddingId ? await fetchChecklistFromBackend(weddingId) : null;
 
       if (updatedChecklist) {
-        setChecklist(weddingId, updatedChecklist);
+        if (typeof weddingId === 'number') {
+          setChecklist(weddingId, updatedChecklist);
+        }
       }
 
       closeEditItemModal();
@@ -881,7 +920,9 @@ export function useProgressTrackerManager(weddingId?: number | null) {
       const updatedChecklist = weddingId ? await fetchChecklistFromBackend(weddingId) : null;
 
       if (updatedChecklist) {
-        setChecklist(weddingId, updatedChecklist);
+        if (typeof weddingId === 'number') {
+          setChecklist(weddingId, updatedChecklist);
+        }
       }
 
       closeDeleteConfirmModal();
@@ -915,7 +956,9 @@ export function useProgressTrackerManager(weddingId?: number | null) {
       const updatedChecklist = weddingId ? await fetchChecklistFromBackend(weddingId) : null;
 
       if (updatedChecklist) {
-        setChecklist(weddingId, updatedChecklist);
+        if (typeof weddingId === 'number') {
+          setChecklist(weddingId, updatedChecklist);
+        }
       }
 
       return updatedChecklist;

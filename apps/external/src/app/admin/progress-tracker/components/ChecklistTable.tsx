@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { ChecklistItem, useProgressTrackerStore } from '../../../store/progressTrackerStore';
 import { useWeddingStore } from '../../../store/sessionStore';
@@ -25,25 +25,54 @@ export default function ChecklistTable({
 }: ChecklistTableProps) {
   const { selectedWeddingId } = useWeddingStore();
   const { updateChecklistItem } = useProgressTrackerStore();
+  const [fadingItems, setFadingItems] = useState<Set<string>>(new Set());
+  const [optimisticStates, setOptimisticStates] = useState<Map<string, boolean>>(new Map());
 
-  // Sort checklist items by months before wedding (descending)
-  const sortedChecklist = useMemo(
-    () =>
-      [...checklist].sort((a, b) => {
-        const aMonths = a.monthsBeforeWedding || 0;
-        const bMonths = b.monthsBeforeWedding || 0;
-        return bMonths - aMonths;
-      }),
-    [checklist],
-  );
+  // Stable default sort: Uncompleted first, then monthsBeforeWedding (desc), then original index as tiebreaker
+  const sortedChecklist = useMemo(() => {
+    const decorated = checklist.map((item, index) => ({ item, index }));
+    decorated.sort((a, b) => {
+      const aCompleted = !!a.item.completed;
+      const bCompleted = !!b.item.completed;
+      if (aCompleted !== bCompleted) {
+        return aCompleted ? 1 : -1; // uncompleted first
+      }
+      const aMonths = a.item.monthsBeforeWedding ?? 0;
+      const bMonths = b.item.monthsBeforeWedding ?? 0;
+      if (aMonths !== bMonths) {
+        return bMonths - aMonths; // desc
+      }
+      return a.index - b.index; // stable tiebreaker by original order
+    });
+    return decorated.map((d) => d.item);
+  }, [checklist]);
 
   const handleCheckboxChange = async (itemId: string, completed: boolean) => {
-    if (onToggleCompletion) {
-      await onToggleCompletion(itemId, completed);
-    } else if (typeof selectedWeddingId === 'number') {
-      // Fallback to local store if no callback provided
-      updateChecklistItem(selectedWeddingId, itemId, { completed });
-    }
+    // Immediately update the optimistic state so checkbox shows the new state
+    setOptimisticStates((prev) => new Map(prev).set(itemId, completed));
+
+    // Start fade-out animation (for both checking and unchecking)
+    setFadingItems((prev) => new Set(prev).add(itemId));
+
+    // Wait for animation, then update state
+    setTimeout(async () => {
+      if (onToggleCompletion) {
+        await onToggleCompletion(itemId, completed);
+      } else if (typeof selectedWeddingId === 'number') {
+        updateChecklistItem(selectedWeddingId, itemId, { completed });
+      }
+      // Remove from fading set and optimistic state after update
+      setFadingItems((prev) => {
+        const next = new Set(prev);
+        next.delete(itemId);
+        return next;
+      });
+      setOptimisticStates((prev) => {
+        const next = new Map(prev);
+        next.delete(itemId);
+        return next;
+      });
+    }, 300); // Match this to CSS transition duration
   };
 
   const getCategoryColor = (category: string) => {
@@ -101,16 +130,24 @@ export default function ChecklistTable({
       {
         id: 'completed',
         header: 'Completed',
-        cell: ({ row }) => (
-          <div className="flex w-full items-center justify-center">
-            <Checkbox
-              className="border-2 data-[state=unchecked]:border-gray-400 data-[state=unchecked]:bg-white dark:data-[state=unchecked]:border-gray-500 dark:data-[state=unchecked]:bg-transparent"
-              checked={row.original.completed || false}
-              onCheckedChange={(checked) => handleCheckboxChange(row.original.id, !!checked)}
-              aria-label={`Mark ${row.original.title} as ${row.original.completed ? 'incomplete' : 'complete'}`}
-            />
-          </div>
-        ),
+        cell: ({ row }) => {
+          const item = row.original;
+          // Use optimistic state if available, otherwise use actual state
+          const isChecked = optimisticStates.has(item.id)
+            ? optimisticStates.get(item.id)!
+            : item.completed || false;
+
+          return (
+            <div className="flex w-full items-center justify-center">
+              <Checkbox
+                className="border-2 data-[state=unchecked]:border-gray-400 data-[state=unchecked]:bg-white dark:data-[state=unchecked]:border-gray-500 dark:data-[state=unchecked]:bg-transparent"
+                checked={isChecked}
+                onCheckedChange={(checked) => handleCheckboxChange(item.id, !!checked)}
+                aria-label={`Mark ${item.title} as ${item.completed ? 'incomplete' : 'complete'}`}
+              />
+            </div>
+          );
+        },
       },
     ];
 
@@ -145,22 +182,38 @@ export default function ChecklistTable({
     }
 
     return baseColumns;
-  }, [onEditItem, onDeleteItem]);
+  }, [onEditItem, onDeleteItem, optimisticStates]);
 
   return (
-    <DataTable
-      data={sortedChecklist}
-      columns={columns}
-      title="Checklist"
-      searchableColumns={[
-        {
-          id: 'title',
-          placeholder: 'Search tasks...',
-        },
-      ]}
-      enableSelection={false}
-      defaultPageSize={10}
-      className="w-full"
-    />
+    <>
+      <style>{`
+        .checklist-row-fade-out {
+          opacity: 0;
+          transition: opacity 300ms ease-out;
+        }
+        .checklist-row {
+          opacity: 1;
+          transition: opacity 300ms ease-in;
+        }
+      `}</style>
+      <DataTable
+        data={sortedChecklist}
+        columns={columns}
+        title="Checklist"
+        searchableColumns={[
+          {
+            id: 'title',
+            placeholder: 'Search tasks...',
+          },
+        ]}
+        enableSelection={false}
+        defaultPageSize={10}
+        className="w-full"
+        rowClassName={(row) => {
+          const item = row.original as ChecklistItem;
+          return fadingItems.has(item.id) ? 'checklist-row-fade-out' : 'checklist-row';
+        }}
+      />
+    </>
   );
 }

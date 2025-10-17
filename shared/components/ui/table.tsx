@@ -150,6 +150,7 @@ interface DataTableProps<TData> {
   emptyDescription?: string;
   cardClassName?: string;
   showCard?: boolean;
+  rowClassName?: (row: Row<TData>) => string;
 }
 
 function DataTable<TData>({
@@ -171,6 +172,7 @@ function DataTable<TData>({
   emptyDescription,
   cardClassName,
   showCard = true,
+  rowClassName,
 }: DataTableProps<TData>) {
   const id = useId();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -217,6 +219,7 @@ function DataTable<TData>({
   const table = useReactTable({
     data,
     columns: finalColumns,
+    getRowId: (row: any, index) => (row && (row.id ?? row._id ?? row.key)) ?? String(index),
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
@@ -252,17 +255,17 @@ function DataTable<TData>({
   };
 
   const tableContent = (
-    <div className={cn('space-y-4 w-full max-w-full overflow-x-hidden', className)}>
+    <div className={cn('w-full max-w-full space-y-4 overflow-x-hidden', className)}>
       {/* Filters and controls */}
       {!isLoading && (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto min-w-0">
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex w-full min-w-0 flex-col items-start gap-3 sm:w-auto sm:flex-row sm:items-center">
             {/* Search input for searchable columns */}
             {searchableColumns.length > 0 && (
               <div className="relative w-full sm:w-auto">
                 <Input
                   ref={searchInputRef}
-                  className="w-full sm:min-w-60 ps-9 border-border text-gray-800 placeholder:text-gray-600"
+                  className="border-border w-full ps-9 text-gray-800 placeholder:text-gray-600 sm:min-w-60"
                   value={
                     (table.getColumn(String(searchableColumns[0].id))?.getFilterValue() ??
                       '') as string
@@ -284,7 +287,11 @@ function DataTable<TData>({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="darkOutline" className="shrink-0">
-                    <Columns3Icon className="sm:mr-2 -ms-1 opacity-60" size={16} aria-hidden="true" />
+                    <Columns3Icon
+                      className="-ms-1 opacity-60 sm:mr-2"
+                      size={16}
+                      aria-hidden="true"
+                    />
                     <span className="hidden sm:inline">View</span>
                   </Button>
                 </DropdownMenuTrigger>
@@ -321,29 +328,26 @@ function DataTable<TData>({
 
       {/* Loading state */}
       {isLoading ? (
-        <div className="text-center py-8">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+        <div className="py-8 text-center">
+          <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin" />
           <p className="text-muted-foreground">{loadingMessage}</p>
         </div>
       ) : data.length === 0 ? (
         /* Empty state */
-        <div className="text-center py-8 text-gray-500">
+        <div className="py-8 text-center text-gray-500">
           <p className="font-medium">{emptyMessage}</p>
-          {emptyDescription && <p className="text-sm mt-1">{emptyDescription}</p>}
+          {emptyDescription && <p className="mt-1 text-sm">{emptyDescription}</p>}
         </div>
       ) : (
         /* Table */
         <>
-          <div className="overflow-x-auto rounded-md border max-w-full">
+          <div className="max-w-full overflow-x-auto rounded-md border">
             <Table style={{ tableLayout: 'auto' }} className="min-w-full">
-                <TableHeader>
+              <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-transparent">
                     {headerGroup.headers.map((header) => (
-                      <TableHead
-                        key={header.id}
-                        className="h-11"
-                      >
+                      <TableHead key={header.id} className="h-11">
                         {header.isPlaceholder ? null : header.column.getCanSort() ? (
                           <div
                             className="flex cursor-pointer items-center justify-between gap-2 select-none"
@@ -385,11 +389,13 @@ function DataTable<TData>({
               <TableBody>
                 {table.getRowModel().rows?.length ? (
                   table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && 'selected'}
+                      className={rowClassName?.(row)}
+                    >
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell
-                          key={cell.id}
-                        >
+                        <TableCell key={cell.id}>
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
@@ -408,7 +414,7 @@ function DataTable<TData>({
 
           {/* Pagination */}
           {enablePagination && (
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
               <div className="flex items-center gap-3 text-gray-800">
                 <Label htmlFor={`${id}-page-size`}>Rows per page</Label>
                 <Select
@@ -427,7 +433,7 @@ function DataTable<TData>({
                     }
                   }}
                 >
-                  <SelectTrigger id={`${id}-page-size`} className="w-fit border-border ">
+                  <SelectTrigger id={`${id}-page-size`} className="border-border w-fit">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -440,9 +446,10 @@ function DataTable<TData>({
                 </Select>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <div className="text-muted-foreground text-sm whitespace-nowrap">
-                  {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}-
+                  {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}
+                  -
                   {Math.min(
                     (table.getState().pagination.pageIndex + 1) *
                       table.getState().pagination.pageSize,
@@ -451,43 +458,43 @@ function DataTable<TData>({
                   of {table.getRowCount()}
                 </div>
 
-                <div className="flex items-center gap-2 justify-center sm:justify-start">
-                <Button
-                  size="sm"
-                  variant="darkOutline"
-                  onClick={() => table.firstPage()}
-                  disabled={!table.getCanPreviousPage()}
-                  aria-label="Go to first page"
-                >
-                  <ChevronFirstIcon size={16} />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="darkOutline"
-                  onClick={() => table.previousPage()}
-                  disabled={!table.getCanPreviousPage()}
-                  aria-label="Go to previous page"
-                >
-                  <ChevronLeftIcon size={16} />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="darkOutline"
-                  onClick={() => table.nextPage()}
-                  disabled={!table.getCanNextPage()}
-                  aria-label="Go to next page"
-                >
-                  <ChevronRightIcon size={16} />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="darkOutline"
-                  onClick={() => table.lastPage()}
-                  disabled={!table.getCanNextPage()}
-                  aria-label="Go to last page"
-                >
-                  <ChevronLastIcon size={16} />
-                </Button>
+                <div className="flex items-center justify-center gap-2 sm:justify-start">
+                  <Button
+                    size="sm"
+                    variant="darkOutline"
+                    onClick={() => table.firstPage()}
+                    disabled={!table.getCanPreviousPage()}
+                    aria-label="Go to first page"
+                  >
+                    <ChevronFirstIcon size={16} />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="darkOutline"
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}
+                    aria-label="Go to previous page"
+                  >
+                    <ChevronLeftIcon size={16} />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="darkOutline"
+                    onClick={() => table.nextPage()}
+                    disabled={!table.getCanNextPage()}
+                    aria-label="Go to next page"
+                  >
+                    <ChevronRightIcon size={16} />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="darkOutline"
+                    onClick={() => table.lastPage()}
+                    disabled={!table.getCanNextPage()}
+                    aria-label="Go to last page"
+                  >
+                    <ChevronLastIcon size={16} />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -503,12 +510,12 @@ function DataTable<TData>({
   }
 
   return (
-    <Card className={cn('bg-transparent border-brand-200', cardClassName)}>
+    <Card className={cn('border-brand-200 bg-transparent', cardClassName)}>
       {title && (
         <CardHeader>
           <CardTitle className="text-foreground">
             {title}
-            {isLoading && <Loader2 className="w-4 h-4 ml-2 animate-spin inline" />}
+            {isLoading && <Loader2 className="ml-2 inline h-4 w-4 animate-spin" />}
           </CardTitle>
         </CardHeader>
       )}

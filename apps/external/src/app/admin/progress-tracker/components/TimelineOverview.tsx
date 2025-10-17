@@ -35,16 +35,7 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
   const { open, openMobile } = useSidebar();
 
   // Helper function to calculate smart popup positioning
-  const getSmartPopupPosition = (
-    itemIndex: number,
-    totalItems: number,
-    isLeftmost: boolean,
-    isRightmost: boolean,
-  ) => {
-    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
-    const popupWidth = 320; // max-w-80 = 320px
-    const margin = 32; // minimum margin from viewport edges
-
+  const getSmartPopupPosition = (isLeftmost: boolean, isRightmost: boolean) => {
     // If there's enough space to center, use default centering
     if (!isLeftmost && !isRightmost) {
       return { left: '50%', transform: 'translateX(-50%)' };
@@ -88,9 +79,10 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
 
     const date = new Date(selectedWedding.date);
     const currentDate = new Date();
-    const monthsUntilWedding = Math.ceil(
-      (date.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24 * 30),
-    );
+    // Use calendar month boundaries so the wedding month is 0
+    const monthsUntilWedding =
+      (date.getFullYear() - currentDate.getFullYear()) * 12 +
+      (date.getMonth() - currentDate.getMonth());
 
     // Separate main timeline items and T-0 branch items
     const mainTimelineItems: TimelineItem[] = [];
@@ -102,14 +94,20 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
         const monthsBeforeWedding = item.monthsBeforeWedding || 0;
         const isOverdue = monthsUntilWedding < monthsBeforeWedding;
 
-        // Create appropriate display label
+        // Create appropriate display label with actual month names
         let displayLabel: string;
         if (monthsBeforeWedding > 0) {
-          displayLabel = `T-${monthsBeforeWedding}`;
+          // Calculate the target month for tasks before wedding
+          const targetDate = new Date(date);
+          targetDate.setMonth(targetDate.getMonth() - monthsBeforeWedding);
+          displayLabel = targetDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
         } else if (monthsBeforeWedding < 0) {
-          displayLabel = `T+${Math.abs(monthsBeforeWedding)}`;
+          // Calculate the target month for tasks after wedding
+          const targetDate = new Date(date);
+          targetDate.setMonth(targetDate.getMonth() - monthsBeforeWedding); // Note: -monthsBeforeWedding because it's negative
+          displayLabel = targetDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
         } else {
-          displayLabel = 'T-0';
+          displayLabel = 'Wedding Day';
         }
 
         const timelineItem: TimelineItem = {
@@ -171,6 +169,133 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
     });
   }, [checklist, selectedWedding]);
 
+  // Calculate user progress state and current time position
+  const progressInfo = useMemo(() => {
+    if (!selectedWedding?.date || timelineItems.length === 0) return null;
+
+    const date = new Date(selectedWedding.date);
+    const currentDate = new Date();
+    // Use calendar month boundaries so the wedding month is 0
+    const monthsUntilWedding =
+      (date.getFullYear() - currentDate.getFullYear()) * 12 +
+      (date.getMonth() - currentDate.getMonth());
+
+    // Find the uncompleted item furthest from wedding day (user's progress state)
+    // The user's position should be at the last completed item before the first uncompleted item
+    const sortedItems = [...timelineItems]
+      .filter((item) => !item.isWeddingDay)
+      .sort((a, b) => b.monthsBeforeWedding - a.monthsBeforeWedding); // Sort by monthsBeforeWedding descending
+
+    // Find the first uncompleted item in the sorted list (furthest from wedding)
+    const firstUncompletedItem = sortedItems.find((item) => !item.completed);
+
+    // Find the latest (most recent) completed item (closest to wedding day among completed items)
+    const completedItems = sortedItems.filter((item) => item.completed);
+    const latestCompletedMonths =
+      completedItems.length > 0
+        ? Math.min(...completedItems.map((item) => item.monthsBeforeWedding))
+        : null;
+
+    let userProgressMonths = 0; // Default to wedding day if all completed
+
+    // If it's already past the wedding date, position at the first uncompleted item AFTER the wedding
+    if (monthsUntilWedding < 0) {
+      const afterWeddingItems = sortedItems.filter((item) => item.monthsBeforeWedding < 0);
+      const firstUncompletedAfterWedding = afterWeddingItems.find((item) => !item.completed);
+      if (firstUncompletedAfterWedding) {
+        userProgressMonths = firstUncompletedAfterWedding.monthsBeforeWedding;
+      } else {
+        // If nothing uncompleted after wedding, fallback to the closest completed after-wedding task if exists, else stay at wedding day
+        const completedAfterWedding = afterWeddingItems.filter((item) => item.completed);
+        if (completedAfterWedding.length > 0) {
+          // Pick the closest to wedding day (e.g., -1 over -3)
+          userProgressMonths = Math.max(
+            ...completedAfterWedding.map((item) => item.monthsBeforeWedding),
+          );
+        }
+      }
+    } else {
+      if (firstUncompletedItem) {
+        // User progress is at the first uncompleted item
+        userProgressMonths = firstUncompletedItem.monthsBeforeWedding;
+      } else {
+        // All items completed - use the latest completed item
+        if (latestCompletedMonths !== null) {
+          userProgressMonths = latestCompletedMonths;
+        }
+      }
+    }
+
+    // Determine schedule status
+    let scheduleStatus: 'ahead' | 'behind' | 'on_schedule' | 'wedding_day' | 'post_wedding';
+
+    if (monthsUntilWedding <= 0) {
+      scheduleStatus = monthsUntilWedding === 0 ? 'wedding_day' : 'post_wedding';
+    } else {
+      // Consider only pre-wedding items when comparing against current month
+      const preWeddingItems = [...timelineItems]
+        .filter((it) => !it.isWeddingDay && it.monthsBeforeWedding > 0)
+        .sort((a, b) => b.monthsBeforeWedding - a.monthsBeforeWedding);
+
+      const preCompleted = preWeddingItems.filter((it) => it.completed);
+      const preUncompleted = preWeddingItems.filter((it) => !it.completed);
+      const latestCompletedPreMonths =
+        preCompleted.length > 0
+          ? Math.min(...preCompleted.map((it) => it.monthsBeforeWedding))
+          : null;
+
+      // Overdue if any uncompleted item exists earlier than current month (i.e., with a larger monthsBeforeWedding number)
+      const overdueExists = preUncompleted.some(
+        (it) => it.monthsBeforeWedding > monthsUntilWedding,
+      );
+
+      if (overdueExists || userProgressMonths > monthsUntilWedding) {
+        scheduleStatus = 'behind';
+      } else {
+        // Gap exists if there is any uncompleted item between the farthest completed pre-wedding month and the current month
+        const gapExists = preUncompleted.some(
+          (it) =>
+            it.monthsBeforeWedding <= monthsUntilWedding &&
+            (latestCompletedPreMonths === null ||
+              it.monthsBeforeWedding > latestCompletedPreMonths),
+        );
+
+        if (
+          latestCompletedPreMonths !== null &&
+          latestCompletedPreMonths < monthsUntilWedding &&
+          !gapExists
+        ) {
+          scheduleStatus = 'ahead';
+        } else {
+          scheduleStatus = 'on_schedule';
+        }
+      }
+    }
+
+    console.log('Progress Info:', {
+      userProgressMonths,
+      currentTimeMonths: monthsUntilWedding,
+      latestCompletedMonths,
+      latestCompletedPreMonths: ((): number | null => {
+        const preCompleted = timelineItems.filter(
+          (it) => !it.isWeddingDay && it.monthsBeforeWedding > 0 && it.completed,
+        );
+        return preCompleted.length > 0
+          ? Math.min(...preCompleted.map((it) => it.monthsBeforeWedding))
+          : null;
+      })(),
+      scheduleStatus,
+      sortedItemsCount: sortedItems.length,
+      firstUncompletedItem: firstUncompletedItem ? firstUncompletedItem.title : 'None',
+    });
+
+    return {
+      userProgressMonths,
+      currentTimeMonths: monthsUntilWedding,
+      scheduleStatus,
+    };
+  }, [timelineItems, selectedWedding]);
+
   // Calculate snaking layout - moved before early return to maintain hook order
   const rows = useMemo(() => {
     if (!selectedWedding?.date || timelineItems.length === 0) {
@@ -203,12 +328,111 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
       case 'completed':
         return `bg-gray-400 border-gray-400 ${opacity}`;
       case 'overdue':
-        return `bg-destructive border-destructive ${opacity}`;
+        return `bg-red-500 border-red-500 `;
       case 'upcoming':
-        return `bg-brand-200 border-brand-200 ${opacity}`;
+        return `bg-chart-4 border-chart-4 ${opacity}`;
       default:
         return `bg-brand-200 border-brand-200 ${opacity}`;
     }
+  };
+
+  // Helper: Is the given item the last displayed in its row (where the path turns down)?
+  const isEndOfDisplayedRow = (targetId: string, rowIndex: number) => {
+    if (!timelineItems.length || itemsPerRow <= 0) return false;
+    const start = rowIndex * itemsPerRow;
+    const slice = timelineItems.slice(start, start + itemsPerRow);
+    const display = rowIndex % 2 === 1 ? [...slice].reverse() : slice;
+    if (display.length === 0) return false;
+    return display[display.length - 1]?.id === targetId;
+  };
+
+  // Helper function to find position along the timeline path for a given monthsBeforeWedding
+  // If multiple items exist at the same monthsBeforeWedding, find based on completion status
+  const getTimelinePosition = (
+    monthsBeforeWedding: number,
+    preferFirstUncompleted: boolean = false,
+  ) => {
+    // Find all items with matching monthsBeforeWedding
+    let matchingItems = timelineItems.filter(
+      (item) => item.monthsBeforeWedding === monthsBeforeWedding,
+    );
+
+    let targetItem: TimelineItem | undefined;
+
+    if (matchingItems.length > 0 || !preferFirstUncompleted) {
+      if (preferFirstUncompleted) {
+        // For user progress: prioritize first uncompleted item, or last completed item
+        const uncompletedItems = matchingItems.filter((item) => !item.completed);
+        const completedItems = matchingItems.filter((item) => item.completed);
+
+        if (uncompletedItems.length > 0) {
+          // Use first uncompleted item
+          targetItem = uncompletedItems[0];
+          console.log(
+            `User progress at first uncompleted: ${targetItem.title} (${uncompletedItems.length} uncompleted items at ${monthsBeforeWedding} months)`,
+          );
+        } else if (completedItems.length > 0) {
+          // If all completed, use last completed item
+          targetItem = completedItems[completedItems.length - 1];
+          console.log(
+            `User progress at last completed: ${targetItem.title} (${completedItems.length} completed items at ${monthsBeforeWedding} months)`,
+          );
+        } else {
+          // Fallback to first item
+          targetItem = matchingItems[0];
+        }
+      } else {
+        // For current time: prefer the last item from the closest previous month group
+        const previousMonthItems = timelineItems.filter(
+          (it) => it.monthsBeforeWedding > monthsBeforeWedding,
+        );
+        if (previousMonthItems.length > 0) {
+          const closestPrevMonth = Math.min(
+            ...previousMonthItems.map((it) => it.monthsBeforeWedding),
+          );
+          const prevGroup = timelineItems.filter(
+            (it) => it.monthsBeforeWedding === closestPrevMonth,
+          );
+          if (prevGroup.length > 0) {
+            targetItem = prevGroup[prevGroup.length - 1];
+          }
+        }
+        // If no previous month group found, fallback to the last item in the current month group
+        if (!targetItem && matchingItems.length > 0) {
+          targetItem = matchingItems[matchingItems.length - 1];
+        }
+      }
+    }
+
+    // If no exact match, find the closest item
+    if (!targetItem && timelineItems.length > 0) {
+      targetItem = timelineItems.reduce((closest, item) => {
+        const closestDiff = Math.abs(closest.monthsBeforeWedding - monthsBeforeWedding);
+        const itemDiff = Math.abs(item.monthsBeforeWedding - monthsBeforeWedding);
+        return itemDiff < closestDiff ? item : closest;
+      }, timelineItems[0]);
+
+      console.log(
+        `No exact match for ${monthsBeforeWedding} months, using closest: ${targetItem.monthsBeforeWedding} months (${targetItem.title})`,
+      );
+    }
+
+    if (targetItem) {
+      const el = dotRefs.current[targetItem.id];
+      if (el && containerRef.current) {
+        const rect = el.getBoundingClientRect();
+        const crect = containerRef.current.getBoundingClientRect();
+        const index = timelineItems.findIndex((it) => it.id === targetItem!.id);
+        const rowIndex = index >= 0 ? Math.floor(index / itemsPerRow) : 0;
+        return {
+          x: rect.left - crect.left + rect.width / 2,
+          y: rect.top - crect.top + rect.height / 2,
+          id: targetItem.id,
+          rowIndex,
+        } as { x: number; y: number; id: string; rowIndex: number };
+      }
+    }
+    return null;
   };
 
   // Compute smooth SVG path that snakes through dots across rows
@@ -326,13 +550,13 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
       {selectedWedding?.date ? (
         <div
           ref={scrollRef}
-          className="scrollbar-hide flex-1 overflow-x-hidden overflow-y-auto px-8 pt-8 pb-20"
+          className="scrollbar-hide flex-1 overflow-x-hidden overflow-y-auto px-16 pt-8 pb-20"
         >
           {/* Legend at top */}
-          <div className="mb-6">
+          <div className="mb-16 ml-[-52px]">
             <div className="flex flex-wrap items-center gap-4 text-sm">
               <div className="flex items-center gap-2">
-                <div className="bg-brand-200 h-3 w-3 rounded-full"></div>
+                <div className="bg-chart-4 h-3 w-3 rounded-full"></div>
                 <span>Upcoming</span>
               </div>
               <div className="flex items-center gap-2">
@@ -344,15 +568,15 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                 <span>Overdue</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-white bg-gradient-to-br from-yellow-400 to-orange-500 shadow-sm">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-white bg-gradient-to-br from-sky-400 to-teal-500 shadow-sm">
                   <Calendar className="h-3 w-3 text-white" />
                 </div>
                 <span>Wedding Day</span>
               </div>
             </div>
             <div className="mt-2 text-xs text-gray-500">
-              Note: T-X means X months before the wedding date (e.g., T-6 = 6 months before); T+X
-              means X months after the wedding date (e.g., T+1 = 1 month after); T-0 = Wedding Day.
+              Note: Timeline shows target completion months relative to your wedding date. Tasks
+              should be completed by the specified month.
             </div>
           </div>
 
@@ -373,9 +597,185 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                 />
               </svg>
             )}
+
+            {/* Progress Indicators */}
+            {progressInfo && (
+              <>
+                {/* User Progress Position */}
+                {(() => {
+                  const userPosition = (() => {
+                    // Edge case: When it's the wedding day, anchor icon to the Wedding Day dot
+                    if (progressInfo.scheduleStatus === 'wedding_day') {
+                      const el = dotRefs.current['wedding-day'];
+                      if (el && containerRef.current) {
+                        const rect = el.getBoundingClientRect();
+                        const crect = containerRef.current.getBoundingClientRect();
+                        const index = timelineItems.findIndex((it) => it.id === 'wedding-day');
+                        const rowIndex = index >= 0 ? Math.floor(index / itemsPerRow) : 0;
+                        return {
+                          x: rect.left - crect.left + rect.width / 2,
+                          y: rect.top - crect.top + rect.height / 2,
+                          id: 'wedding-day',
+                          rowIndex,
+                        } as { x: number; y: number; id: string; rowIndex: number };
+                      }
+                      return null;
+                    }
+                    // Default: use computed user progress position
+                    return getTimelinePosition(progressInfo.userProgressMonths, true);
+                  })();
+                  if (!userPosition) return null;
+
+                  const isEvenNumberedRow = ((userPosition.rowIndex ?? 0) + 1) % 2 === 0;
+                  const endOfRow = isEndOfDisplayedRow(userPosition.id, userPosition.rowIndex ?? 0);
+
+                  let imageSrc = '';
+                  let label = '';
+                  let shouldAnimate = false;
+                  const localRunKeyframes = `
+                    @keyframes youAreHereRun {
+                      0%, 100% { transform: translateY(0) rotate(0deg); }
+                      25% { transform: translateY(-8px) rotate(-3deg); }
+                      50% { transform: translateY(0) rotate(0deg); }
+                      75% { transform: translateY(-8px) rotate(3deg); }
+                    }
+                  `;
+
+                  switch (progressInfo.scheduleStatus) {
+                    case 'behind':
+                      imageSrc = '/images/progress-timeline-icons/you_are_here_behind_schedule.png';
+                      label = 'You are here';
+                      shouldAnimate = true;
+                      break;
+                    case 'ahead':
+                      imageSrc = '/images/progress-timeline-icons/you_are_here_ahead_schedule.png';
+                      label = 'You are here';
+                      break;
+                    case 'on_schedule':
+                      imageSrc = '/images/progress-timeline-icons/time_now_on_schedule.png';
+                      label = 'You are here';
+                      break;
+                    case 'wedding_day':
+                      imageSrc = '/images/progress-timeline-icons/wedding_day.png';
+                      label = 'You are here';
+                      break;
+                    case 'post_wedding':
+                      imageSrc = '/images/progress-timeline-icons/post_wedding.png';
+                      label = 'You are here';
+                      break;
+                  }
+
+                  return (
+                    <div
+                      className="absolute z-20 flex flex-col items-center"
+                      style={{
+                        left: endOfRow
+                          ? userPosition.x - 50
+                          : isEvenNumberedRow
+                            ? userPosition.x + 40
+                            : userPosition.x - 140,
+                        top: endOfRow ? userPosition.y - 100 : userPosition.y - 60,
+                      }}
+                    >
+                      {/* Local animation keyframes to avoid relying on global CSS */}
+                      <style>{localRunKeyframes}</style>
+                      <span className="text-brand-500 mb-[-4px] text-xs font-black whitespace-nowrap">
+                        {label}
+                      </span>
+                      <div
+                        className={`text-brand-500 ${endOfRow ? 'mb-[-22px]' : 'mb-[-12px]'} text-xs`}
+                      >
+                        ▼
+                      </div>
+                      <div
+                        style={{
+                          display: 'inline-block',
+                          transformOrigin: '50% 80%',
+                          willChange: 'transform',
+                          animation: shouldAnimate
+                            ? 'youAreHereRun 0.6s ease-in-out infinite'
+                            : undefined,
+                        }}
+                      >
+                        <img
+                          src={imageSrc}
+                          alt={label}
+                          className={`${shouldAnimate && 'pt-2'} h-24 w-24`}
+                          style={{
+                            transform:
+                              [
+                                ['behind', 'ahead'].includes(progressInfo.scheduleStatus) &&
+                                isEvenNumberedRow
+                                  ? 'scaleX(-1)'
+                                  : '',
+                                endOfRow ? `rotate(${isEvenNumberedRow ? 45 : -45}deg)` : '',
+                              ]
+                                .filter(Boolean)
+                                .join(' ') || undefined,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Current Time Position (only for behind/ahead scenarios) */}
+                {(progressInfo.scheduleStatus === 'behind' ||
+                  progressInfo.scheduleStatus === 'ahead') &&
+                  (() => {
+                    const timePosition = getTimelinePosition(progressInfo.currentTimeMonths);
+                    if (!timePosition) return null;
+
+                    const isEvenNumberedRow = ((timePosition.rowIndex ?? 0) + 1) % 2 === 0;
+                    const endOfRow = isEndOfDisplayedRow(
+                      timePosition.id,
+                      timePosition.rowIndex ?? 0,
+                    );
+
+                    const imageSrc =
+                      progressInfo.scheduleStatus === 'behind'
+                        ? '/images/progress-timeline-icons/time_now_behind_schedule.png'
+                        : '/images/progress-timeline-icons/time_now_ahead_schedule.png';
+
+                    return (
+                      <div
+                        className="absolute z-20 flex flex-col items-center"
+                        style={{
+                          left: endOfRow
+                            ? timePosition.x - 50
+                            : isEvenNumberedRow
+                              ? timePosition.x - 140
+                              : timePosition.x + 40,
+                          top: endOfRow ? timePosition.y + 80 : timePosition.y - 60,
+                        }}
+                      >
+                        <span className="text-brand-500 mb-[-4px] text-xs font-black whitespace-nowrap">
+                          Current month
+                        </span>
+                        <div
+                          className={`text-brand-500 ${endOfRow ? 'mb-[-18px]' : 'mb-[-12px]'} text-xs`}
+                        >
+                          ▼
+                        </div>
+                        <img
+                          src={imageSrc}
+                          alt="Current month"
+                          className="h-24 w-24"
+                          style={{
+                            transform: endOfRow
+                              ? `rotate(${isEvenNumberedRow ? 30 : -30}deg)`
+                              : undefined,
+                          }}
+                        />
+                      </div>
+                    );
+                  })()}
+              </>
+            )}
+
             {/* Snaking Timeline */}
             {rows.map((row, rowIndex) => (
-              <div key={rowIndex} className="relative mb-16">
+              <div key={rowIndex} className="relative mb-26">
                 {/* Row container */}
                 <div className={'relative flex flex-row items-center justify-between'}>
                   {/* Timeline items for this row */}
@@ -386,19 +786,13 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                     const isDomLast = itemIndex === row.items.length - 1;
                     const isLeftmost = isDomFirst;
                     const isRightmost = isDomLast;
-                    const smartPosition = getSmartPopupPosition(
-                      itemIndex,
-                      row.items.length,
-                      isLeftmost,
-                      isRightmost,
-                    );
+                    const smartPosition = getSmartPopupPosition(isLeftmost, isRightmost);
                     const hoverStyle: React.CSSProperties = {
                       top: rowIndex % 2 === 0 ? '60px' : '-120px',
                       ...smartPosition,
                       minWidth: '256px', // min-w-64
                       maxWidth: '320px', // max-w-80
                     };
-
                     return (
                       <div
                         key={item.id}
@@ -437,7 +831,7 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                                   <span className="font-medium text-green-600">✓ Completed</span>
                                 )}
                                 {item.status === 'upcoming' && !item.completed && (
-                                  <span className="font-medium text-blue-600">📅 Upcoming</span>
+                                  <span className="font-medium text-yellow-600">⏰ Upcoming</span>
                                 )}
                               </div>
                             </div>
@@ -451,7 +845,7 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                           }}
                           className={`${
                             item.isWeddingDay
-                              ? 'h-12 w-12 transform cursor-pointer border-4 border-white bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg ring-2 ring-yellow-300 hover:scale-110 hover:shadow-xl'
+                              ? 'h-12 w-12 transform cursor-pointer border-4 border-white bg-gradient-to-br from-sky-400 to-teal-500 shadow-lg ring-2 ring-teal-300 hover:scale-110 hover:shadow-xl'
                               : `${dotSize} ${getItemColor(item, isHovered)}`
                           } rounded-full transition-all duration-200 ${isHovered && !item.isWeddingDay ? 'scale-110 shadow-lg' : ''}`}
                           onClick={() => {
@@ -474,7 +868,7 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
 
                         {/* Wedding Day CTA Badge */}
                         {item.isWeddingDay && item.branchItems && item.branchItems.length > 0 && (
-                          <div className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 text-xs font-bold text-white">
+                          <div className="absolute -top-1 right-6 flex h-6 w-6 items-center justify-center rounded-full bg-teal-500 text-xs font-bold text-white">
                             {item.branchItems.length}
                           </div>
                         )}
@@ -495,7 +889,7 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                               {/* Header with close button */}
                               <div className="mb-3 flex items-center justify-between">
                                 <div className="flex items-center space-x-2">
-                                  <Calendar className="h-5 w-5 text-yellow-500" />
+                                  <Calendar className="h-5 w-5 text-teal-500" />
                                   <div className="text-sm font-semibold text-gray-800">
                                     Wedding Day Activities
                                   </div>
@@ -509,7 +903,7 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                               </div>
 
                               {/* Activities List */}
-                              <div className="max-h-80 space-y-3 overflow-y-auto">
+                              <div className="scrollbar-hide max-h-80 space-y-3 overflow-y-auto">
                                 {item.branchItems?.map((branchItem, index) => (
                                   <div
                                     key={branchItem.id}
@@ -555,7 +949,7 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                         <div
                           className={`mt-2 min-w-0 text-center font-medium break-words transition-colors duration-200 ${
                             item.isWeddingDay
-                              ? 'max-w-40 text-base font-bold text-yellow-600'
+                              ? 'max-w-40 text-base font-bold text-teal-700'
                               : `max-w-32 text-xs ${isHovered ? 'text-gray-900' : 'text-gray-700'}`
                           }`}
                         >
@@ -566,7 +960,7 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                         <div
                           className={`mt-1 min-w-0 text-center transition-colors duration-200 ${
                             item.isWeddingDay
-                              ? 'cursor-pointer text-sm font-semibold text-yellow-700 hover:text-yellow-800'
+                              ? 'cursor-pointer text-sm font-semibold text-teal-700 hover:text-teal-800'
                               : `text-xs ${isHovered ? 'text-gray-700' : 'text-gray-500'}`
                           }`}
                           onClick={() => {
