@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 
+import { ChevronDown, Trash2, X } from 'lucide-react';
+import { CldImage } from 'next-cloudinary';
+import { toast } from 'sonner';
 import { useGuestManager } from '../../apps/external/src/app/hooks/useGuestManager';
 import {
   AdminResponseDto,
@@ -19,6 +22,7 @@ import {
 } from '../api';
 import { useEditProfile } from '../hooks/useEditProfile';
 import { useWeddingProfile } from '../hooks/useWeddingProfile';
+import { ImageUploadWidget } from './index';
 import { TextInputWithAI } from './textInputWithAI';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -27,10 +31,6 @@ import { Input } from './ui/form/input';
 import { MultiSelectDropdown } from './ui/form/multiSelectDropdown';
 import { SingleSelectDropdown } from './ui/form/singleSelectDropdown';
 import { Skeleton } from './ui/skeleton';
-import { ImageUploadWidget } from './index';
-import { CldImage } from 'next-cloudinary';
-import { ChevronDown, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
 
 interface EditProfileProps {
   userId?: number;
@@ -95,6 +95,11 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
   const [collaboratorPendingRemoval, setCollaboratorPendingRemoval] = useState<Collaborator | null>(
     null,
   );
+
+  // PayNow QR deletion state
+  const [showDeleteQRModal, setShowDeleteQRModal] = useState(false);
+  const [isQRPendingDeletion, setIsQRPendingDeletion] = useState(false);
+
   // Determine the actual user ID and role to fetch
   const targetUserId = userId;
   const targetUserRole = userRole;
@@ -177,13 +182,15 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
   const handleEnhancedSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // First handle the profile update with wedding validation
+    // First handle the profile update with wedding validation (silent mode for admins with wedding)
+    const shouldSilence = targetUserRole === UserRole.ADMIN && weddingData;
     const isProfileUpdateSuccessful = await handleSubmit(e, weddingFormData);
 
     // Only update wedding data if profile update was successful and user is admin with wedding data
     if (isProfileUpdateSuccessful && targetUserRole === UserRole.ADMIN && weddingData) {
       try {
-        await updateWeddingProfile();
+        // Update wedding profile silently
+        await updateWeddingProfile(true);
 
         // Remove collaborators that were marked for deletion
         if (collaboratorsToRemove.length > 0) {
@@ -193,10 +200,10 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
             } catch (error) {
               console.error(`Error removing collaborator ${collaboratorId}:`, error);
               toast.error('Failed to remove some collaborators. Please try again.');
+              return; // Exit early if collaborator removal fails
             }
           }
           setCollaboratorsToRemove([]);
-          toast.success('Changes saved successfully');
         }
       } catch (error) {
         console.error('Error updating wedding profile:', error);
@@ -216,11 +223,28 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     setPartnerEmail('');
     // Reset collaborators to remove list and refetch original collaborators
     setCollaboratorsToRemove([]);
+    // Reset PayNow QR deletion state
+    setIsQRPendingDeletion(false);
     // Restore partner and collaborators list by refetching
     if (weddingData?.id && userData) {
       fetchPartner();
       fetchCollaborators();
     }
+  };
+
+  // Handle PayNow QR deletion
+  const handleDeleteQRClick = () => {
+    setShowDeleteQRModal(true);
+  };
+
+  const handleConfirmDeleteQR = () => {
+    setIsQRPendingDeletion(true);
+    handleWeddingInputChange('paynowQR', '');
+    setShowDeleteQRModal(false);
+  };
+
+  const handleCancelDeleteQR = () => {
+    setShowDeleteQRModal(false);
   };
 
   // Handle password reset request
@@ -984,29 +1008,38 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">PayNow QR Code</label>
+            <label className="text-sm font-medium">PayLah QR Code</label>
             {isEditing ? (
               <div className="space-y-4">
                 <ImageUploadWidget
                   onUpload={(url) => handleWeddingInputChange('paynowQR', url)}
                   maxImageWidth={800}
-                  buttonText="Upload PayNow QR Code"
+                  buttonText="Upload PayLah QR Code"
                 />
                 {weddingFormData.paynowQR && (
                   <div className="mt-4">
                     <p className="text-sm text-gray-700 mb-2">Current QR code:</p>
-                    <CldImage
-                      width={200}
-                      height={200}
-                      src={weddingFormData.paynowQR}
-                      sizes="200px"
-                      alt="PayNow QR Code"
-                      className="rounded-lg shadow-sm border"
-                    />
+                    <div
+                      className="relative inline-block group cursor-pointer"
+                      onClick={handleDeleteQRClick}
+                    >
+                      <CldImage
+                        width={200}
+                        height={200}
+                        src={weddingFormData.paynowQR}
+                        sizes="200px"
+                        alt="PayNow QR Code"
+                        className="rounded-lg shadow-sm border"
+                      />
+                      {/* Hover overlay with delete icon */}
+                      <div className="absolute inset-0 bg-black bg-opacity-60 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                        <X className="w-12 h-12 text-white" strokeWidth={3} />
+                      </div>
+                    </div>
                   </div>
                 )}
                 <p className="text-xs text-gray-500">
-                  Upload your PayNow QR code image. This will be used for Ang Bao payments. Recommended size: 500x500px minimum.
+                  Upload your PayLah QR code image. This will be used for Ang Bao payments. Recommended size: 500x500px minimum.
                 </p>
               </div>
             ) : (
@@ -1018,7 +1051,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
                       height={200}
                       src={weddingData.paynowQR}
                       sizes="200px"
-                      alt="PayNow QR Code"
+                      alt="PayLah QR Code"
                       className="rounded-lg shadow-sm border"
                     />
                   </div>
@@ -1287,6 +1320,22 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
         confirmButtonText="Delete Profile"
         cancelButtonText="Cancel"
         isLoading={isDeletingProfile}
+      />
+
+      <DeleteConfirmationModal
+        open={showDeleteQRModal}
+        onOpenChange={(open) => {
+          if (!open) {
+            handleCancelDeleteQR();
+          }
+        }}
+        title="Delete PayNow QR Code"
+        itemName="this PayNow QR code"
+        description="Are you sure you want to remove this PayNow QR code? The image will be removed when you save your changes."
+        onConfirm={handleConfirmDeleteQR}
+        onCancel={handleCancelDeleteQR}
+        confirmButtonText="Delete"
+        cancelButtonText="Cancel"
       />
     </div>
   );

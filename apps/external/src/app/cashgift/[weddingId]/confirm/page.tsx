@@ -203,7 +203,7 @@ export default function ConfirmCashGiftPage() {
             </Button>
             <Button
               onClick={handleBackToForm}
-              variant="outline"
+              variant="secondary"
               className="w-full"
               disabled={isSubmitting}
             >

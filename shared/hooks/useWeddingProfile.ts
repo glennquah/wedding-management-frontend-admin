@@ -114,7 +114,7 @@ export const useWeddingProfile = () => {
     }));
   }, []);
 
-  const updateWeddingProfile = useCallback(async () => {
+  const updateWeddingProfile = useCallback(async (silentSuccess?: boolean) => {
     if (!weddingData) return;
 
     const updateData: UpdateWeddingDto = {};
@@ -139,7 +139,8 @@ export const useWeddingProfile = () => {
     const currentPaynowQR = weddingData.paynowQR || '';
     const newPaynowQR = weddingFormData.paynowQR || '';
     if (newPaynowQR !== currentPaynowQR) {
-      updateData.paynowQR = newPaynowQR || undefined;
+      // Explicitly set to empty string when deleting to ensure the field is sent to the API
+      updateData.paynowQR = newPaynowQR === '' ? '' : newPaynowQR;
     }
 
     console.log('Wedding Update Data:', updateData);
@@ -149,7 +150,9 @@ export const useWeddingProfile = () => {
       const updatedWedding = await WeddingsService.weddingControllerUpdate(weddingData.id, updateData);
       setWeddingData(updatedWedding);
       populateWeddingFormData(updatedWedding);
-      toast.success('Wedding details updated successfully');
+      if (!silentSuccess) {
+        toast.success('Wedding details updated successfully');
+      }
     }
   }, [weddingData, weddingFormData, populateWeddingFormData]);
 
