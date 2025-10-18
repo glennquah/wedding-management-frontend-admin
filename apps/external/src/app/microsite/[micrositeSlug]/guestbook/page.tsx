@@ -5,22 +5,13 @@ import HTMLFlipBook from 'react-pageflip';
 
 import MicrositeLogin from '../../components/MicrositeLogin';
 import { PageProps } from '../page';
-import { AddNoteForm } from './components/AddNoteDialog';
+import { AddNoteDialog } from './components/AddNoteDialog';
 import Page from './components/Page';
 import PageCover from './components/PageCover';
 import { useMicrositeManager } from '@/app/hooks/useMicrositeManager';
 import { CreateGuestbookNoteDto, GuestbookResponseDto, GuestbookService } from '@shared/api';
 import { Button } from '@shared/components';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@shared/components/ui/dialog';
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -59,7 +50,6 @@ export default function FlipbookGuestbook({ params }: PageProps) {
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const flipBookRef = useRef<FlipBookRef | null>(null);
 
@@ -106,7 +96,6 @@ export default function FlipbookGuestbook({ params }: PageProps) {
 
   useEffect(() => {
     fetchGuestbookData();
-    console.log(isWeddingLive);
   }, [fetchGuestbookData, micrositeData?.weddingId]);
 
   const handleFormSubmit = async (formData: CreateGuestbookNoteDto) => {
@@ -114,7 +103,6 @@ export default function FlipbookGuestbook({ params }: PageProps) {
 
     try {
       await GuestbookService.guestbookControllerAddGuestNote(micrositeData.weddingId, formData);
-      setIsFormOpen(false);
       await fetchGuestbookData();
       toast.success('Note added');
     } catch (error) {
@@ -230,7 +218,7 @@ export default function FlipbookGuestbook({ params }: PageProps) {
         }
       `}</style>
       <div
-        className="w-full min-h-screen flex flex-col items-center justify-center p-5 bg-cover bg-center"
+        className="w-full min-h-screen flex flex-col items-center md:justify-center p-5 bg-cover bg-center"
         style={{
           backgroundImage:
             "url('https://res.cloudinary.com/dnyxxyolp/image/upload/v1760625017/wooden-table_vuzm8e.jpg')",
@@ -262,7 +250,7 @@ export default function FlipbookGuestbook({ params }: PageProps) {
               onFlip={onPageFlip}
               onInit={handleInit}
               ref={flipBookRef}
-              className="guestbook-album "
+              className="guestbook-album"
             >
               <PageCover>Our Guestbook</PageCover>
 
@@ -282,34 +270,7 @@ export default function FlipbookGuestbook({ params }: PageProps) {
               </Button>
             </div>
 
-            {/* Add Note Button and Dialog */}
-            <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-              <DialogTrigger asChild>
-                <button className="fixed sm:bottom-10 sm:right-10 md:bottom-25 md:right-45 z-10 cursor-pointer p-0 border-none bg-transparent">
-                  <Image
-                    src="https://res.cloudinary.com/dnyxxyolp/image/upload/v1760678608/fountain-pen_te6flc.png"
-                    alt="Add a Note"
-                    width={256}
-                    height={256}
-                    className="w-25 sm:w-40 h-auto transform hover:scale-105 transition-transform"
-                  />
-                </button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle
-                    style={{ fontFamily: "'Great Vibes', cursive" }}
-                    className="text-3xl"
-                  >
-                    Leave a Note
-                  </DialogTitle>
-                  <DialogDescription>
-                    Share a memory or well wishes with the happy couple.
-                  </DialogDescription>
-                </DialogHeader>
-                <AddNoteForm onSubmit={handleFormSubmit} onClose={() => setIsFormOpen(false)} />
-              </DialogContent>
-            </Dialog>
+            <AddNoteDialog onSubmit={handleFormSubmit} />
           </>
         }
       </div>
