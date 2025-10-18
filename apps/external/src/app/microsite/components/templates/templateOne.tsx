@@ -138,12 +138,18 @@ export default function TemplateOne({
           <div className="absolute inset-0 bg-black/30 z-10" />
 
           {isWeddingLive && micrositeSlug && (
-            <div className="absolute top-4 right-4 z-50">
+            <div className="absolute top-4 right-4 z-50 flex gap-3">
               <Button
                 onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
                 className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
               >
                 View Album
+              </Button>
+              <Button
+                onClick={() => router.push(`/microsite/${micrositeSlug}/guestbook`)}
+                className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+              >
+                View Guestbook
               </Button>
             </div>
           )}

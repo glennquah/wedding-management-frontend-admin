@@ -6,7 +6,6 @@ import { Button } from '@shared/components';
 import FormField from '@shared/components/FormField';
 import FormFieldTextArea from '@shared/components/FormFieldTextArea';
 
-// Define the component's props
 interface AddNoteFormProps {
   onSubmit: (data: { guestName: string; guestNote: string }) => Promise<void>;
   onClose: () => void;
@@ -44,7 +43,7 @@ export function AddNoteForm({ onSubmit, onClose }: AddNoteFormProps) {
         value={formData.guestName}
         onChange={(e) => handleInputChange('guestName', e.target.value)}
         required={true}
-        placeholder="e.g., Jane Doe"
+        placeholder="e.g., Ryan Tang"
       />
 
       <FormFieldTextArea
