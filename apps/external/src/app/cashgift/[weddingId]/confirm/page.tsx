@@ -163,7 +163,7 @@ export default function ConfirmCashGiftPage() {
             <div className="relative h-64 w-64 overflow-hidden rounded-lg border-2 border-primary/20 bg-white p-4 shadow-lg">
               <Image
                 src={cashGiftData.paynowQR}
-                alt="PayNow QR Code"
+                alt="PayLah QR Code"
                 fill
                 className="object-contain"
                 priority
@@ -188,7 +188,7 @@ export default function ConfirmCashGiftPage() {
           {/* Instructions */}
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
             <p className="text-center text-sm text-muted-foreground">
-              After completing the PayNow transfer, please click the button below to confirm
+              After completing the PayLah transfer, please click the button below to confirm
             </p>
           </div>
 

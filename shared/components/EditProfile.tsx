@@ -1028,7 +1028,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
                         height={200}
                         src={weddingFormData.paynowQR}
                         sizes="200px"
-                        alt="PayNow QR Code"
+                        alt="PayLah QR Code"
                         className="rounded-lg shadow-sm border"
                       />
                       {/* Hover overlay with delete icon */}
@@ -1329,9 +1329,9 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
             handleCancelDeleteQR();
           }
         }}
-        title="Delete PayNow QR Code"
-        itemName="this PayNow QR code"
-        description="Are you sure you want to remove this PayNow QR code? The image will be removed when you save your changes."
+        title="Delete PayLah QR Code"
+        itemName="this PayLah QR code"
+        description="Are you sure you want to remove this PayLah QR code? The image will be removed when you save your changes."
         onConfirm={handleConfirmDeleteQR}
         onCancel={handleCancelDeleteQR}
         confirmButtonText="Delete"
