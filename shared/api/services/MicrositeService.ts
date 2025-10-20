@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { ConfirmGuestDto } from '../models/ConfirmGuestDto';
 import type { CreateMicrositeDto } from '../models/CreateMicrositeDto';
+import type { GenerateMicrositeDto } from '../models/GenerateMicrositeDto';
 import type { GuestLookupDto } from '../models/GuestLookupDto';
 import type { GuestResponseDto } from '../models/GuestResponseDto';
 import type { MicrositeLoginDto } from '../models/MicrositeLoginDto';
@@ -113,6 +114,26 @@ export class MicrositeService {
             errors: {
                 404: `Guest not found for the specified wedding.`,
                 409: `Guest has already confirmed attendance.`,
+            },
+        });
+    }
+    /**
+     * Generate microsite content using AI based on wedding details
+     * @param requestBody
+     * @returns CreateMicrositeDto Microsite content generated successfully
+     * @throws ApiError
+     */
+    public static micrositeControllerGenerateMicrositeContent(
+        requestBody: GenerateMicrositeDto,
+    ): CancelablePromise<CreateMicrositeDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/microsite/generate',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                400: `Bad request.`,
+                404: `Wedding not found.`,
             },
         });
     }
