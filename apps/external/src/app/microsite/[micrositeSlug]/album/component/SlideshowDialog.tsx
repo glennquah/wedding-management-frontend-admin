@@ -73,7 +73,6 @@ export default function SlideshowDialog({ photoUrls }: SlideshowCreatorProps) {
       try {
         const fileData = await fetchFile(photoUrls[i]);
         await ffmpeg.writeFile(`image-${i}.jpg`, fileData);
-        console.log(`Successfully wrote image-${i}.jpg to FFmpeg memory.`);
       } catch (error) {
         console.error(`Failed to fetch or write image: ${photoUrls[i]}`, error);
         setIsProcessing(false);
@@ -84,7 +83,6 @@ export default function SlideshowDialog({ photoUrls }: SlideshowCreatorProps) {
     const audioData = await fetchFile(selectedAudioUrl);
     await ffmpeg.writeFile('audio.mp3', audioData);
 
-    console.log('Executing FFmpeg command...');
     await ffmpeg.exec([
       // Video input
       '-framerate',
@@ -110,8 +108,6 @@ export default function SlideshowDialog({ photoUrls }: SlideshowCreatorProps) {
     ]);
 
     const data = (await ffmpeg.readFile('output.mp4')) as Uint8Array;
-
-    console.log('Output video file size (bytes):', data.byteLength);
 
     if (videoRef.current) {
       videoRef.current.src = URL.createObjectURL(
