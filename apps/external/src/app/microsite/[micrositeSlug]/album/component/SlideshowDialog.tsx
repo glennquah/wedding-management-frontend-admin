@@ -109,12 +109,14 @@ export default function SlideshowDialog({ photoUrls }: SlideshowCreatorProps) {
       'output.mp4',
     ]);
 
-    const data = (await ffmpeg.readFile('output.mp4')) as any;
+    const data = (await ffmpeg.readFile('output.mp4')) as Uint8Array;
 
     console.log('Output video file size (bytes):', data.byteLength);
 
     if (videoRef.current) {
-      videoRef.current.src = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+      videoRef.current.src = URL.createObjectURL(
+        new Blob([new Uint8Array(data)], { type: 'video/mp4' }),
+      );
     }
     setIsProcessing(false);
   };
