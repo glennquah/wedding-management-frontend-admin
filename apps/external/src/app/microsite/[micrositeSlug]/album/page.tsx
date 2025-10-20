@@ -6,6 +6,7 @@ import MicrositeLogin from '../../components/MicrositeLogin';
 import Modal from '../../components/Modal';
 import { downloadImagesAsZip } from '../../utils/downloadPhoto';
 import { PageProps } from '../page';
+import SlideshowDialog from './component/SlideshowDialog';
 import { useMicrositeManager } from '@/app/hooks/useMicrositeManager';
 import { AlbumResponseDto, AlbumService } from '@shared/api';
 import { Button, ImageUploadWidget } from '@shared/components';
@@ -182,6 +183,9 @@ export default function AlbumPage({ params }: PageProps) {
                 </h1>
 
                 <div className="flex justify-center gap-3">
+                  {album && album.photos && album.photos.length > 0 && (
+                    <SlideshowDialog photoUrls={album.photos} />
+                  )}
                   <ImageUploadWidget
                     folder={`${album.coupleName}-${micrositeData.weddingDate?.split('T')[0]}`}
                     onUpload={async (url) => {
@@ -205,7 +209,6 @@ export default function AlbumPage({ params }: PageProps) {
                       }
                     }}
                   />
-
                   <Button onClick={() => downloadImagesAsZip(images)}>Download Album</Button>
                 </div>
 
