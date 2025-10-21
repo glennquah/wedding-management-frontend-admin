@@ -119,8 +119,17 @@ export const useWeddingStore = create<WeddingState>()(
     }),
     {
       name: 'wedding-store',
+      partialize: (state) => {
+        // Exclude firstPurchaseMade from persistence - it should be refetched on every load
+        const { firstPurchaseMade, ...rest } = state;
+        return rest;
+      },
       onRehydrateStorage: () => (state) => {
-        state?.setHasHydrated(true);
+        if (state) {
+          // Reset firstPurchaseMade to false on hydration so it gets refetched
+          state.firstPurchaseMade = false;
+          state.setHasHydrated(true);
+        }
       },
     },
   ),

@@ -12,11 +12,10 @@ export const DEFAULT_LINK_PATTERNS: LinkPattern[] = [
   { text: 'AI Scheduler Tool', href: '/admin/scheduler' },
   { text: 'E-commerce Platform', href: '/admin/ecommerce' },
   { text: 'Photo Album Invite Card Builder', href: '/admin/album' },
-  { text: 'Seating Arrangement Tool', href: '/admin/seating' },
+  { text: 'Seating Arrangement Tool', href: '/admin/seating-arrangement' },
   { text: 'Budget Tracking Feature', href: '/admin/dashboard' },
   { text: 'Attendance Taking Tool', href: '/admin/attendance' },
-  { text: 'Wedding Gifts Tool', href: '/admin/gifts' },
-  { text: 'E-card Tool', href: '/admin/ecard' },
+  { text: 'Gratitude Card Builder', href: '/admin/gratitude' },
 
   // Add more patterns as needed
 ];
@@ -101,7 +100,7 @@ export function parseTextWithLinks(
     parts.push({
       type: 'text',
       content: text.substring(lastIndex),
-      key: `text-final`,
+      key: 'text-final',
     });
   }
 

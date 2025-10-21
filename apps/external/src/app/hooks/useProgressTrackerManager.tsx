@@ -17,6 +17,7 @@ import {
   CreateChatMessageDto,
   UpdateChecklistItemDto,
   UpdateChecklistDto,
+  WeddingResponseDto,
 } from '@shared/api';
 
 export function useProgressTrackerManager(weddingId?: number | null) {
@@ -120,7 +121,7 @@ export function useProgressTrackerManager(weddingId?: number | null) {
 
       if (nextStage === 'CHECKLIST_GENERATED') {
         newAssistantMessage =
-          "Great! You've reviewed all the checklist categories. You can now generate your personalized checklist or continue planning with the existing items.";
+          '🎉 Great! You’ve gone through all the checklist categories. Now tell me what’s unique about your wedding — any special plans, themes, or details I might’ve missed — and I’ll help you add personalized tasks to your checklist.';
       } else {
         const nextCategoryName = stageToCategory[nextStage];
         const categoryItems = progressData.checklist.filter(
@@ -135,7 +136,7 @@ export function useProgressTrackerManager(weddingId?: number | null) {
         // If this is ADDITIONAL_DETAILS stage, add the completion message as well
         if (nextStage === 'ADDITIONAL_DETAILS') {
           additionalMessage =
-            "Great! You've reviewed all the checklist categories. You can now generate your personalized checklist or continue planning with the existing items.";
+            "🎉 Great! You've gone through all the checklist categories. Now tell me what’s unique about your wedding — any special plans, themes, or details I might’ve missed — and I’ll help you add personalized tasks to your checklist.";
         }
       }
 
@@ -160,9 +161,12 @@ export function useProgressTrackerManager(weddingId?: number | null) {
         updatedMessages = [...updatedMessages, additionalMsg];
       }
 
-      const chatHistoryForBackend = updatedMessages.map((msg) => ({
+      // Set createdAt with incrementing milliseconds to preserve order
+      const baseTime = new Date();
+      const chatHistoryForBackend = updatedMessages.map((msg, index) => ({
         role: msg.role as CreateChatMessageDto.role,
         content: msg.content,
+        createdAt: new Date(baseTime.getTime() + index).toISOString(),
       }));
 
       // Try to find existing checklist first
@@ -238,17 +242,16 @@ export function useProgressTrackerManager(weddingId?: number | null) {
         setStage(weddingId, nextStage);
       }
 
-      // Add the assistant message(s) to local state AFTER backend save
-      addMessage(weddingId, newAssistantMsg);
-
-      // Add the additional message if it exists (for ADDITIONAL_DETAILS stage)
-      if (additionalMessage) {
-        const additionalMsg = {
-          id: crypto.randomUUID(),
-          role: 'assistant' as const,
-          content: additionalMessage,
-        };
-        addMessage(weddingId, additionalMsg);
+      // Fetch updated checklist to get the chat history from backend (source of truth)
+      const updatedChecklistResponse =
+        await ChecklistService.checklistControllerFindByWeddingId(weddingId);
+      if (updatedChecklistResponse.chatHistory && updatedChecklistResponse.chatHistory.length > 0) {
+        const frontendChatHistory = updatedChecklistResponse.chatHistory.map((msg) => ({
+          id: msg.id,
+          role: msg.role as 'assistant' | 'user',
+          content: msg.content,
+        }));
+        setMessages(weddingId, frontendChatHistory);
       }
 
       console.log(`Stage progression: ${currentStage} -> ${nextStage}`);
@@ -292,6 +295,7 @@ export function useProgressTrackerManager(weddingId?: number | null) {
                 role: msg.role as 'assistant' | 'user',
                 content: msg.content,
               }));
+
               setMessages(targetWeddingId, frontendChatHistory);
             } else {
               // No chat history from backend, add appropriate message for current stage if needed
@@ -373,8 +377,7 @@ export function useProgressTrackerManager(weddingId?: number | null) {
     const text = input.trim();
     if (!text) return;
 
-    const userMsg = { id: crypto.randomUUID(), role: 'user' as const, content: text };
-    addMessage(weddingId, userMsg);
+    const userMsg = { role: 'user' as const, content: text };
 
     try {
       setIsLoading(true);
@@ -408,7 +411,7 @@ export function useProgressTrackerManager(weddingId?: number | null) {
       const existingItems = progressData.checklist || [];
 
       // Extract only NEW items from LLM response (items not already in existing checklist)
-      const newItemsFromLLM = llmData.checklist.filter((llmItem: any) => {
+      const newItemsFromLLM = llmData.checklist.filter((llmItem: CreateChecklistItemDto) => {
         // Check if this item already exists (by title and category)
         return !existingItems.some(
           (existingItem) =>
@@ -434,14 +437,16 @@ export function useProgressTrackerManager(weddingId?: number | null) {
       }
 
       // Convert new LLM items to frontend format
-      const newFrontendItems: ChecklistItem[] = newItemsFromLLM.map((item: any) => ({
-        id: crypto.randomUUID(), // Generate temporary ID for frontend
-        title: item.title,
-        description: item.description,
-        category: item.category,
-        monthsBeforeWedding: item.monthsBeforeWedding,
-        completed: item.completed || false,
-      }));
+      const newFrontendItems: ChecklistItem[] = newItemsFromLLM.map(
+        (item: CreateChecklistItemDto) => ({
+          id: crypto.randomUUID(), // Generate temporary ID for frontend
+          title: item.title,
+          description: item.description,
+          category: item.category,
+          monthsBeforeWedding: item.monthsBeforeWedding,
+          completed: item.completed || false,
+        }),
+      );
 
       // Merge existing items with new items
       const mergedChecklist = [...existingItems, ...newFrontendItems];
@@ -461,18 +466,25 @@ export function useProgressTrackerManager(weddingId?: number | null) {
 
       // Prepare chat history for backend (including the new user message and LLM response)
       const llmResponseMsg = {
-        id: crypto.randomUUID(),
         role: 'assistant' as const,
         content:
           llmData.message ||
           'I have generated your personalized wedding checklist based on your requirements.',
       };
 
+      // Build chat history for backend: existing messages + new userMsg + new llmResponseMsg
       const currentMessages = getCurrentMessages();
-      const allMessages = [...currentMessages, userMsg, llmResponseMsg];
-      const chatHistoryForBackend = allMessages.map((msg) => ({
+      const newMessages = [
+        { role: userMsg.role, content: userMsg.content },
+        { role: llmResponseMsg.role, content: llmResponseMsg.content },
+      ];
+
+      // Set createdAt with incrementing milliseconds to preserve order
+      const baseTime = new Date();
+      const chatHistoryForBackend = [...currentMessages, ...newMessages].map((msg, index) => ({
         role: msg.role as CreateChatMessageDto.role,
         content: msg.content,
+        createdAt: new Date(baseTime.getTime() + index).toISOString(),
       }));
 
       // Check if checklist already exists for this wedding
@@ -519,7 +531,7 @@ export function useProgressTrackerManager(weddingId?: number | null) {
         checklistResponse = await ChecklistService.checklistControllerCreate(createChecklistDto);
       }
 
-      // Step 4: Update the local state with backend IDs if the save was successful
+      // Step 4: Update the local state with backend response
       if (checklistResponse.items && checklistResponse.items.length > 0) {
         // Convert backend response to frontend format with real IDs
         const finalChecklist = checklistResponse.items.map((item) => ({
@@ -534,14 +546,15 @@ export function useProgressTrackerManager(weddingId?: number | null) {
         // Update local state with backend IDs
         setChecklist(weddingId, finalChecklist);
 
-        // Add LLM message first
-        addMessage(weddingId, {
-          id: crypto.randomUUID(),
-          role: 'assistant',
-          content:
-            llmData.message ||
-            'I have generated your personalized wedding checklist based on your requirements.',
-        });
+        // Update chat messages from backend response (source of truth)
+        if (checklistResponse.chatHistory && checklistResponse.chatHistory.length > 0) {
+          const frontendChatHistory = checklistResponse.chatHistory.map((msg) => ({
+            id: msg.id,
+            role: msg.role as 'assistant' | 'user',
+            content: msg.content,
+          }));
+          setMessages(weddingId, frontendChatHistory);
+        }
 
         // Add success message about saving to backend
         const totalItems = checklistResponse.items.length;
@@ -583,7 +596,7 @@ export function useProgressTrackerManager(weddingId?: number | null) {
 
       // Check if this is a backend save error (after successful LLM call)
       if (error && typeof error === 'object' && 'status' in error) {
-        const apiError = error as { status: number; body?: any };
+        const apiError = error as { status: number; body?: { message?: string } };
         let errorMessage = '';
 
         switch (apiError.status) {
@@ -639,14 +652,16 @@ export function useProgressTrackerManager(weddingId?: number | null) {
     }
   };
 
-  const handleWeddingAssistant = async (input: string, context?: { wedding?: any }) => {
+  const handleWeddingAssistant = async (
+    input: string,
+    context?: { wedding?: WeddingResponseDto },
+  ) => {
     if (typeof weddingId !== 'number') return;
 
     const text = input.trim();
     if (!text) return;
 
-    const userMsg = { id: crypto.randomUUID(), role: 'user' as const, content: text };
-    addMessage(weddingId, userMsg);
+    const userMsg = { role: 'user' as const, content: text };
 
     try {
       setIsLoading(true);
@@ -663,31 +678,52 @@ export function useProgressTrackerManager(weddingId?: number | null) {
 
       const data = await res.json();
       const reply = typeof data?.message === 'string' ? data.message : 'How can I help further?';
-      const assistantMsg = { id: crypto.randomUUID(), role: 'assistant' as const, content: reply };
-      addMessage(weddingId, assistantMsg);
+      const assistantMsg = { role: 'assistant' as const, content: reply };
 
       // Save updated chat history to backend if checklist exists
       try {
         const checklistResponse =
           await ChecklistService.checklistControllerFindByWeddingId(weddingId);
         if (checklistResponse?.id) {
-          // Build complete message list including the new user and assistant messages
+          // Build complete message list with new messages
           const currentMessages = getCurrentMessages();
-          const allMessages = [...currentMessages, userMsg, assistantMsg];
-          const chatHistoryForBackend = allMessages.map((msg) => ({
+          const newMessages = [
+            { role: userMsg.role, content: userMsg.content },
+            { role: assistantMsg.role, content: assistantMsg.content },
+          ];
+
+          // Set createdAt with incrementing milliseconds to preserve order
+          const baseTime = new Date();
+          const chatHistoryForBackend = [...currentMessages, ...newMessages].map((msg, index) => ({
             role: msg.role as CreateChatMessageDto.role,
             content: msg.content,
+            createdAt: new Date(baseTime.getTime() + index).toISOString(),
           }));
 
           const updateData: UpdateChecklistDto = {
             chatHistory: chatHistoryForBackend,
           };
 
-          await ChecklistService.checklistControllerUpdate(checklistResponse.id, updateData);
+          const updatedChecklist = await ChecklistService.checklistControllerUpdate(
+            checklistResponse.id,
+            updateData,
+          );
+
+          // Update local chat messages from backend response (source of truth)
+          if (updatedChecklist.chatHistory && updatedChecklist.chatHistory.length > 0) {
+            const frontendChatHistory = updatedChecklist.chatHistory.map((msg) => ({
+              id: msg.id,
+              role: msg.role as 'assistant' | 'user',
+              content: msg.content,
+            }));
+            setMessages(weddingId, frontendChatHistory);
+          }
         }
       } catch (error) {
         // If no checklist exists or update fails, just log it - don't interrupt the user experience
         console.log('Could not save chat history to backend:', error);
+        // Add messages to local state as fallback
+        addMessage(weddingId, { id: crypto.randomUUID(), ...assistantMsg });
       }
     } catch (error) {
       console.error('Assistant chat error:', error);
@@ -807,7 +843,12 @@ export function useProgressTrackerManager(weddingId?: number | null) {
         checklistResponse = await ChecklistService.checklistControllerFindByWeddingId(weddingId);
       } catch (err) {
         // If not found (404), we'll create a new checklist on-the-fly
-        if (err && typeof err === 'object' && 'status' in err && (err as any).status === 404) {
+        if (
+          err &&
+          typeof err === 'object' &&
+          'status' in err &&
+          (err as { status: number }).status === 404
+        ) {
           const itemsForCreate: CreateChecklistItemDto[] = (progressData.checklist || []).map(
             (item) => ({
               title: item.title,

@@ -72,7 +72,7 @@ export default function ChecklistTable({
         next.delete(itemId);
         return next;
       });
-    }, 300); // Match this to CSS transition duration
+    }, 500); // Match this to CSS transition duration
   };
 
   const getCategoryColor = (category: string) => {
@@ -189,11 +189,11 @@ export default function ChecklistTable({
       <style>{`
         .checklist-row-fade-out {
           opacity: 0;
-          transition: opacity 300ms ease-out;
+          transition: opacity 500ms ease-out;
         }
         .checklist-row {
           opacity: 1;
-          transition: opacity 300ms ease-in;
+          transition: opacity 500ms ease-in;
         }
       `}</style>
       <DataTable

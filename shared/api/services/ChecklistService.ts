@@ -72,7 +72,8 @@ export class ChecklistService {
         });
     }
     /**
-     * Update checklist
+     * Update checklist by ID
+     * Updates checklist items, current stage, and chat history. Set appendChatHistory=true to add new messages, or false to replace entire chat history.
      * @param id Checklist ID
      * @param requestBody
      * @returns ChecklistResponseDto Checklist updated successfully
@@ -142,8 +143,8 @@ export class ChecklistService {
         });
     }
     /**
-     * Update checklist by wedding ID - for updating items and stage progression
-     * Updates checklist items and current stage. Used for saving state on Next Category clicks.
+     * Update checklist by wedding ID - for updating items, stage progression, and chat history
+     * Updates checklist items, current stage, and chat history. Set appendChatHistory=true to add new messages, or false to replace entire chat history. Used for saving state on Next Category clicks and chat updates.
      * @param weddingId Wedding ID
      * @param requestBody
      * @returns ChecklistResponseDto Checklist updated successfully

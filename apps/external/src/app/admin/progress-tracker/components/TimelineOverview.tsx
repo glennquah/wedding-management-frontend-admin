@@ -1,14 +1,16 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { useSidebar } from '@shared/components/ui/sidebar';
 import { ChecklistItem } from '../../../store/progressTrackerStore';
 import { parseAndRenderText } from '../../../utils/linkParser';
 import { X, Calendar, CheckCircle } from 'lucide-react';
+import { WeddingResponseDto } from '@shared/api';
 
 interface TimelineOverviewProps {
   checklist: ChecklistItem[];
-  selectedWedding: any;
+  selectedWedding: WeddingResponseDto | null;
 }
 
 interface TimelineItem {
@@ -328,7 +330,7 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
       case 'completed':
         return `bg-gray-400 border-gray-400 ${opacity}`;
       case 'overdue':
-        return `bg-red-500 border-red-500 `;
+        return 'bg-red-500 border-red-500';
       case 'upcoming':
         return `bg-chart-4 border-chart-4 ${opacity}`;
       default:
@@ -353,7 +355,7 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
     preferFirstUncompleted: boolean = false,
   ) => {
     // Find all items with matching monthsBeforeWedding
-    let matchingItems = timelineItems.filter(
+    const matchingItems = timelineItems.filter(
       (item) => item.monthsBeforeWedding === monthsBeforeWedding,
     );
 
@@ -502,7 +504,7 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
     const onScroll = () => {
       recomputePath();
     };
-    el.addEventListener('scroll', onScroll, { passive: true } as any);
+    el.addEventListener('scroll', onScroll, { passive: true });
     return () => el.removeEventListener('scroll', onScroll);
   }, [rows]);
 
@@ -671,10 +673,16 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                       style={{
                         left: endOfRow
                           ? userPosition.x - 50
-                          : isEvenNumberedRow
-                            ? userPosition.x + 40
-                            : userPosition.x - 140,
-                        top: endOfRow ? userPosition.y - 100 : userPosition.y - 60,
+                          : progressInfo.scheduleStatus === 'wedding_day'
+                            ? userPosition.x - 46
+                            : isEvenNumberedRow
+                              ? userPosition.x + 40
+                              : userPosition.x - 140,
+                        top: endOfRow
+                          ? userPosition.y - 100
+                          : progressInfo.scheduleStatus === 'wedding_day'
+                            ? userPosition.y - 100
+                            : userPosition.y - 60,
                       }}
                     >
                       {/* Local animation keyframes to avoid relying on global CSS */}
@@ -796,7 +804,7 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                     return (
                       <div
                         key={item.id}
-                        className={`relative flex cursor-pointer flex-col items-center ${isHovered ? 'z-50' : 'z-10'}`}
+                        className={`relative flex cursor-pointer flex-col items-center ${isHovered ? 'z-50' : item.isWeddingDay ? 'z-30' : 'z-10'}`}
                         onMouseEnter={() => setHoveredItem(item.id)}
                         onMouseLeave={() => setHoveredItem(null)}
                         style={{ minWidth: '160px' }}
@@ -986,8 +994,19 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
           </div>
         </div>
       ) : (
-        <div className="flex h-64 items-center justify-center text-gray-500">
-          <p>Please select a wedding to view the timeline</p>
+        <div className="flex h-64 flex-col items-center justify-center gap-3 text-center text-gray-500">
+          <p className="text-lg">
+            Please choose a wedding date for the timeline overview to be displayed.
+          </p>
+          <p className="text-sm">
+            If you need help finding a date, use our{' '}
+            <Link
+              href="/admin/date-optimizer"
+              className="text-brand-500 hover:text-brand-700 font-medium underline"
+            >
+              Date Optimizer
+            </Link>
+          </p>
         </div>
       )}
 

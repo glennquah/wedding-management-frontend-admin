@@ -1,6 +1,7 @@
 import { openai } from '@ai-sdk/openai';
 import { UIMessage, generateObject, streamText } from 'ai';
 import { z } from 'zod';
+import { WeddingResponseDto } from '@shared/api';
 
 export const maxDuration = 30;
 
@@ -24,7 +25,7 @@ export type ChecklistResponse = z.infer<typeof ChecklistResponseSchema>;
 function buildHistory(msgs: UIMessage[] = []) {
   return msgs
     .map(
-      (m: any) =>
+      (m: UIMessage) =>
         `${m?.role === 'user' ? 'User' : 'Assistant'}: ${
           typeof m?.content === 'string' ? m?.content : JSON.stringify(m?.content ?? '')
         }`,
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
     messages: UIMessage[];
     checklist?: ChecklistItem[];
     action: 'checklist' | 'assistant';
-    wedding?: any;
+    wedding?: WeddingResponseDto;
   } = await req.json();
 
   const history = buildHistory(messages);
@@ -133,11 +134,12 @@ export async function POST(req: Request) {
 
       // Log more details about the error
       if (err && typeof err === 'object') {
+        const error = err as { name?: string; message?: string; stack?: string; cause?: unknown };
         console.error('Error details:', {
-          name: (err as any).name,
-          message: (err as any).message,
-          stack: (err as any).stack,
-          cause: (err as any).cause,
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+          cause: error.cause,
         });
       }
 

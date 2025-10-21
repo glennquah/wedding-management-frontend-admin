@@ -21,6 +21,10 @@ export type UpdateChecklistDto = {
      * Current stage of the checklist progression
      */
     currentStage?: UpdateChecklistDto.currentStage;
+    /**
+     * Whether to append chat messages to existing history (true) or replace all chat history (false). Defaults to false.
+     */
+    appendChatHistory?: boolean;
 };
 export namespace UpdateChecklistDto {
     /**

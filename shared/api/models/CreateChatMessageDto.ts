@@ -11,6 +11,10 @@ export type CreateChatMessageDto = {
      * Content of the chat message
      */
     content: string;
+    /**
+     * Timestamp when the message was created
+     */
+    createdAt?: string;
 };
 export namespace CreateChatMessageDto {
     /**

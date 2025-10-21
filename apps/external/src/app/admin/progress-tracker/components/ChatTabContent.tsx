@@ -67,10 +67,13 @@ const renderMarkdown = (text: string) => {
 
 const ChatTabContent = forwardRef<HTMLDivElement, ChatTabContentProps>(
   ({ messages, isLoading = false, loadingText = 'Thinking...' }, ref) => {
+    // Safety check: ensure messages is always an array
+    const safeMessages = messages || [];
+
     return (
       <div ref={ref} className="custom-scrollbar h-full overflow-y-auto pr-1">
         <ul className="space-y-3">
-          {messages.map((m) => (
+          {safeMessages.map((m) => (
             <li key={m.id} className="flex">
               {m.role === 'assistant' ? (
                 <div className="mr-auto ml-0 max-w-[82%]">

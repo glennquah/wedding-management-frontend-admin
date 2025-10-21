@@ -165,7 +165,7 @@ export const defaultChecklist: ChecklistItem[] = [
     id: '9.3',
     title: 'Hire a Stylist and Florist',
     description:
-      'Engage a wedding stylist and florist from the E-commerce Platform to design the decor and floral arrangements. Hire one from the E-commerce Platform.',
+      'Engage a wedding stylist and florist from the E-commerce Platform to design the decor and floral arrangements.',
     category: 'Detailed Planning',
     monthsBeforeWedding: 4,
   },
@@ -181,7 +181,7 @@ export const defaultChecklist: ChecklistItem[] = [
     id: '9.5',
     title: 'Arrange Cake and Catering Services',
     description:
-      'Book a cake designer and catering service from the E-commerce platform to provide delicious food and desserts.',
+      'Book a cake designer and catering service from the E-commerce Platform to provide delicious food and desserts.',
     category: 'Detailed Planning',
     monthsBeforeWedding: 6,
   },
@@ -245,7 +245,7 @@ export const defaultChecklist: ChecklistItem[] = [
   {
     id: '13',
     title: 'Attendance Taking',
-    description: 'Use the Attendance Taking tool to track guest attendance on the wedding day.',
+    description: 'Use the Attendance Taking Tool to track guest attendance on the wedding day.',
     category: 'During the Wedding',
     monthsBeforeWedding: 0,
   },
@@ -253,7 +253,7 @@ export const defaultChecklist: ChecklistItem[] = [
     id: '14',
     title: 'Wedding Monetary Gifts QR',
     description:
-      'Set up a QR code using the Wedding Gifts Tool for guests to give monetary gifts conveniently.',
+      'Remember to upload your PayLah account QR code on your account settings for the Wedding Monetary Gifts feature to be active on your microsite on the day of your wedding.',
     category: 'During the Wedding',
     monthsBeforeWedding: 0,
   },
@@ -261,7 +261,7 @@ export const defaultChecklist: ChecklistItem[] = [
     id: '15',
     title: 'Photo Album Upload QR',
     description:
-      'Print the photo album invite card created, to provide guests with a QR code to upload photos taken during the wedding.',
+      'Using the Photo Album Invite Card Builder, curate and print a pamphlet that provides guests with a QR code to upload photos taken during the wedding.',
     category: 'During the Wedding',
     monthsBeforeWedding: 0,
   },
@@ -271,7 +271,7 @@ export const defaultChecklist: ChecklistItem[] = [
     id: '17',
     title: 'Send E-Thank You Cards',
     description:
-      'Express your gratitude by sending e-thank you cards using the E-card Tool to your guests.',
+      'Express your gratitude by sending e-thank you cards using the Gratitude Card Builder to your guests.',
     category: 'After the Wedding',
     monthsBeforeWedding: -1,
   },
@@ -544,7 +544,7 @@ export const useProgressTrackerStore = create<ProgressTrackerStore>()(
             id: crypto.randomUUID(),
             role: 'assistant',
             content:
-              "Great! You've reviewed all the default checklist categories. 🎉\n\nNext, share a few details about your wedding—preferences, constraints, priorities, or anything unique. I'll use what you share to generate your personalized Progress Tracker Timeline and Checklist Table. I'm here to help with planning and coordination.\n\nWhat would you like to add or clarify to get your plan generated?",
+              '🎉 Great! You’ve gone through all the checklist categories. Now tell me what’s unique about your wedding — any special plans, themes, or details I might’ve missed — and I’ll help you add personalized tasks to your checklist.',
           });
         } else {
           // Show next category
@@ -604,7 +604,7 @@ export const useProgressTrackerStore = create<ProgressTrackerStore>()(
         const drafts: Record<
           number,
           {
-            data: ProgressTrackerData;
+            data: Omit<ProgressTrackerData, 'messages'> & { messages?: never };
             dirty: boolean;
             modifiedFields: (keyof ProgressTrackerData | string)[];
           }
@@ -612,8 +612,12 @@ export const useProgressTrackerStore = create<ProgressTrackerStore>()(
         for (const [idStr, draft] of Object.entries(state.drafts)) {
           const id = Number(idStr);
           if (Number.isNaN(id)) continue;
+          // Exclude messages from persistence - rely on backend only
+          const { messages, ...dataWithoutMessages } = draft.data;
           drafts[id] = {
-            data: draft.data,
+            data: dataWithoutMessages as Omit<ProgressTrackerData, 'messages'> & {
+              messages?: never;
+            },
             dirty: draft.dirty,
             modifiedFields: draft.modifiedFields,
           };
@@ -621,7 +625,16 @@ export const useProgressTrackerStore = create<ProgressTrackerStore>()(
         return { drafts };
       },
       onRehydrateStorage: () => (state) => {
-        state?.setHasHydrated(true);
+        // Ensure messages are initialized as empty array after rehydration
+        // since they're not persisted
+        if (state) {
+          for (const [weddingIdStr, draft] of Object.entries(state.drafts)) {
+            if (!draft.data.messages) {
+              draft.data.messages = [];
+            }
+          }
+          state.setHasHydrated(true);
+        }
       },
     },
   ),

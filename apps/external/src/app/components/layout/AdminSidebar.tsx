@@ -14,6 +14,7 @@ import {
   ShoppingCart,
   Sparkles,
   Users,
+  Calendar,
 } from 'lucide-react';
 
 export default function AdminSidebar() {
@@ -81,7 +82,6 @@ export default function AdminSidebar() {
           href: '/date-optimizer',
           icon: Sparkles,
           disabled: !hasWedding,
-          disabled: !hasWedding,
         },
         {
           title: 'Microsite',
@@ -99,7 +99,7 @@ export default function AdminSidebar() {
           title: 'Attendance',
           href: '/attendance',
           icon: ClipboardList,
-          disabled: !hasWedding,
+          disabled: !hasWedding || !firstPurchaseMade,
         },
       ],
     },
@@ -110,7 +110,7 @@ export default function AdminSidebar() {
           title: 'Gratitude Card',
           href: '/gratitude',
           icon: BookOpenText,
-          disabled: !hasWedding,
+          disabled: !hasWedding || !firstPurchaseMade,
         },
       ],
     },

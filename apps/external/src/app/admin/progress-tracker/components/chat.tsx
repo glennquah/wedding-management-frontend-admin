@@ -14,9 +14,10 @@ import {
 } from '../../../store/progressTrackerStore';
 import { useWeddingStore } from '../../../store/sessionStore';
 import ChatTabContent from './ChatTabContent';
+import { WeddingResponseDto } from '@shared/api';
 
 type ChatProps = {
-  selectedWedding?: any | null;
+  selectedWedding?: WeddingResponseDto | null;
   currentStage: ChatbotStage;
   firstPurchaseMade: boolean;
   onNextCategory: () => void;
@@ -55,6 +56,18 @@ export default function Chat({
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
   }, [progressData.messages]);
+
+  // Auto-scroll to bottom when chat opens
+  useEffect(() => {
+    if (open) {
+      const el = viewportRef.current;
+      if (!el) return;
+      // Small delay to ensure DOM is rendered
+      setTimeout(() => {
+        el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+      }, 100);
+    }
+  }, [open]);
 
   // Button logic based on current stage
   const showNextButton =
