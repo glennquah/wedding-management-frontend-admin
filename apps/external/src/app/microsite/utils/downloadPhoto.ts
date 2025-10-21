@@ -68,6 +68,7 @@ export async function downloadImagesOrganizedByPerson(
   blurryPhotoIds?: Set<number>,
   includeOthers: boolean = true,
   allPhotoIdsInAnyClusters?: Set<number>,
+  selectedOthersPhotoIds?: number[],
 ) {
   const zip = new JSZip();
 
@@ -111,23 +112,40 @@ export async function downloadImagesOrganizedByPerson(
 
   // Create "Other Photos" folder for photos not in any person cluster (if includeOthers is true)
   if (includeOthers) {
-    // Use allPhotoIdsInAnyClusters if provided, otherwise fall back to photosInPersonFolders
-    const photoIdsToExclude = allPhotoIdsInAnyClusters || photosInPersonFolders;
+    let otherPhotoIds: number[] = [];
 
-    const otherPhotos = allPhotos.filter((_, idx) => {
-      // Skip if in ANY person cluster (not just selected ones)
-      if (photoIdsToExclude.has(idx)) return false;
-      // Skip if blurry (when filtering is enabled)
-      if (blurryPhotoIds && blurryPhotoIds.has(idx)) return false;
-      return true;
-    });
+    if (selectedOthersPhotoIds && selectedOthersPhotoIds.length > 0) {
+      // Use the specific photo IDs provided
+      otherPhotoIds = selectedOthersPhotoIds;
 
-    if (otherPhotos.length > 0) {
+      // Filter out blurry photos if needed
+      if (blurryPhotoIds) {
+        otherPhotoIds = otherPhotoIds.filter((id) => !blurryPhotoIds.has(id));
+      }
+    } else {
+      // Fallback to old behavior: include all photos not in any cluster
+      const photoIdsToExclude = allPhotoIdsInAnyClusters || photosInPersonFolders;
+
+      otherPhotoIds = allPhotos
+        .map((_, idx) => idx)
+        .filter((idx) => {
+          // Skip if in ANY person cluster (not just selected ones)
+          if (photoIdsToExclude.has(idx)) return false;
+          // Skip if blurry (when filtering is enabled)
+          if (blurryPhotoIds && blurryPhotoIds.has(idx)) return false;
+          return true;
+        });
+    }
+
+    if (otherPhotoIds.length > 0) {
       const otherFolder = zip.folder('Other Photos');
 
       if (otherFolder) {
         await Promise.all(
-          otherPhotos.map(async (photo) => {
+          otherPhotoIds.map(async (photoId) => {
+            const photo = allPhotos[photoId];
+            if (!photo) return;
+
             try {
               const response = await fetch(photo.image_url, {
                 headers: { Origin: location.origin },

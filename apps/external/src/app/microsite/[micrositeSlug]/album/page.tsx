@@ -199,7 +199,7 @@ export default function AlbumPage({ params }: PageProps) {
                   {album.coupleName} Wedding Photos
                 </h1>
 
-                <div className="flex justify-center gap-3">
+                <div className="flex flex-wrap justify-center gap-3 max-w-md mx-auto">
                   {album && album.photos && album.photos.length > 0 && (
                     <SlideshowDialog photoUrls={album.photos} />
                   )}
