@@ -2,10 +2,12 @@
 
 import { use, useEffect, useMemo, useRef, useState } from 'react';
 
+import DownloadCuratedAlbum from '../../components/DownloadCuratedAlbum';
 import MicrositeLogin from '../../components/MicrositeLogin';
 import Modal from '../../components/Modal';
 import { downloadImagesAsZip } from '../../utils/downloadPhoto';
 import { PageProps } from '../page';
+import SlideshowDialog from './component/SlideshowDialog';
 import { useMicrositeManager } from '@/app/hooks/useMicrositeManager';
 import { AlbumResponseDto, AlbumService } from '@shared/api';
 import { Button, ImageUploadWidget } from '@shared/components';
@@ -40,11 +42,13 @@ export default function AlbumPage({ params }: PageProps) {
   const {
     micrositeData,
     isLoadingMicrosite,
+    isWeddingLive,
     micrositeError,
     hasAccess,
     fetchMicrositeData,
     handleMicrositeLogin,
     setHasAccess,
+    checkWeddingStatus,
   } = useMicrositeManager();
 
   // fetch microsite data
@@ -53,6 +57,12 @@ export default function AlbumPage({ params }: PageProps) {
     setHasAccess(false);
     fetchMicrositeData(decodedPlanName);
   }, [decodedPlanName, fetchMicrositeData, setHasAccess]);
+
+  useEffect(() => {
+    if (micrositeData) {
+      checkWeddingStatus();
+    }
+  }, [micrositeData]);
 
   // fetch album data + map images
   useEffect(() => {
@@ -130,17 +140,7 @@ export default function AlbumPage({ params }: PageProps) {
     );
   }
 
-  const today = new Date();
-  const weddingDate = new Date(micrositeData.weddingDate || '');
-
-  const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const weddingDateOnly = new Date(
-    weddingDate.getFullYear(),
-    weddingDate.getMonth(),
-    weddingDate.getDate(),
-  );
-
-  if (todayDateOnly < weddingDateOnly) {
+  if (!isWeddingLive) {
     toast.error('Not wedding day yet!');
     router.push(`/microsite/${decodedPlanName}`);
     return null;
@@ -161,7 +161,7 @@ export default function AlbumPage({ params }: PageProps) {
         <div className={images.length === 0 ? 'flex min-h-screen items-center justify-center' : ''}>
           {album && (
             <div
-              className="relative flex h-[630px] flex-col items-center justify-end gap-4 overflow-hidden rounded-lg bg-white/10 pb-16 text-center"
+              className="relative flex h-[630px] flex-col items-center justify-end gap-4 overflow-hidden rounded-lg bg-white/10 pb-16 mb-5 text-center"
               style={{
                 backgroundImage:
                   "url('https://res.cloudinary.com/dnyxxyolp/image/upload/v1759851783/ring_qy7s3y.jpg')",
@@ -171,6 +171,24 @@ export default function AlbumPage({ params }: PageProps) {
                 backdropFilter: 'blur(4px)',
               }}
             >
+              {isWeddingLive && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex gap-3">
+                  <Button
+                    onClick={() => router.push(`/microsite/${decodedPlanName}/guestbook`)}
+                    variant="outline"
+                    className="w-full sm:w-auto over:bg-amber-800 text-white rounded-full"
+                  >
+                    View Guestbook
+                  </Button>
+                  <Button
+                    onClick={() => router.push(`/microsite/${decodedPlanName}`)}
+                    variant="outline"
+                    className="w-full sm:w-auto hover:bg-amber-800 text-white rounded-full"
+                  >
+                    View Microsite
+                  </Button>
+                </div>
+              )}
               <div className="absolute inset-0 pointer-events-none rounded-lg bg-gradient-to-t from-transparent via-black/30 to-black/60" />
 
               <div
@@ -181,9 +199,12 @@ export default function AlbumPage({ params }: PageProps) {
                   {album.coupleName} Wedding Photos
                 </h1>
 
-                <div className="flex justify-center gap-3">
+                <div className="flex flex-wrap justify-center gap-3 max-w-md mx-auto">
+                  {album && album.photos && album.photos.length > 0 && (
+                    <SlideshowDialog photoUrls={album.photos} />
+                  )}
                   <ImageUploadWidget
-                    folder={`${album.coupleName}-${micrositeData.weddingDate?.split('T')[0]}`}
+                    folder={`${album.coupleName.replace(/[^a-zA-Z0-9-]/g, '_')}-${micrositeData.weddingDate?.split('T')[0]}`}
                     onUpload={async (url) => {
                       try {
                         const updatedAlbum = await AlbumService.albumControllerAddPhoto(album.id, {
@@ -202,11 +223,23 @@ export default function AlbumPage({ params }: PageProps) {
                         setImages(mappedImages);
                       } catch (err) {
                         console.error('Failed to add photo:', err);
+                        toast.error('Failed to upload photo');
                       }
                     }}
                   />
 
-                  <Button onClick={() => downloadImagesAsZip(images)}>Download Album</Button>
+                  <DownloadCuratedAlbum
+                    albumId={album.id}
+                    allPhotos={images}
+                    disabled={images.length === 0}
+                  />
+
+                  <Button
+                    onClick={() => downloadImagesAsZip(images)}
+                    disabled={images.length === 0}
+                  >
+                    Download All
+                  </Button>
                 </div>
 
                 {album.landingMessage && (

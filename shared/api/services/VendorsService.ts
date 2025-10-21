@@ -168,14 +168,14 @@ export class VendorsService {
         });
     }
     /**
-     * Accept vendor onboarding
+     * Accept vendor onboarding and create Stripe Connect account
      * @param id
-     * @returns VendorResponseDto The vendor has been marked as onboarded.
+     * @returns any The vendor has been marked as onboarded and Stripe account created.
      * @throws ApiError
      */
     public static vendorControllerOnboardVendor(
         id: number,
-    ): CancelablePromise<VendorResponseDto> {
+    ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
             url: '/vendors/{id}/accept',
@@ -244,6 +244,66 @@ export class VendorsService {
             },
             errors: {
                 404: `Vendor not found.`,
+            },
+        });
+    }
+    /**
+     * Generate new Stripe onboarding link for vendor
+     * @param id
+     * @returns any New Stripe account onboarding link generated.
+     * @throws ApiError
+     */
+    public static vendorControllerGenerateStripeOnboardingLink(
+        id: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/vendors/{id}/stripe/account-link',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Vendor or Stripe account not found.`,
+            },
+        });
+    }
+    /**
+     * Get vendor Stripe Connect account status
+     * @param id
+     * @returns any Stripe account status retrieved.
+     * @throws ApiError
+     */
+    public static vendorControllerGetVendorStripeStatus(
+        id: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/vendors/{id}/stripe/status',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Vendor not found.`,
+            },
+        });
+    }
+    /**
+     * Sync vendor Stripe account status with Stripe
+     * @param id
+     * @returns any Stripe account status synced.
+     * @throws ApiError
+     */
+    public static vendorControllerSyncVendorStripeStatus(
+        id: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/vendors/{id}/stripe/sync',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Vendor or Stripe account not found.`,
             },
         });
     }

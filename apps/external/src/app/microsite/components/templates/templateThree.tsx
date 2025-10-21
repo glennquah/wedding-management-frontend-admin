@@ -108,12 +108,18 @@ export default function TemplateThree({
       }`}
     >
       {isWeddingLive && micrositeSlug && (
-        <div className="absolute top-4 right-4 z-50">
+        <div className="absolute top-4 right-4 z-50 flex gap-3">
           <Button
             onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
             className="rounded-full bg-[#EADBC8] hover:bg-[#E5D4BE] text-stone-900 border border-stone-300"
           >
             View Album
+          </Button>
+          <Button
+            onClick={() => router.push(`/microsite/${micrositeSlug}/guestbook`)}
+            className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+          >
+            View Guestbook
           </Button>
         </div>
       )}

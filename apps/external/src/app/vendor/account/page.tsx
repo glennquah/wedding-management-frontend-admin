@@ -12,7 +12,7 @@ export default function AccountPage() {
 
   const handleProfileUpdate = () => {
     // Force a full page reload to refresh the sidebar and all vendor-related data
-    window.location.href = '/vendor';
+    console.log('Profile updated successfully');
   };
 
   if (isLoading) {
