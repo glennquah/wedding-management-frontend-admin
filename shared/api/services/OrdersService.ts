@@ -280,4 +280,53 @@ export class OrdersService {
             },
         });
     }
+    /**
+     * Vendor marks a specific listing in an order as completed
+     * @param orderId
+     * @param listingId
+     * @returns OrderResponseDto The listing has been successfully marked as completed.
+     * @throws ApiError
+     */
+    public static orderControllerVendorCompleteListing(
+        orderId: number,
+        listingId: number,
+    ): CancelablePromise<OrderResponseDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/orders/{orderId}/listings/{listingId}/vendor-complete',
+            path: {
+                'orderId': orderId,
+                'listingId': listingId,
+            },
+            errors: {
+                400: `Listing cannot be completed or booking dates have not passed.`,
+                403: `Vendor does not own this listing.`,
+                404: `Order or listing not found.`,
+            },
+        });
+    }
+    /**
+     * Superadmin marks a specific listing in an order as completed
+     * @param orderId
+     * @param listingId
+     * @returns OrderResponseDto The listing has been successfully marked as completed.
+     * @throws ApiError
+     */
+    public static orderControllerSuperadminCompleteListing(
+        orderId: number,
+        listingId: number,
+    ): CancelablePromise<OrderResponseDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/orders/{orderId}/listings/{listingId}/superadmin-complete',
+            path: {
+                'orderId': orderId,
+                'listingId': listingId,
+            },
+            errors: {
+                400: `Listing cannot be completed or booking dates have not passed.`,
+                404: `Order or listing not found.`,
+            },
+        });
+    }
 }
