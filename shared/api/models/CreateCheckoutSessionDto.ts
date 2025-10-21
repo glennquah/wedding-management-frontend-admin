@@ -8,6 +8,10 @@ export type CreateCheckoutSessionDto = {
      */
     orderId: number;
     /**
+     * Optional array of listing IDs to pay for. If not provided, all listings in the order will be included.
+     */
+    listingIds?: Array<string>;
+    /**
      * Success URL to redirect to after payment
      */
     successUrl?: string;

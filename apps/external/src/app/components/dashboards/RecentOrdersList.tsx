@@ -1,6 +1,6 @@
 'use client';
 
-import { OrderResponseDto } from '@shared/api';
+import { OrderListingDetailResponseDto } from '@shared/api';
 import { Badge } from '@shared/components/ui/badge';
 import {
   Card,
@@ -20,7 +20,7 @@ import {
 import { Package } from 'lucide-react';
 
 interface RecentOrdersListProps {
-  orders: OrderResponseDto[];
+  listingDetails: OrderListingDetailResponseDto[];
   isLoading?: boolean;
 }
 
@@ -39,57 +39,63 @@ const getStatusColor = (status: string) => {
   }
 };
 
-export const RecentOrdersList = ({ orders, isLoading }: RecentOrdersListProps) => {
-  // Show only the 5 most recent orders
-  const recentOrders = orders
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+export const RecentOrdersList = ({ listingDetails, isLoading }: RecentOrdersListProps) => {
+  // Show only the 5 upcoming listing details (future dates, sorted by soonest first)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const upcomingListings = listingDetails
+    .filter((listing) => new Date(listing.date) >= today)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, 5);
 
   return (
     <Card className="bg-transparent border-brand-200">
       <CardHeader>
-        <CardTitle>Recent Orders</CardTitle>
-        <CardDescription>Your latest 5 orders</CardDescription>
+        <CardTitle>Upcoming Orders</CardTitle>
+        <CardDescription>Your next 5 upcoming orders</CardDescription>
       </CardHeader>
-      <CardContent className="h-[320px]">
+      <CardContent className="h-[350px]">
         {isLoading ? (
           <div className="flex h-full items-center justify-center text-muted-foreground">
             Loading orders...
           </div>
-        ) : recentOrders.length === 0 ? (
+        ) : upcomingListings.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
             <Package className="h-12 w-12 mb-2 opacity-50" />
-            <p>No orders yet</p>
+            <p>No upcoming orders</p>
           </div>
         ) : (
           <div className="overflow-auto h-full border rounded-md ">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Order ID</TableHead>
+                  <TableHead>Listing</TableHead>
+                  <TableHead>Vendor</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">#{order.id}</TableCell>
+                {upcomingListings.map((listing) => (
+                  <TableRow key={`${listing.orderId}-${listing.listingId}`}>
+                    <TableCell className="font-medium">{listing.listingName}</TableCell>
+                    <TableCell>{listing.vendorName}</TableCell>
                     <TableCell>
-                      {new Date(order.purchaseDate).toLocaleDateString('en-US', {
+                      {new Date(listing.date).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',
                       })}
                     </TableCell>
                     <TableCell>
-                      <Badge className={getStatusColor(order.status)} variant="secondary">
-                        {order.status}
+                      <Badge className={getStatusColor(listing.status)} variant="secondary">
+                        {listing.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right font-semibold">
-                      {order.currency} {order.totalAmount.toFixed(2)}
+                      {listing.currency} {listing.amount.toFixed(2)}
                     </TableCell>
                   </TableRow>
                 ))}
