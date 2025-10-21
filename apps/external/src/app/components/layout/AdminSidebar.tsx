@@ -1,10 +1,10 @@
 'use client';
 
+import { signOut, useWeddingStore } from '../../store/sessionStore';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
   BookOpenText,
-  Calendar,
   Camera,
   ClipboardList,
   Clock,
@@ -15,7 +15,6 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react';
-import { signOut, useWeddingStore } from '../../store/sessionStore';
 
 export default function AdminSidebar() {
   const { weddings, firstPurchaseMade } = useWeddingStore();
@@ -82,6 +81,7 @@ export default function AdminSidebar() {
           href: '/date-optimizer',
           icon: Sparkles,
           disabled: !hasWedding,
+          disabled: !hasWedding,
         },
         {
           title: 'Microsite',
@@ -110,6 +110,7 @@ export default function AdminSidebar() {
           title: 'Gratitude Card',
           href: '/gratitude',
           icon: BookOpenText,
+          disabled: !hasWedding,
         },
       ],
     },
