@@ -46,6 +46,7 @@ export { EmailNotificationHistoryResponseDto } from './models/EmailNotificationH
 export type { EmailTemplateResponse } from './models/EmailTemplateResponse';
 export type { EmailTemplateResponseDto } from './models/EmailTemplateResponseDto';
 export type { EmailTemplateWithWeddingDto } from './models/EmailTemplateWithWeddingDto';
+export type { FaceClusterDto } from './models/FaceClusterDto';
 export type { FaqItemDto } from './models/FaqItemDto';
 export { GenerateAiEmailTemplateDto } from './models/GenerateAiEmailTemplateDto';
 export type { GenerateMicrositeDto } from './models/GenerateMicrositeDto';
@@ -73,6 +74,7 @@ export { OrderResponseDto } from './models/OrderResponseDto';
 export { OrderStatus } from './models/OrderStatus';
 export type { PaymentResponseDto } from './models/PaymentResponseDto';
 export { PaymentStatus } from './models/PaymentStatus';
+export type { ProcessingStatusDto } from './models/ProcessingStatusDto';
 export type { RequestCalendarAccessDto } from './models/RequestCalendarAccessDto';
 export type { RequestResetPasswordDto } from './models/RequestResetPasswordDto';
 export type { ResetPasswordDto } from './models/ResetPasswordDto';
