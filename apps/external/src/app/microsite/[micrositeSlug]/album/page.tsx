@@ -208,9 +208,9 @@ export default function AlbumPage({ params }: PageProps) {
                     }}
                   />
 
-                  <DownloadCuratedAlbum albumId={album.id} allPhotos={images} />
+                  <DownloadCuratedAlbum albumId={album.id} allPhotos={images} disabled={images.length === 0} />
 
-                  <Button onClick={() => downloadImagesAsZip(images)}>Download All</Button>
+                  <Button onClick={() => downloadImagesAsZip(images)} disabled={images.length === 0}>Download All</Button>
                 </div>
 
                 {album.landingMessage && (

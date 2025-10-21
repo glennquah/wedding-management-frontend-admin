@@ -25,11 +25,13 @@ interface ImageProps {
 interface DownloadCuratedAlbumProps {
   albumId: number;
   allPhotos: ImageProps[];
+  disabled?: boolean;
 }
 
 export default function DownloadCuratedAlbum({
   albumId,
   allPhotos,
+  disabled = false,
 }: DownloadCuratedAlbumProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -170,7 +172,7 @@ export default function DownloadCuratedAlbum({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>Download Curated Album</Button>
+        <Button disabled={disabled}>Download Curated Album</Button>
       </DialogTrigger>
       <DialogContent className="w-[80vw] max-w-[80vw] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
