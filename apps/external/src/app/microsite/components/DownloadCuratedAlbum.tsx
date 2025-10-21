@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+
 import { AlbumService, FaceClusterDto, ProcessingStatusDto } from '@shared/api';
 import { Button } from '@shared/components';
 import {
@@ -56,10 +57,10 @@ export default function DownloadCuratedAlbum({
       setBlurryPhotoIds(new Set(blurryIndices));
 
       // Select all clusters by default
-      setSelectedClusters(new Set(clusters.map(c => c.id)));
+      setSelectedClusters(new Set(clusters.map((c) => c.id)));
 
       // Calculate number of photos not in any cluster
-      const photosInClusters = new Set(clusters.flatMap(c => c.photoIds));
+      const photosInClusters = new Set(clusters.flatMap((c) => c.photoIds));
       const othersPhotos = allPhotos.filter((_, idx) => !photosInClusters.has(idx));
       setOthersCount(othersPhotos.length);
     } catch (error) {
@@ -110,10 +111,12 @@ export default function DownloadCuratedAlbum({
       let filteredPersons = selectedPersons;
       if (!includeBlurry && blurryPhotoIds.size > 0) {
         // Remove blurry photos from each person's photoIds
-        filteredPersons = selectedPersons.map((person) => ({
-          ...person,
-          photoIds: person.photoIds.filter((id) => !blurryPhotoIds.has(id)),
-        })).filter((person) => person.photoIds.length > 0); // Remove persons with no non-blurry photos
+        filteredPersons = selectedPersons
+          .map((person) => ({
+            ...person,
+            photoIds: person.photoIds.filter((id) => !blurryPhotoIds.has(id)),
+          }))
+          .filter((person) => person.photoIds.length > 0); // Remove persons with no non-blurry photos
       }
 
       if (filteredPersons.length === 0 && !includeOthers) {
@@ -128,7 +131,7 @@ export default function DownloadCuratedAlbum({
       // Add others count if includeOthers is true
       if (includeOthers) {
         // Get ALL photo IDs from ALL clusters (not just selected ones)
-        const allPhotoIdsInAnyClusters = new Set(faceClusters.flatMap(c => c.photoIds));
+        const allPhotoIdsInAnyClusters = new Set(faceClusters.flatMap((c) => c.photoIds));
 
         const othersPhotos = allPhotos.filter((_, idx) => {
           // Skip if in ANY person cluster (not just selected ones)
@@ -146,13 +149,14 @@ export default function DownloadCuratedAlbum({
       const { downloadImagesOrganizedByPerson } = await import('../utils/downloadPhoto');
 
       // Get ALL photo IDs from ALL clusters (not just selected ones) for "Others" calculation
-      const allPhotoIdsInAnyClusters = new Set(faceClusters.flatMap(c => c.photoIds));
+      const allPhotoIdsInAnyClusters = new Set(faceClusters.flatMap((c) => c.photoIds));
+      const clusterIdToIndex = new Map(faceClusters.map((c, idx) => [c.id, idx]));
 
       await downloadImagesOrganizedByPerson(
         allPhotos,
         filteredPersons.map((cluster) => ({
           clusterId: cluster.id,
-          label: cluster.label || `Person ${faceClusters.findIndex(c => c.id === cluster.id) + 1}`,
+          label: cluster.label || `Person ${(clusterIdToIndex.get(cluster.id) ?? -1) + 1}`,
           photoIds: cluster.photoIds,
         })),
         includeBlurry ? undefined : blurryPhotoIds,
@@ -205,8 +209,7 @@ export default function DownloadCuratedAlbum({
                 </div>
                 {!isProcessingComplete && (
                   <p className="text-xs text-gray-500">
-                    Photos are still being processed. Filters will be more accurate once
-                    complete.
+                    Photos are still being processed. Filters will be more accurate once complete.
                   </p>
                 )}
               </div>
@@ -310,9 +313,10 @@ export default function DownloadCuratedAlbum({
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
                       <div>
-                        <span className="text-sm font-medium">Include &ldquo;Other Photos&rdquo; folder</span>
+                        <span className="text-sm font-medium">Include “Other Photos” folder</span>
                         <p className="text-xs text-gray-500">
-                          {othersCount} photo{othersCount !== 1 ? 's' : ''} not matched to any person
+                          {othersCount} photo{othersCount !== 1 ? 's' : ''} not matched to any
+                          person
                         </p>
                       </div>
                     </label>
@@ -332,9 +336,7 @@ export default function DownloadCuratedAlbum({
               <Button variant="outline" onClick={() => setIsOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleDownload}>
-                Download
-              </Button>
+              <Button onClick={handleDownload}>Download</Button>
             </div>
           </div>
         )}

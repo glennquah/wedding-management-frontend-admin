@@ -101,7 +101,7 @@ export async function downloadImagesOrganizedByPerson(
           });
           const blob = await response.blob();
           const extension = photo.format || 'jpg';
-          personFolder.file(`${photoId}.${extension}`, blob);
+          personFolder.file(`${photo.id}.${extension}`, blob);
         } catch (e) {
           console.error(`Failed to fetch image ${photo.image_url}`, e);
         }
