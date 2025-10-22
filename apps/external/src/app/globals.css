@@ -10,6 +10,12 @@
   --container-padding: 2rem;
   --container-2xl: 1400px;
 
+  /* Screen@theme {
+  /* Container settings */
+  --container-center: true;
+  --container-padding: 2rem;
+  --container-2xl: 1400px;
+
   /* Screen breakpoints */
   --screens-phone: 390px;
   --screens-tablet: 768px;
