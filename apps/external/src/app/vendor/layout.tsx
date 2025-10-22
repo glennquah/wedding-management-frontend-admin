@@ -11,7 +11,12 @@ import { Toaster } from '@shared/components/ui/sonner';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 
-const ALLOWED_ROUTES_WITHOUT_DETAILS = ['/vendor', '/vendor/account'];
+const ALLOWED_ROUTES_WITHOUT_DETAILS = [
+  '/vendor',
+  '/vendor/account',
+  '/vendor/stripe-connect/refresh',
+  '/vendor/stripe-connect/complete',
+];
 
 const allowedRoutesWithoutDetails = ['/vendor', '/vendor/account'];
 
@@ -21,6 +26,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
   const pathname = usePathname();
   const [hasVendorDetails, setHasVendorDetails] = useState<boolean | null>(null);
   const [vendorOnboardingStatus, setVendorOnboardingStatus] = useState<string | null>(null);
+  const [stripeOnboardingComplete, setStripeOnboardingComplete] = useState<boolean | null>(null);
   const [isCheckingDetails, setIsCheckingDetails] = useState(true);
 
   console.log('Session status:', status, 'Session data:', session);
@@ -39,9 +45,16 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
           vendor.weddingTypes?.length
         );
         setHasVendorDetails(hasDetails);
+
+        // Get Stripe status
+        const stripeStatus = await VendorsService.vendorControllerGetVendorStripeStatus(
+          session.user.id
+        );
+        setStripeOnboardingComplete(stripeStatus.stripeAccountOnboardingComplete || false);
       } catch (error) {
         console.error('Error checking vendor details:', error);
         setHasVendorDetails(false);
+        setStripeOnboardingComplete(false);
       } finally {
         setIsCheckingDetails(false);
       }
@@ -66,16 +79,17 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
       return;
     }
 
-    // If vendor is ONBOARDED but has no details, allow access to /vendor and /vendor/account only
+    // If vendor is ONBOARDED but hasn't completed Stripe or vendor details,
+    // allow access to /vendor and /vendor/account only
     if (
       vendorOnboardingStatus === 'ONBOARDED' &&
-      hasVendorDetails === false &&
+      (hasVendorDetails === false || stripeOnboardingComplete === false) &&
       pathname &&
       !ALLOWED_ROUTES_WITHOUT_DETAILS.includes(pathname)
     ) {
       router.push('/vendor');
     }
-  }, [vendorOnboardingStatus, hasVendorDetails, pathname, router]);
+  }, [vendorOnboardingStatus, hasVendorDetails, stripeOnboardingComplete, pathname, router]);
 
   if (status === 'loading' || isCheckingDetails) {
     return (

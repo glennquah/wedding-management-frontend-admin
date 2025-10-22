@@ -24,6 +24,7 @@ interface OrderCardProps {
   onPayNow?: (orderId: number, listingId?: number) => void;
   onConfirm?: () => void;
   onReject?: () => void;
+  onComplete?: () => void;
   viewMode?: 'admin' | 'vendor';
 }
 
@@ -40,6 +41,7 @@ export function OrderCard({
   onPayNow,
   onConfirm,
   onReject,
+  onComplete,
   viewMode = 'admin'
 }: OrderCardProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -72,6 +74,34 @@ export function OrderCard({
       month: 'short',
       day: 'numeric',
       year: 'numeric',
+    });
+  };
+
+  // Helper function to check if all booked dates have passed
+  const allBookedDatesPassed = (bookedSlots?: AvailabilitySlotDto[]) => {
+    if (!bookedSlots || bookedSlots.length === 0) {
+      return false;
+    }
+
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // Start of today
+
+    return bookedSlots.every((slot) => {
+      let slotDate: Date | null = null;
+
+      if (slot.date) {
+        slotDate = new Date(slot.date);
+      } else if (slot.endTime) {
+        slotDate = new Date(slot.endTime);
+      } else if (slot.startTime) {
+        slotDate = new Date(slot.startTime);
+      }
+
+      if (slotDate) {
+        slotDate.setHours(0, 0, 0, 0);
+        return slotDate < now; // Date must be in the past
+      }
+      return false; // If no date found, assume not passed
     });
   };
 
@@ -384,6 +414,40 @@ export function OrderCard({
                   Confirm Booking
                 </Button>
               )}
+            </div>
+          )}
+
+          {/* Complete Order Button for Confirmed Orders - Vendor View */}
+          {viewMode === 'vendor' &&
+            listings[0]?.listing?.bookingStatus === OrderStatus.CONFIRMED &&
+            onComplete &&
+            allBookedDatesPassed(listings[0]?.bookedSlots) && (
+            <div className="flex justify-end mt-4">
+              <Button
+                onClick={() => onComplete()}
+                variant="default"
+              >
+                Complete Order
+              </Button>
+            </div>
+          )}
+
+          {/* Rate and Dispute Buttons for Completed Orders - Admin View */}
+          {viewMode === 'admin' && listings[0]?.listing?.bookingStatus === OrderStatus.COMPLETED && (
+            <div className="flex justify-end gap-2 mt-4">
+              <Button
+                onClick={() => {/* TODO: Implement dispute functionality */}}
+                variant="outline"
+                className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+              >
+                Dispute
+              </Button>
+              <Button
+                onClick={() => {/* TODO: Implement rating functionality */}}
+                variant="default"
+              >
+                Rate Service
+              </Button>
             </div>
           )}
         </div>
