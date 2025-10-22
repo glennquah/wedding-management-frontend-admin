@@ -109,6 +109,17 @@ export function useVendorOrders(vendorId?: number) {
     }
   };
 
+  const handleCompleteListing = async (orderId: number, listingId: number) => {
+    try {
+      await OrdersService.orderControllerVendorCompleteListing(orderId, listingId);
+      toast.success('Order completed successfully');
+      fetchOrders();
+    } catch (err) {
+      console.error('Error completing listing:', err);
+      toast.error('Failed to complete order. Please try again.');
+    }
+  };
+
   // Flatten orders into individual order listings for display (only vendor's own listings)
   const getOrderListingsFlat = (): OrderListing[] => {
     const orderListings: OrderListing[] = [];
@@ -140,6 +151,7 @@ export function useVendorOrders(vendorId?: number) {
   const allOrderListings = getOrderListingsFlat();
   const pendingConfirmationListings = filterOrderListingsByStatus(OrderStatus.PAID);
   const confirmedOrderListings = filterOrderListingsByStatus(OrderStatus.CONFIRMED);
+  const completedOrderListings = filterOrderListingsByStatus(OrderStatus.COMPLETED);
   const cancelledOrderListings = filterOrderListingsByStatus(OrderStatus.CANCELLED);
 
   return {
@@ -149,9 +161,11 @@ export function useVendorOrders(vendorId?: number) {
     fetchOrders,
     handleConfirmListing,
     handleRejectListing,
+    handleCompleteListing,
     allOrderListings,
     pendingConfirmationListings,
     confirmedOrderListings,
+    completedOrderListings,
     cancelledOrderListings,
   };
 }
