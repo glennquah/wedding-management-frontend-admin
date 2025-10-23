@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useMemo, useRef, useState } from 'react';
+import { use, useEffect, useMemo, useRef } from 'react';
 
 import { useMicrositeManager } from '../../hooks/useMicrositeManager';
 import MicrositeLogin from '../components/MicrositeLogin';
@@ -35,6 +35,7 @@ export default function MicrositePage({ params }: PageProps) {
     guestDetails,
     hasAccess,
     isWeddingLive,
+    isRestoringSession,
     fetchMicrositeData,
     handleMicrositeLogin,
     handleConfirmGuestAttendance,
@@ -42,15 +43,12 @@ export default function MicrositePage({ params }: PageProps) {
     setHasAccess,
   } = useMicrositeManager();
 
-  // Local UI state
-  const [isCheckingAccess, setIsCheckingAccess] = useState(true);
-
   // Fetch microsite data on mount
   useEffect(() => {
-    setIsCheckingAccess(false);
-    setHasAccess(false);
-    fetchMicrositeData(decodedPlanName);
-  }, [decodedPlanName, fetchMicrositeData, setHasAccess]);
+    if (!isRestoringSession) {
+      fetchMicrositeData(decodedPlanName);
+    }
+  }, [decodedPlanName, isRestoringSession, fetchMicrositeData]);
 
   useEffect(() => {
     if (micrositeData) {
@@ -60,7 +58,7 @@ export default function MicrositePage({ params }: PageProps) {
 
   const rsvpRef = useRef<HTMLDivElement | null>(null);
 
-  if (isCheckingAccess || isLoadingMicrosite) {
+  if (isRestoringSession || isLoadingMicrosite) {
     return (
       <div className="flex min-h-screen items-center justify-center text-gray-600">
         {isLoadingMicrosite ? 'Loading microsite...' : 'Checking access...'}
