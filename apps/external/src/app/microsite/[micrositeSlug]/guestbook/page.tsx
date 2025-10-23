@@ -47,7 +47,6 @@ export default function FlipbookGuestbook({ params }: PageProps) {
 
   const [guestbook, setGuestbook] = useState<GuestbookResponseDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCheckingAccess, setIsCheckingAccess] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
@@ -58,6 +57,8 @@ export default function FlipbookGuestbook({ params }: PageProps) {
     micrositeError,
     hasAccess,
     isWeddingLive,
+    isLoadingMicrosite,
+    isRestoringSession,
     fetchMicrositeData,
     handleMicrositeLogin,
     setHasAccess,
@@ -83,16 +84,53 @@ export default function FlipbookGuestbook({ params }: PageProps) {
   }, [micrositeData?.weddingId]);
 
   useEffect(() => {
-    setIsCheckingAccess(false);
-    setHasAccess(false);
-    fetchMicrositeData(decodedPlanName);
-  }, [decodedPlanName, fetchMicrositeData, setHasAccess]);
+    if (!isRestoringSession) {
+      fetchMicrositeData(decodedPlanName);
+    }
+  }, [decodedPlanName, isRestoringSession, fetchMicrositeData]);
 
   useEffect(() => {
     if (micrositeData) {
       checkWeddingStatus();
     }
   }, [micrositeData]);
+
+  useEffect(() => {
+    if (isLoadingMicrosite || isRestoringSession) {
+      return;
+    }
+
+    if (!micrositeData) {
+      router.replace('/microsite/not-found');
+      return;
+    }
+
+    if (hasAccess && !isWeddingLive) {
+      if (micrositeData.weddingDate) {
+        const today = new Date();
+        const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const weddingDate = new Date(micrositeData.weddingDate);
+        const weddingDateOnly = new Date(
+          weddingDate.getFullYear(),
+          weddingDate.getMonth(),
+          weddingDate.getDate(),
+        );
+
+        if (todayDateOnly < weddingDateOnly) {
+          toast.error('Not wedding day yet!');
+          router.push(`/microsite/${decodedPlanName}`);
+        }
+      }
+    }
+  }, [
+    isLoadingMicrosite,
+    isRestoringSession,
+    micrositeData,
+    hasAccess,
+    isWeddingLive,
+    decodedPlanName,
+    router,
+  ]);
 
   useEffect(() => {
     fetchGuestbookData();
@@ -130,7 +168,7 @@ export default function FlipbookGuestbook({ params }: PageProps) {
     }
   }, []);
 
-  if (isCheckingAccess || isLoading) {
+  if (isRestoringSession || isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center text-gray-600">
         {isLoading ? 'Loading Guestbook...' : 'Checking access...'}
@@ -157,9 +195,11 @@ export default function FlipbookGuestbook({ params }: PageProps) {
   }
 
   if (!isWeddingLive) {
-    toast.error('Not wedding day yet!');
-    router.push(`/microsite/${decodedPlanName}`);
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center text-gray-600">
+        Redirecting to microsite page...
+      </div>
+    );
   }
 
   const pageElements = [];
