@@ -29,7 +29,12 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { Toaster } from 'sonner';
 
-const allowedRoutesWithoutWedding = ['/admin', '/admin/account', '/admin/create-wedding'];
+const allowedRoutesWithoutWedding = [
+  '/admin',
+  '/admin/account',
+  '/admin/create-wedding',
+  '/admin/progress-tracker',
+];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { fetchUserMainWedding, fetchUserWeddings, loading } = useWeddingManager();

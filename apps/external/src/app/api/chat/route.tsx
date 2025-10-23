@@ -2,34 +2,63 @@ import { openai } from '@ai-sdk/openai';
 import { UIMessage, generateObject, streamText } from 'ai';
 import { z } from 'zod';
 import { WeddingResponseDto } from '@shared/api';
+import { NextResponse } from 'next/server';
 
-export const maxDuration = 30;
+// ----------------------------------------------------
+// 1. Define Schemas and Types
+// ----------------------------------------------------
 
-export const ChecklistItemSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  category: z.string(),
-  monthsBeforeWedding: z.number().int().min(-36).max(36),
-  completed: z.boolean().optional(),
+const CategoryEnum = z.enum([
+  'Getting Started',
+  'Initial Planning',
+  'Creating the Foundation',
+  'Detailed Planning',
+  'During the Wedding',
+  'After the Wedding',
+  'Additional Details',
+]);
+
+const ChecklistItemSchema = z.object({
+  id: z.string().describe("Unique identifier for NEW item, e.g., 'task-123'"),
+  title: z.string().describe('Concise title for the new checklist item'),
+  description: z.string().describe('Detailed description of the new task'),
+  category: CategoryEnum.describe('Must be one of the seven defined categories'),
+  monthsBeforeWedding: z
+    .number()
+    .int()
+    .min(-36)
+    .max(36)
+    .describe('Integer timeline: months before (positive) or after (negative) the wedding'),
+  completed: z.boolean().optional().default(false).describe('Should always be false for new items'),
 });
-export type ChecklistItem = z.infer<typeof ChecklistItemSchema>;
 
-export const ChecklistResponseSchema = z.object({
-  message: z.string(),
-  checklist: z.array(ChecklistItemSchema).min(0).max(20), // Allow 0-20 new items
+type ChecklistItem = z.infer<typeof ChecklistItemSchema>;
+
+const ChecklistResponseSchema = z.object({
+  message: z.string().describe('A helpful message explaining what NEW items were added.'),
+  checklist: z
+    .array(ChecklistItemSchema)
+    .min(0)
+    .max(20)
+    .describe('An array of NEW checklist items to be added.'),
 });
-export type ChecklistResponse = z.infer<typeof ChecklistResponseSchema>;
+
+// REMOVED: interface ChecklistResponse - Rely on z.infer for the type definition
+type ChecklistResponse = z.infer<typeof ChecklistResponseSchema>;
+
+// ----------------------------------------------------
+// Rest of the helper functions and POST handler
+// ----------------------------------------------------
 
 /** Helper to render message history */
 function buildHistory(msgs: UIMessage[] = []) {
   return msgs
-    .map(
-      (m: UIMessage) =>
-        `${m?.role === 'user' ? 'User' : 'Assistant'}: ${
-          typeof m?.content === 'string' ? m?.content : JSON.stringify(m?.content ?? '')
-        }`,
-    )
+    .map((m: UIMessage) => {
+      // Extract text content from message parts
+      const textParts = m.parts?.filter((part) => part.type === 'text') ?? [];
+      const content = textParts.map((part) => ('text' in part ? part.text : '')).join(' ');
+      return `${m?.role === 'user' ? 'User' : 'Assistant'}: ${content || ''}`;
+    })
     .join('\n');
 }
 
@@ -39,6 +68,8 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 1): Promise<T> {
     return await fn();
   } catch (e) {
     if (retries <= 0) throw e;
+    // Simple wait between retries
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return withRetry(fn, retries - 1);
   }
 }
@@ -62,16 +93,18 @@ export async function POST(req: Request) {
   if (action === 'checklist') {
     try {
       // Get the user's latest message
+      // Using generic object structure for messages for safer access
       const msgsAny = (messages as unknown as Array<{ role?: string; content?: unknown }>) || [];
       const lastUser = [...msgsAny].reverse().find((m) => m?.role === 'user');
       const content = lastUser?.content as unknown;
       const userText = typeof content === 'string' ? content : JSON.stringify(content ?? '');
 
+      // FINAL FIX: Removed generic parameter from generateObject.
+      // The type of 'object' is now correctly inferred from the 'schema' property.
       const { object } = await withRetry(
         () =>
           generateObject({
             model: openai('gpt-4o'),
-            schema: ChecklistResponseSchema,
             temperature: 0.2,
             system:
               'You are a professional wedding planning assistant for Knotly. You help couples customize their wedding planning checklist by adding relevant items based on their specific needs, preferences, and requirements.\n\n' +
@@ -88,17 +121,17 @@ export async function POST(req: Request) {
               'RESPONSE FORMAT:\n' +
               'You MUST return a JSON object with this EXACT structure:\n' +
               '{\n' +
-              '  "message": "string - Your helpful explanation of what NEW items were added",\n' +
-              '  "checklist": [\n' +
-              '    {\n' +
-              '      "id": "string - Unique identifier for NEW item",\n' +
-              '      "title": "string - NEW item title",\n' +
-              '      "description": "string - Detailed description of NEW item",\n' +
-              '      "category": "string - Must be one of the 7 categories listed above",\n' +
-              '      "monthsBeforeWedding": number - Integer between -36 to 36 months,\n' +
-              '      "completed": false\n' +
-              '    }\n' +
-              '  ]\n' +
+              '  "message": "string - Your helpful explanation of what NEW items were added",\n' +
+              '  "checklist": [\n' +
+              '    {\n' +
+              '      "id": "string - Unique identifier for NEW item",\n' +
+              '      "title": "string - NEW item title",\n' +
+              '      "description": "string - Detailed description of NEW item",\n' +
+              '      "category": "string - Must be one of the 7 categories listed above",\n' +
+              '      "monthsBeforeWedding": number - Integer between -36 to 36 months,\n' +
+              '      "completed": false\n' +
+              '    }\n' +
+              '  ]\n' +
               '}\n\n' +
               'REQUIREMENTS:\n' +
               '- Return ONLY NEW items (1-20 items maximum per request)\n' +
@@ -108,22 +141,26 @@ export async function POST(req: Request) {
               '- Do not include any extra fields not specified in the schema\n' +
               '- Do not wrap the response in markdown code blocks\n\n' +
               `EXISTING CHECKLIST (${checklist?.length || 0} items - DO NOT INCLUDE THESE):\n${JSON.stringify(checklist, null, 2)}`,
+
             prompt: `User's request: ${userText}`,
             schema: ChecklistResponseSchema,
           }),
         1,
       );
 
+      // Cast 'object' to the inferred type 'ChecklistResponse' for cleaner usage
+      const responseObject = object as ChecklistResponse;
+
       console.log('Checklist API success:', {
-        messageLength: object.message?.length,
-        checklistLength: object.checklist?.length,
-        firstItem: object.checklist?.[0],
+        messageLength: responseObject.message?.length,
+        checklistLength: responseObject.checklist?.length,
+        firstItem: responseObject.checklist?.[0],
       });
 
       return new Response(
         JSON.stringify({
-          message: object.message,
-          checklist: object.checklist,
+          message: responseObject.message,
+          checklist: responseObject.checklist,
         }),
         {
           headers: { 'content-type': 'application/json' },
@@ -155,6 +192,7 @@ export async function POST(req: Request) {
     }
   }
 
+  // ... (The 'assistant' action block remains the same)
   if (action === 'assistant') {
     try {
       const msgsAny = (messages as unknown as Array<{ role?: string; content?: unknown }>) || [];
