@@ -11,6 +11,13 @@ import SlideshowDialog from './component/SlideshowDialog';
 import { useMicrositeManager } from '@/app/hooks/useMicrositeManager';
 import { AlbumResponseDto, AlbumService } from '@shared/api';
 import { Button, ImageUploadWidget } from '@shared/components';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@shared/components/ui/form/dropdown-menu';
+import { ChevronDownIcon } from 'lucide-react';
 import { CldImage } from 'next-cloudinary';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -35,6 +42,7 @@ export default function AlbumPage({ params }: PageProps) {
   const [photoId, setPhotoId] = useState<number | null>(null);
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
   const [album, setAlbum] = useState<AlbumResponseDto | null>(null);
+  const [showCuratedDialog, setShowCuratedDialog] = useState(false);
   const lastViewedPhotoRef = useRef<HTMLAnchorElement>(null);
 
   const router = useRouter();
@@ -228,18 +236,31 @@ export default function AlbumPage({ params }: PageProps) {
                     }}
                   />
 
-                  <DownloadCuratedAlbum
-                    albumId={album.id}
-                    allPhotos={images}
-                    disabled={images.length === 0}
-                  />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button disabled={images.length === 0} className="flex items-center gap-2">
+                        Download
+                        <ChevronDownIcon className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center">
+                      <DropdownMenuItem onClick={() => setShowCuratedDialog(true)}>
+                        Curated Album
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => downloadImagesAsZip(images)}>
+                        All Photos
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
-                  <Button
-                    onClick={() => downloadImagesAsZip(images)}
-                    disabled={images.length === 0}
-                  >
-                    Download All
-                  </Button>
+                  {showCuratedDialog && (
+                    <DownloadCuratedAlbum
+                      albumId={album.id}
+                      allPhotos={images}
+                      disabled={images.length === 0}
+                      onClose={() => setShowCuratedDialog(false)}
+                    />
+                  )}
                 </div>
 
                 {album.landingMessage && (
