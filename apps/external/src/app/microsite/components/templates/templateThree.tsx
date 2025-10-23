@@ -116,7 +116,7 @@ export default function TemplateThree({
             View Album
           </Button>
           <Button
-            onClick={() => router.push(`/cashgift/${micrositeData?.weddingId}`)}
+            onClick={() => router.push(`/microsite/${micrositeSlug}/cashgift/${micrositeData?.weddingId}`)}
             className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
           >
             Cash Giftings

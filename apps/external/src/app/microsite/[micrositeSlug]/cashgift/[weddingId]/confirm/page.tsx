@@ -29,8 +29,8 @@ export default function ConfirmCashGiftPage() {
   useEffect(() => {
     // Check if weddingId is valid
     if (!weddingId) {
-      toast.error('Invalid wedding ID');
-      router.push('/not-found');
+      toast.error('Cash gifting not available yet');
+      router.back();
       return;
     }
 
@@ -48,8 +48,8 @@ export default function ConfirmCashGiftPage() {
 
       // Validate data
       if (data.weddingId !== weddingId) {
-        toast.error('Invalid wedding ID');
-        router.push('/not-found');
+        toast.error('Cash gifting not available yet');
+        router.back();
         return;
       }
 
