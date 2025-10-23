@@ -48,6 +48,7 @@ export default function VendorDashboard() {
         const stripeInfo = await VendorsService.vendorControllerGetVendorStripeStatus(
           session.user.id
         );
+
         setStripeStatus(stripeInfo as StripeStatus);
       } catch (error) {
         console.error('Error checking vendor details:', error);
@@ -98,7 +99,6 @@ export default function VendorDashboard() {
   // Check if Stripe onboarding is incomplete
   const needsStripeOnboarding =
     stripeStatus &&
-    stripeStatus.stripeConnectAccountId &&
     !stripeStatus.stripeAccountOnboardingComplete;
 
   // If either vendor details or Stripe onboarding is incomplete, show setup banner
@@ -149,8 +149,7 @@ export default function VendorDashboard() {
                       ? 'Your Stripe account is fully set up and ready to receive payments!'
                       : 'Complete your Stripe onboarding to receive payments from clients.'}
                   </p>
-                  {!stripeStatus?.stripeAccountOnboardingComplete &&
-                    stripeStatus?.stripeConnectAccountId && (
+                  {!stripeStatus?.stripeAccountOnboardingComplete && (
                       <Button
                         onClick={handleStripeOnboarding}
                         disabled={isLoadingStripe}
