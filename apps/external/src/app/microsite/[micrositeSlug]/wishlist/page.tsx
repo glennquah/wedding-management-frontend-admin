@@ -2,6 +2,8 @@
 
 import { use, useEffect, useState } from 'react';
 
+import { useMicrositeManager } from '../../../hooks/useMicrositeManager';
+import MicrositeLogin from '../../components/MicrositeLogin';
 import { MicrositeService, WishlistItemResponseDto, WishlistService } from '@shared/api';
 import { Button } from '@shared/components/ui/button';
 import { Card, CardContent } from '@shared/components/ui/card';
@@ -16,8 +18,6 @@ import {
 import { ArrowLeft, Check, ExternalLink, Gift, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { useMicrositeManager } from '../../../hooks/useMicrositeManager';
-import MicrositeLogin from '../../components/MicrositeLogin';
 
 export type PageProps = {
   params: Promise<{ micrositeSlug: string }>;
@@ -39,16 +39,13 @@ export default function WishlistPage({ params }: PageProps) {
       setIsLoading(true);
       try {
         // First, get the microsite to find the weddingId
-        const micrositeData = await MicrositeService.micrositeControllerGetMicrositeDetails(
-          micrositeSlug,
-        );
+        const micrositeData =
+          await MicrositeService.micrositeControllerGetMicrositeDetails(micrositeSlug);
         const fetchedWeddingId = micrositeData.weddingId;
         setWeddingId(fetchedWeddingId);
 
         // Then fetch the wishlist items
-        const items = await WishlistService.wishlistControllerFindAllByWeddingId(
-          fetchedWeddingId,
-        );
+        const items = await WishlistService.wishlistControllerFindAllByWeddingId(fetchedWeddingId);
         setWishlistItems(items);
       } catch (error) {
         console.error('Error fetching wishlist:', error);
@@ -81,9 +78,7 @@ export default function WishlistPage({ params }: PageProps) {
       setWishlistItems(
         wishlistItems.map((item) => (item.id === updatedItem.id ? updatedItem : item)),
       );
-      toast.success(
-        "Thank you! You've reserved this gift. The couple will be delighted!",
-      );
+      toast.success("Thank you! You've reserved this gift. The couple will be delighted!");
       setSelectedItem(null);
     } catch (error: unknown) {
       console.error('Error reserving item:', error);
@@ -140,8 +135,8 @@ export default function WishlistPage({ params }: PageProps) {
             <h1 className="text-3xl md:text-4xl font-serif text-gray-900">Our Wishlist</h1>
           </div>
           <p className="text-gray-600 max-w-2xl">
-            Your presence at our wedding is the greatest gift of all. However, if you would
-            like to honor us with a gift, here are some items we would cherish.
+            Your presence at our wedding is the greatest gift of all. However, if you would like to
+            honor us with a gift, here are some items we would cherish.
           </p>
         </div>
       </div>
@@ -180,11 +175,6 @@ export default function WishlistPage({ params }: PageProps) {
                         </div>
                       )}
                     </div>
-                    {item.isReserved && item.reservedByName && (
-                      <p className="text-sm text-gray-600">
-                        Reserved by {item.reservedByName === guestDetails?.name ? 'you' : item.reservedByName}
-                      </p>
-                    )}
                   </div>
 
                   <div className="space-y-4">
@@ -238,11 +228,7 @@ export default function WishlistPage({ params }: PageProps) {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setSelectedItem(null)}
-              disabled={isReserving}
-            >
+            <Button variant="outline" onClick={() => setSelectedItem(null)} disabled={isReserving}>
               Cancel
             </Button>
             <Button

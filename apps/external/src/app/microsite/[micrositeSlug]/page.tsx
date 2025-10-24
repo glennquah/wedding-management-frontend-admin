@@ -7,8 +7,8 @@ import MicrositeLogin from '../components/MicrositeLogin';
 import TemplateOne from '../components/templates/templateOne';
 import TemplateThree from '../components/templates/templateThree';
 import TemplateTwo from '../components/templates/templateTwo';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { WishlistService } from '@shared/api';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export type PageProps = {
   params: Promise<{ micrositeSlug: string }>;
@@ -62,21 +62,20 @@ export default function MicrositePage({ params }: PageProps) {
 
   // Fetch wishlist items count
   useEffect(() => {
-    const fetchWishlistCount = async () => {
+    const checkWishlistExists = async () => {
       if (micrositeData?.weddingId) {
         try {
-          const items = await WishlistService.wishlistControllerFindAllByWeddingId(
+          const result = await WishlistService.wishlistControllerCheckWishlistExists(
             micrositeData.weddingId,
           );
-          setHasWishlistItems(items.length > 0);
+          setHasWishlistItems(!!result.hasItems);
         } catch (error) {
-          console.error('Error fetching wishlist:', error);
+          console.error('Error checking wishlist existence:', error);
           setHasWishlistItems(false);
         }
       }
     };
-
-    fetchWishlistCount();
+    checkWishlistExists();
   }, [micrositeData?.weddingId]);
 
   if (isRestoringSession || isLoadingMicrosite) {
