@@ -41,13 +41,31 @@ export const getWishlistColumns = ({
     },
     {
       accessorKey: 'isReserved',
-      header: 'Reserved',
+      header: 'Status',
       cell: ({ row }) => {
         const isReserved = row.getValue('isReserved') as boolean;
         return (
           <Badge variant={isReserved ? 'default' : 'outline'}>
             {isReserved ? 'Reserved' : 'Available'}
           </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: 'reservedByName',
+      header: 'Reserved By',
+      cell: ({ row }) => {
+        const reservedByName = row.getValue('reservedByName') as string | undefined;
+        const isReserved = row.original.isReserved;
+
+        if (!isReserved) {
+          return <span className="text-gray-400 text-sm">-</span>;
+        }
+
+        return (
+          <span className="text-sm text-foreground">
+            {reservedByName || <span className="text-gray-400">Unknown</span>}
+          </span>
         );
       },
     },

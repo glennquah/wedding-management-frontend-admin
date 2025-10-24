@@ -7,5 +7,9 @@ export type ReserveWishlistItemDto = {
      * Whether to reserve or unreserve the item
      */
     isReserved: boolean;
+    /**
+     * Name of the person reserving the item
+     */
+    reservedByName?: string;
 };
 

@@ -23,6 +23,7 @@ interface TemplateOneProps {
   isWeddingLive: boolean;
   micrositeSlug: string;
   handleConfirmGuestAttendance?: (allergies?: string[]) => Promise<void>;
+  hasWishlistItems?: boolean;
 }
 
 export default function TemplateOne({
@@ -32,6 +33,7 @@ export default function TemplateOne({
   isWeddingLive,
   micrositeSlug,
   handleConfirmGuestAttendance,
+  hasWishlistItems = false,
 }: TemplateOneProps) {
   const isMobile = useIsMobileScreen();
   const router = useRouter();
@@ -139,12 +141,14 @@ export default function TemplateOne({
 
           {isWeddingLive && micrositeSlug && (
             <div className="absolute top-4 right-4 z-50 flex gap-3">
-              <Button
-                onClick={() => router.push(`/microsite/${micrositeSlug}/wishlist`)}
-                className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
-              >
-                Wishlist
-              </Button>
+              {hasWishlistItems && (
+                <Button
+                  onClick={() => router.push(`/microsite/${micrositeSlug}/wishlist`)}
+                  className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+                >
+                  Wishlist
+                </Button>
+              )}
               <Button
                 onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
                 className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"

@@ -270,6 +270,7 @@ export default function WishlistPage() {
               <FormField
                 id="title"
                 label="Item Name"
+                type="text"
                 value={newItem.title}
                 onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
                 placeholder="e.g., Kitchen Mixer"
@@ -278,6 +279,7 @@ export default function WishlistPage() {
               <FormField
                 id="itemUrl"
                 label="Item URL"
+                type="url"
                 value={newItem.itemUrl}
                 onChange={(e) => setNewItem({ ...newItem, itemUrl: e.target.value })}
                 placeholder="https://example.com/product/kitchen-mixer"
@@ -311,6 +313,7 @@ export default function WishlistPage() {
                 <FormField
                   id="edit-title"
                   label="Item Name"
+                  type="text"
                   value={editingItem.title}
                   onChange={(e) =>
                     setEditingItem({ ...editingItem, title: e.target.value })
@@ -321,6 +324,7 @@ export default function WishlistPage() {
                 <FormField
                   id="edit-itemUrl"
                   label="Item URL"
+                  type="url"
                   value={editingItem.itemUrl}
                   onChange={(e) =>
                     setEditingItem({ ...editingItem, itemUrl: e.target.value })

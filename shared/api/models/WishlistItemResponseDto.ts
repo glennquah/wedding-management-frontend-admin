@@ -20,6 +20,10 @@ export type WishlistItemResponseDto = {
      */
     isReserved: boolean;
     /**
+     * Name of the person who reserved the item
+     */
+    reservedByName?: string;
+    /**
      * Wedding ID
      */
     weddingId: number;

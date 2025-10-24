@@ -22,6 +22,7 @@ interface TemplateTwoProps {
   isWeddingLive: boolean;
   micrositeSlug: string;
   handleConfirmGuestAttendance: (allergies?: string[]) => Promise<void>;
+  hasWishlistItems?: boolean;
 }
 
 export default function TemplateTwo({
@@ -31,6 +32,7 @@ export default function TemplateTwo({
   isWeddingLive,
   micrositeSlug,
   handleConfirmGuestAttendance,
+  hasWishlistItems = false,
 }: TemplateTwoProps) {
   const isMobile = useIsMobileScreen();
   const router = useRouter();
@@ -123,12 +125,14 @@ export default function TemplateTwo({
 
       {isWeddingLive && micrositeSlug && (
         <div className="absolute top-4 right-4 z-50 flex gap-3">
-          <Button
-            onClick={() => router.push(`/microsite/${micrositeSlug}/wishlist`)}
-            className="rounded-full bg-amber-700 hover:bg-amber-800 text-white px-6 py-3"
-          >
-            Wishlist
-          </Button>
+          {hasWishlistItems && (
+            <Button
+              onClick={() => router.push(`/microsite/${micrositeSlug}/wishlist`)}
+              className="rounded-full bg-amber-700 hover:bg-amber-800 text-white px-6 py-3"
+            >
+              Wishlist
+            </Button>
+          )}
           <Button
             onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
             className="rounded-full bg-amber-700 hover:bg-amber-800 text-white px-6 py-3"

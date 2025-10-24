@@ -456,15 +456,12 @@ export default function CreateMicrositePage() {
             <DialogHeader>
               <DialogTitle>Create a Wishlist?</DialogTitle>
               <DialogDescription>
-                Would you like to create a wishlist for your wedding? Guests will be able to
-                view and reserve items from your wishlist on your microsite.
+                Would you like to create a wishlist for your wedding? Guests will be able to view
+                and reserve items from your wishlist on your microsite.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setShowWishlistPrompt(false)}
-              >
+              <Button variant="outline" onClick={() => setShowWishlistPrompt(false)}>
                 Maybe Later
               </Button>
               <Button
@@ -472,7 +469,6 @@ export default function CreateMicrositePage() {
                   setShowWishlistPrompt(false);
                   window.location.href = '/admin/wishlist';
                 }}
-                className="bg-pink-500 hover:bg-pink-600"
               >
                 Create Wishlist
               </Button>

@@ -15,8 +15,9 @@ import {
 } from '@shared/components/ui/dialog';
 import { ArrowLeft, Check, ExternalLink, Gift, Heart } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useMicrositeManager } from '../../../hooks/useMicrositeManager';
+import MicrositeLogin from '../../components/MicrositeLogin';
 
 export type PageProps = {
   params: Promise<{ micrositeSlug: string }>;
@@ -25,7 +26,7 @@ export type PageProps = {
 export default function WishlistPage({ params }: PageProps) {
   const resolvedParams = use(params);
   const micrositeSlug = decodeURIComponent(resolvedParams.micrositeSlug);
-  const router = useRouter();
+  const { hasAccess, guestDetails, micrositeData, handleMicrositeLogin } = useMicrositeManager();
 
   const [wishlistItems, setWishlistItems] = useState<WishlistItemResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,6 +76,7 @@ export default function WishlistPage({ params }: PageProps) {
     try {
       const updatedItem = await WishlistService.wishlistControllerReserve(selectedItem.id, {
         isReserved: true,
+        reservedByName: guestDetails?.name || undefined,
       });
       setWishlistItems(
         wishlistItems.map((item) => (item.id === updatedItem.id ? updatedItem : item)),
@@ -83,9 +85,9 @@ export default function WishlistPage({ params }: PageProps) {
         "Thank you! You've reserved this gift. The couple will be delighted!",
       );
       setSelectedItem(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error reserving item:', error);
-      if (error?.status === 400) {
+      if (error && typeof error === 'object' && 'status' in error && error.status === 400) {
         toast.error('This item was just reserved by someone else');
         // Refresh the list
         if (weddingId) {
@@ -99,6 +101,16 @@ export default function WishlistPage({ params }: PageProps) {
       setIsReserving(false);
     }
   };
+
+  if (!hasAccess) {
+    return (
+      <MicrositeLogin
+        micrositeData={micrositeData}
+        decodedPlanName={micrositeSlug}
+        handleMicrositeLogin={handleMicrositeLogin}
+      />
+    );
+  }
 
   if (isLoading) {
     return (
@@ -142,7 +154,7 @@ export default function WishlistPage({ params }: PageProps) {
               <Gift className="h-16 w-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-medium text-gray-900 mb-2">No items yet</h3>
               <p className="text-gray-600">
-                The couple hasn't added any wishlist items yet. Check back soon!
+                The couple hasn&apos;t added any wishlist items yet. Check back soon!
               </p>
             </CardContent>
           </Card>
@@ -156,15 +168,22 @@ export default function WishlistPage({ params }: PageProps) {
                 }`}
               >
                 <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <h3 className="text-xl font-semibold text-gray-900 flex-1 pr-2">
-                      {item.title}
-                    </h3>
-                    {item.isReserved && (
-                      <div className="flex items-center gap-1 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
-                        <Check className="h-4 w-4" />
-                        Reserved
-                      </div>
+                  <div className="mb-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-xl font-semibold text-gray-900 flex-1 pr-2">
+                        {item.title}
+                      </h3>
+                      {item.isReserved && (
+                        <div className="flex items-center gap-1 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
+                          <Check className="h-4 w-4" />
+                          Reserved
+                        </div>
+                      )}
+                    </div>
+                    {item.isReserved && item.reservedByName && (
+                      <p className="text-sm text-gray-600">
+                        Reserved by {item.reservedByName === guestDetails?.name ? 'you' : item.reservedByName}
+                      </p>
                     )}
                   </div>
 
@@ -214,8 +233,8 @@ export default function WishlistPage({ params }: PageProps) {
           <DialogHeader>
             <DialogTitle>Reserve This Gift?</DialogTitle>
             <DialogDescription>
-              Are you sure you want to reserve "{selectedItem?.title}"? This will let the
-              couple know you'll be getting this item for them.
+              Are you sure you want to reserve &quot;{selectedItem?.title}&quot;? This will let the
+              couple know you&apos;ll be getting this item for them.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
