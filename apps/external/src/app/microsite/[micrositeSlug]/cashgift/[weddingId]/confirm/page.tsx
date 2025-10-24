@@ -20,6 +20,7 @@ export default function ConfirmCashGiftPage() {
   const params = useParams();
   const router = useRouter();
   const weddingId = params ? parseInt(params.weddingId as string) : null;
+  const micrositeSlug = params?.micrositeSlug as string;
 
   const [cashGiftData, setCashGiftData] = useState<CashGiftData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,7 +40,7 @@ export default function ConfirmCashGiftPage() {
 
     if (!dataString) {
       toast.error('No cash gift data found. Please start over.');
-      router.push(`/cashgift/${weddingId}`);
+      router.push(`/microsite/${micrositeSlug}/cashgift/${weddingId}`);
       return;
     }
 
@@ -57,11 +58,11 @@ export default function ConfirmCashGiftPage() {
     } catch (error) {
       console.error('Error parsing cash gift data:', error);
       toast.error('Invalid data. Please start over.');
-      router.push(`/cashgift/${weddingId}`);
+      router.push(`/microsite/${micrositeSlug}/cashgift/${weddingId}`);
     } finally {
       setLoading(false);
     }
-  }, [weddingId, router]);
+  }, [weddingId, router, micrositeSlug]);
 
   const handleConfirmPayment = async () => {
     if (!cashGiftData) return;
@@ -89,7 +90,7 @@ export default function ConfirmCashGiftPage() {
   };
 
   const handleBackToForm = () => {
-    router.push(`/cashgift/${weddingId}`);
+    router.push(`/microsite/${micrositeSlug}/cashgift/${weddingId}`);
   };
 
   if (loading) {

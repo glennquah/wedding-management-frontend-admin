@@ -1019,21 +1019,27 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
                 {weddingFormData.paynowQR && (
                   <div className="mt-4">
                     <p className="text-sm text-gray-700 mb-2">Current QR code:</p>
-                    <div
-                      className="relative inline-block group cursor-pointer"
-                      onClick={handleDeleteQRClick}
-                    >
-                      <CldImage
-                        width={200}
-                        height={200}
-                        src={weddingFormData.paynowQR}
-                        sizes="200px"
-                        alt="PayLah QR Code"
-                        className="rounded-lg shadow-sm border"
-                      />
-                      {/* Hover overlay with delete icon */}
-                      <div className="absolute inset-0 bg-black bg-opacity-60 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-                        <X className="w-12 h-12 text-white" strokeWidth={3} />
+                    <div className="relative inline-block group">
+                      <div className="relative h-[200px] w-[200px] rounded-lg overflow-hidden border-2 border-gray-200 hover:border-gray-300 transition-all">
+                        <CldImage
+                          width={200}
+                          height={200}
+                          src={weddingFormData.paynowQR}
+                          sizes="200px"
+                          alt="PayLah QR Code"
+                          className="rounded-lg shadow-sm"
+                        />
+                        {/* Delete Button */}
+                        <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={handleDeleteQRClick}
+                            className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                            title="Remove QR code"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

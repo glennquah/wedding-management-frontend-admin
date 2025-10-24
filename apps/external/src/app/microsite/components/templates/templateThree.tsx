@@ -4,7 +4,8 @@ import { Button } from '@shared/components/ui/button';
 import { MultiSelectDropdown } from '@shared/components/ui/form/multiSelectDropdown';
 import { Switch } from '@shared/components/ui/switch';
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
-import { GuestResponseDto, MicrositeResponseDto } from '@wedding/api-types';
+import { GuestResponseDto, MicrositeResponseDto, WeddingPublicResponseDto } from '@wedding/api-types';
+import { WeddingsService } from '@shared/api/services/WeddingsService';
 import { Cormorant_Garamond, Nunito } from 'next/font/google';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -49,6 +50,9 @@ export default function TemplateThree({
 
   // Food allergies state
   const [selectedAllergies, setSelectedAllergies] = useState<string[]>([]);
+
+  // QR code availability state
+  const [hasQRCode, setHasQRCode] = useState<boolean>(false);
 
   // Common allergen options
   const allergenOptions = [
@@ -101,6 +105,22 @@ export default function TemplateThree({
     // no-op, but keep for potential client-only effects
   }, []);
 
+  // Fetch wedding data to check if QR code exists
+  useEffect(() => {
+    const checkQRCode = async () => {
+      if (isWeddingLive && micrositeData?.weddingId) {
+        try {
+          const weddingData = await WeddingsService.weddingControllerFindPublic(micrositeData.weddingId);
+          setHasQRCode(!!weddingData.paynowQR);
+        } catch (error) {
+          // If fetching fails, assume no QR code
+          setHasQRCode(false);
+        }
+      }
+    };
+    checkQRCode();
+  }, [isWeddingLive, micrositeData?.weddingId]);
+
   return (
     <main
       className={`${nunito.className} relative min-h-screen w-full overflow-x-hidden transition-colors duration-500 ${
@@ -115,12 +135,14 @@ export default function TemplateThree({
           >
             View Album
           </Button>
-          <Button
-            onClick={() => router.push(`/microsite/${micrositeSlug}/cashgift/${micrositeData?.weddingId}`)}
-            className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
-          >
-            Cash Giftings
-          </Button>
+          {hasQRCode && (
+            <Button
+              onClick={() => router.push(`/microsite/${micrositeSlug}/cashgift/${micrositeData?.weddingId}`)}
+              className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+            >
+              Cash Giftings
+            </Button>
+          )}
           <Button
             onClick={() => router.push(`/microsite/${micrositeSlug}/guestbook`)}
             className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
