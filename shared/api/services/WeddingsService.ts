@@ -69,7 +69,7 @@ export class WeddingsService {
                 'id': id,
             },
             errors: {
-                404: `Wedding not found or PayNow QR not available.`,
+                404: `Wedding not found or PayLah QR not available.`,
             },
         });
     }

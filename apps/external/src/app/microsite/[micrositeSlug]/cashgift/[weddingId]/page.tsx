@@ -134,7 +134,7 @@ export default function CashGiftPage() {
       guestId: selectedGuest.id,
       guestName: selectedGuest.name,
       amount: parseFloat(parseFloat(amount).toFixed(2)),
-      paynowQR: wedding.paynowQR,
+      payLahQR: wedding.payLahQR,
     }));
 
     router.push(`/microsite/${micrositeSlug}/cashgift/${weddingId}/confirm`);

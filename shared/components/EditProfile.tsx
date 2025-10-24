@@ -96,7 +96,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     null,
   );
 
-  // PayNow QR deletion state
+  // PayLah QR deletion state
   const [showDeleteQRModal, setShowDeleteQRModal] = useState(false);
   const [isQRPendingDeletion, setIsQRPendingDeletion] = useState(false);
 
@@ -223,7 +223,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     setPartnerEmail('');
     // Reset collaborators to remove list and refetch original collaborators
     setCollaboratorsToRemove([]);
-    // Reset PayNow QR deletion state
+    // Reset PayLah QR deletion state
     setIsQRPendingDeletion(false);
     // Restore partner and collaborators list by refetching
     if (weddingData?.id && userData) {
@@ -232,14 +232,14 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
     }
   };
 
-  // Handle PayNow QR deletion
+  // Handle payLah QR deletion
   const handleDeleteQRClick = () => {
     setShowDeleteQRModal(true);
   };
 
   const handleConfirmDeleteQR = () => {
     setIsQRPendingDeletion(true);
-    handleWeddingInputChange('paynowQR', '');
+    handleWeddingInputChange('payLahQR', '');
     setShowDeleteQRModal(false);
   };
 
@@ -1012,11 +1012,11 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
             {isEditing ? (
               <div className="space-y-4">
                 <ImageUploadWidget
-                  onUpload={(url) => handleWeddingInputChange('paynowQR', url)}
+                  onUpload={(url) => handleWeddingInputChange('payLahQR', url)}
                   maxImageWidth={800}
                   buttonText="Upload PayLah QR Code"
                 />
-                {weddingFormData.paynowQR && (
+                {weddingFormData.payLahQR && (
                   <div className="mt-4">
                     <p className="text-sm text-gray-700 mb-2">Current QR code:</p>
                     <div className="relative inline-block group">
@@ -1024,7 +1024,7 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
                         <CldImage
                           width={200}
                           height={200}
-                          src={weddingFormData.paynowQR}
+                          src={weddingFormData.payLahQR}
                           sizes="200px"
                           alt="PayLah QR Code"
                           className="rounded-lg shadow-sm"
@@ -1050,12 +1050,12 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
               </div>
             ) : (
               <div>
-                {weddingData.paynowQR ? (
+                {weddingData.payLahQR ? (
                   <div className="mt-2">
                     <CldImage
                       width={200}
                       height={200}
-                      src={weddingData.paynowQR}
+                      src={weddingData.payLahQR}
                       sizes="200px"
                       alt="PayLah QR Code"
                       className="rounded-lg shadow-sm border"

@@ -30,8 +30,8 @@ export type UpdateWeddingDto = {
      */
     allocatedBudget?: number;
     /**
-     * PayNow QR code link for the wedding
+     * PayLah QR code link for the wedding
      */
-    paynowQR?: string;
+    payLahQR?: string;
 };
 

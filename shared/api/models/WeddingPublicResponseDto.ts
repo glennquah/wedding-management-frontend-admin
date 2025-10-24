@@ -9,9 +9,9 @@ export type WeddingPublicResponseDto = {
      */
     name: string;
     /**
-     * PayNow QR code URL
+     * PayLah QR code URL
      */
-    paynowQR: string;
+    payLahQR: string;
     /**
      * List of guests with minimal info
      */

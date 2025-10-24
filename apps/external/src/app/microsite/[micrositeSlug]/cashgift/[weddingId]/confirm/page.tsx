@@ -13,7 +13,7 @@ interface CashGiftData {
   guestId: number;
   guestName: string;
   amount: number;
-  paynowQR: string;
+  payLahQR: string;
 }
 
 export default function ConfirmCashGiftPage() {
@@ -163,7 +163,7 @@ export default function ConfirmCashGiftPage() {
           <div className="flex justify-center">
             <div className="relative h-64 w-64 overflow-hidden rounded-lg border-2 border-primary/20 bg-white p-4 shadow-lg">
               <Image
-                src={cashGiftData.paynowQR}
+                src={cashGiftData.payLahQR}
                 alt="PayLah QR Code"
                 fill
                 className="object-contain"

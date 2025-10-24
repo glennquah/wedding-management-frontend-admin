@@ -1,11 +1,11 @@
 import { RefObject, useEffect, useMemo, useState } from 'react';
 
+import { WeddingsService } from '@shared/api/services/WeddingsService';
 import { Button } from '@shared/components/ui/button';
 import { MultiSelectDropdown } from '@shared/components/ui/form/multiSelectDropdown';
 import { Switch } from '@shared/components/ui/switch';
 import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
-import { GuestResponseDto, MicrositeResponseDto, WeddingPublicResponseDto } from '@wedding/api-types';
-import { WeddingsService } from '@shared/api/services/WeddingsService';
+import { GuestResponseDto, MicrositeResponseDto } from '@wedding/api-types';
 import { Cormorant_Garamond, Nunito } from 'next/font/google';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -111,7 +111,7 @@ export default function TemplateThree({
       if (isWeddingLive && micrositeData?.weddingId) {
         try {
           const weddingData = await WeddingsService.weddingControllerFindPublic(micrositeData.weddingId);
-          setHasQRCode(!!weddingData.paynowQR);
+          setHasQRCode(!!weddingData.payLahQR);
         } catch (error) {
           // If fetching fails, assume no QR code
           setHasQRCode(false);

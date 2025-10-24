@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
 import {
   AdminsService,
   BudgetBucket,
@@ -12,7 +13,6 @@ import {
   WeddingStyle,
   WeddingType,
 } from '../api';
-import { toast } from 'sonner';
 
 interface WeddingFormData {
   name: string;
@@ -24,7 +24,7 @@ interface WeddingFormData {
   guestCountBucket: GuestCountBucket;
   preferredStyle: WeddingStyle;
   preferredServices: WeddingService[];
-  paynowQR?: string;
+  payLahQR?: string;
 }
 
 const formatDateForInput = (date?: string | null) => {
@@ -67,7 +67,7 @@ export const useWeddingProfile = () => {
     guestCountBucket: GuestCountBucket.MEDIUM,
     preferredStyle: WeddingStyle.MODERN,
     preferredServices: [],
-    paynowQR: '',
+    payLahQR: '',
   });
 
   const fetchMainWedding = useCallback(async () => {
@@ -103,7 +103,7 @@ export const useWeddingProfile = () => {
       guestCountBucket: wedding.guestCountBucket,
       preferredStyle: wedding.preferredStyle,
       preferredServices: wedding.preferredServices || [],
-      paynowQR: wedding.paynowQR || '',
+      payLahQR: wedding.payLahQR || '',
     });
   }, []);
 
@@ -135,12 +135,12 @@ export const useWeddingProfile = () => {
     if (JSON.stringify(weddingFormData.preferredServices) !== JSON.stringify(weddingData.preferredServices || [])) {
       updateData.preferredServices = weddingFormData.preferredServices;
     }
-    // Handle paynowQR comparison properly (comparing empty string with null/undefined)
-    const currentPaynowQR = weddingData.paynowQR || '';
-    const newPaynowQR = weddingFormData.paynowQR || '';
-    if (newPaynowQR !== currentPaynowQR) {
+    // Handle payLahQR comparison properly (comparing empty string with null/undefined)
+    const currentpayLahQR = weddingData.payLahQR || '';
+    const newpayLahQR = weddingFormData.payLahQR || '';
+    if (newpayLahQR !== currentpayLahQR) {
       // Explicitly set to empty string when deleting to ensure the field is sent to the API
-      updateData.paynowQR = newPaynowQR === '' ? '' : newPaynowQR;
+      updateData.payLahQR = newpayLahQR === '' ? '' : newpayLahQR;
     }
 
     console.log('Wedding Update Data:', updateData);
