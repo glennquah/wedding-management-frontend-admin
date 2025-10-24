@@ -16,6 +16,7 @@ import { signOut, useSession } from 'next-auth/react';
 export default function VendorSidebar() {
   const { data: session } = useSession();
   const [hasVendorDetails, setHasVendorDetails] = useState<boolean>(true); // Default to true to avoid flickering
+  const [hasStripeOnboarding, setHasStripeOnboarding] = useState<boolean>(true); // Default to true to avoid flickering
 
   useEffect(() => {
     const checkVendorDetails = async () => {
@@ -29,9 +30,17 @@ export default function VendorSidebar() {
           vendor.weddingTypes?.length
         );
         setHasVendorDetails(hasDetails);
+
+        // Check Stripe onboarding status
+        const stripeStatus = await VendorsService.vendorControllerGetVendorStripeStatus(
+          session.user.id
+        );
+        const stripeComplete = stripeStatus?.stripeAccountOnboardingComplete || false;
+        setHasStripeOnboarding(stripeComplete);
       } catch (error) {
         console.error('Error checking vendor details:', error);
         setHasVendorDetails(false);
+        setHasStripeOnboarding(false);
       }
     };
 
@@ -51,13 +60,13 @@ export default function VendorSidebar() {
           title: 'Listings',
           href: '/listing',
           icon: FileSpreadsheet,
-          disabled: !hasVendorDetails,
+          disabled: !hasVendorDetails || !hasStripeOnboarding,
         },
         {
           title: 'Revenue',
           href: '/revenue',
           icon: CircleDollarSign,
-          disabled: !hasVendorDetails,
+          disabled: !hasVendorDetails || !hasStripeOnboarding,
         },
       ],
     },
@@ -68,19 +77,19 @@ export default function VendorSidebar() {
           title: 'Manage Orders',
           href: '/orders',
           icon: ClipboardList,
-          disabled: !hasVendorDetails,
+          disabled: !hasVendorDetails || !hasStripeOnboarding,
         },
         {
           title: 'Services',
           href: '/services',
           icon: FileSpreadsheet,
-          disabled: !hasVendorDetails,
+          disabled: !hasVendorDetails || !hasStripeOnboarding,
         },
         {
           title: 'Calendar',
           href: '/calendar',
           icon: CalendarDays,
-          disabled: !hasVendorDetails,
+          disabled: !hasVendorDetails || !hasStripeOnboarding,
         },
       ],
     },
