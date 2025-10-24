@@ -8,6 +8,7 @@ import {
   MicrositeService,
   UpdateMicrositeDto,
   WeddingResponseDto,
+  WishlistService,
 } from '@shared/api';
 import { useSidebar } from '@shared/components/ui/sidebar';
 import { useRouter } from 'next/navigation';
@@ -26,6 +27,7 @@ type ManagerOptions = {
   setIsDeleteDialogOpen: (v: boolean) => void;
   setIsUpdateMode: (v: boolean) => void;
   setExistingMicrositeId: (v: number | null) => void;
+  setShowWishlistPrompt?: (v: boolean) => void;
 };
 
 export function useMicrositeAdminManager(opts: ManagerOptions) {
@@ -41,6 +43,7 @@ export function useMicrositeAdminManager(opts: ManagerOptions) {
     setIsDeleteDialogOpen,
     setIsUpdateMode,
     setExistingMicrositeId,
+    setShowWishlistPrompt,
   } = opts;
 
   const router = useRouter();
@@ -114,6 +117,21 @@ export function useMicrositeAdminManager(opts: ManagerOptions) {
       } else {
         await MicrositeService.micrositeControllerCreateMicrosite(submissionData);
         toast.success('Microsite created successfully!');
+      }
+
+      // Check if wishlist exists and show prompt if it doesn't
+      if (typeof selectedWeddingId === 'number' && setShowWishlistPrompt) {
+        try {
+          const { hasItems } = await WishlistService.wishlistControllerCheckWishlistExists(
+            selectedWeddingId,
+          );
+          if (!hasItems) {
+            setShowWishlistPrompt(true);
+          }
+        } catch (error) {
+          console.error('Error checking wishlist:', error);
+          // Fail silently, don't interrupt the success flow
+        }
       }
 
       if (!isUpdateMode && typeof selectedWeddingId === 'number') {
