@@ -11,6 +11,13 @@ import SlideshowDialog from './component/SlideshowDialog';
 import { useMicrositeManager } from '@/app/hooks/useMicrositeManager';
 import { AlbumResponseDto, AlbumService } from '@shared/api';
 import { Button, ImageUploadWidget } from '@shared/components';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@shared/components/ui/form/dropdown-menu';
+import { ChevronDownIcon } from 'lucide-react';
 import { CldImage } from 'next-cloudinary';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -33,8 +40,8 @@ export default function AlbumPage({ params }: PageProps) {
 
   const [images, setImages] = useState<ImageProps[]>([]);
   const [photoId, setPhotoId] = useState<number | null>(null);
-  const [isCheckingAccess, setIsCheckingAccess] = useState(true);
   const [album, setAlbum] = useState<AlbumResponseDto | null>(null);
+  const [showCuratedDialog, setShowCuratedDialog] = useState(false);
   const lastViewedPhotoRef = useRef<HTMLAnchorElement>(null);
 
   const router = useRouter();
@@ -43,26 +50,63 @@ export default function AlbumPage({ params }: PageProps) {
     micrositeData,
     isLoadingMicrosite,
     isWeddingLive,
+    isRestoringSession,
     micrositeError,
     hasAccess,
     fetchMicrositeData,
     handleMicrositeLogin,
-    setHasAccess,
     checkWeddingStatus,
   } = useMicrositeManager();
 
   // fetch microsite data
   useEffect(() => {
-    setIsCheckingAccess(false);
-    setHasAccess(false);
-    fetchMicrositeData(decodedPlanName);
-  }, [decodedPlanName, fetchMicrositeData, setHasAccess]);
+    if (!isRestoringSession) {
+      fetchMicrositeData(decodedPlanName);
+    }
+  }, [decodedPlanName, isRestoringSession, fetchMicrositeData]);
 
   useEffect(() => {
     if (micrositeData) {
       checkWeddingStatus();
     }
-  }, [micrositeData]);
+  }, [micrositeData, hasAccess, checkWeddingStatus]);
+
+  useEffect(() => {
+    if (isLoadingMicrosite || isRestoringSession) {
+      return;
+    }
+
+    if (!micrositeData) {
+      router.replace('/microsite/not-found');
+      return;
+    }
+
+    if (hasAccess && !isWeddingLive) {
+      if (micrositeData.weddingDate) {
+        const today = new Date();
+        const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const weddingDate = new Date(micrositeData.weddingDate);
+        const weddingDateOnly = new Date(
+          weddingDate.getFullYear(),
+          weddingDate.getMonth(),
+          weddingDate.getDate(),
+        );
+
+        if (todayDateOnly < weddingDateOnly) {
+          toast.error('Not wedding day yet!');
+          router.push(`/microsite/${decodedPlanName}`);
+        }
+      }
+    }
+  }, [
+    isLoadingMicrosite,
+    isRestoringSession,
+    micrositeData,
+    hasAccess,
+    isWeddingLive,
+    decodedPlanName,
+    router,
+  ]);
 
   // fetch album data + map images
   useEffect(() => {
@@ -105,7 +149,7 @@ export default function AlbumPage({ params }: PageProps) {
     VALIDATIONS
     -----------
   */
-  if (isCheckingAccess || isLoadingMicrosite) {
+  if (isRestoringSession || isLoadingMicrosite) {
     return (
       <div className="flex min-h-screen items-center justify-center text-gray-600">
         {isLoadingMicrosite ? 'Loading microsite...' : 'Checking access...'}
@@ -122,7 +166,6 @@ export default function AlbumPage({ params }: PageProps) {
   }
 
   if (!micrositeData) {
-    router.replace('/microsite/not-found');
     return (
       <div className="flex min-h-screen items-center justify-center text-gray-600">
         Redirecting to not found page...
@@ -141,9 +184,11 @@ export default function AlbumPage({ params }: PageProps) {
   }
 
   if (!isWeddingLive) {
-    toast.error('Not wedding day yet!');
-    router.push(`/microsite/${decodedPlanName}`);
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center text-gray-600">
+        Redirecting to microsite page...
+      </div>
+    );
   }
 
   return (
@@ -228,18 +273,31 @@ export default function AlbumPage({ params }: PageProps) {
                     }}
                   />
 
-                  <DownloadCuratedAlbum
-                    albumId={album.id}
-                    allPhotos={images}
-                    disabled={images.length === 0}
-                  />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button disabled={images.length === 0} className="flex items-center gap-2">
+                        Download
+                        <ChevronDownIcon className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center">
+                      <DropdownMenuItem onClick={() => setShowCuratedDialog(true)}>
+                        Curated Album
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => downloadImagesAsZip(images)}>
+                        All Photos
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
-                  <Button
-                    onClick={() => downloadImagesAsZip(images)}
-                    disabled={images.length === 0}
-                  >
-                    Download All
-                  </Button>
+                  {showCuratedDialog && (
+                    <DownloadCuratedAlbum
+                      albumId={album.id}
+                      allPhotos={images}
+                      disabled={images.length === 0}
+                      onClose={() => setShowCuratedDialog(false)}
+                    />
+                  )}
                 </div>
 
                 {album.landingMessage && (

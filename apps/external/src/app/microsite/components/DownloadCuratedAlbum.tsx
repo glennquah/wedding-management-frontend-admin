@@ -27,14 +27,16 @@ interface DownloadCuratedAlbumProps {
   albumId: number;
   allPhotos: ImageProps[];
   disabled?: boolean;
+  onClose?: () => void;
 }
 
 export default function DownloadCuratedAlbum({
   albumId,
   allPhotos,
   disabled = false,
+  onClose,
 }: DownloadCuratedAlbumProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [processingStatus, setProcessingStatus] = useState<ProcessingStatusDto | null>(null);
   const [faceClusters, setFaceClusters] = useState<FaceClusterDto[]>([]);
@@ -135,12 +137,10 @@ export default function DownloadCuratedAlbum({
     setSelectedOthersPhotos(new Set(othersPhotoIndices));
   };
 
-  // Fetch data when dialog opens
+  // Fetch data when component mounts
   useEffect(() => {
-    if (isOpen) {
-      fetchData();
-    }
-  }, [isOpen, fetchData]);
+    fetchData();
+  }, [fetchData]);
 
   // Save selections to localStorage whenever they change
   useEffect(() => {
@@ -393,6 +393,7 @@ export default function DownloadCuratedAlbum({
       );
 
       setIsOpen(false);
+      onClose?.();
     } catch (error) {
       console.error('Download failed:', error);
       toast.error('Failed to download photos');
@@ -401,11 +402,15 @@ export default function DownloadCuratedAlbum({
 
   const isProcessingComplete = processingStatus && processingStatus.percentage === 100;
 
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      onClose?.();
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button disabled={disabled}>Download Curated Album</Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="w-[80vw] max-w-[80vw] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Download Curated Album</DialogTitle>
@@ -778,7 +783,13 @@ export default function DownloadCuratedAlbum({
 
             {/* Download Button */}
             <div className="flex justify-end gap-3 pt-4">
-              <Button variant="outline" onClick={() => setIsOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsOpen(false);
+                  onClose?.();
+                }}
+              >
                 Cancel
               </Button>
               <Button

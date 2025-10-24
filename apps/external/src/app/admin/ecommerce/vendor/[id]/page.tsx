@@ -104,12 +104,14 @@ export default function VendorPage() {
                 {vendor.serviceOffered}
               </Badge>
             )}
-            {vendor.rating && (
+            {vendor.rating && vendor.rating > 0 ? (
               <div className="flex items-center gap-1.5 ml-2">
                 <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                 <span className="text-lg font-semibold">{vendor.rating.toFixed(1)}</span>
                 <span className="text-muted-foreground text-sm">rating</span>
               </div>
+            ) : (
+              <span className='text-sm font-medium'>No ratings yet!</span>
             )}
           </div>
 

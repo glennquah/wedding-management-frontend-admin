@@ -20,11 +20,13 @@ export function ListingHeader({ listing, vendor, formatPrice }: ListingHeaderPro
               {vendor.name}
             </Link>
           </span>
-          {vendor.rating && (
+          {vendor.rating && vendor.rating > 0 ? (
             <div className="flex items-center gap-1">
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
               <span>{vendor.rating.toFixed(1)}</span>
             </div>
+          ) : (
+            <span className='text-sm font-medium'>No ratings yet!</span>
           )}
         </div>
       )}

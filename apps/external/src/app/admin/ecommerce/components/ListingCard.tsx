@@ -87,11 +87,13 @@ export function ListingCard({ listing, vendor }: ListingCardProps) {
             {listing.listingName}
           </CardTitle>
           <div className='flex items-center gap-1 ml-2'>
-            {vendor.rating && (
+            {vendor.rating && vendor.rating > 0 ? (
               <>
                 <Star className='w-4 h-4 fill-yellow-400 text-yellow-400' />
                 <span className='text-sm font-medium'>{vendor.rating.toFixed(1)}</span>
               </>
+            ) : (
+              <span className='text-sm font-medium'>No ratings yet!</span>
             )}
           </div>
         </div>
