@@ -114,12 +114,12 @@ export class WishlistService {
     /**
      * Delete a wishlist item
      * @param id
-     * @returns WishlistItemResponseDto Wishlist item deleted successfully
+     * @returns void
      * @throws ApiError
      */
     public static wishlistControllerDelete(
         id: number,
-    ): CancelablePromise<WishlistItemResponseDto> {
+    ): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/wishlist/{id}',
