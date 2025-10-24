@@ -53,6 +53,7 @@ export type { CreateSeatingArrangementDto } from './models/CreateSeatingArrangem
 export type { CreateSuperAdminDto } from './models/CreateSuperAdminDto';
 export type { CreateVendorDto } from './models/CreateVendorDto';
 export type { CreateWeddingDto } from './models/CreateWeddingDto';
+export type { CreateWishlistItemDto } from './models/CreateWishlistItemDto';
 export type { DateOptimizerPreferencesDto } from './models/DateOptimizerPreferencesDto';
 export type { DateRecommendationDto } from './models/DateRecommendationDto';
 export { EmailNotificationHistoryResponseDto } from './models/EmailNotificationHistoryResponseDto';
@@ -91,6 +92,7 @@ export type { PayoutResultDto } from './models/PayoutResultDto';
 export type { ProcessingStatusDto } from './models/ProcessingStatusDto';
 export type { RequestCalendarAccessDto } from './models/RequestCalendarAccessDto';
 export type { RequestResetPasswordDto } from './models/RequestResetPasswordDto';
+export type { ReserveWishlistItemDto } from './models/ReserveWishlistItemDto';
 export type { ResetPasswordDto } from './models/ResetPasswordDto';
 export type { RevenueDataPoint } from './models/RevenueDataPoint';
 export { RevenueOverTimeResponseDto } from './models/RevenueOverTimeResponseDto';
@@ -123,6 +125,7 @@ export type { UpdateSeatingArrangementDto } from './models/UpdateSeatingArrangem
 export type { UpdateSuperAdminDto } from './models/UpdateSuperAdminDto';
 export type { UpdateVendorDto } from './models/UpdateVendorDto';
 export type { UpdateWeddingDto } from './models/UpdateWeddingDto';
+export type { UpdateWishlistItemDto } from './models/UpdateWishlistItemDto';
 export type { UserGrowthDataPoint } from './models/UserGrowthDataPoint';
 export type { UserResponseDto } from './models/UserResponseDto';
 export { UserRole } from './models/UserRole';
@@ -144,6 +147,7 @@ export type { WeddingResponseDto } from './models/WeddingResponseDto';
 export { WeddingService } from './models/WeddingService';
 export { WeddingStyle } from './models/WeddingStyle';
 export { WeddingType } from './models/WeddingType';
+export type { WishlistItemResponseDto } from './models/WishlistItemResponseDto';
 
 export { AdminsService } from './services/AdminsService';
 export { AlbumService } from './services/AlbumService';
@@ -166,3 +170,4 @@ export { UsersService } from './services/UsersService';
 export { VendorRecommendationService } from './services/VendorRecommendationService';
 export { VendorsService } from './services/VendorsService';
 export { WeddingsService } from './services/WeddingsService';
+export { WishlistService } from './services/WishlistService';

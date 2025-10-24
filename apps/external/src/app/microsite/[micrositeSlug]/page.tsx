@@ -1,12 +1,13 @@
 'use client';
 
-import { use, useEffect, useMemo, useRef } from 'react';
+import { use, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useMicrositeManager } from '../../hooks/useMicrositeManager';
 import MicrositeLogin from '../components/MicrositeLogin';
 import TemplateOne from '../components/templates/templateOne';
 import TemplateThree from '../components/templates/templateThree';
 import TemplateTwo from '../components/templates/templateTwo';
+import { WishlistService } from '@shared/api';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 export type PageProps = {
@@ -57,6 +58,25 @@ export default function MicrositePage({ params }: PageProps) {
   }, [micrositeData]);
 
   const rsvpRef = useRef<HTMLDivElement | null>(null);
+  const [hasWishlistItems, setHasWishlistItems] = useState(false);
+
+  // Fetch wishlist items count
+  useEffect(() => {
+    const checkWishlistExists = async () => {
+      if (micrositeData?.weddingId) {
+        try {
+          const result = await WishlistService.wishlistControllerCheckWishlistExists(
+            micrositeData.weddingId,
+          );
+          setHasWishlistItems(!!result.hasItems);
+        } catch (error) {
+          console.error('Error checking wishlist existence:', error);
+          setHasWishlistItems(false);
+        }
+      }
+    };
+    checkWishlistExists();
+  }, [micrositeData?.weddingId]);
 
   if (isRestoringSession || isLoadingMicrosite) {
     return (
@@ -104,6 +124,7 @@ export default function MicrositePage({ params }: PageProps) {
       isWeddingLive={isWeddingLive}
       micrositeSlug={decodedPlanName}
       handleConfirmGuestAttendance={handleConfirmGuestAttendance}
+      hasWishlistItems={hasWishlistItems}
     />
   ) : micrositeData.templateNumber === 2 ? (
     <TemplateTwo
@@ -113,6 +134,7 @@ export default function MicrositePage({ params }: PageProps) {
       isWeddingLive={isWeddingLive}
       micrositeSlug={decodedPlanName}
       handleConfirmGuestAttendance={handleConfirmGuestAttendance}
+      hasWishlistItems={hasWishlistItems}
     />
   ) : (
     <TemplateThree
@@ -122,6 +144,7 @@ export default function MicrositePage({ params }: PageProps) {
       isWeddingLive={isWeddingLive}
       micrositeSlug={decodedPlanName}
       handleConfirmGuestAttendance={handleConfirmGuestAttendance}
+      hasWishlistItems={hasWishlistItems}
     />
   );
 }

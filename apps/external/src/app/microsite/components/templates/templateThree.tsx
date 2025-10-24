@@ -22,6 +22,7 @@ interface TemplateThreeProps {
   isWeddingLive: boolean;
   micrositeSlug: string;
   handleConfirmGuestAttendance: (allergies?: string[]) => Promise<void>;
+  hasWishlistItems?: boolean;
 }
 
 // Predefined collage slots (deterministic to avoid hydration mismatch)
@@ -43,6 +44,7 @@ export default function TemplateThree({
   isWeddingLive,
   micrositeSlug,
   handleConfirmGuestAttendance,
+  hasWishlistItems = false,
 }: TemplateThreeProps) {
   const isMobile = useIsMobileScreen();
   const router = useRouter();
@@ -107,20 +109,32 @@ export default function TemplateThree({
         isDark ? 'dark bg-zinc-950 text-zinc-50' : 'bg-[#FFF7EC] text-zinc-900'
       }`}
     >
-      {isWeddingLive && micrositeSlug && (
+      {micrositeSlug && (
         <div className="absolute top-4 right-4 z-50 flex gap-3">
-          <Button
-            onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
-            className="rounded-full bg-[#EADBC8] hover:bg-[#E5D4BE] text-stone-900 border border-stone-300"
-          >
-            View Album
-          </Button>
-          <Button
-            onClick={() => router.push(`/microsite/${micrositeSlug}/guestbook`)}
-            className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
-          >
-            View Guestbook
-          </Button>
+          {hasWishlistItems && (
+            <Button
+              onClick={() => router.push(`/microsite/${micrositeSlug}/wishlist`)}
+              className="rounded-full bg-[#EADBC8] hover:bg-[#E5D4BE] text-stone-900 border border-stone-300"
+            >
+              Wishlist
+            </Button>
+          )}
+          {isWeddingLive && (
+            <>
+              <Button
+                onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
+                className="rounded-full bg-[#EADBC8] hover:bg-[#E5D4BE] text-stone-900 border border-stone-300"
+              >
+                View Album
+              </Button>
+              <Button
+                onClick={() => router.push(`/microsite/${micrositeSlug}/guestbook`)}
+                className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+              >
+                View Guestbook
+              </Button>
+            </>
+          )}
         </div>
       )}
 
