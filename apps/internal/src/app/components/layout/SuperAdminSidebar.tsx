@@ -20,7 +20,7 @@ const tabs = [
     items: [
       {
         title: 'Main Dashboard',
-        href: '/admin-dashboard',
+        href: '/',
         icon: LayoutDashboard,
       },
       {

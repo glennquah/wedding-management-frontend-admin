@@ -55,3 +55,122 @@ export async function downloadImagesAsZip(images: ImageProps[]) {
   a.remove();
   window.URL.revokeObjectURL(blobUrl);
 }
+
+export interface PersonFolder {
+  clusterId: number;
+  label: string;
+  photoIds: number[];
+}
+
+export async function downloadImagesOrganizedByPerson(
+  allPhotos: ImageProps[],
+  personFolders: PersonFolder[],
+  blurryPhotoIds?: Set<number>,
+  includeOthers: boolean = true,
+  allPhotoIdsInAnyClusters?: Set<number>,
+  selectedOthersPhotoIds?: number[],
+) {
+  const zip = new JSZip();
+
+  // Track which photos have been added (for duplicates across person folders)
+  const photosInPersonFolders = new Set<number>();
+
+  // Create folders for each person and add their photos
+  for (const person of personFolders) {
+    const folderName = person.label || `Person ${person.clusterId}`;
+    const personFolder = zip.folder(folderName);
+
+    if (!personFolder) continue;
+
+    // Filter out blurry photos if needed
+    const photoIdsToDownload = blurryPhotoIds
+      ? person.photoIds.filter((id) => !blurryPhotoIds.has(id))
+      : person.photoIds;
+
+    // Add photos for this person
+    await Promise.all(
+      photoIdsToDownload.map(async (photoId) => {
+        photosInPersonFolders.add(photoId);
+
+        const photo = allPhotos[photoId];
+        if (!photo) return;
+
+        try {
+          const response = await fetch(photo.image_url, {
+            headers: { Origin: location.origin },
+            mode: 'cors',
+          });
+          const blob = await response.blob();
+          const extension = photo.format || 'jpg';
+          personFolder.file(`${photo.id}.${extension}`, blob);
+        } catch (e) {
+          console.error(`Failed to fetch image ${photo.image_url}`, e);
+        }
+      }),
+    );
+  }
+
+  // Create "Other Photos" folder for photos not in any person cluster (if includeOthers is true)
+  if (includeOthers) {
+    let otherPhotoIds: number[] = [];
+
+    if (selectedOthersPhotoIds && selectedOthersPhotoIds.length > 0) {
+      // Use the specific photo IDs provided
+      otherPhotoIds = selectedOthersPhotoIds;
+
+      // Filter out blurry photos if needed
+      if (blurryPhotoIds) {
+        otherPhotoIds = otherPhotoIds.filter((id) => !blurryPhotoIds.has(id));
+      }
+    } else {
+      // Fallback to old behavior: include all photos not in any cluster
+      const photoIdsToExclude = allPhotoIdsInAnyClusters || photosInPersonFolders;
+
+      otherPhotoIds = allPhotos
+        .map((_, idx) => idx)
+        .filter((idx) => {
+          // Skip if in ANY person cluster (not just selected ones)
+          if (photoIdsToExclude.has(idx)) return false;
+          // Skip if blurry (when filtering is enabled)
+          if (blurryPhotoIds && blurryPhotoIds.has(idx)) return false;
+          return true;
+        });
+    }
+
+    if (otherPhotoIds.length > 0) {
+      const otherFolder = zip.folder('Other Photos');
+
+      if (otherFolder) {
+        await Promise.all(
+          otherPhotoIds.map(async (photoId) => {
+            const photo = allPhotos[photoId];
+            if (!photo) return;
+
+            try {
+              const response = await fetch(photo.image_url, {
+                headers: { Origin: location.origin },
+                mode: 'cors',
+              });
+              const blob = await response.blob();
+              const extension = photo.format || 'jpg';
+              otherFolder.file(`${photo.id}.${extension}`, blob);
+            } catch (e) {
+              console.error(`Failed to fetch image ${photo.image_url}`, e);
+            }
+          }),
+        );
+      }
+    }
+  }
+
+  const content = await zip.generateAsync({ type: 'blob' });
+
+  const blobUrl = window.URL.createObjectURL(content);
+  const a = document.createElement('a');
+  a.href = blobUrl;
+  a.download = 'curated-album.zip';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(blobUrl);
+}

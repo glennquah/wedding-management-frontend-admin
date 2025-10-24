@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { WeddingsService } from '@shared/api/services/WeddingsService';
 import { WeddingPublicResponseDto } from '@shared/api/models/WeddingPublicResponseDto';
+import { WeddingsService } from '@shared/api/services/WeddingsService';
+import { Button } from '@shared/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/ui/card';
+import { Input } from '@shared/components/ui/form/input';
+import { Label } from '@shared/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -11,22 +13,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@shared/components/ui/select';
-import { Button } from '@shared/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/ui/card';
-import { Label } from '@shared/components/ui/label';
-import { Input } from '@shared/components/ui/form/input';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function CashGiftPage() {
   const params = useParams();
   const router = useRouter();
   const weddingId = params ? parseInt(params.weddingId as string) : NaN;
+  const micrositeSlug = params?.micrositeSlug as string;
 
   const [wedding, setWedding] = useState<WeddingPublicResponseDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedGuestId, setSelectedGuestId] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const toastShownRef = useRef(false);
 
   useEffect(() => {
     const fetchWedding = async () => {
@@ -34,8 +36,11 @@ export default function CashGiftPage() {
         const weddingData = await WeddingsService.weddingControllerFindPublic(weddingId);
         setWedding(weddingData);
       } catch (error) {
-        console.error('Error fetching wedding:', error);
-        router.push('/not-found');
+        router.push(`/microsite/${micrositeSlug}`);
+        if (!toastShownRef.current) {
+          toast.error('Cash gifting not available yet');
+          toastShownRef.current = true;
+        }
       } finally {
         setLoading(false);
       }
@@ -44,9 +49,13 @@ export default function CashGiftPage() {
     if (!isNaN(weddingId)) {
       fetchWedding();
     } else {
-      router.push('/not-found');
+      router.push(`/microsite/${micrositeSlug}`);
+      if (!toastShownRef.current) {
+        toast.error('Cash gifting not available yet');
+        toastShownRef.current = true;
+      }
     }
-  }, [weddingId, router]);
+  }, [weddingId, router, micrositeSlug]);
 
   // Filter and sort guests based on search query
   const filteredGuests = useMemo(() => {

@@ -14,9 +14,11 @@ export default function VendorOrdersPage() {
     isLoading,
     handleConfirmListing,
     handleRejectListing,
+    handleCompleteListing,
     allOrderListings,
     pendingConfirmationListings,
     confirmedOrderListings,
+    completedOrderListings,
     cancelledOrderListings,
   } = useVendorOrders(vendorId);
 
@@ -63,6 +65,7 @@ export default function VendorOrdersPage() {
             adminEmail={adminEmail}
             onConfirm={() => handleConfirmListing(ol.order.id, ol.listing.id)}
             onReject={() => handleRejectListing(ol.order.id, ol.listing.id)}
+            onComplete={() => handleCompleteListing(ol.order.id, ol.listing.id)}
             viewMode="vendor"
           />
         );
@@ -98,6 +101,13 @@ export default function VendorOrdersPage() {
             <span className="hidden md:block">Confirmed ({confirmedOrderListings.length})</span>
           </TabsTrigger>
           <TabsTrigger
+            value="completed"
+            className="px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+          >
+            <span className="md:hidden">Completed ({completedOrderListings.length})</span>
+            <span className="hidden md:block">Completed ({completedOrderListings.length})</span>
+          </TabsTrigger>
+          <TabsTrigger
             value="cancelled"
             className="px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
           >
@@ -127,6 +137,14 @@ export default function VendorOrdersPage() {
             <OrderListingList orderListings={confirmedOrderListings} />
           ) : (
             <EmptyState message="No confirmed orders yet." />
+          )}
+        </TabsContent>
+
+        <TabsContent value="completed">
+          {completedOrderListings.length > 0 ? (
+            <OrderListingList orderListings={completedOrderListings} />
+          ) : (
+            <EmptyState message="No completed orders yet." />
           )}
         </TabsContent>
 
