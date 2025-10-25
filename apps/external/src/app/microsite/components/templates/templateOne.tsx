@@ -189,22 +189,7 @@ export default function TemplateOne({
                   Wishlist
                 </Button>
               )}
-              {isWeddingLive && (
-                <>
-                  <Button
-                    onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
-                    className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
-                  >
-                    View Album
-                  </Button>
-                  <Button
-                    onClick={() => router.push(`/microsite/${micrositeSlug}/guestbook`)}
-                    className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
-                  >
-                    View Guestbook
-                  </Button>
-                </>
-              )}
+              
             </div>
           )}
 
