@@ -37,7 +37,9 @@ export function VendorCard({ vendor, maxScore }: VendorCardProps) {
 
           <div className='flex items-center gap-1'>
             <Star className='w-4 h-4 fill-yellow-400 text-yellow-400' />
-            <span className='text-sm font-semibold'>{vendor.rating.toFixed(1)}</span>
+            <span className='text-sm font-semibold'>
+              {vendor.rating > 0 ? vendor.rating.toFixed(1) : 'No ratings yet!'}
+            </span>
           </div>
         </div>
 

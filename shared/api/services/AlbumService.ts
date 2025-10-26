@@ -4,6 +4,8 @@
 /* eslint-disable */
 import type { AlbumResponseDto } from '../models/AlbumResponseDto';
 import type { CreateAlbumDto } from '../models/CreateAlbumDto';
+import type { FaceClusterDto } from '../models/FaceClusterDto';
+import type { ProcessingStatusDto } from '../models/ProcessingStatusDto';
 import type { UpdateAlbumDto } from '../models/UpdateAlbumDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -121,6 +123,141 @@ export class AlbumService {
             mediaType: 'application/json',
             errors: {
                 400: `Bad request.`,
+                404: `Album not found.`,
+            },
+        });
+    }
+    /**
+     * Get photo processing status for an album
+     * Returns statistics about photo processing progress including counts of pending, processing, completed, and failed photos
+     * @param id
+     * @returns ProcessingStatusDto Processing status retrieved successfully
+     * @throws ApiError
+     */
+    public static albumControllerGetProcessingStatus(
+        id: number,
+    ): CancelablePromise<ProcessingStatusDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/album/{id}/processing-status',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Album not found.`,
+            },
+        });
+    }
+    /**
+     * Get face clusters for an album
+     * Returns groups of similar faces detected in the album photos. Each cluster represents a person.
+     * @param id
+     * @returns FaceClusterDto Face clusters retrieved successfully
+     * @throws ApiError
+     */
+    public static albumControllerGetFaceClusters(
+        id: number,
+    ): CancelablePromise<Array<FaceClusterDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/album/{id}/face-clusters',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Album not found.`,
+            },
+        });
+    }
+    /**
+     * Manually trigger face clustering for an album
+     * Triggers face clustering for all unclustered faces in the album. This is automatically done after photo upload, but can be manually triggered if needed.
+     * @param id
+     * @returns any Clustering completed successfully
+     * @throws ApiError
+     */
+    public static albumControllerTriggerClustering(
+        id: number,
+    ): CancelablePromise<{
+        message?: string;
+    }> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/album/{id}/trigger-clustering',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Album not found.`,
+            },
+        });
+    }
+    /**
+     * Update label for a face cluster
+     * Set a custom label for a face cluster (e.g., "Bride", "Groom", "Best Man")
+     * @param albumId
+     * @param clusterId
+     * @returns any Cluster label updated successfully
+     * @throws ApiError
+     */
+    public static albumControllerUpdateClusterLabel(
+        albumId: number,
+        clusterId: number,
+    ): CancelablePromise<{
+        message?: string;
+    }> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/album/{albumId}/clusters/{clusterId}/label',
+            path: {
+                'albumId': albumId,
+                'clusterId': clusterId,
+            },
+            errors: {
+                404: `Cluster not found.`,
+            },
+        });
+    }
+    /**
+     * Re-cluster all faces in an album
+     * Clears existing face clusters and re-runs the clustering algorithm. Useful if clustering parameters are adjusted.
+     * @param id
+     * @returns any Re-clustering completed successfully
+     * @throws ApiError
+     */
+    public static albumControllerReclusterAlbum(
+        id: number,
+    ): CancelablePromise<{
+        message?: string;
+    }> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/album/{id}/recluster',
+            path: {
+                'id': id,
+            },
+            errors: {
+                404: `Album not found.`,
+            },
+        });
+    }
+    /**
+     * Get blurry photo indices for an album
+     * Returns array indices of photos that have been detected as blurry
+     * @param id
+     * @returns number Blurry photo indices retrieved successfully
+     * @throws ApiError
+     */
+    public static albumControllerGetBlurryPhotos(
+        id: number,
+    ): CancelablePromise<Array<number>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/album/{id}/blurry-photos',
+            path: {
+                'id': id,
+            },
+            errors: {
                 404: `Album not found.`,
             },
         });

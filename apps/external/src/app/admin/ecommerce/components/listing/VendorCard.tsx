@@ -19,10 +19,14 @@ export function VendorCard({ vendor }: VendorCardProps) {
           </div>
         )}
 
-        {vendor.rating && (
+        {vendor.rating !== undefined && vendor.rating !== null && (
           <div className="flex items-center gap-3">
             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-            <span>Rating: {vendor.rating.toFixed(1)}/5</span>
+            <span>
+              {vendor.rating > 0
+                ? `Rating: ${vendor.rating.toFixed(1)}/5`
+                : 'No ratings yet!'}
+            </span>
           </div>
         )}
 

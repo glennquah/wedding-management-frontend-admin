@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { GuestResponseDto, MicrositeResponseDto, MicrositeService } from '@shared/api';
 import { useRouter } from 'next/navigation';
@@ -13,6 +13,7 @@ interface UseMicrositeManagerReturn {
   micrositeError: string | null;
   guestDetails: GuestResponseDto | null;
   isValidatingAuth: boolean;
+  isRestoringSession: boolean;
   hasAccess: boolean;
   isWeddingLive: boolean;
 
@@ -44,8 +45,28 @@ export const useMicrositeManager = (): UseMicrositeManagerReturn => {
   const [micrositeError, setMicrositeError] = useState<string | null>(null);
   const [guestDetails, setGuestDetails] = useState<GuestResponseDto | null>(null);
   const [isValidatingAuth, setIsValidatingAuth] = useState(false);
+  const [isRestoringSession, setIsRestoringSession] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
   const [isWeddingLive, setIsWeddingLive] = useState(false);
+
+  useEffect(() => {
+    const accessGranted = sessionStorage.getItem('micrositeAccessGranted');
+    const storedDetails = sessionStorage.getItem('micrositeGuestDetails');
+
+    if (accessGranted === 'true' && storedDetails) {
+      setHasAccess(true);
+      try {
+        setGuestDetails(JSON.parse(storedDetails));
+      } catch (e) {
+        console.error('Failed to parse guest details from sessionStorage', e);
+        sessionStorage.removeItem('micrositeAccessGranted');
+        sessionStorage.removeItem('micrositeGuestDetails');
+        setHasAccess(false);
+      }
+    }
+
+    setIsRestoringSession(false);
+  }, []);
 
   const fetchMicrositeData = useCallback(
     async (decodedPlanName: string) => {
@@ -114,7 +135,7 @@ export const useMicrositeManager = (): UseMicrositeManagerReturn => {
         });
 
         // Convert API response to expected format
-        setGuestDetails({
+        const guestData = {
           id: response.id,
           name: response.name,
           email: response.email || '',
@@ -127,7 +148,8 @@ export const useMicrositeManager = (): UseMicrositeManagerReturn => {
           confirmationStatus: response.confirmationStatus,
           createdAt: response.createdAt,
           updatedAt: response.updatedAt,
-        });
+        };
+        setGuestDetails(guestData);
 
         // Step 2: Validate password
         const passwordResponse = await MicrositeService.micrositeControllerValidatePassword({
@@ -144,6 +166,9 @@ export const useMicrositeManager = (): UseMicrositeManagerReturn => {
         setHasAccess(true);
         setPasswordError(null);
         setNameError(null);
+
+        sessionStorage.setItem('micrositeAccessGranted', 'true');
+        sessionStorage.setItem('micrositeGuestDetails', JSON.stringify(guestData));
       } catch (err: unknown) {
         console.error('Authentication error:', err);
         const status = (() => {
@@ -214,6 +239,7 @@ export const useMicrositeManager = (): UseMicrositeManagerReturn => {
     micrositeError,
     guestDetails,
     isValidatingAuth,
+    isRestoringSession,
     hasAccess,
     isWeddingLive,
 

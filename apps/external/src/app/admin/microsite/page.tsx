@@ -51,6 +51,7 @@ export default function CreateMicrositePage() {
   const [existingMicrositeId, setExistingMicrositeId] = useState<number | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showWishlistPrompt, setShowWishlistPrompt] = useState(false);
 
   const { handlePreview, handleSubmit, handleDelete } = useMicrositeAdminManager({
     formData,
@@ -64,6 +65,7 @@ export default function CreateMicrositePage() {
     setIsDeleteDialogOpen,
     setIsUpdateMode,
     setExistingMicrositeId,
+    setShowWishlistPrompt,
   });
 
   // Keep weddingId in formData in sync with selection
@@ -447,6 +449,32 @@ export default function CreateMicrositePage() {
             </Button>
           </div>
         </form>
+
+        {/* Wishlist Prompt Dialog */}
+        <Dialog open={showWishlistPrompt} onOpenChange={setShowWishlistPrompt}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create a Wishlist?</DialogTitle>
+              <DialogDescription>
+                Would you like to create a wishlist for your wedding? Guests will be able to view
+                and reserve items from your wishlist on your microsite.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWishlistPrompt(false)}>
+                Maybe Later
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowWishlistPrompt(false);
+                  window.location.href = '/admin/wishlist';
+                }}
+              >
+                Create Wishlist
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

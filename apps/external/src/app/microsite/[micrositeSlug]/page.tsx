@@ -7,6 +7,7 @@ import MicrositeLogin from '../components/MicrositeLogin';
 import TemplateOne from '../components/templates/templateOne';
 import TemplateThree from '../components/templates/templateThree';
 import TemplateTwo from '../components/templates/templateTwo';
+import { WishlistService } from '@shared/api';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 export type PageProps = {
@@ -35,6 +36,7 @@ export default function MicrositePage({ params }: PageProps) {
     guestDetails,
     hasAccess,
     isWeddingLive,
+    isRestoringSession,
     fetchMicrositeData,
     handleMicrositeLogin,
     handleConfirmGuestAttendance,
@@ -42,15 +44,12 @@ export default function MicrositePage({ params }: PageProps) {
     setHasAccess,
   } = useMicrositeManager();
 
-  // Local UI state
-  const [isCheckingAccess, setIsCheckingAccess] = useState(true);
-
   // Fetch microsite data on mount
   useEffect(() => {
-    setIsCheckingAccess(false);
-    setHasAccess(false);
-    fetchMicrositeData(decodedPlanName);
-  }, [decodedPlanName, fetchMicrositeData, setHasAccess]);
+    if (!isRestoringSession) {
+      fetchMicrositeData(decodedPlanName);
+    }
+  }, [decodedPlanName, isRestoringSession, fetchMicrositeData]);
 
   useEffect(() => {
     if (micrositeData) {
@@ -59,8 +58,27 @@ export default function MicrositePage({ params }: PageProps) {
   }, [micrositeData]);
 
   const rsvpRef = useRef<HTMLDivElement | null>(null);
+  const [hasWishlistItems, setHasWishlistItems] = useState(false);
 
-  if (isCheckingAccess || isLoadingMicrosite) {
+  // Fetch wishlist items count
+  useEffect(() => {
+    const checkWishlistExists = async () => {
+      if (micrositeData?.weddingId) {
+        try {
+          const result = await WishlistService.wishlistControllerCheckWishlistExists(
+            micrositeData.weddingId,
+          );
+          setHasWishlistItems(!!result.hasItems);
+        } catch (error) {
+          console.error('Error checking wishlist existence:', error);
+          setHasWishlistItems(false);
+        }
+      }
+    };
+    checkWishlistExists();
+  }, [micrositeData?.weddingId]);
+
+  if (isRestoringSession || isLoadingMicrosite) {
     return (
       <div className="flex min-h-screen items-center justify-center text-gray-600">
         {isLoadingMicrosite ? 'Loading microsite...' : 'Checking access...'}
@@ -106,6 +124,7 @@ export default function MicrositePage({ params }: PageProps) {
       isWeddingLive={isWeddingLive}
       micrositeSlug={decodedPlanName}
       handleConfirmGuestAttendance={handleConfirmGuestAttendance}
+      hasWishlistItems={hasWishlistItems}
     />
   ) : micrositeData.templateNumber === 2 ? (
     <TemplateTwo
@@ -115,6 +134,7 @@ export default function MicrositePage({ params }: PageProps) {
       isWeddingLive={isWeddingLive}
       micrositeSlug={decodedPlanName}
       handleConfirmGuestAttendance={handleConfirmGuestAttendance}
+      hasWishlistItems={hasWishlistItems}
     />
   ) : (
     <TemplateThree
@@ -124,6 +144,7 @@ export default function MicrositePage({ params }: PageProps) {
       isWeddingLive={isWeddingLive}
       micrositeSlug={decodedPlanName}
       handleConfirmGuestAttendance={handleConfirmGuestAttendance}
+      hasWishlistItems={hasWishlistItems}
     />
   );
 }

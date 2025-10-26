@@ -2,6 +2,14 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AdminBasicStatsResponseDto } from '../models/AdminBasicStatsResponseDto';
+import type { AdminBookingsOverTimeResponseDto } from '../models/AdminBookingsOverTimeResponseDto';
+import type { AdminRevenueByCategoryResponseDto } from '../models/AdminRevenueByCategoryResponseDto';
+import type { AdminRevenueResponseDto } from '../models/AdminRevenueResponseDto';
+import type { AdminTopListingsResponseDto } from '../models/AdminTopListingsResponseDto';
+import type { AdminTopVendorsResponseDto } from '../models/AdminTopVendorsResponseDto';
+import type { AdminUserGrowthResponseDto } from '../models/AdminUserGrowthResponseDto';
+import type { AdminWeddingDatesHeatmapResponseDto } from '../models/AdminWeddingDatesHeatmapResponseDto';
 import type { GuestCountResponseDto } from '../models/GuestCountResponseDto';
 import type { RevenueOverTimeResponseDto } from '../models/RevenueOverTimeResponseDto';
 import type { RsvpCountResponseDto } from '../models/RsvpCountResponseDto';
@@ -167,6 +175,144 @@ export class AnalyticsService {
             },
             errors: {
                 404: `Vendor not found`,
+            },
+        });
+    }
+    /**
+     * Get basic platform statistics (Super Admin)
+     * Returns total vendors, couples, weddings, microsites, and guests served.
+     * @returns AdminBasicStatsResponseDto Basic statistics retrieved successfully
+     * @throws ApiError
+     */
+    public static analyticsControllerGetAdminBasicStats(): CancelablePromise<AdminBasicStatsResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/analytics/admin/basic-stats',
+        });
+    }
+    /**
+     * Get platform revenue analytics (Super Admin)
+     * Returns MTD, YTD, and all-time revenue, plus average order value and commission earned.
+     * @returns AdminRevenueResponseDto Revenue analytics retrieved successfully
+     * @throws ApiError
+     */
+    public static analyticsControllerGetAdminRevenue(): CancelablePromise<AdminRevenueResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/analytics/admin/revenue',
+        });
+    }
+    /**
+     * Get platform revenue over time (Super Admin)
+     * Returns revenue data: MONTHLY (current month by days), YEARLY (current year by months), ALL (all time by months).
+     * @param period Time period: MONTHLY=daily breakdown for current month, YEARLY=monthly breakdown for current year, ALL=monthly breakdown for all time (default: MONTHLY)
+     * @returns RevenueOverTimeResponseDto Revenue over time retrieved successfully
+     * @throws ApiError
+     */
+    public static analyticsControllerGetAdminRevenueOverTime(
+        period?: 'MONTHLY' | 'YEARLY' | 'ALL',
+    ): CancelablePromise<RevenueOverTimeResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/analytics/admin/revenue-over-time',
+            query: {
+                'period': period,
+            },
+        });
+    }
+    /**
+     * Get revenue breakdown by wedding service category (Super Admin)
+     * Returns revenue and booking counts for each wedding service category.
+     * @returns AdminRevenueByCategoryResponseDto Revenue by category retrieved successfully
+     * @throws ApiError
+     */
+    public static analyticsControllerGetAdminRevenueByCategory(): CancelablePromise<AdminRevenueByCategoryResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/analytics/admin/revenue-by-category',
+        });
+    }
+    /**
+     * Get top vendors by revenue (Super Admin)
+     * Returns the top vendors sorted by revenue.
+     * @param limit Number of top vendors to return (default: 10)
+     * @returns AdminTopVendorsResponseDto Top vendors retrieved successfully
+     * @throws ApiError
+     */
+    public static analyticsControllerGetAdminTopVendors(
+        limit?: number,
+    ): CancelablePromise<AdminTopVendorsResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/analytics/admin/top-vendors',
+            query: {
+                'limit': limit,
+            },
+        });
+    }
+    /**
+     * Get top listings by revenue (Super Admin)
+     * Returns the top order listings sorted by revenue.
+     * @param limit Number of top listings to return (default: 10)
+     * @returns AdminTopListingsResponseDto Top listings retrieved successfully
+     * @throws ApiError
+     */
+    public static analyticsControllerGetAdminTopListings(
+        limit?: number,
+    ): CancelablePromise<AdminTopListingsResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/analytics/admin/top-listings',
+            query: {
+                'limit': limit,
+            },
+        });
+    }
+    /**
+     * Get platform bookings over time (Super Admin)
+     * Returns booking counts and revenue over time: MONTHLY (current month by days), YEARLY (current year by months), ALL (all time by months).
+     * @param period Time period: MONTHLY=daily breakdown for current month, YEARLY=monthly breakdown for current year, ALL=monthly breakdown for all time (default: MONTHLY)
+     * @returns AdminBookingsOverTimeResponseDto Bookings over time retrieved successfully
+     * @throws ApiError
+     */
+    public static analyticsControllerGetAdminBookingsOverTime(
+        period?: 'MONTHLY' | 'YEARLY' | 'ALL',
+    ): CancelablePromise<AdminBookingsOverTimeResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/analytics/admin/bookings-over-time',
+            query: {
+                'period': period,
+            },
+        });
+    }
+    /**
+     * Get wedding dates heatmap (Super Admin)
+     * Returns all wedding dates and the count of weddings scheduled for each date.
+     * @returns AdminWeddingDatesHeatmapResponseDto Wedding dates heatmap retrieved successfully
+     * @throws ApiError
+     */
+    public static analyticsControllerGetAdminWeddingDatesHeatmap(): CancelablePromise<AdminWeddingDatesHeatmapResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/analytics/admin/wedding-dates-heatmap',
+        });
+    }
+    /**
+     * Get user growth trend (Super Admin)
+     * Returns signup trends for both vendors and couples over time.
+     * @param period Time period: MONTHLY=daily breakdown for current month, YEARLY=monthly breakdown for current year, ALL=monthly breakdown for all time (default: MONTHLY)
+     * @returns AdminUserGrowthResponseDto User growth trend retrieved successfully
+     * @throws ApiError
+     */
+    public static analyticsControllerGetAdminUserGrowth(
+        period?: 'MONTHLY' | 'YEARLY' | 'ALL',
+    ): CancelablePromise<AdminUserGrowthResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/analytics/admin/user-growth',
+            query: {
+                'period': period,
             },
         });
     }

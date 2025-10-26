@@ -8,6 +8,7 @@ import {
   Camera,
   ClipboardList,
   Clock,
+  Gift,
   LayoutDashboard,
   MapPin,
   PaintRoller,
@@ -88,6 +89,12 @@ export default function AdminSidebar() {
           href: '/microsite',
           icon: PaintRoller,
           disabled: !hasWedding || !firstPurchaseMade,
+        },
+        {
+          title: 'Wishlist',
+          href: '/wishlist',
+          icon: Gift,
+          disabled: !hasWedding,
         },
         {
           title: 'Album Invite',
