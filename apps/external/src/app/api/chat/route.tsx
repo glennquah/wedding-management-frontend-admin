@@ -2,7 +2,6 @@ import { openai } from '@ai-sdk/openai';
 import { UIMessage, generateObject, streamText } from 'ai';
 import { z } from 'zod';
 import { WeddingResponseDto } from '@shared/api';
-import { NextResponse } from 'next/server';
 
 // ----------------------------------------------------
 // 1. Define Schemas and Types
@@ -99,8 +98,6 @@ export async function POST(req: Request) {
       const content = lastUser?.content as unknown;
       const userText = typeof content === 'string' ? content : JSON.stringify(content ?? '');
 
-      // FINAL FIX: Removed generic parameter from generateObject.
-      // The type of 'object' is now correctly inferred from the 'schema' property.
       const { object } = await withRetry(
         () =>
           generateObject({
@@ -143,7 +140,8 @@ export async function POST(req: Request) {
               `EXISTING CHECKLIST (${checklist?.length || 0} items - DO NOT INCLUDE THESE):\n${JSON.stringify(checklist, null, 2)}`,
 
             prompt: `User's request: ${userText}`,
-            schema: ChecklistResponseSchema,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            schema: ChecklistResponseSchema as any,
           }),
         1,
       );

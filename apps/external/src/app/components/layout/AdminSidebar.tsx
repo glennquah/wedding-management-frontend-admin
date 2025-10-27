@@ -17,10 +17,26 @@ import {
   Users,
   Calendar,
 } from 'lucide-react';
+import {
+  useProgressTrackerStore,
+  createEmptyProgressTrackerData,
+} from '../../store/progressTrackerStore';
+import { useUrgentChecklistItems } from '../../hooks/useUrgentChecklistItems';
 
 export default function AdminSidebar() {
-  const { weddings, firstPurchaseMade } = useWeddingStore();
+  const { weddings, firstPurchaseMade, selectedWeddingId } = useWeddingStore();
   const hasWedding = weddings && weddings.length > 0;
+  const selectedWedding = weddings?.find((w) => w.id === selectedWeddingId) || null;
+
+  // Get checklist data for the selected wedding
+  const progressData = useProgressTrackerStore((s) =>
+    typeof selectedWeddingId === 'number'
+      ? (s.drafts[selectedWeddingId]?.data ?? createEmptyProgressTrackerData(selectedWeddingId))
+      : createEmptyProgressTrackerData(0),
+  );
+
+  // Calculate urgent items count
+  const { totalUrgentCount } = useUrgentChecklistItems(progressData.checklist, selectedWedding);
 
   const tabs = [
     {
@@ -32,15 +48,16 @@ export default function AdminSidebar() {
           icon: LayoutDashboard,
         },
         {
-          title: 'Shop',
-          href: '/ecommerce',
-          icon: ShoppingCart,
-          disabled: !hasWedding,
-        },
-        {
           title: 'Progress Tracker',
           href: '/progress-tracker',
           icon: Clock,
+          disabled: !hasWedding,
+          badge: hasWedding ? totalUrgentCount : undefined,
+        },
+        {
+          title: 'Shop',
+          href: '/ecommerce',
+          icon: ShoppingCart,
           disabled: !hasWedding,
         },
         {

@@ -5,12 +5,13 @@ import Link from 'next/link';
 import { useSidebar } from '@shared/components/ui/sidebar';
 import { ChecklistItem } from '../../../store/progressTrackerStore';
 import { parseAndRenderText } from '../../../utils/linkParser';
-import { X, Calendar, CheckCircle } from 'lucide-react';
+import { X, Calendar, CheckCircle, Circle } from 'lucide-react';
 import { WeddingResponseDto } from '@shared/api';
 
 interface TimelineOverviewProps {
   checklist: ChecklistItem[];
   selectedWedding: WeddingResponseDto | null;
+  onToggleCompletion?: (itemId: string, completed: boolean) => Promise<ChecklistItem[] | null>;
 }
 
 interface TimelineItem {
@@ -26,7 +27,11 @@ interface TimelineItem {
   status: 'completed' | 'upcoming' | 'overdue';
 }
 
-export default function TimelineOverview({ checklist, selectedWedding }: TimelineOverviewProps) {
+export default function TimelineOverview({
+  checklist,
+  selectedWedding,
+  onToggleCompletion,
+}: TimelineOverviewProps) {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isWeddingDayModalOpen, setIsWeddingDayModalOpen] = useState(false);
   const [itemsPerRow, setItemsPerRow] = useState(6);
@@ -815,9 +820,27 @@ export default function TimelineOverview({ checklist, selectedWedding }: Timelin
                             className="absolute z-[60] max-w-80 min-w-64 rounded-lg border border-gray-200 bg-white p-4 shadow-lg transition-all duration-200"
                             style={hoverStyle}
                           >
-                            {/* Full title */}
-                            <div className="mb-2 text-sm font-semibold text-gray-800">
-                              {item.title}
+                            {/* Header with title and toggle button */}
+                            <div className="mb-2 flex items-start justify-between gap-2">
+                              <div className="text-sm font-semibold text-gray-800">
+                                {item.title}
+                              </div>
+                              {onToggleCompletion && (
+                                <button
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    await onToggleCompletion(item.id, !item.completed);
+                                  }}
+                                  className="hover:bg-brand-50 flex-shrink-0 rounded-full p-1 transition-colors"
+                                  title={item.completed ? 'Mark as incomplete' : 'Mark as complete'}
+                                >
+                                  {item.completed ? (
+                                    <CheckCircle className="h-5 w-5 text-green-600" />
+                                  ) : (
+                                    <Circle className="h-5 w-5 text-gray-400" />
+                                  )}
+                                </button>
+                              )}
                             </div>
 
                             {/* Description */}

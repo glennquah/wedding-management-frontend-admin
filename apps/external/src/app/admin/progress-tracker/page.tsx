@@ -312,6 +312,7 @@ export default function Home() {
                 <TimelineOverview
                   checklist={visibleChecklistItems}
                   selectedWedding={selectedWedding}
+                  onToggleCompletion={toggleItemCompletion}
                 />
               </div>
             </div>
