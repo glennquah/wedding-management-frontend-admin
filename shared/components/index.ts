@@ -40,6 +40,7 @@ export { CodeEditor } from './ui/code-editor';
 export { DatePicker, type DateWithPeriod, type TimePeriod } from './ui/date-picker';
 export { DatePickerWithPeriods } from './ui/date-picker-with-periods';
 export { DateRangePicker, type DateRange } from './ui/date-range-picker';
+export { SingleDatePicker } from './ui/single-date-picker';
 export { DeleteConfirmationModal } from './ui/delete-confirmation-modal';
 export {
   Dialog,

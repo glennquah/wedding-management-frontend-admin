@@ -9,7 +9,7 @@ export type VendorEarningsSummaryDto = {
      */
     totalGrossAmount: number;
     /**
-     * Total 5% platform commission
+     * Total 10% platform commission
      */
     totalPlatformFee: number;
     /**

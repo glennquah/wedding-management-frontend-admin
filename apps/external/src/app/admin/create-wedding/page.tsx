@@ -14,6 +14,7 @@ import {
 import { Button } from '@shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { Input } from '@shared/components/ui/form/input';
+import { SingleDatePicker } from '@shared/components';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -263,11 +264,11 @@ export default function CreateWeddingPage() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Wedding Date (Optional)</label>
-              <Input
-                type="date"
+              <SingleDatePicker
                 value={onboardingData.date}
-                onChange={(e) => handleInputChange('date', e.target.value)}
-                className="w-full"
+                onChange={(date) => handleInputChange('date', date || '')}
+                placeholder="Select wedding date"
+                minDate={new Date().toISOString().split('T')[0]}
               />
               <p className="text-xs text-gray-500">You can always update this later</p>
             </div>
