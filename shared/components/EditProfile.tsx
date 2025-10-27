@@ -32,8 +32,6 @@ import { MultiSelectDropdown } from './ui/form/multiSelectDropdown';
 import { SingleSelectDropdown } from './ui/form/singleSelectDropdown';
 import { Skeleton } from './ui/skeleton';
 import { SingleDatePicker } from './ui/single-date-picker';
-import { ChevronDown, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
 
 interface EditProfileProps {
   userId?: number;
