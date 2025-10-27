@@ -304,7 +304,7 @@ export const useEditProfile = ({ userId, userRole, onProfileUpdate }: UseEditPro
   }, [userId, userRole, userData, formData, populateFormData]);
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent, weddingFormData?: any): Promise<boolean> => {
+    async (e: React.FormEvent, weddingFormData?: any, silentSuccess?: boolean): Promise<boolean> => {
       e.preventDefault();
 
       if (!validateForm(weddingFormData)) {
@@ -317,7 +317,9 @@ export const useEditProfile = ({ userId, userRole, onProfileUpdate }: UseEditPro
         await updateUserProfile();
         setIsEditing(false);
         setValidationErrors({});
-        toast.success('Profile updated successfully');
+        if (!silentSuccess) {
+          toast.success('Profile updated successfully');
+        }
         onProfileUpdate?.();
         return true;
       } catch (error) {
