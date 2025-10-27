@@ -27,6 +27,7 @@ import { Input } from './ui/form/input';
 import { MultiSelectDropdown } from './ui/form/multiSelectDropdown';
 import { SingleSelectDropdown } from './ui/form/singleSelectDropdown';
 import { Skeleton } from './ui/skeleton';
+import { SingleDatePicker } from './ui/single-date-picker';
 import { ChevronDown, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -791,10 +792,10 @@ export default function EditProfile({ userId, userRole, onProfileUpdate }: EditP
           <div className="space-y-2">
             <label className="text-sm font-medium">Wedding Date</label>
             {isEditing ? (
-              <Input
-                type="date"
+              <SingleDatePicker
                 value={weddingFormData.date}
-                onChange={(e) => handleWeddingInputChange('date', e.target.value)}
+                onChange={(date) => handleWeddingInputChange('date', date || '')}
+                placeholder="Select wedding date"
               />
             ) : (
               <p className="p-3 bg-muted rounded-md">
