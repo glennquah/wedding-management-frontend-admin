@@ -3,6 +3,7 @@ import React from 'react';
 import FormField from '@shared/components/FormField';
 import { Checkbox } from '@shared/components/ui/checkbox';
 import { Label } from '@shared/components/ui/form/label';
+import { SingleDatePicker } from '@shared/components';
 import {
   Select,
   SelectContent,
@@ -57,15 +58,15 @@ export const getWeddingFormFields = ({ wedding, setWedding }: WeddingFormFieldsP
   </div>,
 
   <div key="date" className="md:col-span-1">
-    <FormField
-      label="Wedding Date"
-      id="date"
-      type="date"
-      value={wedding.date || ''}
-      onChange={(e) => setWedding({ ...wedding, date: e.target.value })}
-      placeholder="Select wedding date"
-      min={new Date().toISOString().split('T')[0]}
-    />
+    <div className="mt-4 gap-2 flex flex-col">
+      <Label htmlFor="date">Wedding Date</Label>
+      <SingleDatePicker
+        value={wedding.date || ''}
+        onChange={(date) => setWedding({ ...wedding, date: date || '' })}
+        placeholder="Select wedding date"
+        minDate={new Date().toISOString().split('T')[0]}
+      />
+    </div>
   </div>,
 
   <div key="weddingType" className="md:col-span-1">
@@ -213,15 +214,15 @@ export const getEditWeddingFormFields = ({ wedding, setWedding }: EditWeddingFor
   </div>,
 
   <div key="date" className="md:col-span-1">
-    <FormField
-      label="Wedding Date"
-      id="date"
-      type="date"
-      value={wedding.date || ''}
-      onChange={(e) => setWedding({ ...wedding, date: e.target.value })}
-      placeholder="Select wedding date"
-      min={new Date().toISOString().split('T')[0]}
-    />
+    <div className="mt-4 gap-2 flex flex-col">
+      <Label htmlFor="date">Wedding Date</Label>
+      <SingleDatePicker
+        value={wedding.date || ''}
+        onChange={(date) => setWedding({ ...wedding, date: date || '' })}
+        placeholder="Select wedding date"
+        minDate={new Date().toISOString().split('T')[0]}
+      />
+    </div>
   </div>,
 
   <div key="weddingType" className="md:col-span-1">
