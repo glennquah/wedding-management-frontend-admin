@@ -219,7 +219,8 @@ export function useProgressTrackerManager(weddingId?: number | null) {
           chatHistory: chatHistoryForBackend,
         };
 
-        const newChecklistResponse = await ChecklistService.checklistControllerCreate(createData);
+        const newChecklistResponse =
+          await ChecklistService.checklistControllerCreateChecklist(createData);
 
         // Now update the newly created checklist with the correct stage
         if (newChecklistResponse.id) {
@@ -528,7 +529,8 @@ export function useProgressTrackerManager(weddingId?: number | null) {
           chatHistory: chatHistoryForBackend,
         };
 
-        checklistResponse = await ChecklistService.checklistControllerCreate(createChecklistDto);
+        checklistResponse =
+          await ChecklistService.checklistControllerCreateChecklist(createChecklistDto);
       }
 
       // Step 4: Update the local state with backend response
@@ -859,7 +861,7 @@ export function useProgressTrackerManager(weddingId?: number | null) {
             }),
           );
 
-          const created = await ChecklistService.checklistControllerCreate({
+          const created = await ChecklistService.checklistControllerCreateChecklist({
             weddingId,
             items: itemsForCreate,
             chatHistory: [],

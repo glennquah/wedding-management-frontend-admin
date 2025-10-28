@@ -6,7 +6,6 @@ import type { CreateWeddingDto } from '../models/CreateWeddingDto';
 import type { DateOptimizerPreferencesDto } from '../models/DateOptimizerPreferencesDto';
 import type { SetWeddingDateDto } from '../models/SetWeddingDateDto';
 import type { UpdateWeddingDto } from '../models/UpdateWeddingDto';
-import type { WeddingPublicResponseDto } from '../models/WeddingPublicResponseDto';
 import type { WeddingResponseDto } from '../models/WeddingResponseDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -51,26 +50,6 @@ export class WeddingsService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/weddings/admin/my-weddings',
-        });
-    }
-    /**
-     * Get public wedding details (no auth required)
-     * @param id
-     * @returns WeddingPublicResponseDto Public wedding details for cash gift page
-     * @throws ApiError
-     */
-    public static weddingControllerFindPublic(
-        id: number,
-    ): CancelablePromise<WeddingPublicResponseDto> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/weddings/{id}/public',
-            path: {
-                'id': id,
-            },
-            errors: {
-                404: `Wedding not found or PayLah QR not available.`,
-            },
         });
     }
     /**

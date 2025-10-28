@@ -1,10 +1,18 @@
 'use client';
 
+import { useMemo } from 'react';
+
+import { useUrgentChecklistItems } from '../../hooks/useUrgentChecklistItems';
+import {
+  createEmptyProgressTrackerData,
+  useProgressTrackerStore,
+} from '../../store/progressTrackerStore';
 import { signOut, useWeddingStore } from '../../store/sessionStore';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
   BookOpenText,
+  Calendar,
   Camera,
   ClipboardList,
   Clock,
@@ -15,25 +23,23 @@ import {
   ShoppingCart,
   Sparkles,
   Users,
-  Calendar,
 } from 'lucide-react';
-import {
-  useProgressTrackerStore,
-  createEmptyProgressTrackerData,
-} from '../../store/progressTrackerStore';
-import { useUrgentChecklistItems } from '../../hooks/useUrgentChecklistItems';
 
 export default function AdminSidebar() {
   const { weddings, firstPurchaseMade, selectedWeddingId } = useWeddingStore();
   const hasWedding = weddings && weddings.length > 0;
   const selectedWedding = weddings?.find((w) => w.id === selectedWeddingId) || null;
 
-  // Get checklist data for the selected wedding
-  const progressData = useProgressTrackerStore((s) =>
-    typeof selectedWeddingId === 'number'
-      ? (s.drafts[selectedWeddingId]?.data ?? createEmptyProgressTrackerData(selectedWeddingId))
-      : createEmptyProgressTrackerData(0),
-  );
+  // Get checklist data from store using getState to avoid subscription issues
+  const progressData = useMemo(() => {
+    if (typeof selectedWeddingId !== 'number') {
+      return createEmptyProgressTrackerData(0);
+    }
+    const state = useProgressTrackerStore.getState();
+    return (
+      state.drafts[selectedWeddingId]?.data ?? createEmptyProgressTrackerData(selectedWeddingId)
+    );
+  }, [selectedWeddingId]);
 
   // Calculate urgent items count
   const { totalUrgentCount } = useUrgentChecklistItems(progressData.checklist, selectedWedding);

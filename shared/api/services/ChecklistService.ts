@@ -19,7 +19,7 @@ export class ChecklistService {
      * @returns ChecklistResponseDto Checklist created successfully
      * @throws ApiError
      */
-    public static checklistControllerCreate(
+    public static checklistControllerCreateChecklist(
         requestBody: CreateChecklistDto,
     ): CancelablePromise<ChecklistResponseDto> {
         return __request(OpenAPI, {
@@ -204,7 +204,7 @@ export class ChecklistService {
     ): CancelablePromise<ChecklistItemResponseDto> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/checklist/{id}/items',
+            url: '/checklist/items/{id}',
             path: {
                 'id': id,
             },
