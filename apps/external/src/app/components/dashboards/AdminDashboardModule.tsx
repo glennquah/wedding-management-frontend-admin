@@ -7,6 +7,7 @@ import { BudgetLineChart } from './BudgetLineChart';
 import { DashboardStatsCards } from './DashboardStatsCards';
 import { RecentOrdersList } from './RecentOrdersList';
 import { WeddingTasksChecklist } from './WeddingTasksChecklist';
+import { WeddingWrappedModal } from './WeddingWrappedModal';
 import {
   AnalyticsService,
   GuestCountResponseDto,
@@ -17,9 +18,14 @@ import {
   RsvpCountResponseDto,
   SeatingArrangementsService,
   SpendingResponseDto,
+  WeddingWrappedResponseDto,
 } from '@shared/api';
 import { PageHeader } from '@shared/components';
+import { Button } from '@shared/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { useSession } from 'next-auth/react';
+import { Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
 
 const AdminDashboardModule = () => {
   const { data: session } = useSession();
@@ -40,6 +46,12 @@ const AdminDashboardModule = () => {
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
   const [isLoadingChecklist, setIsLoadingChecklist] = useState(false);
+
+  // Wedding Wrapped state
+  const [weddingWrappedData, setWeddingWrappedData] = useState<WeddingWrappedResponseDto | null>(null);
+  const [isWeddingWrappedModalOpen, setIsWeddingWrappedModalOpen] = useState(false);
+  const [isGeneratingWrapped, setIsGeneratingWrapped] = useState(false);
+  const [isSavingWrapped, setIsSavingWrapped] = useState(false);
 
   // Calculate days until wedding
   const daysUntilWedding = selectedWedding
@@ -145,6 +157,41 @@ const AdminDashboardModule = () => {
     fetchChecklistData();
   }, [selectedWeddingId]);
 
+  // Wedding Wrapped handlers
+  const handleGenerateWeddingWrapped = async () => {
+    if (!selectedWeddingId) return;
+
+    setIsGeneratingWrapped(true);
+    try {
+      const data = await AnalyticsService.analyticsControllerGenerateWeddingWrapped(selectedWeddingId);
+      setWeddingWrappedData(data);
+      setIsWeddingWrappedModalOpen(true);
+      toast.success('Wedding Wrapped Generated! Your wedding analytics have been successfully generated.');
+    } catch (error) {
+      console.error('Error generating Wedding Wrapped:', error);
+      toast.error('Failed to generate Wedding Wrapped. Please try again.');
+    } finally {
+      setIsGeneratingWrapped(false);
+    }
+  };
+
+  const handleSaveWeddingWrapped = async () => {
+    if (!selectedWeddingId) return;
+
+    setIsSavingWrapped(true);
+    try {
+      // The data is already saved when generated, so we just need to confirm
+      await AnalyticsService.analyticsControllerGetWeddingWrapped(selectedWeddingId);
+      toast.success('Wedding Wrapped Saved! Your Wedding Wrapped has been saved successfully.');
+      setIsWeddingWrappedModalOpen(false);
+    } catch (error) {
+      console.error('Error saving Wedding Wrapped:', error);
+      toast.error('Failed to save Wedding Wrapped. Please try again.');
+    } finally {
+      setIsSavingWrapped(false);
+    }
+  };
+
   if (!selectedWeddingId || !selectedWedding) {
     return (
       <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground py-6">
@@ -168,6 +215,39 @@ const AdminDashboardModule = () => {
           title={`Welcome back, ${session?.user?.name || 'there'}!`}
           description={headerDescription}
         />
+
+        {/* Wedding Wrapped Card - Only show when wedding has passed */}
+        {daysUntilWedding !== null && daysUntilWedding < 0 && (
+          <div className="mb-6">
+            <Card className="border-2 border-brand-200 bg-gradient-to-r from-brand-25 to-brand-50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-brand-500" />
+                  Wedding Wrapped
+                </CardTitle>
+                <CardDescription>
+                  Relive your special day with a comprehensive look at all your wedding analytics and memories
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  onClick={handleGenerateWeddingWrapped}
+                  disabled={isGeneratingWrapped}
+                  className="bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700"
+                >
+                  {isGeneratingWrapped ? (
+                    <>Generating...</>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Generate Wedding Wrapped
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* First Row - Stats Cards */}
         <div className="mb-4">
@@ -201,6 +281,15 @@ const AdminDashboardModule = () => {
             isLoading={isLoadingChecklist}
           />
         </div>
+
+        {/* Wedding Wrapped Modal */}
+        <WeddingWrappedModal
+          open={isWeddingWrappedModalOpen}
+          onOpenChange={setIsWeddingWrappedModalOpen}
+          data={weddingWrappedData}
+          onSave={handleSaveWeddingWrapped}
+          isSaving={isSavingWrapped}
+        />
       </div>
     </div>
   );
