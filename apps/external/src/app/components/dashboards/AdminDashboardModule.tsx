@@ -287,6 +287,7 @@ const AdminDashboardModule = () => {
           open={isWeddingWrappedModalOpen}
           onOpenChange={setIsWeddingWrappedModalOpen}
           data={weddingWrappedData}
+          wedding={selectedWedding}
           onSave={handleSaveWeddingWrapped}
           isSaving={isSavingWrapped}
         />

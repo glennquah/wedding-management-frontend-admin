@@ -1,17 +1,19 @@
 'use client';
 
-import React, { useEffect, useState, useRef, Suspense } from 'react';
-import { WeddingWrappedResponseDto } from '@shared/api';
-import { Button } from '@shared/components/ui/button';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
+
 import { Canvas, useFrame } from '@react-three/fiber';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight, ChevronLeft, Volume2, VolumeX } from 'lucide-react';
+import { WeddingResponseDto, WeddingWrappedResponseDto } from '@shared/api';
+import { Button } from '@shared/components/ui/button';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Volume2, VolumeX, X } from 'lucide-react';
 import * as THREE from 'three';
 
 interface WeddingWrappedModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   data: WeddingWrappedResponseDto | null;
+  wedding: WeddingResponseDto | undefined;
   onSave: () => void;
   isSaving: boolean;
 }
@@ -32,6 +34,33 @@ const audioOptions = [
   },
 ];
 
+// Type definitions for particle userData
+interface ParticleUserData {
+  positions: number[];
+  velocities: number[];
+  time?: number;
+  scales?: number[];
+  phases?: number[];
+}
+
+// Type for slide statistics
+interface SlideStatItem {
+  label: string;
+  value: number;
+  color: string;
+  delay: number;
+}
+
+interface SlideMemoryItem extends SlideStatItem {
+  icon: string;
+}
+
+// Type for slide content
+interface SlideContent {
+  background: () => React.ReactElement;
+  content: React.ReactElement;
+}
+
 // Confetti Particles for Guest Experience
 function ConfettiParticles() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
@@ -49,26 +78,29 @@ function ConfettiParticles() {
       positions.push(
         (Math.random() - 0.5) * 20,
         Math.random() * 15 + 5,
-        (Math.random() - 0.5) * 20
+        (Math.random() - 0.5) * 20,
       );
       velocities.push(
         (Math.random() - 0.5) * 0.02,
         -Math.random() * 0.05 - 0.02,
-        (Math.random() - 0.5) * 0.02
+        (Math.random() - 0.5) * 0.02,
       );
       const color = new THREE.Color();
       color.setHSL(Math.random(), 0.8, 0.6);
       colors.push(color.r, color.g, color.b);
     }
 
-    (meshRef.current as any).userData = { positions, velocities };
+    meshRef.current.userData = { positions, velocities } as ParticleUserData;
 
     for (let i = 0; i < count; i++) {
       dummy.position.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
       dummy.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
-      meshRef.current.setColorAt(i, new THREE.Color(colors[i * 3], colors[i * 3 + 1], colors[i * 3 + 2]));
+      meshRef.current.setColorAt(
+        i,
+        new THREE.Color(colors[i * 3], colors[i * 3 + 1], colors[i * 3 + 2]),
+      );
     }
     meshRef.current.instanceMatrix.needsUpdate = true;
     if (meshRef.current.instanceColor) meshRef.current.instanceColor.needsUpdate = true;
@@ -77,7 +109,8 @@ function ConfettiParticles() {
   useFrame(() => {
     if (!meshRef.current) return;
 
-    const { positions, velocities } = (meshRef.current as any).userData;
+    const userData = meshRef.current.userData as ParticleUserData;
+    const { positions, velocities } = userData;
     if (!positions || !velocities) return;
 
     for (let i = 0; i < count; i++) {
@@ -124,16 +157,12 @@ function FloatingHearts() {
       positions.push(
         (Math.random() - 0.5) * 15,
         Math.random() * 20 - 5,
-        (Math.random() - 0.5) * 15
+        (Math.random() - 0.5) * 15,
       );
-      velocities.push(
-        Math.sin(i) * 0.01,
-        Math.random() * 0.02 + 0.01,
-        Math.cos(i) * 0.01
-      );
+      velocities.push(Math.sin(i) * 0.01, Math.random() * 0.02 + 0.01, Math.cos(i) * 0.01);
     }
 
-    (meshRef.current as any).userData = { positions, velocities, time: 0 };
+    meshRef.current.userData = { positions, velocities, time: 0 } as ParticleUserData;
 
     for (let i = 0; i < count; i++) {
       dummy.position.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
@@ -147,15 +176,17 @@ function FloatingHearts() {
   useFrame(() => {
     if (!meshRef.current) return;
 
-    const { positions, velocities, time } = (meshRef.current as any).userData;
+    const userData = meshRef.current.userData as ParticleUserData;
+    const { positions, velocities, time } = userData;
     if (!positions || !velocities) return;
 
-    (meshRef.current as any).userData.time += 0.01;
+    const currentTime = (time || 0) + 0.01;
+    userData.time = currentTime;
 
     for (let i = 0; i < count; i++) {
-      positions[i * 3] += velocities[i * 3] + Math.sin(time + i) * 0.01;
+      positions[i * 3] += velocities[i * 3] + Math.sin(currentTime + i) * 0.01;
       positions[i * 3 + 1] += velocities[i * 3 + 1];
-      positions[i * 3 + 2] += velocities[i * 3 + 2] + Math.cos(time + i) * 0.01;
+      positions[i * 3 + 2] += velocities[i * 3 + 2] + Math.cos(currentTime + i) * 0.01;
 
       if (positions[i * 3 + 1] > 15) {
         positions[i * 3 + 1] = -5;
@@ -164,8 +195,12 @@ function FloatingHearts() {
       }
 
       dummy.position.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
-      dummy.rotation.y = time + i;
-      dummy.scale.set(0.3 + Math.sin(time + i) * 0.1, 0.3 + Math.sin(time + i) * 0.1, 0.3);
+      dummy.rotation.y = currentTime + i;
+      dummy.scale.set(
+        0.3 + Math.sin(currentTime + i) * 0.1,
+        0.3 + Math.sin(currentTime + i) * 0.1,
+        0.3,
+      );
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
     }
@@ -196,12 +231,12 @@ function SparklingStars() {
       positions.push(
         (Math.random() - 0.5) * 25,
         (Math.random() - 0.5) * 25,
-        (Math.random() - 0.5) * 25
+        (Math.random() - 0.5) * 25,
       );
       scales.push(Math.random() * 0.3 + 0.1);
     }
 
-    (meshRef.current as any).userData = { positions, scales, time: 0 };
+    meshRef.current.userData = { positions, velocities: [], scales, time: 0 } as ParticleUserData;
 
     for (let i = 0; i < count; i++) {
       dummy.position.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
@@ -215,16 +250,18 @@ function SparklingStars() {
   useFrame(() => {
     if (!meshRef.current) return;
 
-    const { positions, scales, time } = (meshRef.current as any).userData;
+    const userData = meshRef.current.userData as ParticleUserData;
+    const { positions, scales, time } = userData;
     if (!positions || !scales) return;
 
-    (meshRef.current as any).userData.time += 0.02;
+    const currentTime = (time || 0) + 0.02;
+    userData.time = currentTime;
 
     for (let i = 0; i < count; i++) {
-      const scale = scales[i] * (1 + Math.sin(time * 2 + i) * 0.5);
+      const scale = scales[i] * (1 + Math.sin(currentTime * 2 + i) * 0.5);
       dummy.position.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
       dummy.scale.setScalar(scale);
-      dummy.rotation.z = time + i;
+      dummy.rotation.z = currentTime + i;
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
     }
@@ -255,12 +292,12 @@ function CameraFlashes() {
       positions.push(
         (Math.random() - 0.5) * 20,
         (Math.random() - 0.5) * 20,
-        (Math.random() - 0.5) * 20
+        (Math.random() - 0.5) * 20,
       );
       phases.push(Math.random() * Math.PI * 2);
     }
 
-    (meshRef.current as any).userData = { positions, phases, time: 0 };
+    meshRef.current.userData = { positions, velocities: [], phases, time: 0 } as ParticleUserData;
 
     for (let i = 0; i < count; i++) {
       dummy.position.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
@@ -274,13 +311,18 @@ function CameraFlashes() {
   useFrame(() => {
     if (!meshRef.current) return;
 
-    const { positions, phases, time } = (meshRef.current as any).userData;
+    const userData = meshRef.current.userData as ParticleUserData;
+    const { positions, phases, time } = userData;
     if (!positions || !phases) return;
 
-    (meshRef.current as any).userData.time += 0.05;
+    const currentTime = (time || 0) + 0.05;
+    userData.time = currentTime;
 
     for (let i = 0; i < count; i++) {
-      const flash = Math.max(0, Math.sin(time + phases[i]) * Math.sin(time * 2 + phases[i]));
+      const flash = Math.max(
+        0,
+        Math.sin(currentTime + phases[i]) * Math.sin(currentTime * 2 + phases[i]),
+      );
       dummy.position.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
       dummy.scale.setScalar(0.3 + flash * 0.5);
       dummy.updateMatrix();
@@ -328,6 +370,7 @@ export function WeddingWrappedModal({
   open,
   onOpenChange,
   data,
+  wedding,
   onSave,
   isSaving,
 }: WeddingWrappedModalProps) {
@@ -341,7 +384,7 @@ export function WeddingWrappedModal({
       // Start playing music when modal opens
       if (audioRef.current) {
         audioRef.current.currentTime = 0;
-        audioRef.current.play().catch((error) => {
+        audioRef.current.play().catch((error: unknown) => {
           console.log('Auto-play prevented:', error);
         });
       }
@@ -380,12 +423,12 @@ export function WeddingWrappedModal({
     });
   };
 
-  const slides = [
+  const slides: SlideContent[] = [
     // Intro Slide
     {
       background: ConfettiParticles,
       content: (
-        <div className="text-center space-y-8">
+        <div className="text-center space-y-8 max-w-5xl">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -395,14 +438,83 @@ export function WeddingWrappedModal({
               Wedding Wrapped
             </h1>
           </motion.div>
-          <motion.p
-            className="text-3xl text-white"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 1 }}
-          >
-            <AnimatedWords text="A celebration of your special day" startDelay={0.8} />
-          </motion.p>
+
+          {wedding && (
+            <>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.8 }}
+                className="space-y-8"
+              >
+                <p className="text-6xl text-white font-bold">
+                  <AnimatedWords
+                    text={`On ${new Date(wedding.date).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}`}
+                    startDelay={0.6}
+                  />
+                </p>
+
+                {wedding.mainCouple && wedding.mainCouple.length > 0 && (
+                  <motion.div
+                    className="space-y-6"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1.2, duration: 0.8 }}
+                  >
+                    <p className="text-8xl text-white font-bold leading-tight">
+                      <AnimatedWords
+                        text={wedding.mainCouple[0]?.name || 'Partner 1'}
+                        startDelay={1.3}
+                      />
+                    </p>
+                    <p className="text-7xl text-pink-300 font-semibold">
+                      <AnimatedWords text="tied the knot with" startDelay={1.9} />
+                    </p>
+                    <p className="text-8xl text-white font-bold leading-tight">
+                      <AnimatedWords
+                        text={
+                          wedding.mainCouple[1]?.name ||
+                          (wedding.mainCouple[0]?.name ? 'Partner 2' : wedding.name)
+                        }
+                        startDelay={2.5}
+                      />
+                    </p>
+                  </motion.div>
+                )}
+              </motion.div>
+
+              {wedding.location && (
+                <motion.div
+                  className="bg-white/10 backdrop-blur-lg rounded-3xl p-10 border-2 border-white/30 shadow-2xl"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 3.2, duration: 0.8 }}
+                >
+                  <p className="text-4xl text-white/80 mb-4">
+                    <AnimatedWords text="📍 Celebrated at" startDelay={3.3} />
+                  </p>
+                  <p className="text-6xl text-white font-bold">
+                    <AnimatedWords text={wedding.location} startDelay={3.7} />
+                  </p>
+                </motion.div>
+              )}
+            </>
+          )}
+
+          {!wedding && (
+            <motion.p
+              className="text-3xl text-white"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8, duration: 1 }}
+            >
+              <AnimatedWords text="A celebration of your special day" startDelay={0.8} />
+            </motion.p>
+          )}
         </div>
       ),
     },
@@ -422,11 +534,28 @@ export function WeddingWrappedModal({
           </motion.h2>
 
           <div className="grid grid-cols-3 gap-8 mb-8">
-            {[
-              { label: 'Invited', value: guestInsights.totalInvited, color: 'from-blue-400 to-blue-600', delay: 0.3 },
-              { label: 'Confirmed', value: guestInsights.totalConfirmed, color: 'from-green-400 to-green-600', delay: 0.5 },
-              { label: 'Attended', value: guestInsights.totalAttended, color: 'from-purple-400 to-purple-600', delay: 0.7 },
-            ].map((item, idx) => (
+            {(
+              [
+                {
+                  label: 'Invited',
+                  value: guestInsights.totalInvited,
+                  color: 'from-blue-400 to-blue-600',
+                  delay: 0.3,
+                },
+                {
+                  label: 'Confirmed',
+                  value: guestInsights.totalConfirmed,
+                  color: 'from-green-400 to-green-600',
+                  delay: 0.5,
+                },
+                {
+                  label: 'Attended',
+                  value: guestInsights.totalAttended,
+                  color: 'from-purple-400 to-purple-600',
+                  delay: 0.7,
+                },
+              ] as const satisfies readonly SlideStatItem[]
+            ).map((item, idx) => (
               <motion.div
                 key={idx}
                 className={`bg-gradient-to-br ${item.color} rounded-2xl p-8 text-center shadow-2xl`}
@@ -451,7 +580,10 @@ export function WeddingWrappedModal({
                 <AnimatedWords text="🏆 First to Arrive" startDelay={1.2} />
               </p>
               <p className="text-3xl text-white">
-                <AnimatedWords text={`${guestInsights.firstGuestName} at ${formatDate(guestInsights.firstGuestTime)}`} startDelay={1.5} />
+                <AnimatedWords
+                  text={`${guestInsights.firstGuestName} at ${formatDate(guestInsights.firstGuestTime)}`}
+                  startDelay={1.5}
+                />
               </p>
             </motion.div>
           )}
@@ -662,12 +794,38 @@ export function WeddingWrappedModal({
           </motion.h2>
 
           <div className="grid grid-cols-2 gap-8">
-            {[
-              { label: 'Photos Uploaded', value: emotionalTouchInsights.totalPhotos, color: 'from-orange-400 to-red-600', icon: '📸', delay: 0.3 },
-              { label: 'Well Wishes', value: emotionalTouchInsights.totalWellWishes, color: 'from-purple-400 to-pink-600', icon: '💌', delay: 0.5 },
-              { label: 'Faces Detected', value: emotionalTouchInsights.totalFacesDetected, color: 'from-blue-400 to-cyan-600', icon: '👥', delay: 0.7 },
-              { label: 'Unique People', value: emotionalTouchInsights.totalPeopleClusters, color: 'from-green-400 to-teal-600', icon: '✨', delay: 0.9 },
-            ].map((item, idx) => (
+            {(
+              [
+                {
+                  label: 'Photos Uploaded',
+                  value: emotionalTouchInsights.totalPhotos,
+                  color: 'from-orange-400 to-red-600',
+                  icon: '📸',
+                  delay: 0.3,
+                },
+                {
+                  label: 'Well Wishes',
+                  value: emotionalTouchInsights.totalWellWishes,
+                  color: 'from-purple-400 to-pink-600',
+                  icon: '💌',
+                  delay: 0.5,
+                },
+                {
+                  label: 'Faces Detected',
+                  value: emotionalTouchInsights.totalFacesDetected,
+                  color: 'from-blue-400 to-cyan-600',
+                  icon: '👥',
+                  delay: 0.7,
+                },
+                {
+                  label: 'Unique People',
+                  value: emotionalTouchInsights.totalPeopleClusters,
+                  color: 'from-green-400 to-teal-600',
+                  icon: '✨',
+                  delay: 0.9,
+                },
+              ] as const satisfies readonly SlideMemoryItem[]
+            ).map((item, idx) => (
               <motion.div
                 key={idx}
                 className={`bg-gradient-to-br ${item.color} rounded-2xl p-8 text-center shadow-2xl`}
@@ -709,9 +867,7 @@ export function WeddingWrappedModal({
             animate={{ scale: 1 }}
             transition={{ duration: 0.8, type: 'spring' }}
           >
-            <h1 className="text-7xl font-bold text-white mb-4">
-              Thank You for Celebrating
-            </h1>
+            <h1 className="text-7xl font-bold text-white mb-4">Thank You for Celebrating</h1>
           </motion.div>
           <motion.p
             className="text-3xl text-white/90 mb-8"
@@ -797,21 +953,21 @@ export function WeddingWrappedModal({
               onClick={prevSlide}
               disabled={currentSlide === 0}
               size="lg"
-              className="rounded-full w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 border-2 border-white shadow-2xl disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:scale-110"
+              className="rounded-full w-12 h-12 p-0 bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 border-4 border-white shadow-2xl disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:scale-110 flex items-center justify-center"
             >
-              <ChevronLeft className="w-10 h-10 text-white" />
+              <ChevronLeft className="w-8 h-8 text-white" strokeWidth={4} />
             </Button>
 
             {/* Progress Dots */}
-            <div className="flex gap-3 px-6 py-3 bg-black/40 backdrop-blur-lg rounded-full border border-white/30">
+            <div className="flex gap-2 px-4 py-2 bg-black/40 backdrop-blur-lg rounded-full border border-white/30">
               {slides.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
                   className={`rounded-full transition-all ${
                     index === currentSlide
-                      ? 'bg-white w-10 h-4'
-                      : 'bg-white/50 hover:bg-white/80 w-4 h-4'
+                      ? 'bg-white w-6 h-2'
+                      : 'bg-white/50 hover:bg-white/80 w-2 h-2'
                   }`}
                 />
               ))}
@@ -821,9 +977,9 @@ export function WeddingWrappedModal({
               onClick={nextSlide}
               disabled={currentSlide === slides.length - 1}
               size="lg"
-              className="rounded-full w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 border-2 border-white shadow-2xl disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:scale-110"
+              className="rounded-full w-12 h-12 p-0 bg-gradient-to-br from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 border-4 border-white shadow-2xl disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:scale-110 flex items-center justify-center"
             >
-              <ChevronRight className="w-10 h-10 text-white" />
+              <ChevronRight className="w-8 h-8 text-white" strokeWidth={4} />
             </Button>
           </div>
 
