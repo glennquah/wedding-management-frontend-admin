@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
 import {
   AdminsService,
   BudgetBucket,
@@ -23,6 +24,7 @@ interface WeddingFormData {
   guestCountBucket: GuestCountBucket;
   preferredStyle: WeddingStyle;
   preferredServices: WeddingService[];
+  payLahQR?: string;
 }
 
 const formatDateForInput = (date?: string | null) => {
@@ -65,6 +67,7 @@ export const useWeddingProfile = () => {
     guestCountBucket: GuestCountBucket.MEDIUM,
     preferredStyle: WeddingStyle.MODERN,
     preferredServices: [],
+    payLahQR: '',
   });
 
   const fetchMainWedding = useCallback(async () => {
@@ -100,6 +103,7 @@ export const useWeddingProfile = () => {
       guestCountBucket: wedding.guestCountBucket,
       preferredStyle: wedding.preferredStyle,
       preferredServices: wedding.preferredServices || [],
+      payLahQR: wedding.payLahQR || '',
     });
   }, []);
 
@@ -110,7 +114,7 @@ export const useWeddingProfile = () => {
     }));
   }, []);
 
-  const updateWeddingProfile = useCallback(async () => {
+  const updateWeddingProfile = useCallback(async (silentSuccess?: boolean) => {
     if (!weddingData) return;
 
     const updateData: UpdateWeddingDto = {};
@@ -131,12 +135,24 @@ export const useWeddingProfile = () => {
     if (JSON.stringify(weddingFormData.preferredServices) !== JSON.stringify(weddingData.preferredServices || [])) {
       updateData.preferredServices = weddingFormData.preferredServices;
     }
+    // Handle payLahQR comparison properly (comparing empty string with null/undefined)
+    const currentpayLahQR = weddingData.payLahQR || '';
+    const newpayLahQR = weddingFormData.payLahQR || '';
+    if (newpayLahQR !== currentpayLahQR) {
+      // Explicitly set to empty string when deleting to ensure the field is sent to the API
+      updateData.payLahQR = newpayLahQR === '' ? '' : newpayLahQR;
+    }
+
+    console.log('Wedding Update Data:', updateData);
 
     // Only update if there are changes
     if (Object.keys(updateData).length > 0) {
       const updatedWedding = await WeddingsService.weddingControllerUpdate(weddingData.id, updateData);
       setWeddingData(updatedWedding);
       populateWeddingFormData(updatedWedding);
+      if (!silentSuccess) {
+        toast.success('Wedding details updated successfully');
+      }
     }
   }, [weddingData, weddingFormData, populateWeddingFormData]);
 

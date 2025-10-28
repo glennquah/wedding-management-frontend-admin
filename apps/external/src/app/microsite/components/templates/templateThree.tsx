@@ -1,7 +1,6 @@
 import { RefObject, useEffect, useMemo, useState } from 'react';
 
-import FaqAccordion from '../FaqAccordion';
-import GalleryDialog from '../GalleryDialog';
+import { WeddingsService } from '@shared/api/services/WeddingsService';
 import { Button } from '@shared/components/ui/button';
 import { MultiSelectDropdown } from '@shared/components/ui/form/multiSelectDropdown';
 import { Switch } from '@shared/components/ui/switch';
@@ -10,6 +9,8 @@ import { GuestResponseDto, MicrositeResponseDto } from '@wedding/api-types';
 import { Cormorant_Garamond, Nunito } from 'next/font/google';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import FaqAccordion from '../FaqAccordion';
+import GalleryDialog from '../GalleryDialog';
 
 // Clean, professional heading + friendly body
 const serif = Cormorant_Garamond({ subsets: ['latin'], weight: ['600', '700'] });
@@ -51,6 +52,9 @@ export default function TemplateThree({
 
   // Food allergies state
   const [selectedAllergies, setSelectedAllergies] = useState<string[]>([]);
+
+  // QR code availability state
+  const [hasQRCode, setHasQRCode] = useState<boolean>(false);
 
   // Common allergen options
   const allergenOptions = [
@@ -103,6 +107,22 @@ export default function TemplateThree({
     // no-op, but keep for potential client-only effects
   }, []);
 
+  // Fetch wedding data to check if QR code exists
+  useEffect(() => {
+    const checkQRCode = async () => {
+      if (isWeddingLive && micrositeData?.weddingId) {
+        try {
+          const weddingData = await WeddingsService.weddingControllerFindPublic(micrositeData.weddingId);
+          setHasQRCode(!!weddingData.payLahQR);
+        } catch (error) {
+          // If fetching fails, assume no QR code
+          setHasQRCode(false);
+        }
+      }
+    };
+    checkQRCode();
+  }, [isWeddingLive, micrositeData?.weddingId]);
+
   return (
     <main
       className={`${nunito.className} relative min-h-screen w-full overflow-x-hidden transition-colors duration-500 ${
@@ -111,6 +131,26 @@ export default function TemplateThree({
     >
       {micrositeSlug && (
         <div className="absolute top-4 right-4 z-50 flex gap-3">
+          <Button
+            onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
+            className="rounded-full bg-[#EADBC8] hover:bg-[#E5D4BE] text-stone-900 border border-stone-300"
+          >
+            View Album
+          </Button>
+          {hasQRCode && (
+            <Button
+              onClick={() => router.push(`/microsite/${micrositeSlug}/cashgift/${micrositeData?.weddingId}`)}
+              className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+            >
+              Cash Giftings
+            </Button>
+          )}
+          <Button
+            onClick={() => router.push(`/microsite/${micrositeSlug}/guestbook`)}
+            className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+          >
+            View Guestbook
+          </Button>
           {hasWishlistItems && (
             <Button
               onClick={() => router.push(`/microsite/${micrositeSlug}/wishlist`)}
@@ -119,22 +159,7 @@ export default function TemplateThree({
               Wishlist
             </Button>
           )}
-          {isWeddingLive && (
-            <>
-              <Button
-                onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
-                className="rounded-full bg-[#EADBC8] hover:bg-[#E5D4BE] text-stone-900 border border-stone-300"
-              >
-                View Album
-              </Button>
-              <Button
-                onClick={() => router.push(`/microsite/${micrositeSlug}/guestbook`)}
-                className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
-              >
-                View Guestbook
-              </Button>
-            </>
-          )}
+          
         </div>
       )}
 
