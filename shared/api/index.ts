@@ -38,6 +38,7 @@ export type { CategoryRevenueData } from './models/CategoryRevenueData';
 export { ChatMessageResponseDto } from './models/ChatMessageResponseDto';
 export type { ChecklistItemResponseDto } from './models/ChecklistItemResponseDto';
 export { ChecklistResponseDto } from './models/ChecklistResponseDto';
+export type { ChecklistStatsResponseDto } from './models/ChecklistStatsResponseDto';
 export type { CheckoutSessionResponseDto } from './models/CheckoutSessionResponseDto';
 export type { CollaboratorResponseDto } from './models/CollaboratorResponseDto';
 export { ConfirmationStatus } from './models/ConfirmationStatus';

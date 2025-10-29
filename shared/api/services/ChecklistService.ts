@@ -5,6 +5,7 @@
 import type { ChatMessageResponseDto } from '../models/ChatMessageResponseDto';
 import type { ChecklistItemResponseDto } from '../models/ChecklistItemResponseDto';
 import type { ChecklistResponseDto } from '../models/ChecklistResponseDto';
+import type { ChecklistStatsResponseDto } from '../models/ChecklistStatsResponseDto';
 import type { CreateChecklistDto } from '../models/CreateChecklistDto';
 import type { CreateChecklistItemDto } from '../models/CreateChecklistItemDto';
 import type { UpdateChecklistDto } from '../models/UpdateChecklistDto';
@@ -361,30 +362,12 @@ export class ChecklistService {
     /**
      * Get completion statistics for a checklist
      * @param id Checklist ID
-     * @returns any Completion statistics retrieved successfully
+     * @returns ChecklistStatsResponseDto Completion statistics retrieved successfully
      * @throws ApiError
      */
     public static checklistControllerGetCompletionStats(
         id: number,
-    ): CancelablePromise<{
-        /**
-         * Total number of items
-         */
-        total?: number;
-        /**
-         * Number of completed items
-         */
-        completed?: number;
-        /**
-         * Completion percentage
-         */
-        percentage?: number;
-        byCategory?: Record<string, {
-            total?: number;
-            completed?: number;
-            percentage?: number;
-        }>;
-    }> {
+    ): CancelablePromise<ChecklistStatsResponseDto> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/checklist/{id}/stats',
