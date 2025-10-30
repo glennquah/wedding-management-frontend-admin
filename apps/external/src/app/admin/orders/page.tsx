@@ -1,6 +1,13 @@
- 'use client';
+'use client';
 
-import { OrderCard, PageHeader, Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components';
+import {
+  OrderCard,
+  PageHeader,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@shared/components';
 import { Loader2, Package } from 'lucide-react';
 import { OrderListing, useOrders } from '../../hooks/useOrders';
 import { useWeddingStore } from '../../store/sessionStore';
@@ -10,6 +17,7 @@ export default function OrdersPage() {
   const {
     vendors,
     isLoading,
+    fetchOrders,
     handleDeleteOrder,
     handlePayNow,
     allOrderListings,
@@ -25,21 +33,21 @@ export default function OrdersPage() {
       <div className="container mx-auto px-4 pt-4 md:pt-6">
         <PageHeader title="My Orders" description="Track your wedding service orders" />
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <Loader2 className="text-primary h-8 w-8 animate-spin" />
         </div>
       </div>
     );
   }
 
   const EmptyState = ({ message }: { message: string }) => (
-    <div className="flex flex-col items-center justify-center py-8 text-center mt-6">
-      <Package className="w-16 h-16 text-gray-300 mb-4" />
-      <p className="text-gray-500 text-sm">{message}</p>
+    <div className="mt-6 flex flex-col items-center justify-center py-8 text-center">
+      <Package className="mb-4 h-16 w-16 text-gray-300" />
+      <p className="text-sm text-gray-500">{message}</p>
     </div>
   );
 
   const OrderListingList = ({ orderListings }: { orderListings: OrderListing[] }) => (
-    <div className="grid grid-cols-1 gap-4 mt-6">
+    <div className="mt-6 grid grid-cols-1 gap-4">
       {orderListings.map((ol, index) => {
         const vendor = vendors[ol.listing.vendorId];
         return (
@@ -52,6 +60,7 @@ export default function OrdersPage() {
             vendorEmail={vendor?.email}
             onDelete={handleDeleteOrder}
             onPayNow={handlePayNow}
+            onRefresh={fetchOrders}
           />
         );
       })}
@@ -63,45 +72,45 @@ export default function OrdersPage() {
       <PageHeader title="My Orders" description="Track your wedding service orders" />
 
       <Tabs defaultValue="all" className="mt-6">
-        <TabsList className="bg-muted/50 rounded-lg p-1 grid w-full grid-cols-4 md:flex md:space-x-2 md:w-fit">
+        <TabsList className="bg-muted/50 grid w-full grid-cols-4 rounded-lg p-1 md:flex md:w-fit md:space-x-2">
           <TabsTrigger
             value="all"
-            className="px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+            className="text-foreground data-[state=active]:bg-primary hover:bg-primary/20 hover:text-foreground rounded-lg px-2 py-2 text-xs font-medium transition-colors data-[state=active]:text-white md:px-4 md:text-sm"
           >
             <span className="md:hidden">All ({allOrderListings.length})</span>
             <span className="hidden md:block">All Orders ({allOrderListings.length})</span>
           </TabsTrigger>
           <TabsTrigger
             value="to-pay"
-            className="px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+            className="text-foreground data-[state=active]:bg-primary hover:bg-primary/20 hover:text-foreground rounded-lg px-2 py-2 text-xs font-medium transition-colors data-[state=active]:text-white md:px-4 md:text-sm"
           >
             <span className="md:hidden">To Pay ({toPayOrderListings.length})</span>
             <span className="hidden md:block">To Pay ({toPayOrderListings.length})</span>
           </TabsTrigger>
           <TabsTrigger
             value="paid"
-            className="px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+            className="text-foreground data-[state=active]:bg-primary hover:bg-primary/20 hover:text-foreground rounded-lg px-2 py-2 text-xs font-medium transition-colors data-[state=active]:text-white md:px-4 md:text-sm"
           >
             <span className="md:hidden">Paid ({paidOrderListings.length})</span>
             <span className="hidden md:block">Paid ({paidOrderListings.length})</span>
           </TabsTrigger>
           <TabsTrigger
             value="confirmed"
-            className="px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+            className="text-foreground data-[state=active]:bg-primary hover:bg-primary/20 hover:text-foreground rounded-lg px-2 py-2 text-xs font-medium transition-colors data-[state=active]:text-white md:px-4 md:text-sm"
           >
             <span className="md:hidden">Done ({confirmedOrderListings.length})</span>
             <span className="hidden md:block">Confirmed ({confirmedOrderListings.length})</span>
           </TabsTrigger>
           <TabsTrigger
             value="cancelled"
-            className="px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+            className="text-foreground data-[state=active]:bg-primary hover:bg-primary/20 hover:text-foreground rounded-lg px-2 py-2 text-xs font-medium transition-colors data-[state=active]:text-white md:px-4 md:text-sm"
           >
             <span className="md:hidden">Cancelled ({cancelledOrderListings.length})</span>
             <span className="hidden md:block">Cancelled ({cancelledOrderListings.length})</span>
           </TabsTrigger>
           <TabsTrigger
             value="completed"
-            className="px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium text-foreground data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-primary/20 hover:text-foreground transition-colors"
+            className="text-foreground data-[state=active]:bg-primary hover:bg-primary/20 hover:text-foreground rounded-lg px-2 py-2 text-xs font-medium transition-colors data-[state=active]:text-white md:px-4 md:text-sm"
           >
             <span className="md:hidden">Completed ({completedOrderListings.length})</span>
             <span className="hidden md:block">Completed ({completedOrderListings.length})</span>
