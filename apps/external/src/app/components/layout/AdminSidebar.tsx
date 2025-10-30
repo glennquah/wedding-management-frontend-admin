@@ -1,10 +1,18 @@
 'use client';
 
+import { useMemo } from 'react';
+
+import { useUrgentChecklistItems } from '../../hooks/useUrgentChecklistItems';
+import {
+  createEmptyProgressTrackerData,
+  useProgressTrackerStore,
+} from '../../store/progressTrackerStore';
 import { signOut, useWeddingStore } from '../../store/sessionStore';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
   BookOpenText,
+  Calendar,
   Camera,
   ClipboardList,
   Clock,
@@ -18,8 +26,23 @@ import {
 } from 'lucide-react';
 
 export default function AdminSidebar() {
-  const { weddings } = useWeddingStore();
+  const { weddings, firstPurchaseMade, selectedWeddingId } = useWeddingStore();
   const hasWedding = weddings && weddings.length > 0;
+  const selectedWedding = weddings?.find((w) => w.id === selectedWeddingId) || null;
+
+  // Get checklist data from store using getState to avoid subscription issues
+  const progressData = useMemo(() => {
+    if (typeof selectedWeddingId !== 'number') {
+      return createEmptyProgressTrackerData(0);
+    }
+    const state = useProgressTrackerStore.getState();
+    return (
+      state.drafts[selectedWeddingId]?.data ?? createEmptyProgressTrackerData(selectedWeddingId)
+    );
+  }, [selectedWeddingId]);
+
+  // Calculate urgent items count
+  const { totalUrgentCount } = useUrgentChecklistItems(progressData.checklist, selectedWedding);
 
   const tabs = [
     {
@@ -31,22 +54,23 @@ export default function AdminSidebar() {
           icon: LayoutDashboard,
         },
         {
+          title: 'Progress Tracker',
+          href: '/progress-tracker',
+          icon: Clock,
+          disabled: !hasWedding,
+          badge: hasWedding ? totalUrgentCount : undefined,
+        },
+        {
           title: 'Shop',
           href: '/ecommerce',
           icon: ShoppingCart,
           disabled: !hasWedding,
         },
         {
-          title: 'Progress Tracker',
-          href: '/progress-tracker',
-          icon: Clock,
-          disabled: !hasWedding,
-        },
-        {
           title: 'Notification Templates',
           href: '/notification-templates',
           icon: BellDot,
-          disabled: !hasWedding,
+          disabled: !hasWedding || !firstPurchaseMade,
         },
       ],
     },
@@ -69,7 +93,13 @@ export default function AdminSidebar() {
           title: 'Seating Arrangement',
           href: '/seating-arrangement',
           icon: MapPin,
-          disabled: !hasWedding,
+          disabled: !hasWedding || !firstPurchaseMade,
+        },
+        {
+          title: 'Timeline',
+          href: '/timeline',
+          icon: Calendar,
+          disabled: !hasWedding || !firstPurchaseMade,
         },
         {
           title: 'Date Optimizer',
@@ -81,7 +111,7 @@ export default function AdminSidebar() {
           title: 'Microsite',
           href: '/microsite',
           icon: PaintRoller,
-          disabled: !hasWedding,
+          disabled: !hasWedding || !firstPurchaseMade,
         },
         {
           title: 'Wishlist',
@@ -93,13 +123,13 @@ export default function AdminSidebar() {
           title: 'Album Invite',
           href: '/album',
           icon: Camera,
-          disabled: !hasWedding,
+          disabled: !hasWedding || !firstPurchaseMade,
         },
         {
           title: 'Attendance',
           href: '/attendance',
           icon: ClipboardList,
-          disabled: !hasWedding,
+          disabled: !hasWedding || !firstPurchaseMade,
         },
       ],
     },
@@ -110,7 +140,7 @@ export default function AdminSidebar() {
           title: 'Gratitude Card',
           href: '/gratitude',
           icon: BookOpenText,
-          disabled: !hasWedding,
+          disabled: !hasWedding || !firstPurchaseMade,
         },
       ],
     },

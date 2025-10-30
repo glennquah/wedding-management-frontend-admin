@@ -205,7 +205,7 @@ export default function CreateWeddingPage() {
         toast.success('Wedding created successfully!');
 
         // Force a full page reload to refresh the sidebar and all wedding-related data
-        window.location.href = '/admin';
+        window.location.href = '/admin/progress-tracker';
       } catch (error) {
         console.error('Error creating wedding:', error);
         toast.error('Failed to create wedding. Please try again.');
@@ -247,7 +247,7 @@ export default function CreateWeddingPage() {
     switch (step.key) {
       case 'basic':
         return (
-          <div className="space-y-6 max-w-2xl mx-auto">
+          <div className="mx-auto max-w-2xl space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
                 Wedding Name <span className="text-red-500">*</span>
@@ -289,13 +289,13 @@ export default function CreateWeddingPage() {
 
       case 'weddingType':
         return (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             {WEDDING_TYPES.map((type) => (
               <Card
                 key={type.value}
                 className={`cursor-pointer transition-all hover:shadow-md ${
                   onboardingData.weddingType === type.value
-                    ? 'ring-2 ring-brand-500 bg-destructive'
+                    ? 'ring-brand-500 bg-destructive ring-2'
                     : 'hover:bg-primary-hover'
                 }`}
                 onClick={() => {
@@ -310,7 +310,7 @@ export default function CreateWeddingPage() {
                   <CardTitle className="text-lg">{type.label}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="!text-base text-gray-900 font-medium">{type.description}</p>
+                  <p className="!text-base font-medium text-gray-900">{type.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -320,13 +320,13 @@ export default function CreateWeddingPage() {
       case 'budgetBucket':
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               {BUDGET_BUCKETS.map((budget) => (
                 <Card
                   key={budget.value}
                   className={`cursor-pointer transition-all hover:shadow-md ${
                     onboardingData.budgetBucket === budget.value
-                      ? 'ring-2 ring-brand-500 bg-destructive'
+                      ? 'ring-brand-500 bg-destructive ring-2'
                       : 'hover:bg-primary-hover'
                   }`}
                   onClick={() => {
@@ -341,13 +341,13 @@ export default function CreateWeddingPage() {
                     <CardTitle className="text-lg">{budget.label}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="!text-base text-gray-900 font-medium">{budget.description}</p>
+                    <p className="!text-base font-medium text-gray-900">{budget.description}</p>
                   </CardContent>
                 </Card>
               ))}
             </div>
 
-            <div className="space-y-2 max-w-2xl mx-auto">
+            <div className="mx-auto max-w-2xl space-y-2">
               <label className="text-sm font-medium text-gray-700">
                 Allocated Budget <span className="text-red-500">*</span>
               </label>
@@ -369,13 +369,13 @@ export default function CreateWeddingPage() {
 
       case 'guestCountBucket':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {GUEST_COUNT_BUCKETS.map((count) => (
               <Card
                 key={count.value}
                 className={`cursor-pointer transition-all hover:shadow-md ${
                   onboardingData.guestCountBucket === count.value
-                    ? 'ring-2 ring-brand-500 bg-destructive'
+                    ? 'ring-brand-500 bg-destructive ring-2'
                     : 'hover:bg-primary-hover'
                 }`}
                 onClick={() => {
@@ -390,7 +390,7 @@ export default function CreateWeddingPage() {
                   <CardTitle className="text-lg">{count.label}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="!text-base text-gray-900 font-medium">{count.description}</p>
+                  <p className="!text-base font-medium text-gray-900">{count.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -399,13 +399,13 @@ export default function CreateWeddingPage() {
 
       case 'preferredStyle':
         return (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {WEDDING_STYLES.map((style) => (
               <Card
                 key={style.value}
                 className={`cursor-pointer transition-all hover:shadow-md ${
                   onboardingData.preferredStyle === style.value
-                    ? 'ring-2 ring-brand-500 bg-destructive'
+                    ? 'ring-brand-500 bg-destructive ring-2'
                     : 'hover:bg-primary-hover'
                 }`}
                 onClick={() => {
@@ -420,7 +420,7 @@ export default function CreateWeddingPage() {
                   <CardTitle className="text-lg">{style.label}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="!text-base text-gray-900 font-medium">{style.description}</p>
+                  <p className="!text-base font-medium text-gray-900">{style.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -429,19 +429,19 @@ export default function CreateWeddingPage() {
 
       case 'preferredServices':
         return (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-3">
             {WEDDING_SERVICES.map((service) => (
               <Card
                 key={service.value}
                 className={`relative cursor-pointer transition-all hover:shadow-md ${
                   onboardingData.preferredServices.includes(service.value)
-                    ? 'ring-2 ring-brand-500 bg-destructive'
+                    ? 'ring-brand-500 bg-destructive ring-2'
                     : 'hover:bg-primary-hover'
                 }`}
                 onClick={() => handleMultiSelect(service.value)}
               >
                 {onboardingData.preferredServices.includes(service.value) && (
-                  <span className="absolute top-2 right-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-brand-100 text-brand-800 shadow">
+                  <span className="bg-brand-100 text-brand-800 absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-1 text-xs shadow">
                     ✓ Selected
                   </span>
                 )}
@@ -451,7 +451,7 @@ export default function CreateWeddingPage() {
                 </CardHeader>
 
                 <CardContent>
-                  <p className="!text-base text-gray-900 font-medium">{service.description}</p>
+                  <p className="!text-base font-medium text-gray-900">{service.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -466,17 +466,17 @@ export default function CreateWeddingPage() {
   const currentStepData = STEPS[currentStep];
 
   return (
-    <div className="min-h-screen bg-gradient-to-t from-brand-200 to-brand-25 px-6 py-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="from-brand-200 to-brand-25 min-h-screen bg-gradient-to-t px-6 py-8">
+      <div className="mx-auto max-w-4xl">
         {/* Progress indicator */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
+          <div className="mb-2 flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900">Create Your Wedding</h1>
             <span className="text-sm text-gray-600">
               Step {currentStep + 1} of {STEPS.length}
             </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="h-2 w-full rounded-full bg-gray-200">
             <div
               className="bg-brand-500 h-2 rounded-full transition-all duration-300"
               style={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
@@ -486,8 +486,8 @@ export default function CreateWeddingPage() {
 
         {/* Step content */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">{currentStepData.title}</h2>
-          <p className="text-gray-600 mb-6">{currentStepData.subtitle}</p>
+          <h2 className="mb-2 text-xl font-semibold text-gray-900">{currentStepData.title}</h2>
+          <p className="mb-6 text-gray-600">{currentStepData.subtitle}</p>
           {renderStep()}
         </div>
 
