@@ -105,3 +105,4 @@ export type { DataTableProps } from './ui/table';
 export { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 export { Textarea } from './ui/textarea';
 export { WeddingTable } from './WeddingTable';
+export { OrderTable } from './OrderTable';
