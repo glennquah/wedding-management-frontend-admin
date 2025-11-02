@@ -144,6 +144,17 @@ export function RateVendorModal({
             )}
           </div>
         </div>
+
+        <DialogFooter>
+          <Button variant="darkOutline" onClick={handleCancel} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          {!existingReview && (
+            <Button onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting ? 'Submitting...' : 'Submit Review'}
+            </Button>
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

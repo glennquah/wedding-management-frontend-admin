@@ -484,21 +484,12 @@ export function OrderCard({
               </div>
             )}
 
-          {/* Rate and Dispute Buttons for Completed Orders - Admin View */}
+          {/* Rate Button for Completed Orders - Admin View */}
           {viewMode === 'admin' &&
             listings[0]?.listing?.bookingStatus === OrderStatus.COMPLETED &&
             vendorName &&
             vendorId && (
               <div className="mt-4 flex justify-end gap-2">
-                <Button
-                  onClick={() => {
-                    /* TODO: Implement dispute functionality */
-                  }}
-                  variant="outline"
-                  className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-                >
-                  Dispute
-                </Button>
                 {!existingReview && (
                   <Button
                     onClick={() => setShowRateModal(true)}
