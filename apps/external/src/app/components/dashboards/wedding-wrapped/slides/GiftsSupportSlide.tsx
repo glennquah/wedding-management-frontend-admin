@@ -1,9 +1,229 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { WeddingWrappedResponseDto } from '@shared/api';
-import { AnimatedWords } from '../AnimationComponents';
+import { TypingText } from '../TypingText';
 import { FloatingHearts } from '../ParticleEffects';
+
+interface GiftsSupportSlideContentProps {
+  giftSupportInsights: WeddingWrappedResponseDto['giftSupportInsights'];
+  formatCurrency: (amount: number) => string;
+}
+
+function GiftsSupportSlideContent({ giftSupportInsights, formatCurrency }: GiftsSupportSlideContentProps) {
+  const [showQuestion, setShowQuestion] = useState(false);
+  const [showGiftValue, setShowGiftValue] = useState(false);
+  const [showComment, setShowComment] = useState(false);
+  const [showWishlist, setShowWishlist] = useState(false);
+  const [showMostWanted, setShowMostWanted] = useState(false);
+  const [showTopContributor, setShowTopContributor] = useState(false);
+
+  const getGiftComment = () => {
+    if (giftSupportInsights.totalGiftValue > 10000) {
+      return "Okay WOW! 💰 Your friends and family went ALL OUT!";
+    } else if (giftSupportInsights.totalGiftValue > 5000) {
+      return "That's some serious love right there! 💝";
+    } else if (giftSupportInsights.totalGiftValue > 2000) {
+      return "Not too shabby! Your people came through! 🎁";
+    } else {
+      return "It's the thought that counts! ❤️";
+    }
+  };
+
+  const getWishlistComment = () => {
+    const completion = giftSupportInsights.wishlistCompletion;
+    if (completion >= 95) {
+      return "BINGO! Nearly a perfect score! 🎯";
+    } else if (completion >= 75) {
+      return "Most boxes checked! Well done! ✅";
+    } else if (completion >= 50) {
+      return "Halfway there! Living on a prayer! 🎵";
+    } else {
+      return "Room for more surprises! 🎁";
+    }
+  };
+
+  return (
+    <div className="space-y-10 max-w-4xl">
+        <motion.h2
+          className="text-6xl font-bold text-white mb-8"
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <TypingText text="Gifts & Support" speed={80} />
+        </motion.h2>
+
+        <div className="space-y-8">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2 }}
+            onAnimationComplete={() => setTimeout(() => setShowQuestion(true), 1500)}
+          >
+            <p className="text-3xl text-white/90 text-center">
+              <TypingText
+                text="Time to count the love... 💕"
+                delay={1200}
+                speed={70}
+              />
+            </p>
+          </motion.div>
+
+          {showQuestion && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <p className="text-4xl text-white font-bold text-center">
+                <TypingText
+                  text="How generous were your guests?"
+                  delay={300}
+                  speed={60}
+                  onComplete={() => setTimeout(() => setShowGiftValue(true), 1000)}
+                />
+              </p>
+            </motion.div>
+          )}
+
+          {showGiftValue && (
+            <motion.div
+              className="space-y-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <motion.div
+                className="bg-gradient-to-br from-pink-500 to-rose-600 rounded-3xl p-12 text-center shadow-2xl"
+                initial={{ scale: 0, rotate: -5 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: 'spring', bounce: 0.5 }}
+              >
+                <div className="text-6xl font-bold text-white mb-3">
+                  {formatCurrency(giftSupportInsights.totalGiftValue)}
+                </div>
+                <div className="text-2xl text-white/90">Total Gift Value</div>
+              </motion.div>
+
+              <p className="text-3xl text-pink-200 font-semibold text-center pt-4">
+                <TypingText
+                  text={getGiftComment()}
+                  delay={800}
+                  speed={50}
+                  onComplete={() => setTimeout(() => setShowWishlist(true), 1200)}
+                />
+              </p>
+            </motion.div>
+          )}
+
+          {showWishlist && (
+            <motion.div
+              className="space-y-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <motion.div
+                className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-3xl p-12 text-center shadow-2xl"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', bounce: 0.4, delay: 0.3 }}
+              >
+                <div className="text-6xl font-bold text-white mb-3">
+                  {giftSupportInsights.wishlistCompletion.toFixed(0)}%
+                </div>
+                <div className="text-2xl text-white/90">Wishlist Completion</div>
+              </motion.div>
+
+              <p className="text-3xl text-purple-200 font-semibold text-center">
+                <TypingText
+                  text={getWishlistComment()}
+                  delay={1000}
+                  speed={50}
+                  onComplete={() => setTimeout(() => setShowMostWanted(true), 1000)}
+                />
+              </p>
+            </motion.div>
+          )}
+
+          {showMostWanted && giftSupportInsights.mostWantedItem && (
+            <motion.div
+              className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <p className="text-2xl text-pink-300 font-semibold mb-4">
+                <TypingText text="💖 The Crowd Favorite" delay={300} speed={70} />
+              </p>
+              <p className="text-xl text-white/70 mb-2">
+                <TypingText
+                  text="Everyone wanted to get you this!"
+                  delay={1500}
+                  speed={60}
+                />
+              </p>
+              <p className="text-4xl text-white font-bold pt-2">
+                <TypingText
+                  text={giftSupportInsights.mostWantedItem}
+                  delay={3200}
+                  speed={60}
+                />
+              </p>
+              <p className="text-xl text-white/60 mt-2">
+                <TypingText
+                  text={`${giftSupportInsights.mostWantedItemCount} ${giftSupportInsights.mostWantedItemCount === 1 ? 'reservation' : 'reservations'} 🎯`}
+                  delay={4500}
+                  speed={50}
+                  onComplete={() => setTimeout(() => setShowTopContributor(true), 800)}
+                />
+              </p>
+            </motion.div>
+          )}
+
+          {showTopContributor && giftSupportInsights.topContributorName && (
+            <motion.div
+              className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <p className="text-2xl text-yellow-300 font-semibold mb-4">
+                <TypingText text="🌟 MVP - Most Valuable Present!" delay={300} speed={70} />
+              </p>
+              <p className="text-xl text-white/70 mb-2">
+                <TypingText
+                  text="The ultimate gift-giver! 🏆"
+                  delay={1800}
+                  speed={60}
+                />
+              </p>
+              <p className="text-4xl text-white font-bold pt-2">
+                <TypingText
+                  text={giftSupportInsights.topContributorName}
+                  delay={3200}
+                  speed={70}
+                />
+              </p>
+              <p className="text-3xl text-white/80 mt-3">
+                <TypingText
+                  text={formatCurrency(giftSupportInsights.topContribution || 0)}
+                  delay={4500}
+                  speed={50}
+                />
+              </p>
+              <p className="text-lg text-white/50 mt-3">
+                <TypingText
+                  text="You better send a REALLY good thank you card! 😄"
+                  delay={5500}
+                  speed={50}
+                />
+              </p>
+            </motion.div>
+          )}
+        </div>
+      </div>
+  );
+}
 
 interface GiftsSupportSlideProps {
   giftSupportInsights: WeddingWrappedResponseDto['giftSupportInsights'];
@@ -13,81 +233,6 @@ interface GiftsSupportSlideProps {
 export function GiftsSupportSlide({ giftSupportInsights, formatCurrency }: GiftsSupportSlideProps) {
   return {
     background: FloatingHearts,
-    content: (
-      <div className="space-y-8 max-w-4xl">
-        <motion.h2
-          className="text-6xl font-bold text-white mb-8"
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          Gifts & Support
-        </motion.h2>
-
-        <div className="grid grid-cols-2 gap-8 mb-8">
-          <motion.div
-            className="bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl p-8 text-center shadow-2xl"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-          >
-            <div className="text-5xl font-bold text-white mb-2">
-              {formatCurrency(giftSupportInsights.totalGiftValue)}
-            </div>
-            <div className="text-xl text-white/90">Total Gift Value</div>
-          </motion.div>
-
-          <motion.div
-            className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl p-8 text-center shadow-2xl"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.5, duration: 0.6 }}
-          >
-            <div className="text-5xl font-bold text-white mb-2">
-              {giftSupportInsights.wishlistCompletion.toFixed(0)}%
-            </div>
-            <div className="text-xl text-white/90">Wishlist Completion</div>
-          </motion.div>
-        </div>
-
-        {giftSupportInsights.mostWantedItem && (
-          <motion.div
-            className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.8 }}
-          >
-            <p className="text-2xl text-pink-300 font-semibold mb-2">
-              <AnimatedWords text="💖 Most Wanted Item" startDelay={1} />
-            </p>
-            <p className="text-3xl text-white">
-              <AnimatedWords
-                text={`${giftSupportInsights.mostWantedItem} (${giftSupportInsights.mostWantedItemCount} reservations)`}
-                startDelay={1.3}
-              />
-            </p>
-          </motion.div>
-        )}
-
-        {giftSupportInsights.topContributorName && (
-          <motion.div
-            className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.2, duration: 0.8 }}
-          >
-            <p className="text-2xl text-yellow-300 font-semibold mb-2">
-              <AnimatedWords text="🌟 Top Contributor" startDelay={1.4} />
-            </p>
-            <p className="text-3xl text-white">
-              <AnimatedWords
-                text={`${giftSupportInsights.topContributorName} - ${formatCurrency(giftSupportInsights.topContribution || 0)}`}
-                startDelay={1.7}
-              />
-            </p>
-          </motion.div>
-        )}
-      </div>
-    ),
+    content: <GiftsSupportSlideContent giftSupportInsights={giftSupportInsights} formatCurrency={formatCurrency} />,
   };
 }

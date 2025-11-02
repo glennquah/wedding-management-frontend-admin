@@ -101,14 +101,10 @@ export function WeddingWrappedModal({
     }
   }, [open]);
 
-  // Determine music index based on current slide
+  // Each slide gets its own music track
   const getMusicIndexForSlide = (slideIndex: number): number => {
-    // Slide 0-1: music 0 (Ry in the feels)
-    // Slide 2-3: music 1 (Make a move)
-    // Slide 4-6: music 2 (Seal the deal)
-    if (slideIndex <= 1) return 0;
-    if (slideIndex <= 3) return 1;
-    return 2;
+    // Ensure we don't exceed available music tracks
+    return Math.min(slideIndex, audioOptions.length - 1);
   };
 
   // Change music when slide changes
@@ -185,20 +181,20 @@ export function WeddingWrappedModal({
     data;
 
   const slides: SlideContent[] = [
-    // ARE YOU READY Slide
+    // ARE YOU READY Slide - Marry You
     { ...AreYouReadySlide({ wedding }), musicIndex: 0 },
-    // Intro Slide
-    { ...IntroSlide({ wedding }), musicIndex: 0 },
-    // Guest Experience
-    { ...GuestExperienceSlide({ guestInsights, formatDate }), musicIndex: 1 },
-    // Gifts & Support
-    { ...GiftsSupportSlide({ giftSupportInsights, formatCurrency }), musicIndex: 1 },
-    // Planning Journey
-    { ...PlanningJourneySlide({ planningJourneyInsights, formatCurrency }), musicIndex: 2 },
-    // Memories & Moments
-    { ...MemoriesMomentsSlide({ emotionalTouchInsights }), musicIndex: 2 },
-    // Final Slide
-    { ...FinalSlide({ onSave, isSaving }), musicIndex: 2 },
+    // Intro Slide - Shut Up and Dance
+    { ...IntroSlide({ wedding }), musicIndex: 1 },
+    // Guest Experience - Dance with somebody
+    { ...GuestExperienceSlide({ guestInsights, formatDate }), musicIndex: 2 },
+    // Gifts & Support - Love i need
+    { ...GiftsSupportSlide({ giftSupportInsights, formatCurrency }), musicIndex: 3 },
+    // Planning Journey - DANCE
+    { ...PlanningJourneySlide({ planningJourneyInsights, formatCurrency }), musicIndex: 4 },
+    // Memories & Moments - SUGAR
+    { ...MemoriesMomentsSlide({ emotionalTouchInsights }), musicIndex: 5 },
+    // Final Slide - 24K
+    { ...FinalSlide({ onSave, isSaving }), musicIndex: 7 },
   ];
 
   const nextSlide = () => {
