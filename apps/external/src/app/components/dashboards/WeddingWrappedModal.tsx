@@ -28,16 +28,36 @@ interface WeddingWrappedModalProps {
 // Music options from slideshow
 const audioOptions = [
   {
-    name: 'Ry in the feels',
-    url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1760936505/slideshow-music-1_opllxe.mp3',
+    name: 'Marry You',
+    url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1762106255/Bruno_Mars_-_Marry_You_Official_Lyric_Video_qscqiz.mp3',
   },
   {
-    name: 'Make a move',
-    url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1760936505/slideshow-music-3_iwnnif.mp3',
+    name: 'Shut Up and Dance',
+    url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1762106745/WALK_THE_MOON_-_Shut_Up_and_Dance_Lyrics_v7otzn.mp3',
   },
   {
-    name: 'Seal the deal',
-    url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1760936505/slideshow-music-2_y4n2dd.mp3',
+    name: 'Dance with somebody',
+    url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1762106183/TRIMMED_ennzu7.m4a',
+  },
+  {
+    name: 'Love i need',
+    url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1762106383/LOVE_I_NEED_byaho0.m4a',
+  },
+  {
+    name: 'DANCE',
+    url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1762106594/DANCE_mz2tfq.m4a',
+  },
+  {
+    name: 'SUGAR',
+    url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1762106687/sugar_wuc7u9.m4a',
+  },
+  {
+    name: 'SUGAR',
+    url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1762106687/sugar_wuc7u9.m4a',
+  },
+  {
+    name: '24K',
+    url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1762106463/24K_pjbqiv.m4a',
   },
 ];
 
