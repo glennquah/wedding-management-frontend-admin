@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { getEditOrderFormFields } from '../components/formFields/OrderManagement';
 import { PageHeader } from '@shared/components';
 import { OrderTable } from '@shared/components/OrderTable';
-import { OrderResponseDto, OrdersService, UpdateOrderDto } from '@wedding/api-types';
+import { OrderResponseDto, OrdersService, OrderStatus, UpdateOrderDto } from '@wedding/api-types';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -50,7 +50,7 @@ export default function OrderManagementPage() {
   const openEditOrderModal = (order: OrderResponseDto) => {
     setEditOrder({
       id: order.id,
-      orderStatus: order.status as any,
+      orderStatus: order.status as unknown as OrderStatus,
       remark: order.remark,
     });
     setIsEditingOrder(true);
