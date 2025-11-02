@@ -9,7 +9,8 @@ import {
   CircleDollarSign,
   ClipboardList,
   FileSpreadsheet,
-  LayoutDashboard
+  LayoutDashboard,
+  Star
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 
@@ -77,6 +78,12 @@ export default function VendorSidebar() {
           title: 'Manage Orders',
           href: '/orders',
           icon: ClipboardList,
+          disabled: !hasVendorDetails || !hasStripeOnboarding,
+        },
+        {
+          title: 'Reviews',
+          href: '/reviews',
+          icon: Star,
           disabled: !hasVendorDetails || !hasStripeOnboarding,
         },
         {

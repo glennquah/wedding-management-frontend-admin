@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { Badge } from '@shared/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { Skeleton } from '@shared/components/ui/skeleton';
+import { VendorReviewsModal } from '@shared/components/VendorReviewsModal';
 import { Globe, Mail, Star } from 'lucide-react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ListingsGrid } from '../../components/ListingsGrid';
@@ -20,6 +22,7 @@ export default function VendorPage() {
   const from = searchParams?.get('from') || 'marketplace';
 
   const { vendor, listings, loading, error } = useVendorData(vendorId);
+  const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
 
   const handleBack = () => {
     router.back();
@@ -105,11 +108,18 @@ export default function VendorPage() {
               </Badge>
             )}
             {vendor.rating && vendor.rating > 0 ? (
-              <div className="flex items-center gap-1.5 ml-2">
+              <button
+                onClick={() => setIsReviewsModalOpen(true)}
+                className="flex items-center gap-1.5 ml-2 hover:bg-gray-100 px-3 py-1.5 rounded-md transition-colors group cursor-pointer"
+              >
                 <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                <span className="text-lg font-semibold">{vendor.rating.toFixed(1)}</span>
-                <span className="text-muted-foreground text-sm">rating</span>
-              </div>
+                <span className="text-lg font-semibold group-hover:underline">
+                  {vendor.rating.toFixed(1)}
+                </span>
+                <span className="text-muted-foreground text-sm group-hover:text-gray-700">
+                  rating
+                </span>
+              </button>
             ) : (
               <span className='text-sm font-medium'>No ratings yet!</span>
             )}
@@ -185,6 +195,14 @@ export default function VendorPage() {
           </Card>
         )}
       </div>
+
+      {/* Reviews Modal */}
+      <VendorReviewsModal
+        open={isReviewsModalOpen}
+        onOpenChange={setIsReviewsModalOpen}
+        vendorId={Number(vendorId)}
+        vendorName={vendor.name}
+      />
     </div>
   );
 }
