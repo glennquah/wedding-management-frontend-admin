@@ -42,7 +42,7 @@ const profileItems = [
 export default function AppSidebar({
   tabs,
   signOut,
-  basePath = "",
+  basePath = '',
 }: {
   tabs: Array<{
     sectionHeader: string;
@@ -51,6 +51,7 @@ export default function AppSidebar({
       href: string;
       icon: React.ComponentType<{ className?: string }>;
       disabled?: boolean;
+      badge?: number; // Add badge support for notification count
     }>;
   }>;
   signOut?: () => void;
@@ -59,7 +60,7 @@ export default function AppSidebar({
   const { data: session } = useSession();
   return (
     <Sidebar>
-      <SidebarHeader className="flex items-center justify-center p-4 relative">
+      <SidebarHeader className="relative flex items-center justify-center p-4">
         <Image
           src="/images/logo.png"
           alt="Company Logo"
@@ -67,7 +68,7 @@ export default function AppSidebar({
           height={40}
           style={{ objectFit: 'contain' }}
         />
-        <div className="absolute right-5 bottom-[1px] text-primary italic font-montserrat font-black text-[8px]">
+        <div className="text-primary font-montserrat absolute right-5 bottom-[1px] text-[8px] font-black italic">
           Stress Not, Tie the Knot.
         </div>
       </SidebarHeader>
@@ -80,16 +81,30 @@ export default function AppSidebar({
               <SidebarMenu>
                 {section.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild={!item.disabled} disabled={item.disabled} className={item.disabled ? 'bg-gray-200 opacity-60' : ''}>
+                    <SidebarMenuButton
+                      asChild={!item.disabled}
+                      disabled={item.disabled}
+                      className={item.disabled ? 'bg-gray-200 opacity-60' : ''}
+                    >
                       {item.disabled ? (
-                        <div className="cursor-not-allowed flex items-center gap-2">
+                        <div className="flex cursor-not-allowed items-center gap-2">
                           <item.icon className="h-4 w-4" />
                           <span>{item.title}</span>
                         </div>
                       ) : (
-                        <Link href={basePath ? `/${basePath}${item.href}` : item.href}>
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
+                        <Link
+                          href={basePath ? `/${basePath}${item.href}` : item.href}
+                          className="flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-2">
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </div>
+                          {item.badge && item.badge > 0 && (
+                            <div className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
+                              {item.badge > 99 ? '99+' : item.badge}
+                            </div>
+                          )}
                         </Link>
                       )}
                     </SidebarMenuButton>
@@ -106,7 +121,7 @@ export default function AppSidebar({
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="flex items-center justify-between w-full no-underline"
+              className="flex w-full items-center justify-between no-underline"
             >
               <div className="flex items-center gap-2">
                 <UserCircle className="h-6 w-6" />
@@ -116,10 +131,15 @@ export default function AppSidebar({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-52">
-            <DropdownMenuItem disabled>Role: {session?.user.role}</DropdownMenuItem>
+            <DropdownMenuItem disabled>
+              Role: {(session?.user as { role?: string })?.role || 'User'}
+            </DropdownMenuItem>
             {profileItems.map((item) => (
               <DropdownMenuItem key={item.title} asChild>
-                <Link href={basePath ? `/${basePath}${item.href}` : item.href} className="flex items-center">
+                <Link
+                  href={basePath ? `/${basePath}${item.href}` : item.href}
+                  className="flex items-center"
+                >
                   <item.icon className="mr-2 h-4 w-4" />
                   {item.title}
                 </Link>
@@ -129,7 +149,7 @@ export default function AppSidebar({
             <DropdownMenuItem asChild className="text-red-600">
               <button
                 onClick={() => signOut && signOut()}
-                className="flex w-full items-center text-bold"
+                className="text-bold flex w-full items-center"
               >
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign Out

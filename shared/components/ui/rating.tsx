@@ -98,7 +98,7 @@ export const RatingButton = ({
         size,
         className: cn(
           'transition-colors duration-200',
-          isActive && 'fill-current',
+          isActive ? 'fill-primary text-primary' : 'text-muted-foreground',
           !readOnly && 'cursor-pointer'
         ),
         'aria-hidden': 'true',

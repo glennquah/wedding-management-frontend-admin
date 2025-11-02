@@ -1,19 +1,42 @@
 'use client';
 
-import { AvailabilitySlotDto, ListingResponseDto, OrderResponseDto, OrderStatus } from '@shared/api';
+import {
+  AvailabilitySlotDto,
+  ListingResponseDto,
+  OrderResponseDto,
+  OrderStatus,
+  ReviewResponseDto,
+  ReviewsService,
+} from '@shared/api';
 import { Badge } from '@shared/components/ui/badge';
 import { Button } from '@shared/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/ui/card';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@shared/components/ui/carousel';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@shared/components/ui/card';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@shared/components/ui/carousel';
 import { DeleteConfirmationModal } from '@shared/components/ui/delete-confirmation-modal';
 import { Calendar, Camera, Clock, ExternalLink, Mail, Trash2, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { RateVendorModal } from './RateVendorModal';
 
 interface OrderCardProps {
   order: OrderResponseDto;
-  listings: Array<{ listing: ListingResponseDto & { bookingStatus?: OrderStatus }; bookedSlots?: AvailabilitySlotDto[] }>;
+  listings: Array<{
+    listing: ListingResponseDto & { bookingStatus?: OrderStatus };
+    bookedSlots?: AvailabilitySlotDto[];
+  }>;
   vendorName?: string;
   vendorId?: number;
   vendorEmail?: string;
@@ -25,6 +48,7 @@ interface OrderCardProps {
   onConfirm?: () => void;
   onReject?: () => void;
   onComplete?: () => void;
+  onRefresh?: () => void;
   viewMode?: 'admin' | 'vendor';
 }
 
@@ -42,10 +66,43 @@ export function OrderCard({
   onConfirm,
   onReject,
   onComplete,
-  viewMode = 'admin'
+  onRefresh,
+  viewMode = 'admin',
 }: OrderCardProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showRateModal, setShowRateModal] = useState(false);
+  const [existingReview, setExistingReview] = useState<ReviewResponseDto | null>(null);
+  const [isCheckingReview, setIsCheckingReview] = useState(false);
+
+  // Check if review exists for completed orders
+  useEffect(() => {
+    const checkExistingReview = async () => {
+      if (
+        viewMode === 'admin' &&
+        listings[0]?.listing?.bookingStatus === OrderStatus.COMPLETED &&
+        order.id &&
+        listings[0]?.listing?.id
+      ) {
+        try {
+          setIsCheckingReview(true);
+          const review = await ReviewsService.reviewControllerFindByOrderListing(
+            order.id,
+            listings[0].listing.id,
+          );
+          setExistingReview(review);
+        } catch (error) {
+          // Review doesn't exist yet, which is fine
+          setExistingReview(null);
+        } finally {
+          setIsCheckingReview(false);
+        }
+      }
+    };
+
+    checkExistingReview();
+  }, [order.id, listings, viewMode]);
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-SG', {
       style: 'currency',
@@ -133,19 +190,16 @@ export function OrderCard({
   // Determine which name/id/email to display based on viewMode
   const displayName = viewMode === 'vendor' ? weddingName : vendorName;
   const displayEmail = viewMode === 'vendor' ? adminEmail : vendorEmail;
-  const displayLinkHref = viewMode === 'vendor'
-    ? `/vendor/orders`
-    : `/admin/ecommerce/vendor/${vendorId}?from=orders`;
+  const displayLinkHref =
+    viewMode === 'vendor' ? `/vendor/orders` : `/admin/ecommerce/vendor/${vendorId}?from=orders`;
 
   return (
-    <Card className="w-full hover:shadow-lg transition-shadow duration-200">
+    <Card className="w-full transition-shadow duration-200 hover:shadow-lg">
       <CardHeader className="pb-3">
-        <div className="flex justify-between items-start gap-3">
-          <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <CardTitle className="text-lg font-semibold">
-               {displayName}
-              </CardTitle>
+              <CardTitle className="text-lg font-semibold">{displayName}</CardTitle>
               {viewMode === 'admin' && vendorId && (
                 <Link
                   href={displayLinkHref}
@@ -165,32 +219,38 @@ export function OrderCard({
                 </a>
               )}
             </div>
-            <CardDescription className="text-sm text-muted-foreground mt-1">
+            <CardDescription className="text-muted-foreground mt-1 text-sm">
               {coupleNames && coupleNames.length > 0 && (
-                <div className="flex items-center gap-1 mb-1">
-                  <Users className="text-base-black w-4 h-4" />
-                  <span className="font-semibold text-base text-foreground">{coupleNames.join(' & ')}</span>
+                <div className="mb-1 flex items-center gap-1">
+                  <Users className="text-base-black h-4 w-4" />
+                  <span className="text-foreground text-base font-semibold">
+                    {coupleNames.join(' & ')}
+                  </span>
                 </div>
               )}
               <div className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
+                <Calendar className="h-3 w-3" />
                 Purchased on: {formatDate(order.purchaseDate)}
               </div>
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            {listings[0]?.listing?.bookingStatus === OrderStatus.PENDING && onDelete && viewMode === 'admin' && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowDeleteModal(true)}
-                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                title="Delete order"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-            <Badge className={`${getStatusColor(listings[0]?.listing?.bookingStatus || OrderStatus.PENDING)} border`}>
+            {listings[0]?.listing?.bookingStatus === OrderStatus.PENDING &&
+              onDelete &&
+              viewMode === 'admin' && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowDeleteModal(true)}
+                  className="h-8 w-8 text-red-600 hover:bg-red-50 hover:text-red-700"
+                  title="Delete order"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            <Badge
+              className={`${getStatusColor(listings[0]?.listing?.bookingStatus || OrderStatus.PENDING)} border`}
+            >
               {listings[0]?.listing?.bookingStatus || OrderStatus.PENDING}
             </Badge>
           </div>
@@ -210,16 +270,16 @@ export function OrderCard({
               return bookedSlots.map((slot, slotIndex) => (
                 <div
                   key={`${listing.id}-${listingIndex}-${slotIndex}`}
-                  className="flex gap-3 p-3 rounded-lg border bg-gray-50/50 hover:bg-gray-50 transition-colors"
+                  className="flex gap-3 rounded-lg border bg-gray-50/50 p-3 transition-colors hover:bg-gray-50"
                 >
                   {/* Listing Image */}
-                  <div className="relative w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                  <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md bg-gradient-to-br from-gray-100 to-gray-200">
                     {hasImages ? (
-                      <Carousel className="w-full h-full">
+                      <Carousel className="h-full w-full">
                         <CarouselContent>
                           {listing.imageUrls?.map((imageUrl: string, index: number) => (
                             <CarouselItem key={index}>
-                              <div className="relative w-24 h-24">
+                              <div className="relative h-24 w-24">
                                 <Image
                                   src={imageUrl}
                                   alt={`${listing.listingName} - Image ${index + 1}`}
@@ -235,13 +295,13 @@ export function OrderCard({
                           <>
                             <div onClick={(e) => e.stopPropagation()}>
                               <CarouselPrevious
-                                className="left-1 h-6 w-6 bg-white/80 hover:bg-white border-none shadow"
+                                className="left-1 h-6 w-6 border-none bg-white/80 shadow hover:bg-white"
                                 size="icon"
                               />
                             </div>
                             <div onClick={(e) => e.stopPropagation()}>
                               <CarouselNext
-                                className="right-1 h-6 w-6 bg-white/80 hover:bg-white border-none shadow"
+                                className="right-1 h-6 w-6 border-none bg-white/80 shadow hover:bg-white"
                                 size="icon"
                               />
                             </div>
@@ -249,30 +309,28 @@ export function OrderCard({
                         )}
                       </Carousel>
                     ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <Camera className="w-8 h-8 text-gray-400" />
+                      <div className="flex h-full items-center justify-center">
+                        <Camera className="h-8 w-8 text-gray-400" />
                       </div>
                     )}
                   </div>
 
                   {/* Listing Details */}
-                  <div className="flex justify-between items-center gap-3 w-full">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-sm truncate">
-                        {listing.listingName}
-                      </h4>
+                  <div className="flex w-full items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <h4 className="truncate text-sm font-semibold">{listing.listingName}</h4>
 
-                      <div className="flex items-center gap-1 mt-1 text-xs text-gray-600">
-                        <Clock className="w-3 h-3" />
+                      <div className="mt-1 flex items-center gap-1 text-xs text-gray-600">
+                        <Clock className="h-3 w-3" />
                         <span>{formatSlotDate(slot.startTime)}</span>
                       </div>
-                      <div className="text-xs text-gray-600 mt-0.5">
+                      <div className="mt-0.5 text-xs text-gray-600">
                         {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
                       </div>
 
                       {listing.remarks && (
                         <p
-                          className="text-xs text-gray-600 mt-1 overflow-hidden"
+                          className="mt-1 overflow-hidden text-xs text-gray-600"
                           style={{
                             display: '-webkit-box',
                             WebkitLineClamp: 2,
@@ -284,7 +342,7 @@ export function OrderCard({
                       )}
                     </div>
 
-                    <div className="text-base font-bold text-primary whitespace-nowrap pr-1">
+                    <div className="text-primary pr-1 text-base font-bold whitespace-nowrap">
                       {formatPrice(listing.price)}
                     </div>
                   </div>
@@ -296,16 +354,16 @@ export function OrderCard({
             return (
               <div
                 key={`${listing.id}-${listingIndex}`}
-                className="flex gap-3 p-3 rounded-lg border bg-gray-50/50 hover:bg-gray-50 transition-colors"
+                className="flex gap-3 rounded-lg border bg-gray-50/50 p-3 transition-colors hover:bg-gray-50"
               >
                 {/* Listing Image */}
-                <div className="relative w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md bg-gradient-to-br from-gray-100 to-gray-200">
                   {hasImages ? (
-                    <Carousel className="w-full h-full">
+                    <Carousel className="h-full w-full">
                       <CarouselContent>
                         {listing.imageUrls?.map((imageUrl: string, index: number) => (
                           <CarouselItem key={index}>
-                            <div className="relative w-24 h-24">
+                            <div className="relative h-24 w-24">
                               <Image
                                 src={imageUrl}
                                 alt={`${listing.listingName} - Image ${index + 1}`}
@@ -321,13 +379,13 @@ export function OrderCard({
                         <>
                           <div onClick={(e) => e.stopPropagation()}>
                             <CarouselPrevious
-                              className="left-1 h-6 w-6 bg-white/80 hover:bg-white border-none shadow"
+                              className="left-1 h-6 w-6 border-none bg-white/80 shadow hover:bg-white"
                               size="icon"
                             />
                           </div>
                           <div onClick={(e) => e.stopPropagation()}>
                             <CarouselNext
-                              className="right-1 h-6 w-6 bg-white/80 hover:bg-white border-none shadow"
+                              className="right-1 h-6 w-6 border-none bg-white/80 shadow hover:bg-white"
                               size="icon"
                             />
                           </div>
@@ -335,22 +393,20 @@ export function OrderCard({
                       )}
                     </Carousel>
                   ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <Camera className="w-8 h-8 text-gray-400" />
+                    <div className="flex h-full items-center justify-center">
+                      <Camera className="h-8 w-8 text-gray-400" />
                     </div>
                   )}
                 </div>
 
                 {/* Listing Details */}
-                <div className="flex flex-row justify-between items-start gap-3">
+                <div className="flex flex-row items-start justify-between gap-3">
                   {/* Left: name + remarks */}
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-sm truncate">
-                      {listing.listingName}
-                    </h4>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="truncate text-sm font-semibold">{listing.listingName}</h4>
                     {listing.remarks && (
                       <p
-                        className="text-xs text-gray-600 mt-1 overflow-hidden"
+                        className="mt-1 overflow-hidden text-xs text-gray-600"
                         style={{
                           display: '-webkit-box',
                           WebkitLineClamp: 2,
@@ -363,7 +419,7 @@ export function OrderCard({
                   </div>
 
                   {/* Right: price */}
-                  <div className="text-sm font-bold text-primary whitespace-nowrap">
+                  <div className="text-primary text-sm font-bold whitespace-nowrap">
                     {formatPrice(listing.price)}
                   </div>
                 </div>
@@ -373,83 +429,87 @@ export function OrderCard({
         </div>
 
         {/* Vendor Subtotal */}
-        <div className="mt-4 pt-4 border-t">
-          <div className="flex justify-between items-center">
+        <div className="mt-4 border-t pt-4">
+          <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-gray-700">Subtotal</span>
-            <span className="text-xl font-bold text-primary">
-              {formatPrice(vendorTotal)}
-            </span>
+            <span className="text-primary text-xl font-bold">{formatPrice(vendorTotal)}</span>
           </div>
 
           {/* Pay Now Button for Pending Orders - Admin View */}
-          {viewMode === 'admin' && listings[0]?.listing?.bookingStatus === OrderStatus.PENDING && onPayNow && (
-            <div className="flex justify-end">
-              <Button
-                className="mt-4"
-                onClick={() => onPayNow(order.id, listings[0]?.listing.id)}
-                variant="default"
-              >
-                Pay Now
-              </Button>
-            </div>
-          )}
-
-          {/* Confirm/Reject Buttons for Paid Orders - Vendor View */}
-          {viewMode === 'vendor' && listings[0]?.listing?.bookingStatus === OrderStatus.PAID && (onConfirm || onReject) && (
-            <div className="flex justify-end gap-2 mt-4">
-              {onReject && (
+          {viewMode === 'admin' &&
+            listings[0]?.listing?.bookingStatus === OrderStatus.PENDING &&
+            onPayNow && (
+              <div className="flex justify-end">
                 <Button
-                  onClick={() => setShowRejectModal(true)}
-                  variant="outline"
-                  className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-                >
-                  Reject Booking
-                </Button>
-              )}
-              {onConfirm && (
-                <Button
-                  onClick={() => onConfirm()}
+                  className="mt-4"
+                  onClick={() => onPayNow(order.id, listings[0]?.listing.id)}
                   variant="default"
                 >
-                  Confirm Booking
+                  Pay Now
                 </Button>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+
+          {/* Confirm/Reject Buttons for Paid Orders - Vendor View */}
+          {viewMode === 'vendor' &&
+            listings[0]?.listing?.bookingStatus === OrderStatus.PAID &&
+            (onConfirm || onReject) && (
+              <div className="mt-4 flex justify-end gap-2">
+                {onReject && (
+                  <Button
+                    onClick={() => setShowRejectModal(true)}
+                    variant="outline"
+                    className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                  >
+                    Reject Booking
+                  </Button>
+                )}
+                {onConfirm && (
+                  <Button onClick={() => onConfirm()} variant="default">
+                    Confirm Booking
+                  </Button>
+                )}
+              </div>
+            )}
 
           {/* Complete Order Button for Confirmed Orders - Vendor View */}
           {viewMode === 'vendor' &&
             listings[0]?.listing?.bookingStatus === OrderStatus.CONFIRMED &&
             onComplete &&
             allBookedDatesPassed(listings[0]?.bookedSlots) && (
-            <div className="flex justify-end mt-4">
-              <Button
-                onClick={() => onComplete()}
-                variant="default"
-              >
-                Complete Order
-              </Button>
-            </div>
-          )}
+              <div className="mt-4 flex justify-end">
+                <Button onClick={() => onComplete()} variant="default">
+                  Complete Order
+                </Button>
+              </div>
+            )}
 
-          {/* Rate and Dispute Buttons for Completed Orders - Admin View */}
-          {viewMode === 'admin' && listings[0]?.listing?.bookingStatus === OrderStatus.COMPLETED && (
-            <div className="flex justify-end gap-2 mt-4">
-              <Button
-                onClick={() => {/* TODO: Implement dispute functionality */}}
-                variant="outline"
-                className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-              >
-                Dispute
-              </Button>
-              <Button
-                onClick={() => {/* TODO: Implement rating functionality */}}
-                variant="default"
-              >
-                Rate Service
-              </Button>
-            </div>
-          )}
+          {/* Rate Button for Completed Orders - Admin View */}
+          {viewMode === 'admin' &&
+            listings[0]?.listing?.bookingStatus === OrderStatus.COMPLETED &&
+            vendorName &&
+            vendorId && (
+              <div className="mt-4 flex justify-end gap-2">
+                {!existingReview && (
+                  <Button
+                    onClick={() => setShowRateModal(true)}
+                    variant="default"
+                    disabled={isCheckingReview}
+                  >
+                    Rate Service
+                  </Button>
+                )}
+                {existingReview && (
+                  <Button
+                    onClick={() => setShowRateModal(true)}
+                    variant="default"
+                    disabled={isCheckingReview}
+                  >
+                    View Rating
+                  </Button>
+                )}
+              </div>
+            )}
         </div>
       </CardContent>
 
@@ -486,6 +546,32 @@ export function OrderCard({
         confirmButtonText="Reject Booking"
         cancelButtonText="Keep Booking"
       />
+
+      {vendorName && vendorId && (
+        <RateVendorModal
+          open={showRateModal}
+          onOpenChange={setShowRateModal}
+          vendorName={vendorName}
+          vendorId={vendorId}
+          orderId={order.id}
+          listingId={listings[0]?.listing.id}
+          existingReview={existingReview}
+          onReviewSubmitted={async () => {
+            // Refresh the review check
+            try {
+              const review = await ReviewsService.reviewControllerFindByOrderListing(
+                order.id,
+                listings[0].listing.id,
+              );
+              setExistingReview(review);
+            } catch (error) {
+              setExistingReview(null);
+            }
+            // Also refresh the parent orders list
+            onRefresh?.();
+          }}
+        />
+      )}
     </Card>
   );
 }
