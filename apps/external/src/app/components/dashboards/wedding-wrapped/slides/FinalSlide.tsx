@@ -171,7 +171,7 @@ Wedding Management Platform
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8, duration: 1 }}
       >
-        <AnimatedWords text="Your special day was truly magical ✨" startDelay={0.8} />
+        <TypingText text="Your special day was truly magical ✨" delay={800} speed={90} />
       </motion.p>
 
       {/* Action Buttons */}
