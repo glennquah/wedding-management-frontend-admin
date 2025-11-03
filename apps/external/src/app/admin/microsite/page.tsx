@@ -455,9 +455,9 @@ export default function CreateMicrositePage() {
           <DialogContent>
             <DialogHeader>
               {isUpdateMode ? (
-                <DialogTitle>Updated Microsite! Create a Wishlist?</DialogTitle>
+                <DialogTitle>Microsite Updated! Create a Wishlist?</DialogTitle>
               ) : (
-                <DialogTitle>Updated Microsite! Create a Wishlist?</DialogTitle>
+                <DialogTitle>Microsite Created! Create a Wishlist?</DialogTitle>
               )}
 
               <DialogDescription>
