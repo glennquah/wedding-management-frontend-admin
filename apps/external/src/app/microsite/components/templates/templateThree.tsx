@@ -112,7 +112,9 @@ export default function TemplateThree({
     const checkQRCode = async () => {
       if (isWeddingLive && micrositeData?.weddingId) {
         try {
-          const weddingData = await WeddingsService.weddingControllerFindPublic(micrositeData.weddingId);
+          const weddingData = await WeddingsService.weddingControllerFindPublic(
+            micrositeData.weddingId,
+          );
           setHasQRCode(!!weddingData.payLahQR);
         } catch (error) {
           // If fetching fails, assume no QR code
@@ -129,44 +131,47 @@ export default function TemplateThree({
         isDark ? 'dark bg-zinc-950 text-zinc-50' : 'bg-[#FFF7EC] text-zinc-900'
       }`}
     >
-      {micrositeSlug && (
+      {hasWishlistItems && (
+        <div className="absolute top-4 right-4 z-50 flex gap-3">
+          <Button
+            onClick={() => router.push(`/microsite/${micrositeSlug}/wishlist`)}
+            className="rounded-full border border-stone-300 bg-[#EADBC8] text-stone-900 hover:bg-[#E5D4BE]"
+          >
+            Wishlist
+          </Button>
+        </div>
+      )}
+      {isWeddingLive && (
         <div className="absolute top-4 right-4 z-50 flex gap-3">
           <Button
             onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
-            className="rounded-full bg-[#EADBC8] hover:bg-[#E5D4BE] text-stone-900 border border-stone-300"
+            className="rounded-full border border-stone-300 bg-[#EADBC8] text-stone-900 hover:bg-[#E5D4BE]"
           >
             View Album
           </Button>
+          <Button
+            onClick={() => router.push(`/microsite/${micrositeSlug}/guestbook`)}
+            className="w-full rounded-full bg-amber-700 text-white hover:bg-amber-800 sm:w-auto"
+          >
+            View Guestbook
+          </Button>
           {hasQRCode && (
             <Button
-              onClick={() => router.push(`/microsite/${micrositeSlug}/cashgift/${micrositeData?.weddingId}`)}
-              className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+              onClick={() =>
+                router.push(`/microsite/${micrositeSlug}/cashgift/${micrositeData?.weddingId}`)
+              }
+              className="w-full rounded-full bg-amber-700 text-white hover:bg-amber-800 sm:w-auto"
             >
               Cash Giftings
             </Button>
           )}
-          <Button
-            onClick={() => router.push(`/microsite/${micrositeSlug}/guestbook`)}
-            className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
-          >
-            View Guestbook
-          </Button>
-          {hasWishlistItems && (
-            <Button
-              onClick={() => router.push(`/microsite/${micrositeSlug}/wishlist`)}
-              className="rounded-full bg-[#EADBC8] hover:bg-[#E5D4BE] text-stone-900 border border-stone-300"
-            >
-              Wishlist
-            </Button>
-          )}
-          
         </div>
       )}
 
       {/* Party Mode (dark) switch */}
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
-        <div className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-zinc-300 dark:border-zinc-700 bg-white/80 dark:bg-zinc-900/80 backdrop-blur px-3 py-2 shadow-sm">
-          <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300 select-none">
+      <div className="fixed right-4 bottom-4 z-50 sm:right-6 sm:bottom-6">
+        <div className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-white/80 px-3 py-2 shadow-sm backdrop-blur dark:border-zinc-700 dark:bg-zinc-900/80">
+          <span className="text-xs font-medium text-zinc-700 select-none dark:text-zinc-300">
             Dark Mode
           </span>
           <Switch aria-label="Toggle Dark Mode" checked={isDark} onCheckedChange={setIsDark} />
@@ -179,17 +184,17 @@ export default function TemplateThree({
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,#F5E9D8_0%,transparent_42%),radial-gradient(circle_at_75%_65%,#FFF_0%,transparent_35%)] opacity-60 dark:opacity-15" />
 
         {/* Collage stage */}
-        <div className="relative mx-auto max-w-[1400px] h-[95vh]">
+        <div className="relative mx-auto h-[95vh] max-w-[1400px]">
           {/* Center title badge */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] flex flex-col items-center text-center">
+          <div className="absolute top-1/2 left-1/2 z-[60] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center text-center">
             <div className="relative">
-              <div className="absolute -inset-6 -rotate-6 bg-[#F5E9D8]/40 dark:bg-[#F5E9D8]/20 blur-2xl rounded-full" />
-              <div className="absolute -inset-4 rotate-6 bg-white/50 dark:bg-white/10 blur-xl rounded-full" />
-              <div className="relative px-6 py-4 rounded-2xl bg-white/90 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-700 shadow-xl">
-                <h1 className={`${serif.className} text-5xl sm:text-6xl md:text-7xl leading-none`}>
+              <div className="absolute -inset-6 -rotate-6 rounded-full bg-[#F5E9D8]/40 blur-2xl dark:bg-[#F5E9D8]/20" />
+              <div className="absolute -inset-4 rotate-6 rounded-full bg-white/50 blur-xl dark:bg-white/10" />
+              <div className="relative rounded-2xl border border-zinc-200 bg-white/90 px-6 py-4 shadow-xl dark:border-zinc-700 dark:bg-zinc-900/90">
+                <h1 className={`${serif.className} text-5xl leading-none sm:text-6xl md:text-7xl`}>
                   {micrositeData?.weddingName}
                 </h1>
-                <p className="mt-2 text-sm sm:text-base text-zinc-700 dark:text-zinc-300">
+                <p className="mt-2 text-sm text-zinc-700 sm:text-base dark:text-zinc-300">
                   {micrositeData?.weddingDate
                     ? new Date(micrositeData.weddingDate).toLocaleDateString('en-US', {
                         weekday: 'long',
@@ -208,7 +213,7 @@ export default function TemplateThree({
                 <div className="mt-4">
                   <Button
                     onClick={() => rsvpRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                    className="rounded-full bg-[#EADBC8] hover:bg-[#E5D4BE] text-stone-900 border border-stone-300"
+                    className="rounded-full border border-stone-300 bg-[#EADBC8] text-stone-900 hover:bg-[#E5D4BE]"
                   >
                     RSVP Now
                   </Button>
@@ -237,7 +242,7 @@ export default function TemplateThree({
                         height: slot.h,
                       }}
                     >
-                      <div className="relative w-full h-full rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-[0_10px_20px_-10px_rgba(0,0,0,0.35)] hover:scale-[1.03] hover:-rotate-1 transition-transform duration-300">
+                      <div className="relative h-full w-full overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-[0_10px_20px_-10px_rgba(0,0,0,0.35)] transition-transform duration-300 hover:scale-[1.03] hover:-rotate-1 dark:border-zinc-700 dark:bg-zinc-800">
                         <Image
                           src={src}
                           alt={`hero-${i}`}
@@ -245,8 +250,8 @@ export default function TemplateThree({
                           className="object-cover select-none"
                         />
                         {/* tape corners in beige */}
-                        <span className="pointer-events-none absolute -top-2 left-5 rotate-[8deg] bg-[#F5E9D8]/90 dark:bg-[#F5E9D8]/40 h-5 w-16 rounded-[2px]" />
-                        <span className="pointer-events-none absolute -bottom-2 right-6 -rotate-[10deg] bg-white/80 dark:bg-white/10 h-5 w-14 rounded-[2px]" />
+                        <span className="pointer-events-none absolute -top-2 left-5 h-5 w-16 rotate-[8deg] rounded-[2px] bg-[#F5E9D8]/90 dark:bg-[#F5E9D8]/40" />
+                        <span className="pointer-events-none absolute right-6 -bottom-2 h-5 w-14 -rotate-[10deg] rounded-[2px] bg-white/80 dark:bg-white/10" />
                       </div>
                     </div>
                   );
@@ -263,7 +268,7 @@ export default function TemplateThree({
                   .map((src, i) => (
                     <div
                       key={`${src}-${i}`}
-                      className={`relative h-36 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow ${i % 3 === 0 ? 'rotate-2' : i % 3 === 1 ? '-rotate-2' : 'rotate-1'}`}
+                      className={`relative h-36 overflow-hidden rounded-xl border border-zinc-200 shadow dark:border-zinc-700 ${i % 3 === 0 ? 'rotate-2' : i % 3 === 1 ? '-rotate-2' : 'rotate-1'}`}
                     >
                       <Image src={src} alt={`hero-m-${i}`} fill className="object-cover" />
                     </div>
@@ -276,26 +281,26 @@ export default function TemplateThree({
 
       {/* ZIGZAG SCHEDULE TIMELINE (neutral accents) */}
       <section className="relative mx-auto max-w-6xl px-4 py-16">
-        <h2 className={`${serif.className} text-4xl text-center`}>The Big Day Timeline</h2>
+        <h2 className={`${serif.className} text-center text-4xl`}>The Big Day Timeline</h2>
         <p className="mt-1 text-center text-sm text-zinc-700 dark:text-zinc-300">
           Follow the fun — a little zig, a little zag.
         </p>
         <div className="relative mt-10">
           {/* center line */}
-          <div className="absolute left-1/2 top-0 -translate-x-1/2 h-full w-1 bg-gradient-to-b from-[#F5E9D8] to-white rounded-full opacity-80" />
+          <div className="absolute top-0 left-1/2 h-full w-1 -translate-x-1/2 rounded-full bg-gradient-to-b from-[#F5E9D8] to-white opacity-80" />
           <ul className="space-y-10">
             {micrositeData?.schedule?.map((item, idx) => (
-              <li key={idx} className="relative grid grid-cols-1 md:grid-cols-2 items-center">
+              <li key={idx} className="relative grid grid-cols-1 items-center md:grid-cols-2">
                 {/* Show item on left side for even indices (0, 2, 4...) */}
                 {idx % 2 === 0 && (
-                  <div className="md:pr-10 md:col-start-1">
-                    <div className="inline-block max-w-xl rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white/90 dark:bg-zinc-900/90 px-5 py-4 shadow-sm -rotate-2">
-                      <div className="text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
+                  <div className="md:col-start-1 md:pr-10">
+                    <div className="inline-block max-w-xl -rotate-2 rounded-2xl border border-zinc-200 bg-white/90 px-5 py-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/90">
+                      <div className="text-xs font-semibold tracking-wide text-zinc-700 uppercase dark:text-zinc-300">
                         {item.time}
                       </div>
-                      <div className="mt-1 font-semibold text-lg">{item.title}</div>
+                      <div className="mt-1 text-lg font-semibold">{item.title}</div>
                       {item.description ? (
-                        <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">
+                        <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
                           {item.description}
                         </p>
                       ) : null}
@@ -305,14 +310,14 @@ export default function TemplateThree({
 
                 {/* Show item on right side for odd indices (1, 3, 5...) */}
                 {idx % 2 === 1 && (
-                  <div className="md:pl-10 md:col-start-2">
-                    <div className="inline-block max-w-xl rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white/90 dark:bg-zinc-900/90 px-5 py-4 shadow-sm rotate-2">
-                      <div className="text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
+                  <div className="md:col-start-2 md:pl-10">
+                    <div className="inline-block max-w-xl rotate-2 rounded-2xl border border-zinc-200 bg-white/90 px-5 py-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/90">
+                      <div className="text-xs font-semibold tracking-wide text-zinc-700 uppercase dark:text-zinc-300">
                         {item.time}
                       </div>
-                      <div className="mt-1 font-semibold text-lg">{item.title}</div>
+                      <div className="mt-1 text-lg font-semibold">{item.title}</div>
                       {item.description ? (
-                        <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">
+                        <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
                           {item.description}
                         </p>
                       ) : null}
@@ -327,10 +332,10 @@ export default function TemplateThree({
 
       {/* FAQS with clean accents */}
       <section className="relative mx-auto max-w-5xl px-4 py-16">
-        <div className="relative rounded-3xl border border-zinc-200 dark:border-zinc-700 bg-white/90 dark:bg-zinc-900/90 p-6 md:p-8 shadow-lg -rotate-1">
-          <div className="absolute -top-3 left-8 rotate-[8deg] bg-[#F5E9D8]/80 dark:bg-[#F5E9D8]/40 h-6 w-20 rounded-[3px]" />
-          <div className="absolute -bottom-3 right-10 -rotate-[10deg] bg-white/80 dark:bg-white/10 h-6 w-16 rounded-[3px]" />
-          <h2 className={`${serif.className} text-4xl text-center`}>FAQs</h2>
+        <div className="relative -rotate-1 rounded-3xl border border-zinc-200 bg-white/90 p-6 shadow-lg md:p-8 dark:border-zinc-700 dark:bg-zinc-900/90">
+          <div className="absolute -top-3 left-8 h-6 w-20 rotate-[8deg] rounded-[3px] bg-[#F5E9D8]/80 dark:bg-[#F5E9D8]/40" />
+          <div className="absolute right-10 -bottom-3 h-6 w-16 -rotate-[10deg] rounded-[3px] bg-white/80 dark:bg-white/10" />
+          <h2 className={`${serif.className} text-center text-4xl`}>FAQs</h2>
           <p className="mt-1 text-center text-sm text-zinc-700 dark:text-zinc-300">
             The quirky bits you might wonder about.
           </p>
@@ -342,22 +347,22 @@ export default function TemplateThree({
 
       {/* Polaroid-ish Gallery */}
       <section className="mx-auto max-w-6xl px-4 py-16">
-        <h2 className={`${serif.className} text-4xl text-center`}>Gallery</h2>
-        <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300 text-center">
+        <h2 className={`${serif.className} text-center text-4xl`}>Gallery</h2>
+        <p className="mt-1 text-center text-sm text-zinc-700 dark:text-zinc-300">
           Snapshots from the lovefest.
         </p>
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
           {micrositeData?.imageGallery?.slice(0, 9).map((src, idx) => (
             <div
               key={idx}
-              className={`relative aspect-[3/4] bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl p-2 shadow hover:scale-[1.02] transition-transform ${
+              className={`relative aspect-[3/4] rounded-xl border border-zinc-200 bg-white p-2 shadow transition-transform hover:scale-[1.02] dark:border-zinc-700 dark:bg-zinc-800 ${
                 idx % 3 === 0 ? '-rotate-2' : idx % 3 === 1 ? 'rotate-1' : 'rotate-2'
               }`}
             >
-              <div className="relative w-full h-full rounded-lg overflow-hidden">
+              <div className="relative h-full w-full overflow-hidden rounded-lg">
                 <Image src={src} alt={`gallery-${idx}`} fill className="object-cover" />
               </div>
-              <div className="absolute -top-2 left-6 rotate-[6deg] bg-[#F5E9D8]/90 dark:bg-[#F5E9D8]/40 h-5 w-16 rounded" />
+              <div className="absolute -top-2 left-6 h-5 w-16 rotate-[6deg] rounded bg-[#F5E9D8]/90 dark:bg-[#F5E9D8]/40" />
             </div>
           ))}
         </div>
@@ -378,17 +383,17 @@ export default function TemplateThree({
 
       {/* RSVP */}
       <section ref={rsvpRef} className="mx-auto max-w-4xl px-4 py-16">
-        <div className="rounded-3xl border-2 border-dashed border-[#E8DFCF] dark:border-zinc-700 bg-white/90 dark:bg-zinc-900/90 p-6 md:p-8 shadow relative">
-          <div className="absolute -top-3 left-8 rotate-[8deg] bg-[#F5E9D8]/80 dark:bg-[#F5E9D8]/40 h-6 w-20 rounded-[3px]" />
-          <div className="absolute -bottom-3 right-10 -rotate-[10deg] bg-white/80 dark:bg-white/10 h-6 w-16 rounded-[3px]" />
+        <div className="relative rounded-3xl border-2 border-dashed border-[#E8DFCF] bg-white/90 p-6 shadow md:p-8 dark:border-zinc-700 dark:bg-zinc-900/90">
+          <div className="absolute -top-3 left-8 h-6 w-20 rotate-[8deg] rounded-[3px] bg-[#F5E9D8]/80 dark:bg-[#F5E9D8]/40" />
+          <div className="absolute right-10 -bottom-3 h-6 w-16 -rotate-[10deg] rounded-[3px] bg-white/80 dark:bg-white/10" />
           <h2 className={`${serif.className} text-5xl`}>RSVP</h2>
-          <p className="mt-2 text-base md:text-lg text-zinc-700 dark:text-zinc-300">
+          <p className="mt-2 text-base text-zinc-700 md:text-lg dark:text-zinc-300">
             Please review your details and confirm your attendance.
           </p>
 
           {firstHero && (
             <div className="mt-6">
-              <div className="relative h-40 sm:h-56 w-full overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-700">
+              <div className="relative h-40 w-full overflow-hidden rounded-xl border border-zinc-200 sm:h-56 dark:border-zinc-700">
                 <Image
                   src={firstHero}
                   alt="RSVP hero"
@@ -403,31 +408,31 @@ export default function TemplateThree({
 
           {guest && (
             <div className="mt-6 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="bg-zinc-50 dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 p-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
                   <div className="text-xs font-medium text-zinc-600 dark:text-zinc-300">Guest</div>
-                  <div className="mt-1 font-semibold text-zinc-900 dark:text-zinc-100 text-sm">
+                  <div className="mt-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                     {guest.name}
                   </div>
                 </div>
                 {guest.email && guest.email.length > 0 && (
-                  <div className="bg-zinc-50 dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 p-4">
+                  <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
                     <div className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
                       Email
                     </div>
-                    <div className="mt-1 font-semibold text-zinc-900 dark:text-zinc-100 text-sm">
+                    <div className="mt-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                       {guest.email}
                     </div>
                   </div>
                 )}
-                <div className="bg-zinc-50 dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 p-4">
+                <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
                   <div className="text-xs font-medium text-zinc-600 dark:text-zinc-300">Group</div>
-                  <div className="mt-1 font-semibold text-zinc-900 dark:text-zinc-100 text-sm">
+                  <div className="mt-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                     {guest.group}
                   </div>
                 </div>
                 {guest.accompanyingGuests && guest.accompanyingGuests.length > 0 && (
-                  <div className="bg-zinc-50 dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 p-4">
+                  <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
                     <div className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
                       Accompanying Guests
                     </div>
@@ -454,7 +459,7 @@ export default function TemplateThree({
               <div className="flex justify-end pt-2">
                 <Button
                   onClick={() => handleConfirmGuestAttendance(selectedAllergies)}
-                  className="w-full sm:w-auto rounded-full bg-[#EADBC8] hover:bg-[#E5D4BE] text-stone-900 border border-stone-300"
+                  className="w-full rounded-full border border-stone-300 bg-[#EADBC8] text-stone-900 hover:bg-[#E5D4BE] sm:w-auto"
                 >
                   Confirm Attendance
                 </Button>

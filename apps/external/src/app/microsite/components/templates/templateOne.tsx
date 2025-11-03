@@ -82,7 +82,9 @@ export default function TemplateOne({
     const checkQRCode = async () => {
       if (isWeddingLive && micrositeData?.weddingId) {
         try {
-          const weddingData = await WeddingsService.weddingControllerFindPublic(micrositeData.weddingId);
+          const weddingData = await WeddingsService.weddingControllerFindPublic(
+            micrositeData.weddingId,
+          );
           setHasQRCode(!!weddingData.payLahQR);
         } catch (error) {
           // If fetching fails, assume no QR code
@@ -126,23 +128,23 @@ export default function TemplateOne({
   return (
     <>
       <main
-        className={`${montserrat.className} relative min-h-screen w-full transition-colors duration-500 ${!isMobile && 'pt-20'}  ${
+        className={`${montserrat.className} relative min-h-screen w-full transition-colors duration-500 ${!isMobile && 'pt-20'} ${
           isDark ? 'dark bg-gray-modern-950 text-white' : 'bg-brand-25 text-black'
         }`}
       >
         {/* Sticky Dark Mode Switch */}
         <div className="fixed right-0 bottom-4 z-50">
-          <div className="max-w-6xl mx-auto px-4 flex justify-end">
-            <div className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-modern-900/80 backdrop-blur px-3 py-2 shadow-sm">
-              <span className="text-xs font-medium text-gray-700 dark:text-gray-300 select-none">
+          <div className="mx-auto flex max-w-6xl justify-end px-4">
+            <div className="dark:bg-gray-modern-900/80 pointer-events-auto inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/80 px-3 py-2 shadow-sm backdrop-blur dark:border-gray-700">
+              <span className="text-xs font-medium text-gray-700 select-none dark:text-gray-300">
                 Dark Mode
               </span>
               <Switch aria-label="Toggle Dark Mode" checked={isDark} onCheckedChange={setIsDark} />
             </div>
           </div>
         </div>
-        <section className="relative min-h-[70vh] w-full flex items-center justify-center bg-base-black overflow-hidden ">
-          <div className="absolute inset-0 w-full h-full z-0">
+        <section className="bg-base-black relative flex min-h-[70vh] w-full items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 z-0 h-full w-full">
             {micrositeData?.heroImages?.map((src, idx) => (
               <Image
                 key={src}
@@ -150,56 +152,58 @@ export default function TemplateOne({
                 alt="wedding hero"
                 fill
                 priority={idx === 0}
-                className={`object-cover w-full h-full absolute inset-0 transition-opacity duration-500 ${
+                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
                   idx === current && fade ? 'opacity-70' : 'opacity-0'
                 }`}
                 style={{ transitionProperty: 'opacity' }}
               />
             ))}
           </div>
-          <div className="absolute inset-0 bg-black/30 z-10" />
-
-          {micrositeSlug && (
+          <div className="absolute inset-0 z-10 bg-black/30" />
+          {hasWishlistItems && (
+            <div className="absolute top-4 right-4 z-50 flex gap-3">
+              <Button
+                onClick={() => router.push(`/microsite/${micrositeSlug}/wishlist`)}
+                className="w-full rounded-full bg-amber-700 text-white hover:bg-amber-800 sm:w-auto"
+              >
+                Wishlist
+              </Button>
+            </div>
+          )}
+          {isWeddingLive && (
             <div className="absolute top-4 right-4 z-50 flex gap-3">
               <Button
                 onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
-                className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+                className="w-full rounded-full bg-amber-700 text-white hover:bg-amber-800 sm:w-auto"
               >
                 View Album
               </Button>
+              <Button
+                onClick={() => router.push(`/microsite/${micrositeSlug}/guestbook`)}
+                className="w-full rounded-full bg-amber-700 text-white hover:bg-amber-800 sm:w-auto"
+              >
+                View Guestbook
+              </Button>
               {hasQRCode && (
                 <Button
-                  onClick={() => router.push(`/microsite/${micrositeSlug}/cashgift/${micrositeData?.weddingId}`)}
-                  className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+                  onClick={() =>
+                    router.push(`/microsite/${micrositeSlug}/cashgift/${micrositeData?.weddingId}`)
+                  }
+                  className="w-full rounded-full bg-amber-700 text-white hover:bg-amber-800 sm:w-auto"
                 >
                   Cash Giftings
                 </Button>
               )}
-              <Button
-                onClick={() => router.push(`/microsite/${micrositeSlug}/guestbook`)}
-                className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
-              >
-                View Guestbook
-              </Button>
-              {hasWishlistItems && (
-                <Button
-                  onClick={() => router.push(`/microsite/${micrositeSlug}/wishlist`)}
-                  className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
-                >
-                  Wishlist
-                </Button>
-              )}
-              
             </div>
           )}
 
-          <div className="relative z-20 flex flex-col items-center justify-center text-center w-full px-6 sm:px-20 gap-3">
+          <div className="relative z-20 flex w-full flex-col items-center justify-center gap-3 px-6 text-center sm:px-20">
             <h1
-              className={`${alexBrush.className} text-4xl sm:text-6xl text-base-white drop-shadow-lg`}
+              className={`${alexBrush.className} text-base-white text-4xl drop-shadow-lg sm:text-6xl`}
             >
               {micrositeData?.weddingName}
             </h1>
-            <p className="text-base sm:text-lg text-white/85">
+            <p className="text-base text-white/85 sm:text-lg">
               {micrositeData?.weddingDate
                 ? new Date(micrositeData.weddingDate).toLocaleDateString('en-US', {
                     weekday: 'long',
@@ -229,11 +233,11 @@ export default function TemplateOne({
         {/* Schedule Section */}
         <section className="mx-auto max-w-4xl px-4 py-12">
           <h2
-            className={`${alexBrush.className} text-2xl font-semibold text-gray-900 dark:text-white text-center`}
+            className={`${alexBrush.className} text-center text-2xl font-semibold text-gray-900 dark:text-white`}
           >
             Wedding Schedule
           </h2>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 text-center">
+          <p className="mt-1 text-center text-sm text-gray-600 dark:text-gray-300">
             Here’s the plan for the day.
           </p>
           <div className="mt-8">
@@ -241,15 +245,15 @@ export default function TemplateOne({
               {micrositeData?.schedule?.map((item, idx) => (
                 <li
                   key={idx}
-                  className="py-5 grid grid-cols-1 sm:grid-cols-[7rem_1fr] gap-4 items-start"
+                  className="grid grid-cols-1 items-start gap-4 py-5 sm:grid-cols-[7rem_1fr]"
                 >
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">
+                  <div className="text-xs font-semibold tracking-wide text-gray-700 uppercase dark:text-gray-300">
                     {item.time}
                   </div>
                   <div>
-                    <div className="text-gray-900 dark:text-white font-medium">{item.title}</div>
+                    <div className="font-medium text-gray-900 dark:text-white">{item.title}</div>
                     {item.description ? (
-                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
                         {item.description}
                       </p>
                     ) : null}
@@ -263,11 +267,11 @@ export default function TemplateOne({
         {/* FAQs Section */}
         <section className="mx-auto max-w-4xl px-4 py-12">
           <h2
-            className={`${alexBrush.className} text-2xl font-semibold text-gray-900 dark:text-white text-center`}
+            className={`${alexBrush.className} text-center text-2xl font-semibold text-gray-900 dark:text-white`}
           >
             FAQs
           </h2>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 text-center">
+          <p className="mt-1 text-center text-sm text-gray-600 dark:text-gray-300">
             Everything you might wonder.
           </p>
           <div className="mt-6">
@@ -278,23 +282,23 @@ export default function TemplateOne({
         {/* Gallery Section */}
         <section className="mx-auto max-w-6xl px-4 py-12">
           <h2
-            className={`${alexBrush.className} text-2xl font-semibold text-gray-900 dark:text-white text-center`}
+            className={`${alexBrush.className} text-center text-2xl font-semibold text-gray-900 dark:text-white`}
           >
             Gallery
           </h2>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 text-center">
+          <p className="mt-1 text-center text-sm text-gray-600 dark:text-gray-300">
             A few moments we love.
           </p>
-          <div className="mt-8 columns-1 sm:columns-2 md:columns-3 gap-3 space-y-3">
+          <div className="mt-8 columns-1 gap-3 space-y-3 sm:columns-2 md:columns-3">
             {micrositeData?.imageGallery?.slice(0, 6).map((src, idx) => (
-              <div key={idx} className="break-inside-avoid mb-3 group">
+              <div key={idx} className="group mb-3 break-inside-avoid">
                 <div className="relative overflow-hidden">
                   <Image
                     src={src}
                     alt={`gallery-${idx}`}
                     width={400}
                     height={600}
-                    className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-[1.015] group-hover:brightness-90 rounded-lg"
+                    className="h-auto w-full rounded-lg object-cover transition-transform duration-300 group-hover:scale-[1.015] group-hover:brightness-90"
                   />
                 </div>
               </div>
@@ -316,12 +320,12 @@ export default function TemplateOne({
         </section>
         {/* RSVP: portrait image on the left, content on the right */}
         <section ref={rsvpRef} className="mx-auto max-w-4xl px-4 py-12">
-          <div className="rounded-xl border border-stone-200 dark:border-stone-700 bg-gray-100 dark:bg-stone-900 p-6 shadow-sm transition-colors duration-500">
+          <div className="rounded-xl border border-stone-200 bg-gray-100 p-6 shadow-sm transition-colors duration-500 dark:border-stone-700 dark:bg-stone-900">
             {firstHero ? (
               isHeroPortrait ? (
                 <div className="md:flex md:items-stretch md:gap-6">
                   {/* Left: portrait image */}
-                  <div className="relative mx-auto md:mx-0 h-56 w-40 sm:h-64 sm:w-48 md:self-stretch md:h-auto md:w-56 lg:w-64 xl:w-72 overflow-hidden rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800">
+                  <div className="relative mx-auto h-56 w-40 overflow-hidden rounded-lg border border-stone-200 bg-stone-50 sm:h-64 sm:w-48 md:mx-0 md:h-auto md:w-56 md:self-stretch lg:w-64 xl:w-72 dark:border-stone-700 dark:bg-stone-800">
                     <Image
                       src={firstHero}
                       alt="RSVP hero"
@@ -337,54 +341,54 @@ export default function TemplateOne({
                     />
                   </div>
                   {/* Right: header, subtitle and details */}
-                  <div className="mt-6 md:mt-0 flex-1">
+                  <div className="mt-6 flex-1 md:mt-0">
                     <h2
-                      className={`${alexBrush.className} text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-stone-100`}
+                      className={`${alexBrush.className} text-3xl font-semibold text-stone-900 sm:text-4xl dark:text-stone-100`}
                     >
                       RSVP
                     </h2>
                     <p
-                      className={`mt-2 ${montserrat.className} sm:text-lg text-stone-700 dark:text-stone-300`}
+                      className={`mt-2 ${montserrat.className} text-stone-700 sm:text-lg dark:text-stone-300`}
                     >
                       Please review your details and confirm your attendance.
                     </p>
                     {guest && (
                       <div className="mt-6 space-y-4">
-                        <div className="border-b border-stone-200 dark:border-stone-700 pb-4">
+                        <div className="border-b border-stone-200 pb-4 dark:border-stone-700">
                           <h4
-                            className={`${alexBrush.className} text-base font-medium text-stone-900 dark:text-stone-100 mb-3`}
+                            className={`${alexBrush.className} mb-3 text-base font-medium text-stone-900 dark:text-stone-100`}
                           >
                             Your Details
                           </h4>
-                          <div className={`grid grid-cols-1 gap-3  ${montserrat.className} `}>
-                            <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                          <div className={`grid grid-cols-1 gap-3 ${montserrat.className} `}>
+                            <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 transition-colors duration-500 dark:border-stone-700 dark:bg-stone-800">
                               <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                                 Guest
                               </div>
-                              <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                              <div className="mt-1 text-sm font-semibold text-stone-900 dark:text-stone-100">
                                 {guest.name}
                               </div>
                             </div>
                             {guest.email && guest.email.length > 0 && (
-                              <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                              <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 transition-colors duration-500 dark:border-stone-700 dark:bg-stone-800">
                                 <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                                   Email
                                 </div>
-                                <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                                <div className="mt-1 text-sm font-semibold text-stone-900 dark:text-stone-100">
                                   {guest.email}
                                 </div>
                               </div>
                             )}
-                            <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                            <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 transition-colors duration-500 dark:border-stone-700 dark:bg-stone-800">
                               <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                                 Group
                               </div>
-                              <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                              <div className="mt-1 text-sm font-semibold text-stone-900 dark:text-stone-100">
                                 {guest.group}
                               </div>
                             </div>
                             {guest.accompanyingGuests && guest.accompanyingGuests.length > 0 && (
-                              <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                              <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 transition-colors duration-500 dark:border-stone-700 dark:bg-stone-800">
                                 <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                                   Accompanying Guests
                                 </div>
@@ -412,7 +416,7 @@ export default function TemplateOne({
                         <div className="flex justify-end pt-2">
                           <Button
                             onClick={() => handleConfirmGuestAttendance?.(selectedAllergies)}
-                            className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+                            className="w-full rounded-full bg-amber-700 text-white hover:bg-amber-800 sm:w-auto"
                           >
                             Confirm Attendance
                           </Button>
@@ -424,7 +428,7 @@ export default function TemplateOne({
               ) : (
                 // Landscape or unknown orientation: show image with overlay title
                 <div className="mb-6">
-                  <div className="relative h-40 sm:h-56 w-full overflow-hidden rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800">
+                  <div className="relative h-40 w-full overflow-hidden rounded-lg border border-stone-200 bg-stone-50 sm:h-56 dark:border-stone-700 dark:bg-stone-800">
                     <Image
                       src={firstHero}
                       alt="RSVP hero"
@@ -442,11 +446,11 @@ export default function TemplateOne({
                     <div className="absolute inset-0 z-20 flex items-end justify-center p-3 sm:p-4">
                       <div className="text-center">
                         <h2
-                          className={`${alexBrush.className} text-4xl sm:text-5xl text-white drop-shadow-md`}
+                          className={`${alexBrush.className} text-4xl text-white drop-shadow-md sm:text-5xl`}
                         >
                           RSVP
                         </h2>
-                        <p className="mt-2 text-sm sm:text-base md:text-lg text-white/90">
+                        <p className="mt-2 text-sm text-white/90 sm:text-base md:text-lg">
                           Please review your details and confirm your attendance.
                         </p>
                       </div>
@@ -458,11 +462,11 @@ export default function TemplateOne({
               // No image available: simple header and subtitle
               <div className="mb-6">
                 <h2
-                  className={`${alexBrush.className} text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-stone-100 mb-2`}
+                  className={`${alexBrush.className} mb-2 text-3xl font-semibold text-stone-900 sm:text-4xl dark:text-stone-100`}
                 >
                   RSVP
                 </h2>
-                <p className="text-base sm:text-lg text-stone-700 dark:text-stone-300">
+                <p className="text-base text-stone-700 sm:text-lg dark:text-stone-300">
                   Please review your details and confirm your attendance.
                 </p>
               </div>
@@ -471,41 +475,41 @@ export default function TemplateOne({
             {/* Details block for non-portrait (or no image) layouts */}
             {(!isHeroPortrait || !firstHero) && guest && (
               <div className="space-y-4">
-                <div className="border-b border-stone-200 dark:border-stone-700 pb-4">
+                <div className="border-b border-stone-200 pb-4 dark:border-stone-700">
                   <h4
-                    className={`${alexBrush.className} text-base font-medium text-stone-900 dark:text-stone-100 mb-3`}
+                    className={`${alexBrush.className} mb-3 text-base font-medium text-stone-900 dark:text-stone-100`}
                   >
                     Your Details
                   </h4>
                   <div className="grid grid-cols-1 gap-3">
-                    <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                    <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 transition-colors duration-500 dark:border-stone-700 dark:bg-stone-800">
                       <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                         Guest
                       </div>
-                      <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                      <div className="mt-1 text-sm font-semibold text-stone-900 dark:text-stone-100">
                         {guest.name}
                       </div>
                     </div>
                     {guest.email && guest.email.length > 0 && (
-                      <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                      <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 transition-colors duration-500 dark:border-stone-700 dark:bg-stone-800">
                         <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                           Email
                         </div>
-                        <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                        <div className="mt-1 text-sm font-semibold text-stone-900 dark:text-stone-100">
                           {guest.email}
                         </div>
                       </div>
                     )}
-                    <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                    <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 transition-colors duration-500 dark:border-stone-700 dark:bg-stone-800">
                       <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                         Group
                       </div>
-                      <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                      <div className="mt-1 text-sm font-semibold text-stone-900 dark:text-stone-100">
                         {guest.group}
                       </div>
                     </div>
                     {guest.accompanyingGuests && guest.accompanyingGuests.length > 0 && (
-                      <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                      <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 transition-colors duration-500 dark:border-stone-700 dark:bg-stone-800">
                         <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                           Accompanying Guests
                         </div>
@@ -534,7 +538,7 @@ export default function TemplateOne({
                 <div className="flex justify-end pt-2">
                   <Button
                     onClick={() => handleConfirmGuestAttendance?.(selectedAllergies)}
-                    className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+                    className="w-full rounded-full bg-amber-700 text-white hover:bg-amber-800 sm:w-auto"
                   >
                     Confirm Attendance
                   </Button>

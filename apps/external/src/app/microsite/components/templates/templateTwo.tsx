@@ -103,7 +103,9 @@ export default function TemplateTwo({
     const checkQRCode = async () => {
       if (isWeddingLive && micrositeData?.weddingId) {
         try {
-          const weddingData = await WeddingsService.weddingControllerFindPublic(micrositeData.weddingId);
+          const weddingData = await WeddingsService.weddingControllerFindPublic(
+            micrositeData.weddingId,
+          );
           setHasQRCode(!!weddingData.payLahQR);
         } catch (error) {
           // If fetching fails, assume no QR code
@@ -130,9 +132,9 @@ export default function TemplateTwo({
       }`}
     >
       {/* Theme Switch: Light (default) -> Dark */}
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
-        <div className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-stone-300 dark:border-stone-700 bg-white/80 dark:bg-stone-800/80 backdrop-blur px-3 py-2 shadow-sm">
-          <span className="text-xs font-medium text-stone-700 dark:text-stone-300 select-none">
+      <div className="fixed right-4 bottom-4 z-50 sm:right-6 sm:bottom-6">
+        <div className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white/80 px-3 py-2 shadow-sm backdrop-blur dark:border-stone-700 dark:bg-stone-800/80">
+          <span className="text-xs font-medium text-stone-700 select-none dark:text-stone-300">
             Dark Mode
           </span>
           <Switch
@@ -142,46 +144,48 @@ export default function TemplateTwo({
           />
         </div>
       </div>
-
-      {micrositeSlug && (
+      {hasWishlistItems && (
+        <div className="absolute top-4 right-4 z-50 flex gap-3">
+          <Button
+            onClick={() => router.push(`/microsite/${micrositeSlug}/wishlist`)}
+            className="rounded-full bg-amber-700 px-6 py-3 text-white hover:bg-amber-800"
+          >
+            Wishlist
+          </Button>
+        </div>
+      )}
+      {isWeddingLive && (
         <div className="absolute top-4 right-4 z-50 flex gap-3">
           <Button
             onClick={() => router.push(`/microsite/${micrositeSlug}/album`)}
-            className="rounded-full bg-amber-700 hover:bg-amber-800 text-white px-6 py-3"
+            className="rounded-full bg-amber-700 px-6 py-3 text-white hover:bg-amber-800"
           >
             View Album
           </Button>
+          <Button
+            onClick={() => router.push(`/microsite/${micrositeSlug}/guestbook`)}
+            className="w-full rounded-full bg-amber-700 text-white hover:bg-amber-800 sm:w-auto"
+          >
+            View Guestbook
+          </Button>
           {hasQRCode && (
             <Button
-              onClick={() => router.push(`/microsite/${micrositeSlug}/cashgift/${micrositeData?.weddingId}`)}
-              className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+              onClick={() =>
+                router.push(`/microsite/${micrositeSlug}/cashgift/${micrositeData?.weddingId}`)
+              }
+              className="w-full rounded-full bg-amber-700 text-white hover:bg-amber-800 sm:w-auto"
             >
               Cash Giftings
             </Button>
           )}
-          <Button
-            onClick={() => router.push(`/microsite/${micrositeSlug}/guestbook`)}
-            className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
-          >
-            View Guestbook
-          </Button>
-          {hasWishlistItems && (
-            <Button
-              onClick={() => router.push(`/microsite/${micrositeSlug}/wishlist`)}
-              className="rounded-full bg-amber-700 hover:bg-amber-800 text-white px-6 py-3"
-            >
-              Wishlist
-            </Button>
-          )}
-          
         </div>
       )}
 
       {/* Hero Split: left images (50vw), right text (50vw) */}
       <section className="w-screen md:h-[90vh]">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 h-[40vh] md:h-full items-stretch">
+        <div className="grid h-[40vh] grid-cols-1 items-stretch gap-0 md:h-full md:grid-cols-2">
           {/* Left: rotating gallery */}
-          <div className="relative w-full h-full overflow-hidden">
+          <div className="relative h-full w-full overflow-hidden">
             <div className="absolute inset-0">
               {micrositeData?.heroImages?.map((src, idx) => (
                 <Image
@@ -190,7 +194,7 @@ export default function TemplateTwo({
                   alt="wedding hero"
                   fill
                   priority={idx === 0}
-                  className={`object-cover w-full h-full absolute inset-0 transition-opacity duration-500 ${
+                  className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
                     idx === current && fade ? 'opacity-90' : 'opacity-0'
                   }`}
                   style={{ transitionProperty: 'opacity' }}
@@ -201,13 +205,13 @@ export default function TemplateTwo({
           </div>
 
           {/* Right: content */}
-          <div className="flex flex-col justify-center h-full px-6 md:px-12 py-8">
+          <div className="flex h-full flex-col justify-center px-6 py-8 md:px-12">
             <h1
-              className={`${playfair.className} text-4xl sm:text-5xl text-stone-900 dark:text-stone-100`}
+              className={`${playfair.className} text-4xl text-stone-900 sm:text-5xl dark:text-stone-100`}
             >
               {micrositeData?.weddingName}
             </h1>
-            <p className="mt-2 text-base sm:text-lg text-stone-700 dark:text-stone-300">
+            <p className="mt-2 text-base text-stone-700 sm:text-lg dark:text-stone-300">
               {micrositeData?.weddingDate
                 ? new Date(micrositeData.weddingDate).toLocaleDateString('en-US', {
                     weekday: 'long',
@@ -226,7 +230,7 @@ export default function TemplateTwo({
             <div className="mt-4">
               <Button
                 onClick={() => rsvpRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                className="rounded-full bg-amber-700 hover:bg-amber-800 text-white px-6 py-3"
+                className="rounded-full bg-amber-700 px-6 py-3 text-white hover:bg-amber-800"
               >
                 RSVP Now
               </Button>
@@ -237,10 +241,10 @@ export default function TemplateTwo({
 
       {/* Schedule Split: left schedule (50vw), right image (50vw) */}
       <section className="w-screen md:h-[90vh]">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 h-full items-stretch">
+        <div className="grid h-full grid-cols-1 items-stretch gap-0 md:grid-cols-2">
           {/* Left: schedule */}
           <div
-            className={`h-full flex flex-col justify-center px-20 ${isMobile ? 'px-6' : 'px-20'} py-8`}
+            className={`flex h-full flex-col justify-center px-20 ${isMobile ? 'px-6' : 'px-20'} py-8`}
           >
             <h2
               className={`${playfair.className} text-3xl font-semibold text-stone-900 dark:text-stone-100`}
@@ -254,10 +258,10 @@ export default function TemplateTwo({
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-stone-100 dark:bg-stone-800/80">
-                    <th className="text-left text-xs font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300 px-3 py-2 w-32">
+                    <th className="w-32 px-3 py-2 text-left text-xs font-semibold tracking-wide text-stone-700 uppercase dark:text-stone-300">
                       Time
                     </th>
-                    <th className="text-left text-xs font-semibold uppercase tracking-wide text-stone-700 dark:text-stone-300 px-3 py-2">
+                    <th className="px-3 py-2 text-left text-xs font-semibold tracking-wide text-stone-700 uppercase dark:text-stone-300">
                       Event
                     </th>
                   </tr>
@@ -265,15 +269,15 @@ export default function TemplateTwo({
                 <tbody className="divide-y divide-stone-200 dark:divide-stone-700">
                   {micrositeData?.schedule?.map((item, idx) => (
                     <tr key={idx} className="align-top">
-                      <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-stone-900 dark:text-stone-100">
+                      <td className="px-3 py-3 text-sm font-medium whitespace-nowrap text-stone-900 dark:text-stone-100">
                         {item.time}
                       </td>
                       <td className="px-3 py-3">
-                        <div className="text-stone-900 dark:text-stone-100 font-medium">
+                        <div className="font-medium text-stone-900 dark:text-stone-100">
                           {item.title}
                         </div>
                         {item.description ? (
-                          <p className="text-sm text-stone-700 dark:text-stone-300 mt-1">
+                          <p className="mt-1 text-sm text-stone-700 dark:text-stone-300">
                             {item.description}
                           </p>
                         ) : null}
@@ -286,7 +290,7 @@ export default function TemplateTwo({
           </div>
 
           {/* Right: image */}
-          <div className="relative w-full h-[40vh] md:h-full overflow-hidden">
+          <div className="relative h-[40vh] w-full overflow-hidden md:h-full">
             {schedImage ? (
               <Image src={schedImage} alt="schedule visual" fill className="object-cover" />
             ) : null}
@@ -297,9 +301,9 @@ export default function TemplateTwo({
 
       {/* FAQs Split: left image (50vw), right FAQs (50vw) */}
       <section className="w-screen md:h-[90vh]">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 h-full items-stretch">
+        <div className="grid h-full grid-cols-1 items-stretch gap-0 md:grid-cols-2">
           {/* Left: image */}
-          <div className="relative order-1 md:order-none w-full h-[40vh] md:h-full overflow-hidden">
+          <div className="relative order-1 h-[40vh] w-full overflow-hidden md:order-none md:h-full">
             {faqImage ? (
               <Image src={faqImage} alt="faq visual" fill className="object-cover" />
             ) : null}
@@ -308,10 +312,10 @@ export default function TemplateTwo({
 
           {/* Right: FAQs */}
           <div
-            className={`h-full flex flex-col justify-center ${isMobile ? 'px-6' : 'px-20'} py-8`}
+            className={`flex h-full flex-col justify-center ${isMobile ? 'px-6' : 'px-20'} py-8`}
           >
             <h2
-              className={`${playfair.className} text-3xl font-semibold text-stone-900 dark:text-stone-100 text-left`}
+              className={`${playfair.className} text-left text-3xl font-semibold text-stone-900 dark:text-stone-100`}
             >
               FAQs
             </h2>
@@ -328,23 +332,23 @@ export default function TemplateTwo({
       {/* Gallery (same as Template One, font changes only) */}
       <section className="mx-auto max-w-6xl px-4 py-12">
         <h2
-          className={`${playfair.className} text-2xl font-semibold text-stone-900 dark:text-stone-100 text-center`}
+          className={`${playfair.className} text-center text-2xl font-semibold text-stone-900 dark:text-stone-100`}
         >
           Gallery
         </h2>
-        <p className="mt-1 text-sm text-stone-700 dark:text-stone-300 text-center">
+        <p className="mt-1 text-center text-sm text-stone-700 dark:text-stone-300">
           A few moments we love.
         </p>
-        <div className="mt-8 columns-1 sm:columns-2 md:columns-3 gap-3 space-y-3">
+        <div className="mt-8 columns-1 gap-3 space-y-3 sm:columns-2 md:columns-3">
           {micrositeData?.imageGallery?.slice(0, 6).map((src, idx) => (
-            <div key={idx} className="break-inside-avoid mb-3 group">
+            <div key={idx} className="group mb-3 break-inside-avoid">
               <div className="relative overflow-hidden">
                 <Image
                   src={src}
                   alt={`gallery-${idx}`}
                   width={400}
                   height={600}
-                  className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-[1.015] group-hover:brightness-90 rounded-lg"
+                  className="h-auto w-full rounded-lg object-cover transition-transform duration-300 group-hover:scale-[1.015] group-hover:brightness-90"
                 />
               </div>
             </div>
@@ -367,12 +371,12 @@ export default function TemplateTwo({
 
       {/* RSVP: portrait image on the left, content on the right */}
       <section ref={rsvpRef} className="mx-auto max-w-4xl px-4 py-12">
-        <div className="rounded-xl border border-stone-200 dark:border-stone-700 bg-gray-100 dark:bg-stone-900 p-6 shadow-sm transition-colors duration-500">
+        <div className="rounded-xl border border-stone-200 bg-gray-100 p-6 shadow-sm transition-colors duration-500 dark:border-stone-700 dark:bg-stone-900">
           {firstHero ? (
             isHeroPortrait ? (
               <div className="md:flex md:items-stretch md:gap-6">
                 {/* Left: portrait image */}
-                <div className="relative mx-auto md:mx-0 h-56 w-40 sm:h-64 sm:w-48 md:self-stretch md:h-auto md:w-56 lg:w-64 xl:w-72 overflow-hidden rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800">
+                <div className="relative mx-auto h-56 w-40 overflow-hidden rounded-lg border border-stone-200 bg-stone-50 sm:h-64 sm:w-48 md:mx-0 md:h-auto md:w-56 md:self-stretch lg:w-64 xl:w-72 dark:border-stone-700 dark:bg-stone-800">
                   <Image
                     src={firstHero}
                     alt="RSVP hero"
@@ -388,52 +392,52 @@ export default function TemplateTwo({
                   />
                 </div>
                 {/* Right: header, subtitle and details */}
-                <div className="mt-6 md:mt-0 flex-1">
+                <div className="mt-6 flex-1 md:mt-0">
                   <h2
-                    className={`${playfair.className} text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-stone-100`}
+                    className={`${playfair.className} text-3xl font-semibold text-stone-900 sm:text-4xl dark:text-stone-100`}
                   >
                     RSVP
                   </h2>
-                  <p className="mt-2 text-base sm:text-lg text-stone-700 dark:text-stone-300">
+                  <p className="mt-2 text-base text-stone-700 sm:text-lg dark:text-stone-300">
                     Please review your details and confirm your attendance.
                   </p>
                   {guest && (
                     <div className="mt-6 space-y-4">
-                      <div className="border-b border-stone-200 dark:border-stone-700 pb-4">
+                      <div className="border-b border-stone-200 pb-4 dark:border-stone-700">
                         <h4
-                          className={`${playfair.className} text-base font-medium text-stone-900 dark:text-stone-100 mb-3`}
+                          className={`${playfair.className} mb-3 text-base font-medium text-stone-900 dark:text-stone-100`}
                         >
                           Your Details
                         </h4>
-                        <div className="grid grid-cols-1  gap-3">
-                          <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                        <div className="grid grid-cols-1 gap-3">
+                          <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 transition-colors duration-500 dark:border-stone-700 dark:bg-stone-800">
                             <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                               Guest
                             </div>
-                            <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                            <div className="mt-1 text-sm font-semibold text-stone-900 dark:text-stone-100">
                               {guest.name}
                             </div>
                           </div>
                           {guest.email && guest.email.length > 0 && (
-                            <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                            <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 transition-colors duration-500 dark:border-stone-700 dark:bg-stone-800">
                               <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                                 Email
                               </div>
-                              <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                              <div className="mt-1 text-sm font-semibold text-stone-900 dark:text-stone-100">
                                 {guest.email}
                               </div>
                             </div>
                           )}
-                          <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                          <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 transition-colors duration-500 dark:border-stone-700 dark:bg-stone-800">
                             <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                               Group
                             </div>
-                            <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                            <div className="mt-1 text-sm font-semibold text-stone-900 dark:text-stone-100">
                               {guest.group}
                             </div>
                           </div>
                           {guest.accompanyingGuests && guest.accompanyingGuests.length > 0 && (
-                            <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                            <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 transition-colors duration-500 dark:border-stone-700 dark:bg-stone-800">
                               <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                                 Accompanying Guests
                               </div>
@@ -461,7 +465,7 @@ export default function TemplateTwo({
                       <div className="flex justify-end pt-2">
                         <Button
                           onClick={() => handleConfirmGuestAttendance(selectedAllergies)}
-                          className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+                          className="w-full rounded-full bg-amber-700 text-white hover:bg-amber-800 sm:w-auto"
                         >
                           Confirm Attendance
                         </Button>
@@ -473,7 +477,7 @@ export default function TemplateTwo({
             ) : (
               // Landscape or unknown orientation: show image with overlay title
               <div className="mb-6">
-                <div className="relative h-40 sm:h-56 w-full overflow-hidden rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800">
+                <div className="relative h-40 w-full overflow-hidden rounded-lg border border-stone-200 bg-stone-50 sm:h-56 dark:border-stone-700 dark:bg-stone-800">
                   <Image
                     src={firstHero}
                     alt="RSVP hero"
@@ -491,11 +495,11 @@ export default function TemplateTwo({
                   <div className="absolute inset-0 z-20 flex items-end justify-center p-3 sm:p-4">
                     <div className="text-center">
                       <h2
-                        className={`${playfair.className} text-4xl sm:text-5xl text-white drop-shadow-md`}
+                        className={`${playfair.className} text-4xl text-white drop-shadow-md sm:text-5xl`}
                       >
                         RSVP
                       </h2>
-                      <p className="mt-2 text-sm sm:text-base md:text-lg text-white/90">
+                      <p className="mt-2 text-sm text-white/90 sm:text-base md:text-lg">
                         Please review your details and confirm your attendance.
                       </p>
                     </div>
@@ -507,11 +511,11 @@ export default function TemplateTwo({
             // No image available: simple header and subtitle
             <div className="mb-6">
               <h2
-                className={`${playfair.className} text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-stone-100 mb-2`}
+                className={`${playfair.className} mb-2 text-3xl font-semibold text-stone-900 sm:text-4xl dark:text-stone-100`}
               >
                 RSVP
               </h2>
-              <p className="text-base sm:text-lg text-stone-700 dark:text-stone-300">
+              <p className="text-base text-stone-700 sm:text-lg dark:text-stone-300">
                 Please review your details and confirm your attendance.
               </p>
             </div>
@@ -520,41 +524,41 @@ export default function TemplateTwo({
           {/* Details block for non-portrait (or no image) layouts */}
           {(!isHeroPortrait || !firstHero) && guest && (
             <div className="space-y-4">
-              <div className="border-b border-stone-200 dark:border-stone-700 pb-4">
+              <div className="border-b border-stone-200 pb-4 dark:border-stone-700">
                 <h4
-                  className={`${playfair.className} text-base font-medium text-stone-900 dark:text-stone-100 mb-3`}
+                  className={`${playfair.className} mb-3 text-base font-medium text-stone-900 dark:text-stone-100`}
                 >
                   Your Details
                 </h4>
                 <div className="grid grid-cols-1 gap-3">
-                  <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                  <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 transition-colors duration-500 dark:border-stone-700 dark:bg-stone-800">
                     <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                       Guest
                     </div>
-                    <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                    <div className="mt-1 text-sm font-semibold text-stone-900 dark:text-stone-100">
                       {guest.name}
                     </div>
                   </div>
                   {guest.email && guest.email.length > 0 && (
-                    <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                    <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 transition-colors duration-500 dark:border-stone-700 dark:bg-stone-800">
                       <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                         Email
                       </div>
-                      <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                      <div className="mt-1 text-sm font-semibold text-stone-900 dark:text-stone-100">
                         {guest.email}
                       </div>
                     </div>
                   )}
-                  <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                  <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 transition-colors duration-500 dark:border-stone-700 dark:bg-stone-800">
                     <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                       Group
                     </div>
-                    <div className="mt-1 font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                    <div className="mt-1 text-sm font-semibold text-stone-900 dark:text-stone-100">
                       {guest.group}
                     </div>
                   </div>
                   {guest.accompanyingGuests && guest.accompanyingGuests.length > 0 && (
-                    <div className="bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 transition-colors duration-500">
+                    <div className="rounded-lg border border-stone-200 bg-stone-50 p-3 transition-colors duration-500 dark:border-stone-700 dark:bg-stone-800">
                       <div className="text-xs font-medium text-stone-600 dark:text-stone-300">
                         Accompanying Guests
                       </div>
@@ -582,7 +586,7 @@ export default function TemplateTwo({
               <div className="flex justify-end pt-2">
                 <Button
                   onClick={() => handleConfirmGuestAttendance(selectedAllergies)}
-                  className="w-full sm:w-auto bg-amber-700 hover:bg-amber-800 text-white rounded-full"
+                  className="w-full rounded-full bg-amber-700 text-white hover:bg-amber-800 sm:w-auto"
                 >
                   Confirm Attendance
                 </Button>
