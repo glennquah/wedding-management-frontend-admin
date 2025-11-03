@@ -52,6 +52,7 @@ const AdminDashboardModule = () => {
   const [isWeddingWrappedModalOpen, setIsWeddingWrappedModalOpen] = useState(false);
   const [isGeneratingWrapped, setIsGeneratingWrapped] = useState(false);
   const [isSavingWrapped, setIsSavingWrapped] = useState(false);
+  const [hasExistingWrapped, setHasExistingWrapped] = useState(false);
 
   // Calculate days until wedding
   const daysUntilWedding = selectedWedding
@@ -119,7 +120,7 @@ const AdminDashboardModule = () => {
     fetchOrders();
   }, [selectedWeddingId]);
 
-  // Fetch checklist data (microsite, seating)
+  // Fetch checklist data (microsite, seating, wedding wrapped)
   useEffect(() => {
     if (!selectedWeddingId) return;
 
@@ -147,6 +148,15 @@ const AdminDashboardModule = () => {
           // Seating doesn't exist
           setHasSeating(false);
         }
+
+        // Check if Wedding Wrapped already exists
+        try {
+          await AnalyticsService.analyticsControllerGetWeddingWrapped(selectedWeddingId);
+          setHasExistingWrapped(true);
+        } catch {
+          // Wedding Wrapped doesn't exist
+          setHasExistingWrapped(false);
+        }
       } catch (error) {
         console.error('Error fetching checklist data:', error);
       } finally {
@@ -165,6 +175,7 @@ const AdminDashboardModule = () => {
     try {
       const data = await AnalyticsService.analyticsControllerGenerateWeddingWrapped(selectedWeddingId);
       setWeddingWrappedData(data);
+      setHasExistingWrapped(true);
       setIsWeddingWrappedModalOpen(true);
       toast.success('Wedding Wrapped Generated! Your wedding analytics have been successfully generated.');
     } catch (error) {
@@ -216,8 +227,8 @@ const AdminDashboardModule = () => {
           description={headerDescription}
         />
 
-        {/* Wedding Wrapped Card - Only show when wedding has passed */}
-        {daysUntilWedding !== null && daysUntilWedding < 0 && (
+        {/* Wedding Wrapped Card - Only show when wedding has passed and hasn't been generated yet */}
+        {daysUntilWedding !== null && daysUntilWedding < 0 && !hasExistingWrapped && (
           <div className="mb-6">
             <Card className="border-2 border-brand-200 bg-gradient-to-r from-brand-25 to-brand-50">
               <CardHeader>
