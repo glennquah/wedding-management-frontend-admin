@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { WeddingWrappedResponseDto } from '@shared/api';
 import { TypingText } from '../TypingText';
@@ -11,166 +11,185 @@ interface GuestExperienceSlideContentProps {
   formatDate: (dateString: string | null) => string;
 }
 
-function GuestExperienceSlideContent({ guestInsights, formatDate }: GuestExperienceSlideContentProps) {
-  const [showStats, setShowStats] = useState(false);
+function GuestExperienceSlideContent({
+  guestInsights,
+  formatDate,
+}: GuestExperienceSlideContentProps) {
+  const [showIntro, setShowIntro] = useState(false);
+  const [showInvited, setShowInvited] = useState(false);
+  const [showConfirmed, setShowConfirmed] = useState(false);
+  const [showAttended, setShowAttended] = useState(false);
   const [showComment, setShowComment] = useState(false);
   const [showFirst, setShowFirst] = useState(false);
   const [showFastest, setShowFastest] = useState(false);
 
+  // Trigger the first card when intro text is shown
+  useEffect(() => {
+    if (showIntro) {
+      setTimeout(() => setShowInvited(true), 800);
+    }
+  }, [showIntro]);
+
   const getAttendanceComment = () => {
     const rate = (guestInsights.totalAttended / guestInsights.totalInvited) * 100;
     if (rate > 90) {
-      return "Basically a full house! 🎉 Your popularity is showing!";
+      return 'Basically a full house! 🎉 Your popularity is showing!';
     } else if (rate > 75) {
-      return "Great turnout! The party people showed up! 🥳";
+      return 'Great turnout! The party people showed up! 🥳';
     } else if (rate > 60) {
-      return "Solid crowd! Quality over quantity, right? 😎";
+      return 'Solid crowd! Quality over quantity, right? 😎';
     } else {
-      return "Intimate gathering vibes! Sometimes less is more 💕";
+      return 'Intimate gathering vibes! Sometimes less is more 💕';
     }
   };
 
   return (
-    <div className="space-y-6 max-w-4xl w-full">
-        <motion.h2
-          className="text-6xl font-bold text-white mb-6"
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <TypingText text="Guest Experience" speed={80} />
-        </motion.h2>
+    <div className="w-full max-w-4xl space-y-6">
+      <motion.h2
+        className="mb-6 text-6xl font-bold text-white"
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8 }}
+      >
+        <TypingText text="Guest Experience" speed={80} />
+      </motion.h2>
 
-        <div className="space-y-6">
+      <div className="space-y-6">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}>
+          <p className="mb-4 text-2xl text-white/90">
+            <TypingText
+              text="Let's talk about the people who celebrated with you..."
+              delay={1200}
+              speed={60}
+              onComplete={() => setTimeout(() => setShowIntro(true), 600)}
+            />
+          </p>
+        </motion.div>
+
+        {showIntro && (
           <motion.div
+            className="mb-4 grid grid-cols-3 gap-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.2 }}
           >
-            <p className="text-2xl text-white/90 mb-4">
+            {showInvited && (
+              <motion.div
+                className="rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 p-6 text-center shadow-2xl"
+                initial={{ opacity: 0, y: 50, scale: 0.8, rotateY: -90 }}
+                animate={{ opacity: 1, y: 0, scale: 1, rotateY: 0 }}
+                transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
+                onAnimationComplete={() => setTimeout(() => setShowConfirmed(true), 1000)}
+              >
+                <div className="mb-2 text-5xl font-bold text-white">
+                  {guestInsights.totalInvited}
+                </div>
+                <div className="text-base text-white/90">Invited</div>
+              </motion.div>
+            )}
+
+            {showConfirmed && (
+              <motion.div
+                className="rounded-2xl bg-gradient-to-br from-green-400 to-green-600 p-6 text-center shadow-2xl"
+                initial={{ opacity: 0, y: 50, scale: 0.8, rotateY: -90 }}
+                animate={{ opacity: 1, y: 0, scale: 1, rotateY: 0 }}
+                transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
+                onAnimationComplete={() => setTimeout(() => setShowAttended(true), 1000)}
+              >
+                <div className="mb-2 text-5xl font-bold text-white">
+                  {guestInsights.totalConfirmed}
+                </div>
+                <div className="text-base text-white/90">Confirmed</div>
+              </motion.div>
+            )}
+
+            {showAttended && (
+              <motion.div
+                className="rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 p-6 text-center shadow-2xl"
+                initial={{ opacity: 0, y: 50, scale: 0.8, rotateY: -90 }}
+                animate={{ opacity: 1, y: 0, scale: 1, rotateY: 0 }}
+                transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
+                onAnimationComplete={() => setTimeout(() => setShowComment(true), 1000)}
+              >
+                <div className="mb-2 text-5xl font-bold text-white">
+                  {guestInsights.totalAttended}
+                </div>
+                <div className="text-base text-white/90">Attended</div>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {showComment && (
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+            <p className="text-center text-2xl font-semibold text-yellow-300">
               <TypingText
-                text="Let's talk about the people who celebrated with you..."
-                delay={1200}
-                speed={60}
-                onComplete={() => setTimeout(() => setShowStats(true), 600)}
+                text={getAttendanceComment()}
+                delay={200}
+                speed={50}
+                onComplete={() => setTimeout(() => setShowFirst(true), 1000)}
               />
             </p>
           </motion.div>
+        )}
 
-          {showStats && (
-            <motion.div
-              className="grid grid-cols-3 gap-4 mb-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              {[
-                { label: 'Invited', value: guestInsights.totalInvited, color: 'from-blue-400 to-blue-600', delay: 0.2 },
-                { label: 'Confirmed', value: guestInsights.totalConfirmed, color: 'from-green-400 to-green-600', delay: 0.4 },
-                { label: 'Attended', value: guestInsights.totalAttended, color: 'from-purple-400 to-purple-600', delay: 0.6 },
-              ].map((item, idx) => (
-                <motion.div
-                  key={idx}
-                  className={`bg-gradient-to-br ${item.color} rounded-2xl p-6 text-center shadow-2xl`}
-                  initial={{ opacity: 0, y: 50, scale: 0.8 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: item.delay, type: 'spring', bounce: 0.4 }}
-                  onAnimationComplete={() => {
-                    if (idx === 2) setTimeout(() => setShowComment(true), 500);
-                  }}
-                >
-                  <div className="text-5xl font-bold text-white mb-2">{item.value}</div>
-                  <div className="text-base text-white/90">{item.label}</div>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
+        {showFirst && guestInsights.firstGuestName && (
+          <motion.div
+            className="rounded-2xl border-2 border-white/20 bg-white/10 p-6 backdrop-blur-lg"
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <p className="mb-3 text-xl font-semibold text-yellow-300">
+              <TypingText text="🏆 First to Arrive" delay={300} speed={70} />
+            </p>
+            <p className="mb-2 text-lg text-white/70">
+              <TypingText
+                text="The early bird who couldn't wait to celebrate!"
+                delay={1500}
+                speed={50}
+              />
+            </p>
+            <p className="pt-1 text-3xl font-bold text-white">
+              <TypingText text={`${guestInsights.firstGuestName}`} delay={3500} speed={70} />
+            </p>
+            <p className="mt-2 text-lg text-white/60">
+              <TypingText
+                text={`at ${formatDate(guestInsights.firstGuestTime)}`}
+                delay={4500}
+                speed={40}
+                onComplete={() => setTimeout(() => setShowFastest(true), 800)}
+              />
+            </p>
+          </motion.div>
+        )}
 
-          {showComment && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-            >
-              <p className="text-2xl text-yellow-300 font-semibold text-center">
-                <TypingText
-                  text={getAttendanceComment()}
-                  delay={200}
-                  speed={50}
-                  onComplete={() => setTimeout(() => setShowFirst(true), 1000)}
-                />
-              </p>
-            </motion.div>
-          )}
-
-          {showFirst && guestInsights.firstGuestName && (
-            <motion.div
-              className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border-2 border-white/20"
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <p className="text-xl text-yellow-300 font-semibold mb-3">
-                <TypingText text="🏆 First to Arrive" delay={300} speed={70} />
-              </p>
-              <p className="text-lg text-white/70 mb-2">
-                <TypingText
-                  text="The early bird who couldn't wait to celebrate!"
-                  delay={1500}
-                  speed={50}
-                />
-              </p>
-              <p className="text-3xl text-white font-bold pt-1">
-                <TypingText
-                  text={`${guestInsights.firstGuestName}`}
-                  delay={3500}
-                  speed={70}
-                />
-              </p>
-              <p className="text-lg text-white/60 mt-2">
-                <TypingText
-                  text={`at ${formatDate(guestInsights.firstGuestTime)}`}
-                  delay={4500}
-                  speed={40}
-                  onComplete={() => setTimeout(() => setShowFastest(true), 800)}
-                />
-              </p>
-            </motion.div>
-          )}
-
-          {showFastest && guestInsights.fastestRsvpName && (
-            <motion.div
-              className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border-2 border-white/20"
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <p className="text-xl text-green-300 font-semibold mb-3">
-                <TypingText text="⚡ Fastest RSVP" delay={300} speed={70} />
-              </p>
-              <p className="text-lg text-white/70 mb-2">
-                <TypingText
-                  text="Someone was EAGER! 🏃‍♂️💨"
-                  delay={1200}
-                  speed={60}
-                />
-              </p>
-              <p className="text-3xl text-white font-bold pt-1">
-                <TypingText
-                  text={guestInsights.fastestRsvpName}
-                  delay={2500}
-                  speed={70}
-                />
-              </p>
-              <p className="text-xl text-white/80 mt-2">
-                <TypingText
-                  text={`Lightning speed: ${guestInsights.fastestRsvpDuration?.toFixed(1)} hours ⚡`}
-                  delay={3800}
-                  speed={50}
-                />
-              </p>
-            </motion.div>
-          )}
-        </div>
+        {showFastest && guestInsights.fastestRsvpName && (
+          <motion.div
+            className="rounded-2xl border-2 border-white/20 bg-white/10 p-6 backdrop-blur-lg"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <p className="mb-3 text-xl font-semibold text-green-300">
+              <TypingText text="⚡ Fastest RSVP" delay={300} speed={70} />
+            </p>
+            <p className="mb-2 text-lg text-white/70">
+              <TypingText text="Someone was EAGER! 🏃‍♂️💨" delay={1200} speed={60} />
+            </p>
+            <p className="pt-1 text-3xl font-bold text-white">
+              <TypingText text={guestInsights.fastestRsvpName} delay={2500} speed={70} />
+            </p>
+            <p className="mt-2 text-xl text-white/80">
+              <TypingText
+                text={`Lightning speed: ${guestInsights.fastestRsvpDuration?.toFixed(1)} hours ⚡`}
+                delay={3800}
+                speed={50}
+              />
+            </p>
+          </motion.div>
+        )}
       </div>
+    </div>
   );
 }
 
