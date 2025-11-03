@@ -7,7 +7,6 @@ import { BudgetLineChart } from './BudgetLineChart';
 import { DashboardStatsCards } from './DashboardStatsCards';
 import { RecentOrdersList } from './RecentOrdersList';
 import { WeddingTasksChecklist } from './WeddingTasksChecklist';
-import { WeddingWrappedModal } from './WeddingWrappedModal';
 import {
   AnalyticsService,
   GuestCountResponseDto,
@@ -18,7 +17,6 @@ import {
   RsvpCountResponseDto,
   SeatingArrangementsService,
   SpendingResponseDto,
-  WeddingWrappedResponseDto,
 } from '@shared/api';
 import { PageHeader } from '@shared/components';
 import { Button } from '@shared/components/ui/button';
@@ -26,8 +24,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shar
 import { useSession } from 'next-auth/react';
 import { Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 const AdminDashboardModule = () => {
+  const router = useRouter();
   const { data: session } = useSession();
   const selectedWeddingId = useWeddingStore((state) => state.selectedWeddingId);
   const weddings = useWeddingStore((state) => state.weddings);
@@ -48,10 +48,7 @@ const AdminDashboardModule = () => {
   const [isLoadingChecklist, setIsLoadingChecklist] = useState(false);
 
   // Wedding Wrapped state
-  const [weddingWrappedData, setWeddingWrappedData] = useState<WeddingWrappedResponseDto | null>(null);
-  const [isWeddingWrappedModalOpen, setIsWeddingWrappedModalOpen] = useState(false);
   const [isGeneratingWrapped, setIsGeneratingWrapped] = useState(false);
-  const [isSavingWrapped, setIsSavingWrapped] = useState(false);
   const [hasExistingWrapped, setHasExistingWrapped] = useState(false);
 
   // Calculate days until wedding
@@ -173,33 +170,16 @@ const AdminDashboardModule = () => {
 
     setIsGeneratingWrapped(true);
     try {
-      const data = await AnalyticsService.analyticsControllerGenerateWeddingWrapped(selectedWeddingId);
-      setWeddingWrappedData(data);
+      await AnalyticsService.analyticsControllerGenerateWeddingWrapped(selectedWeddingId);
       setHasExistingWrapped(true);
-      setIsWeddingWrappedModalOpen(true);
       toast.success('Wedding Wrapped Generated! Your wedding analytics have been successfully generated.');
+      // Navigate to the fullscreen view
+      router.push('/admin/wedding-wrapped/view');
     } catch (error) {
       console.error('Error generating Wedding Wrapped:', error);
       toast.error('Failed to generate Wedding Wrapped. Please try again.');
     } finally {
       setIsGeneratingWrapped(false);
-    }
-  };
-
-  const handleSaveWeddingWrapped = async () => {
-    if (!selectedWeddingId) return;
-
-    setIsSavingWrapped(true);
-    try {
-      // The data is already saved when generated, so we just need to confirm
-      await AnalyticsService.analyticsControllerGetWeddingWrapped(selectedWeddingId);
-      toast.success('Wedding Wrapped Saved! Your Wedding Wrapped has been saved successfully.');
-      setIsWeddingWrappedModalOpen(false);
-    } catch (error) {
-      console.error('Error saving Wedding Wrapped:', error);
-      toast.error('Failed to save Wedding Wrapped. Please try again.');
-    } finally {
-      setIsSavingWrapped(false);
     }
   };
 
@@ -292,16 +272,6 @@ const AdminDashboardModule = () => {
             isLoading={isLoadingChecklist}
           />
         </div>
-
-        {/* Wedding Wrapped Modal */}
-        <WeddingWrappedModal
-          open={isWeddingWrappedModalOpen}
-          onOpenChange={setIsWeddingWrappedModalOpen}
-          data={weddingWrappedData}
-          wedding={selectedWedding}
-          onSave={handleSaveWeddingWrapped}
-          isSaving={isSavingWrapped}
-        />
       </div>
     </div>
   );

@@ -215,7 +215,7 @@ export function WeddingWrappedModal({
     // Summary Slide - SUGAR (same music)
     { ...SummarySlide({ data, wedding: fullWedding, formatCurrency, formatDate }), musicIndex: 5 },
     // Final Slide - 24K
-    { ...FinalSlide({ onSave, isSaving }), musicIndex: 7 },
+    { ...FinalSlide({ onSave, isSaving, data, wedding: fullWedding, formatCurrency, formatDate }), musicIndex: 7 },
   ];
 
   const nextSlide = () => {

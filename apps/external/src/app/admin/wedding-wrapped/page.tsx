@@ -1,23 +1,22 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { useWeddingStore } from '@/app/store/sessionStore';
-import { WeddingWrappedModal } from '@/app/components/dashboards/WeddingWrappedModal';
 import { AnalyticsService, WeddingWrappedResponseDto } from '@shared/api';
 import { PageHeader } from '@shared/components';
 import { Button } from '@shared/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { Sparkles, Heart, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
 
 export default function WeddingWrappedPage() {
+  const router = useRouter();
   const selectedWeddingId = useWeddingStore((state) => state.selectedWeddingId);
   const weddings = useWeddingStore((state) => state.weddings);
   const selectedWedding = weddings.find((w) => w.id === selectedWeddingId);
 
   const [weddingWrappedData, setWeddingWrappedData] = useState<WeddingWrappedResponseDto | null>(null);
-  const [isWeddingWrappedModalOpen, setIsWeddingWrappedModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [hasWrapped, setHasWrapped] = useState(false);
 
@@ -52,14 +51,8 @@ export default function WeddingWrappedPage() {
 
   const handleOpenWeddingWrapped = () => {
     if (weddingWrappedData) {
-      setIsWeddingWrappedModalOpen(true);
+      router.push('/admin/wedding-wrapped/view');
     }
-  };
-
-  const handleSaveWeddingWrapped = async () => {
-    // Wedding Wrapped is already saved, just close the modal
-    toast.success('Wedding Wrapped is saved!');
-    setIsWeddingWrappedModalOpen(false);
   };
 
   if (!selectedWeddingId || !selectedWedding) {
@@ -150,16 +143,6 @@ export default function WeddingWrappedPage() {
             </CardHeader>
           </Card>
         )}
-
-        {/* Wedding Wrapped Modal */}
-        <WeddingWrappedModal
-          open={isWeddingWrappedModalOpen}
-          onOpenChange={setIsWeddingWrappedModalOpen}
-          data={weddingWrappedData}
-          wedding={selectedWedding}
-          onSave={handleSaveWeddingWrapped}
-          isSaving={false}
-        />
       </div>
     </div>
   );
