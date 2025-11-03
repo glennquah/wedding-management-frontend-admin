@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { WeddingResponseDto, WeddingWrappedResponseDto } from '@shared/api';
 import { Button } from '@shared/components/ui/button';
-import { AnimatedWords } from '../AnimationComponents';
+import { TypingText } from '../TypingText';
 import { FireworksParticles } from '../ParticleEffects';
 import { Download, Mail, Loader2, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
