@@ -31,9 +31,9 @@ function GuestExperienceSlideContent({ guestInsights, formatDate }: GuestExperie
   };
 
   return (
-    <div className="space-y-10 max-w-5xl">
+    <div className="space-y-6 max-w-4xl w-full">
         <motion.h2
-          className="text-8xl font-bold text-white mb-8"
+          className="text-6xl font-bold text-white mb-6"
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
@@ -41,13 +41,13 @@ function GuestExperienceSlideContent({ guestInsights, formatDate }: GuestExperie
           <TypingText text="Guest Experience" speed={80} />
         </motion.h2>
 
-        <div className="space-y-10">
+        <div className="space-y-6">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.2 }}
           >
-            <p className="text-4xl text-white/90 mb-8">
+            <p className="text-2xl text-white/90 mb-4">
               <TypingText
                 text="Let's talk about the people who celebrated with you..."
                 delay={1200}
@@ -59,7 +59,7 @@ function GuestExperienceSlideContent({ guestInsights, formatDate }: GuestExperie
 
           {showStats && (
             <motion.div
-              className="grid grid-cols-3 gap-10 mb-8"
+              className="grid grid-cols-3 gap-4 mb-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
@@ -70,7 +70,7 @@ function GuestExperienceSlideContent({ guestInsights, formatDate }: GuestExperie
               ].map((item, idx) => (
                 <motion.div
                   key={idx}
-                  className={`bg-gradient-to-br ${item.color} rounded-3xl p-10 text-center shadow-2xl`}
+                  className={`bg-gradient-to-br ${item.color} rounded-2xl p-6 text-center shadow-2xl`}
                   initial={{ opacity: 0, y: 50, scale: 0.8 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ delay: item.delay, type: 'spring', bounce: 0.4 }}
@@ -78,8 +78,8 @@ function GuestExperienceSlideContent({ guestInsights, formatDate }: GuestExperie
                     if (idx === 2) setTimeout(() => setShowComment(true), 500);
                   }}
                 >
-                  <div className="text-8xl font-bold text-white mb-3">{item.value}</div>
-                  <div className="text-2xl text-white/90">{item.label}</div>
+                  <div className="text-5xl font-bold text-white mb-2">{item.value}</div>
+                  <div className="text-base text-white/90">{item.label}</div>
                 </motion.div>
               ))}
             </motion.div>
@@ -90,7 +90,7 @@ function GuestExperienceSlideContent({ guestInsights, formatDate }: GuestExperie
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
             >
-              <p className="text-4xl text-yellow-300 font-semibold text-center">
+              <p className="text-2xl text-yellow-300 font-semibold text-center">
                 <TypingText
                   text={getAttendanceComment()}
                   delay={200}
@@ -103,29 +103,29 @@ function GuestExperienceSlideContent({ guestInsights, formatDate }: GuestExperie
 
           {showFirst && guestInsights.firstGuestName && (
             <motion.div
-              className="bg-white/10 backdrop-blur-lg rounded-3xl p-10 border-2 border-white/20"
+              className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border-2 border-white/20"
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <p className="text-3xl text-yellow-300 font-semibold mb-6">
+              <p className="text-xl text-yellow-300 font-semibold mb-3">
                 <TypingText text="🏆 First to Arrive" delay={300} speed={70} />
               </p>
-              <p className="text-2xl text-white/70 mb-4">
+              <p className="text-lg text-white/70 mb-2">
                 <TypingText
                   text="The early bird who couldn't wait to celebrate!"
                   delay={1500}
                   speed={50}
                 />
               </p>
-              <p className="text-5xl text-white font-bold pt-2">
+              <p className="text-3xl text-white font-bold pt-1">
                 <TypingText
                   text={`${guestInsights.firstGuestName}`}
                   delay={3500}
                   speed={70}
                 />
               </p>
-              <p className="text-2xl text-white/60 mt-4">
+              <p className="text-lg text-white/60 mt-2">
                 <TypingText
                   text={`at ${formatDate(guestInsights.firstGuestTime)}`}
                   delay={4500}
@@ -138,29 +138,29 @@ function GuestExperienceSlideContent({ guestInsights, formatDate }: GuestExperie
 
           {showFastest && guestInsights.fastestRsvpName && (
             <motion.div
-              className="bg-white/10 backdrop-blur-lg rounded-3xl p-10 border-2 border-white/20"
+              className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border-2 border-white/20"
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <p className="text-3xl text-green-300 font-semibold mb-6">
+              <p className="text-xl text-green-300 font-semibold mb-3">
                 <TypingText text="⚡ Fastest RSVP" delay={300} speed={70} />
               </p>
-              <p className="text-2xl text-white/70 mb-4">
+              <p className="text-lg text-white/70 mb-2">
                 <TypingText
                   text="Someone was EAGER! 🏃‍♂️💨"
                   delay={1200}
                   speed={60}
                 />
               </p>
-              <p className="text-5xl text-white font-bold pt-2">
+              <p className="text-3xl text-white font-bold pt-1">
                 <TypingText
                   text={guestInsights.fastestRsvpName}
                   delay={2500}
                   speed={70}
                 />
               </p>
-              <p className="text-3xl text-white/80 mt-4">
+              <p className="text-xl text-white/80 mt-2">
                 <TypingText
                   text={`Lightning speed: ${guestInsights.fastestRsvpDuration?.toFixed(1)} hours ⚡`}
                   delay={3800}

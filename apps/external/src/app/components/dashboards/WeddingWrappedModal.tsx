@@ -3,7 +3,7 @@
 import React, { Suspense, useEffect, useRef, useState } from 'react';
 
 import { Canvas } from '@react-three/fiber';
-import { WeddingResponseDto, WeddingWrappedResponseDto } from '@shared/api';
+import { WeddingResponseDto, WeddingWrappedResponseDto, WeddingsService } from '@shared/api';
 import { Button } from '@shared/components/ui/button';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Volume2, VolumeX, X } from 'lucide-react';
@@ -14,6 +14,7 @@ import { GuestExperienceSlide } from './wedding-wrapped/slides/GuestExperienceSl
 import { GiftsSupportSlide } from './wedding-wrapped/slides/GiftsSupportSlide';
 import { PlanningJourneySlide } from './wedding-wrapped/slides/PlanningJourneySlide';
 import { MemoriesMomentsSlide } from './wedding-wrapped/slides/MemoriesMomentsSlide';
+import { SummarySlide } from './wedding-wrapped/slides/SummarySlide';
 import { FinalSlide } from './wedding-wrapped/slides/FinalSlide';
 
 interface WeddingWrappedModalProps {
@@ -80,6 +81,24 @@ export function WeddingWrappedModal({
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentMusicIndex, setCurrentMusicIndex] = useState(0);
+  const [fullWedding, setFullWedding] = useState<WeddingResponseDto | undefined>(wedding);
+
+  // Fetch full wedding details when modal opens
+  useEffect(() => {
+    if (open && wedding?.id) {
+      const fetchFullWedding = async () => {
+        try {
+          const weddingDetails = await WeddingsService.weddingControllerFindOne(wedding.id);
+          setFullWedding(weddingDetails);
+        } catch (error) {
+          console.error('Error fetching wedding details:', error);
+          // Fall back to the wedding prop if fetch fails
+          setFullWedding(wedding);
+        }
+      };
+      fetchFullWedding();
+    }
+  }, [open, wedding]);
 
   useEffect(() => {
     if (open) {
@@ -182,9 +201,9 @@ export function WeddingWrappedModal({
 
   const slides: SlideContent[] = [
     // ARE YOU READY Slide - Marry You
-    { ...AreYouReadySlide({ wedding }), musicIndex: 0 },
+    { ...AreYouReadySlide({ wedding: fullWedding }), musicIndex: 0 },
     // Intro Slide - Shut Up and Dance
-    { ...IntroSlide({ wedding }), musicIndex: 1 },
+    { ...IntroSlide({ wedding: fullWedding }), musicIndex: 1 },
     // Guest Experience - Dance with somebody
     { ...GuestExperienceSlide({ guestInsights, formatDate }), musicIndex: 2 },
     // Gifts & Support - Love i need
@@ -193,6 +212,8 @@ export function WeddingWrappedModal({
     { ...PlanningJourneySlide({ planningJourneyInsights, formatCurrency }), musicIndex: 4 },
     // Memories & Moments - SUGAR
     { ...MemoriesMomentsSlide({ emotionalTouchInsights }), musicIndex: 5 },
+    // Summary Slide - SUGAR (same music)
+    { ...SummarySlide({ data, wedding: fullWedding, formatCurrency, formatDate }), musicIndex: 5 },
     // Final Slide - 24K
     { ...FinalSlide({ onSave, isSaving }), musicIndex: 7 },
   ];
@@ -233,20 +254,22 @@ export function WeddingWrappedModal({
             </Canvas>
           </div>
 
-          {/* Content Overlay */}
-          <div className="relative z-10 flex h-full items-center justify-center p-8">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentSlide}
-                initial={{ opacity: 0, x: 100 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                transition={{ duration: 0.5 }}
-                className="flex w-full items-center justify-center"
-              >
-                {slides[currentSlide].content}
-              </motion.div>
-            </AnimatePresence>
+          {/* Content Overlay - WITH SCROLLING */}
+          <div className="relative z-10 flex h-full items-center justify-center p-8 overflow-hidden">
+            <div className="w-full h-full overflow-y-auto overflow-x-hidden flex items-center justify-center py-20">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentSlide}
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                  transition={{ duration: 0.5 }}
+                  className="flex w-full items-center justify-center"
+                >
+                  {slides[currentSlide].content}
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Navigation Controls */}
