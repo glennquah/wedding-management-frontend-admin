@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { WeddingWrappedResponseDto } from '@shared/api';
 import { AnimatedWords } from '../AnimationComponents';
-import { CameraFlashes } from '../ParticleEffects';
+import { FlowerPetals } from '../ParticleEffects';
 
 interface MemoriesMomentsSlideProps {
   emotionalTouchInsights: WeddingWrappedResponseDto['emotionalTouchInsights'];
@@ -19,9 +19,9 @@ interface SlideMemoryItem {
 
 export function MemoriesMomentsSlide({ emotionalTouchInsights }: MemoriesMomentsSlideProps) {
   return {
-    background: CameraFlashes,
+    background: FlowerPetals, // Beautiful flower petals for memories!
     content: (
-      <div className="space-y-10 max-w-5xl">
+      <div className="space-y-10 max-w-6xl">
         <motion.h2
           className="text-8xl font-bold text-white mb-10"
           initial={{ opacity: 0, x: -50 }}
@@ -31,7 +31,7 @@ export function MemoriesMomentsSlide({ emotionalTouchInsights }: MemoriesMoments
           Memories & Moments
         </motion.h2>
 
-        <div className="grid grid-cols-2 gap-10">
+        <div className="flex flex-row gap-6 justify-center items-stretch">
           {(
             [
               {
@@ -66,14 +66,14 @@ export function MemoriesMomentsSlide({ emotionalTouchInsights }: MemoriesMoments
           ).map((item, idx) => (
             <motion.div
               key={idx}
-              className={`bg-gradient-to-br ${item.color} rounded-3xl p-10 text-center shadow-2xl`}
+              className={`bg-gradient-to-br ${item.color} rounded-2xl p-6 text-center shadow-2xl flex-1`}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: item.delay, duration: 0.6 }}
             >
-              <div className="text-6xl mb-6">{item.icon}</div>
-              <div className="text-7xl font-bold text-white mb-3">{item.value}</div>
-              <div className="text-2xl text-white/90">{item.label}</div>
+              <div className="text-4xl mb-3">{item.icon}</div>
+              <div className="text-6xl font-bold text-white mb-2">{item.value}</div>
+              <div className="text-lg text-white/90">{item.label}</div>
             </motion.div>
           ))}
         </div>

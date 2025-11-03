@@ -20,9 +20,9 @@ export function DynamicWaveParticles() {
   const meshDataRef = useRef<MeshData[]>([]);
   const clockRef = useRef(0);
 
-  // Create sphere geometry for particles
+  // Create sphere geometry for particles - MUCH BIGGER for Spotify Wrapped style
   const particlePositions = useMemo(() => {
-    const geometry = new THREE.SphereGeometry(200, 32, 32);
+    const geometry = new THREE.SphereGeometry(400, 48, 48); // Doubled size, more detail
     const positions = geometry.attributes.position;
     return positions;
   }, []);
@@ -32,13 +32,13 @@ export function DynamicWaveParticles() {
 
     meshDataRef.current = [];
 
-    // Create multiple particle systems with different colors and positions
+    // Create multiple particle systems with different colors and positions - WIDER SPREAD
     const configs = [
       { x: 0, y: 0, z: 0, color: 0xff69b4 }, // Pink
-      { x: -400, y: 0, z: 200, color: 0xff1493 }, // Deep pink
-      { x: 400, y: 0, z: -200, color: 0xda70d6 }, // Orchid
-      { x: 0, y: 200, z: 400, color: 0xba55d3 }, // Medium orchid
-      { x: 200, y: -100, z: -300, color: 0x9370db }, // Medium purple
+      { x: -800, y: 0, z: 400, color: 0xff1493 }, // Deep pink - wider
+      { x: 800, y: 0, z: -400, color: 0xda70d6 }, // Orchid - wider
+      { x: 0, y: 400, z: 800, color: 0xba55d3 }, // Medium orchid - wider
+      { x: 400, y: -200, z: -600, color: 0x9370db }, // Medium purple - wider
     ];
 
     configs.forEach((config, index) => {
@@ -52,16 +52,16 @@ export function DynamicWaveParticles() {
       }
 
       const material = new THREE.PointsMaterial({
-        size: 15,
+        size: 30, // Doubled size
         color: config.color,
         transparent: true,
-        opacity: 0.8,
+        opacity: 0.9, // More visible
         blending: THREE.AdditiveBlending,
       });
 
       const mesh = new THREE.Points(geometry, material);
       mesh.position.set(config.x, config.y, config.z);
-      mesh.scale.set(2, 2, 2);
+      mesh.scale.set(3, 3, 3); // Bigger scale
 
       groupRef.current!.add(mesh);
 
@@ -181,10 +181,10 @@ export function DynamicWaveParticles() {
 
   return (
     <group ref={groupRef}>
-      {/* Additional ambient particles for background effect */}
-      <points position={[0, -300, 0]} rotation-x={-Math.PI / 2}>
-        <planeGeometry args={[3000, 3000, 32, 32]} />
-        <pointsMaterial color={0xff69b4} size={5} transparent opacity={0.3} />
+      {/* Additional ambient particles for background effect - BIGGER */}
+      <points position={[0, -600, 0]} rotation-x={-Math.PI / 2}>
+        <planeGeometry args={[6000, 6000, 48, 48]} />
+        <pointsMaterial color={0xff69b4} size={10} transparent opacity={0.4} />
       </points>
     </group>
   );

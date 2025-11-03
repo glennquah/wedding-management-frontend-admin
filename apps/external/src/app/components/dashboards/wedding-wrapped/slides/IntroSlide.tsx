@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { WeddingResponseDto } from '@shared/api';
 import { AnimatedWords } from '../AnimationComponents';
-import { ConfettiParticles } from '../ParticleEffects';
+import { FireworksParticles } from '../ParticleEffects';
 
 interface IntroSlideProps {
   wedding: WeddingResponseDto | undefined;
@@ -11,7 +11,7 @@ interface IntroSlideProps {
 
 export function IntroSlide({ wedding }: IntroSlideProps) {
   return {
-    background: ConfettiParticles,
+    background: FireworksParticles, // FIREWORKS for the intro!
     content: (
       <div className="text-center space-y-8 max-w-5xl">
         <motion.div

@@ -97,10 +97,10 @@ export function ConfettiParticles() {
   );
 }
 
-// Floating Hearts for Gifts & Support
+// Floating Hearts for Gifts & Support - BIGGER and MORE ROMANTIC
 export function FloatingHearts() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
-  const count = 100;
+  const count = 200; // Doubled
   const dummy = new THREE.Object3D();
 
   useEffect(() => {
@@ -111,18 +111,18 @@ export function FloatingHearts() {
 
     for (let i = 0; i < count; i++) {
       positions.push(
-        (Math.random() - 0.5) * 15,
-        Math.random() * 20 - 5,
-        (Math.random() - 0.5) * 15,
+        (Math.random() - 0.5) * 50, // Much wider
+        Math.random() * 60 - 20,
+        (Math.random() - 0.5) * 50,
       );
-      velocities.push(Math.sin(i) * 0.01, Math.random() * 0.02 + 0.01, Math.cos(i) * 0.01);
+      velocities.push(Math.sin(i) * 0.02, Math.random() * 0.04 + 0.02, Math.cos(i) * 0.02);
     }
 
     meshRef.current.userData = { positions, velocities, time: 0 } as ParticleUserData;
 
     for (let i = 0; i < count; i++) {
       dummy.position.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
-      dummy.scale.set(0.3, 0.3, 0.3);
+      dummy.scale.set(0.8, 0.8, 0.8); // Bigger hearts
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
     }
@@ -140,22 +140,22 @@ export function FloatingHearts() {
     userData.time = currentTime;
 
     for (let i = 0; i < count; i++) {
-      positions[i * 3] += velocities[i * 3] + Math.sin(currentTime + i) * 0.01;
+      positions[i * 3] += velocities[i * 3] + Math.sin(currentTime + i) * 0.02;
       positions[i * 3 + 1] += velocities[i * 3 + 1];
-      positions[i * 3 + 2] += velocities[i * 3 + 2] + Math.cos(currentTime + i) * 0.01;
+      positions[i * 3 + 2] += velocities[i * 3 + 2] + Math.cos(currentTime + i) * 0.02;
 
-      if (positions[i * 3 + 1] > 15) {
-        positions[i * 3 + 1] = -5;
-        positions[i * 3] = (Math.random() - 0.5) * 15;
-        positions[i * 3 + 2] = (Math.random() - 0.5) * 15;
+      if (positions[i * 3 + 1] > 40) {
+        positions[i * 3 + 1] = -20;
+        positions[i * 3] = (Math.random() - 0.5) * 50;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 50;
       }
 
       dummy.position.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
       dummy.rotation.y = currentTime + i;
       dummy.scale.set(
-        0.3 + Math.sin(currentTime + i) * 0.1,
-        0.3 + Math.sin(currentTime + i) * 0.1,
-        0.3,
+        0.8 + Math.sin(currentTime + i) * 0.3, // Pulsing effect
+        0.8 + Math.sin(currentTime + i) * 0.3,
+        0.8,
       );
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
@@ -165,16 +165,16 @@ export function FloatingHearts() {
 
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
-      <sphereGeometry args={[0.5, 16, 16]} />
-      <meshStandardMaterial color="#ff69b4" emissive="#ff1493" emissiveIntensity={0.5} />
+      <sphereGeometry args={[1.0, 20, 20]} />
+      <meshStandardMaterial color="#ff69b4" emissive="#ff1493" emissiveIntensity={1.2} />
     </instancedMesh>
   );
 }
 
-// Sparkling Stars for Planning Journey
+// Sparkling Stars for Planning Journey - BIGGER and MORE SPARKLY
 export function SparklingStars() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
-  const count = 150;
+  const count = 300; // Doubled
   const dummy = new THREE.Object3D();
 
   useEffect(() => {
@@ -185,11 +185,11 @@ export function SparklingStars() {
 
     for (let i = 0; i < count; i++) {
       positions.push(
-        (Math.random() - 0.5) * 25,
-        (Math.random() - 0.5) * 25,
-        (Math.random() - 0.5) * 25,
+        (Math.random() - 0.5) * 60, // Much wider
+        (Math.random() - 0.5) * 60,
+        (Math.random() - 0.5) * 60,
       );
-      scales.push(Math.random() * 0.3 + 0.1);
+      scales.push(Math.random() * 0.8 + 0.3); // Bigger stars
     }
 
     meshRef.current.userData = { positions, velocities: [], scales, time: 0 } as ParticleUserData;
@@ -214,7 +214,7 @@ export function SparklingStars() {
     userData.time = currentTime;
 
     for (let i = 0; i < count; i++) {
-      const scale = scales[i] * (1 + Math.sin(currentTime * 2 + i) * 0.5);
+      const scale = scales[i] * (1 + Math.sin(currentTime * 2 + i) * 0.7); // More dramatic pulsing
       dummy.position.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
       dummy.scale.setScalar(scale);
       dummy.rotation.z = currentTime + i;
@@ -226,8 +226,8 @@ export function SparklingStars() {
 
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
-      <octahedronGeometry args={[0.2, 0]} />
-      <meshStandardMaterial color="#ffd700" emissive="#ffaa00" emissiveIntensity={0.8} />
+      <octahedronGeometry args={[0.5, 0]} />
+      <meshStandardMaterial color="#ffd700" emissive="#ffaa00" emissiveIntensity={1.5} />
     </instancedMesh>
   );
 }

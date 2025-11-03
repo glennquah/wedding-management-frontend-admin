@@ -218,12 +218,13 @@ export function WeddingWrappedModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          {/* THREE.js Background */}
+          {/* THREE.js Background - FULLSCREEN SPOTIFY WRAPPED STYLE */}
           <div className="absolute inset-0">
-            <Canvas camera={{ position: [0, 0, 10], fov: 75 }}>
-              <ambientLight intensity={0.5} />
-              <pointLight position={[10, 10, 10]} intensity={1} />
-              <pointLight position={[-10, -10, -10]} intensity={0.5} />
+            <Canvas camera={{ position: [0, 0, 30], fov: 75 }}>
+              <ambientLight intensity={0.8} />
+              <pointLight position={[20, 20, 20]} intensity={2} />
+              <pointLight position={[-20, -20, -20]} intensity={1} />
+              <pointLight position={[0, 20, 10]} intensity={1.5} color="#ff69b4" />
               <Suspense fallback={null}>
                 <AnimatePresence mode="wait">
                   {React.createElement(slides[currentSlide].background)}

@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Button } from '@shared/components/ui/button';
 import { AnimatedWords } from '../AnimationComponents';
-import { ConfettiParticles } from '../ParticleEffects';
+import { FireworksParticles } from '../ParticleEffects';
 
 interface FinalSlideProps {
   onSave: () => void;
@@ -12,7 +12,7 @@ interface FinalSlideProps {
 
 export function FinalSlide({ onSave, isSaving }: FinalSlideProps) {
   return {
-    background: ConfettiParticles,
+    background: FireworksParticles, // FIREWORKS for the finale!
     content: (
       <div className="text-center space-y-8">
         <motion.div
