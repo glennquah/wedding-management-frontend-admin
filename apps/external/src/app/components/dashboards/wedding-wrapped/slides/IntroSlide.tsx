@@ -10,16 +10,23 @@ interface IntroSlideProps {
 }
 
 export function IntroSlide({ wedding }: IntroSlideProps) {
+  // Debug logging
+  console.log('IntroSlide - wedding:', wedding);
+  console.log('IntroSlide - mainCouple:', wedding?.mainCouple);
+  console.log('IntroSlide - mainCouple length:', wedding?.mainCouple?.length);
+  console.log('IntroSlide - mainCouple[0]:', wedding?.mainCouple?.[0]);
+  console.log('IntroSlide - mainCouple[1]:', wedding?.mainCouple?.[1]);
+
   return {
-    background: FireworksParticles, // FIREWORKS for the intro!
+    background: FireworksParticles,
     content: (
-      <div className="text-center space-y-8 max-w-5xl">
+      <div className="max-w-5xl space-y-8 text-center">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ duration: 0.8, type: 'spring' }}
         >
-          <h1 className="text-8xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent mb-4">
+          <h1 className="mb-4 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-8xl font-bold text-transparent">
             Wedding Wrapped
           </h1>
         </motion.div>
@@ -32,7 +39,7 @@ export function IntroSlide({ wedding }: IntroSlideProps) {
               transition={{ delay: 0.5, duration: 0.8 }}
               className="space-y-8"
             >
-              <p className="text-6xl text-white font-bold">
+              <p className="text-6xl font-bold text-white">
                 <AnimatedWords
                   text={`On ${new Date(wedding.date).toLocaleDateString('en-US', {
                     month: 'long',
@@ -43,23 +50,24 @@ export function IntroSlide({ wedding }: IntroSlideProps) {
                 />
               </p>
 
-              {wedding.mainCouple && wedding.mainCouple.length > 0 && (
+              {/* Show main couple if available, otherwise show wedding name */}
+              {wedding.mainCouple && wedding.mainCouple.length > 0 ? (
                 <motion.div
                   className="space-y-6"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1.2, duration: 0.8 }}
                 >
-                  <p className="text-8xl text-white font-bold leading-tight">
+                  <p className="text-8xl leading-tight font-bold text-white">
                     <AnimatedWords
                       text={wedding.mainCouple[0]?.name || 'Partner 1'}
                       startDelay={1.3}
                     />
                   </p>
-                  <p className="text-7xl text-pink-300 font-semibold">
+                  <p className="text-7xl font-semibold text-pink-300">
                     <AnimatedWords text="tied the knot with" startDelay={1.9} />
                   </p>
-                  <p className="text-8xl text-white font-bold leading-tight">
+                  <p className="text-8xl leading-tight font-bold text-white">
                     <AnimatedWords
                       text={
                         wedding.mainCouple[1]?.name ||
@@ -69,20 +77,37 @@ export function IntroSlide({ wedding }: IntroSlideProps) {
                     />
                   </p>
                 </motion.div>
+              ) : (
+                <motion.div
+                  className="space-y-6"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.2, duration: 0.8 }}
+                >
+                  <p className="text-8xl leading-tight font-bold text-white">
+                    <AnimatedWords
+                      text={wedding.name}
+                      startDelay={1.3}
+                    />
+                  </p>
+                  <p className="text-5xl font-semibold text-pink-300">
+                    <AnimatedWords text="celebrated their special day" startDelay={2.2} />
+                  </p>
+                </motion.div>
               )}
             </motion.div>
 
             {wedding.location && (
               <motion.div
-                className="bg-white/10 backdrop-blur-lg rounded-3xl p-10 border-2 border-white/30 shadow-2xl"
+                className="rounded-3xl border-2 border-white/30 bg-white/10 p-10 shadow-2xl backdrop-blur-lg"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 3.2, duration: 0.8 }}
               >
-                <p className="text-4xl text-white/80 mb-4">
+                <p className="mb-4 text-4xl text-white/80">
                   <AnimatedWords text="📍 Celebrated at" startDelay={3.3} />
                 </p>
-                <p className="text-6xl text-white font-bold">
+                <p className="text-6xl font-bold text-white">
                   <AnimatedWords text={wedding.location} startDelay={3.7} />
                 </p>
               </motion.div>

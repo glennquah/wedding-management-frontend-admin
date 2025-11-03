@@ -3,7 +3,7 @@
 import React, { Suspense, useEffect, useRef, useState } from 'react';
 
 import { Canvas } from '@react-three/fiber';
-import { WeddingResponseDto, WeddingWrappedResponseDto, WeddingsService } from '@shared/api';
+import { WeddingResponseDto, WeddingWrappedResponseDto, WeddingsService, AdminsService } from '@shared/api';
 import { Button } from '@shared/components/ui/button';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Volume2, VolumeX, X } from 'lucide-react';
@@ -82,18 +82,39 @@ export function WeddingWrappedModal({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentMusicIndex, setCurrentMusicIndex] = useState(0);
   const [fullWedding, setFullWedding] = useState<WeddingResponseDto | undefined>(wedding);
+  const [isLoadingWedding, setIsLoadingWedding] = useState(false);
 
   // Fetch full wedding details when modal opens
   useEffect(() => {
     if (open && wedding?.id) {
       const fetchFullWedding = async () => {
+        setIsLoadingWedding(true);
         try {
-          const weddingDetails = await WeddingsService.weddingControllerFindOne(wedding.id);
-          setFullWedding(weddingDetails);
+          console.log('Wedding prop passed to modal:', wedding);
+
+          // The wedding endpoint /weddings/{id} doesn't return mainCouple
+          // We MUST use /admins/my-weddings which includes the mainCouple relationship
+          console.log('Fetching weddings with mainCouple from admin endpoint...');
+
+          const adminWeddings = await AdminsService.adminControllerGetMyWeddings();
+          console.log('All admin weddings received:', adminWeddings);
+
+          // Find the matching wedding
+          const matchingWedding = adminWeddings.find(w => w.id === wedding.id);
+          console.log('Matching wedding found:', matchingWedding);
+
+          if (matchingWedding) {
+            console.log('MainCouple from matching wedding:', matchingWedding.mainCouple);
+            setFullWedding(matchingWedding);
+          } else {
+            console.log('No matching wedding found, using prop');
+            setFullWedding(wedding);
+          }
         } catch (error) {
-          console.error('Error fetching wedding details:', error);
-          // Fall back to the wedding prop if fetch fails
+          console.error('Error fetching wedding with main couple:', error);
           setFullWedding(wedding);
+        } finally {
+          setIsLoadingWedding(false);
         }
       };
       fetchFullWedding();
@@ -229,6 +250,35 @@ export function WeddingWrappedModal({
       setCurrentSlide(currentSlide - 1);
     }
   };
+
+  // Show loading state while fetching wedding details
+  if (isLoadingWedding) {
+    return (
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="text-center">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <h2 className="text-4xl font-bold text-white mb-4">Preparing Your Wedding Wrapped...</h2>
+                <div className="flex justify-center">
+                  <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  }
 
   return (
     <AnimatePresence>
