@@ -31,6 +31,10 @@ export type AdminResponseDto = {
      */
     isSuspended?: boolean;
     /**
+     * Is the admin registered from dating app platform?
+     */
+    isDatingPartnerRegistered?: boolean;
+    /**
      * Date when the admin was onboarded
      */
     onboardedDate: string;

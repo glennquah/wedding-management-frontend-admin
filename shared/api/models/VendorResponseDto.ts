@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ListingResponseDto } from './ListingResponseDto';
 import type { UserRole } from './UserRole';
 import type { VendorOnboardingStatus } from './VendorOnboardingStatus';
 import type { WeddingService } from './WeddingService';
@@ -61,5 +62,9 @@ export type VendorResponseDto = {
      */
     capacity?: number;
     onboardingStatus: VendorOnboardingStatus;
+    /**
+     * List of product/service listings from the vendor
+     */
+    listings?: Array<ListingResponseDto>;
 };
 
