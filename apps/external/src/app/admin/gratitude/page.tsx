@@ -80,7 +80,7 @@ export default function GratitudeCardFlow() {
 
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as Step)} className="mt-8">
           <TabsList className="bg-muted/50 rounded-lg p-1 grid w-full grid-cols-3 md:flex md:space-x-2 md:w-fit">
-            {steps.map((step, idx) => (
+            {steps.map((step) => (
               <TabsTrigger
                 key={step}
                 value={step}

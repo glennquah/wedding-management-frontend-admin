@@ -16,7 +16,6 @@ function PlanningJourneySlideContent({
   formatCurrency,
 }: PlanningJourneySlideContentProps) {
   const [showDays, setShowDays] = useState(false);
-  const [showDaysComment, setShowDaysComment] = useState(false);
   const [showBudget, setShowBudget] = useState(false);
   const [showBudgetReveal, setShowBudgetReveal] = useState(false);
   const [showSpent, setShowSpent] = useState(false);
@@ -24,28 +23,28 @@ function PlanningJourneySlideContent({
 
   const getDaysComment = () => {
     if (planningJourneyInsights.planningDays > 365) {
-      return "Whoa! That's over a year of planning! 😮 Talk about dedication...";
+      return 'Whoa! That\'s over a year of planning! 😮 Talk about dedication...';
     } else if (planningJourneyInsights.planningDays > 180) {
-      return "Half a year of planning? You really took your time! 🗓️";
+      return 'Half a year of planning? You really took your time! 🗓️';
     } else if (planningJourneyInsights.planningDays > 90) {
-      return "A solid few months! Well-planned and well-paced 👌";
+      return 'A solid few months! Well-planned and well-paced 👌';
     } else {
-      return "Speed run champion! 🏃‍♀️💨 Quick but efficient!";
+      return 'Speed run champion! 🏃‍♀️💨 Quick but efficient!';
     }
   };
 
   const getBudgetComment = () => {
     const utilization = planningJourneyInsights.budgetUtilization;
     if (utilization > 95) {
-      return "You MAXED IT OUT! 💸 Every penny counted!";
+      return 'You MAXED IT OUT! 💸 Every penny counted!';
     } else if (utilization > 80) {
-      return "Close to the edge! But who's counting? 😏";
+      return 'Close to the edge! But who\'s counting? 😏';
     } else if (utilization > 60) {
-      return "Nicely balanced! The Goldilocks zone 👌";
+      return 'Nicely balanced! The Goldilocks zone 👌';
     } else if (utilization > 40) {
-      return "Playing it safe! Smart moves 🧠";
+      return 'Playing it safe! Smart moves 🧠';
     } else {
-      return "Under budget?! Teach us your ways! 🙌";
+      return 'Under budget?! Teach us your ways! 🙌';
     }
   };
 

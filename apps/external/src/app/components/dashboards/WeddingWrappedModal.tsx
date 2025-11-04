@@ -3,7 +3,12 @@
 import React, { Suspense, useEffect, useRef, useState } from 'react';
 
 import { Canvas } from '@react-three/fiber';
-import { WeddingResponseDto, WeddingWrappedResponseDto, WeddingsService, AdminsService } from '@shared/api';
+import {
+  WeddingResponseDto,
+  WeddingWrappedResponseDto,
+  WeddingsService,
+  AdminsService,
+} from '@shared/api';
 import { Button } from '@shared/components/ui/button';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Volume2, VolumeX, X } from 'lucide-react';
@@ -100,7 +105,7 @@ export function WeddingWrappedModal({
           console.log('All admin weddings received:', adminWeddings);
 
           // Find the matching wedding
-          const matchingWedding = adminWeddings.find(w => w.id === wedding.id);
+          const matchingWedding = adminWeddings.find((w) => w.id === wedding.id);
           console.log('Matching wedding found:', matchingWedding);
 
           if (matchingWedding) {
@@ -234,9 +239,12 @@ export function WeddingWrappedModal({
     // Memories & Moments - SUGAR
     { ...MemoriesMomentsSlide({ emotionalTouchInsights }), musicIndex: 5 },
     // Summary Slide - SUGAR (same music)
-    { ...SummarySlide({ data, wedding: fullWedding, formatCurrency, formatDate }), musicIndex: 5 },
+    { ...SummarySlide({ data, wedding: fullWedding!, formatCurrency, formatDate }), musicIndex: 5 },
     // Final Slide - 24K
-    { ...FinalSlide({ onSave, isSaving, data, wedding: fullWedding, formatCurrency, formatDate }), musicIndex: 7 },
+    {
+      ...FinalSlide({ onSave, isSaving, data, wedding: fullWedding, formatCurrency, formatDate }),
+      musicIndex: 7,
+    },
   ];
 
   const nextSlide = () => {
@@ -257,7 +265,7 @@ export function WeddingWrappedModal({
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-50 bg-black flex items-center justify-center"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -268,9 +276,11 @@ export function WeddingWrappedModal({
                 animate={{ scale: 1 }}
                 transition={{ duration: 0.5 }}
               >
-                <h2 className="text-4xl font-bold text-white mb-4">Preparing Your Wedding Wrapped...</h2>
+                <h2 className="mb-4 text-4xl font-bold text-white">
+                  Preparing Your Wedding Wrapped...
+                </h2>
                 <div className="flex justify-center">
-                  <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <div className="h-16 w-16 animate-spin rounded-full border-4 border-white/30 border-t-white"></div>
                 </div>
               </motion.div>
             </div>
@@ -305,8 +315,8 @@ export function WeddingWrappedModal({
           </div>
 
           {/* Content Overlay - WITH SCROLLING */}
-          <div className="relative z-10 flex h-full items-center justify-center p-8 overflow-hidden">
-            <div className="w-full h-full overflow-y-auto overflow-x-hidden flex items-center justify-center py-20">
+          <div className="relative z-10 flex h-full items-center justify-center overflow-hidden p-8">
+            <div className="flex h-full w-full items-center justify-center overflow-x-hidden overflow-y-auto py-20">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentSlide}

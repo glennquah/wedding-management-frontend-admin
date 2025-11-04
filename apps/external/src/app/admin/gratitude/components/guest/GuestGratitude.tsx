@@ -95,7 +95,7 @@ export default function GuestGratitude({ onComplete, onDelete }: GuestGratitudeP
       setIsSubmitting(true);
       await handleSubmit(e, 'guest');
       toast.success(isGuestUpdateMode ? 'Gratitude card updated!' : 'Gratitude card created!');
-    } catch (err) {
+    } catch {
       toast.error('Something went wrong while saving your card.');
     } finally {
       setIsSubmitting(false);

@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { PageHeader } from '@shared/components';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/ui/card';
+import { Card, CardContent } from '@shared/components/ui/card';
 import { Button } from '@shared/components/ui/button';
-import { Download, DollarSign, TrendingUp, Clock, CheckCircle, Loader2, Receipt } from 'lucide-react';
+import { Download, Loader2, Receipt } from 'lucide-react';
 import { PaymentsService, OpenAPI } from '@shared/api';
 
 interface VendorPayout {
@@ -42,7 +42,7 @@ export default function RevenuePage() {
       const [payoutsData] = await Promise.all([
         PaymentsService.paymentControllerGetVendorPayouts(vendorId),
       ]);
- 
+
       setPayouts(payoutsData);
     } catch (error) {
       console.error('Error fetching revenue data:', error);
@@ -54,20 +54,29 @@ export default function RevenuePage() {
   const handleDownloadInvoice = async (payoutId: number) => {
     try {
       // Get the token from OpenAPI config (it's a resolver function)
-      const token = typeof OpenAPI.TOKEN === 'function'
-        ? await OpenAPI.TOKEN({ method: 'GET', url: '', path: {}, cookies: {}, errors: {}, query: {}, formData: {}, body: undefined, mediaType: undefined, responseHeader: undefined })
-        : OpenAPI.TOKEN;
+      const token =
+        typeof OpenAPI.TOKEN === 'function'
+          ? await OpenAPI.TOKEN({
+              method: 'GET',
+              url: '',
+              path: {},
+              cookies: {},
+              errors: {},
+              query: {},
+              formData: {},
+              body: undefined,
+              mediaType: undefined,
+              responseHeader: undefined,
+            })
+          : OpenAPI.TOKEN;
 
-      const response = await fetch(
-        `${OpenAPI.BASE}/payments/vendor-payouts/${payoutId}/invoice`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-          credentials: OpenAPI.CREDENTIALS,
-        }
-      );
+      const response = await fetch(`${OpenAPI.BASE}/payments/vendor-payouts/${payoutId}/invoice`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: OpenAPI.CREDENTIALS,
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to download invoice: ${response.status}`);
@@ -91,24 +100,30 @@ export default function RevenuePage() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 pt-4 md:pt-6">
-        <PageHeader title="Revenue & Payouts" description="Track your earnings and download payout statements" />
+        <PageHeader
+          title="Revenue & Payouts"
+          description="Track your earnings and download payout statements"
+        />
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <Loader2 className="text-primary h-8 w-8 animate-spin" />
         </div>
       </div>
     );
   }
 
   const EmptyState = ({ message }: { message: string }) => (
-    <div className="flex flex-col items-center justify-center py-8 text-center mt-6">
-      <Receipt className="w-16 h-16 text-gray-300 mb-4" />
-      <p className="text-gray-500 text-sm">{message}</p>
+    <div className="mt-6 flex flex-col items-center justify-center py-8 text-center">
+      <Receipt className="mb-4 h-16 w-16 text-gray-300" />
+      <p className="text-sm text-gray-500">{message}</p>
     </div>
   );
 
   return (
     <div className="container mx-auto px-4 py-8 md:pt-6">
-      <PageHeader title="Revenue & Payouts" description="Track your earnings and download payout statements" />
+      <PageHeader
+        title="Revenue & Payouts"
+        description="Track your earnings and download payout statements"
+      />
 
       <Card className="mt-6">
         <CardContent className="mt-6">
@@ -119,17 +134,17 @@ export default function RevenuePage() {
               {payouts.map((payout) => (
                 <div
                   key={payout.id}
-                  className="flex items-center justify-between p-4 border rounded-lg transition-colors"
+                  className="flex items-center justify-between rounded-lg border p-4 transition-colors"
                 >
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="mb-1 flex items-center gap-2">
                       <h3 className="font-semibold">Payout #{payout.id}</h3>
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       Period: {new Date(payout.periodStart).toLocaleDateString()} -{' '}
                       {new Date(payout.periodEnd).toLocaleDateString()}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-muted-foreground mt-1 text-xs">
                       {payout.earningsCount} bookings • Paid on{' '}
                       {new Date(payout.createdAt).toLocaleDateString()}
                     </p>

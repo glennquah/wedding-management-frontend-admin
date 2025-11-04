@@ -50,8 +50,8 @@ const audioOptions = [
     url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1762106687/sugar_wuc7u9.m4a',
   },
   {
-    name: '24K',
-    url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1762106463/24K_pjbqiv.m4a',
+    name: 'Falling in Love',
+    url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1762230430/Elvis_Presley_-_Can_t_Help_Falling_In_Love_Official_Audio_blsm2i.mp3',
   },
 ];
 
@@ -86,9 +86,8 @@ export default function WeddingWrappedViewPage() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const wrappedData = await AnalyticsService.analyticsControllerGetWeddingWrapped(
-          selectedWeddingId,
-        );
+        const wrappedData =
+          await AnalyticsService.analyticsControllerGetWeddingWrapped(selectedWeddingId);
         setData(wrappedData);
       } catch (error) {
         console.error('Error fetching Wedding Wrapped:', error);
@@ -209,8 +208,8 @@ export default function WeddingWrappedViewPage() {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center">
-        <div className="text-white text-2xl">Loading Wedding Wrapped...</div>
+      <div className="fixed inset-0 flex items-center justify-center bg-black">
+        <div className="text-2xl text-white">Loading Wedding Wrapped...</div>
       </div>
     );
   }
@@ -272,8 +271,8 @@ export default function WeddingWrappedViewPage() {
       </div>
 
       {/* Content Overlay - FULLSCREEN WITH SCROLL */}
-      <div className="relative z-10 h-full overflow-y-auto overflow-x-hidden">
-        <div className="min-h-screen flex items-center justify-center p-8 py-32">
+      <div className="relative z-10 h-full overflow-x-hidden overflow-y-auto">
+        <div className="flex min-h-screen items-center justify-center p-8 py-32">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -307,7 +306,9 @@ export default function WeddingWrappedViewPage() {
               key={index}
               onClick={() => setCurrentSlide(index)}
               className={`rounded-full transition-all ${
-                index === currentSlide ? 'h-2 w-6 bg-white' : 'h-2 w-2 bg-white/50 hover:bg-white/80'
+                index === currentSlide
+                  ? 'h-2 w-6 bg-white'
+                  : 'h-2 w-2 bg-white/50 hover:bg-white/80'
               }`}
             />
           ))}

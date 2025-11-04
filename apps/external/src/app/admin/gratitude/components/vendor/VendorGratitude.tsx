@@ -58,7 +58,7 @@ export default function VendorGratitude({ onComplete, onDelete }: VendorGratitud
     if (guestCard) {
       setIsVendorUpdateMode(!!guestCard.vendorCardMessage);
     }
-  }, [guestCard]);
+  }, [guestCard, setIsVendorUpdateMode]);
 
   const handleOpenBroadcastDialog = () => {
     if (!guestCard) {
@@ -101,7 +101,7 @@ export default function VendorGratitude({ onComplete, onDelete }: VendorGratitud
       setIsSubmitting(true);
       await handleSubmit(e, 'vendor');
       toast.success(isVendorUpdateMode ? 'Gratitude card updated!' : 'Gratitude card created!');
-    } catch (err) {
+    } catch {
       toast.error('Something went wrong while saving your card.');
     } finally {
       setIsSubmitting(false);

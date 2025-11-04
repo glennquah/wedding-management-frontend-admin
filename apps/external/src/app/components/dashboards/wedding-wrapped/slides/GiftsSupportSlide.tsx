@@ -14,33 +14,32 @@ interface GiftsSupportSlideContentProps {
 function GiftsSupportSlideContent({ giftSupportInsights, formatCurrency }: GiftsSupportSlideContentProps) {
   const [showQuestion, setShowQuestion] = useState(false);
   const [showGiftValue, setShowGiftValue] = useState(false);
-  const [showComment, setShowComment] = useState(false);
   const [showWishlist, setShowWishlist] = useState(false);
   const [showMostWanted, setShowMostWanted] = useState(false);
   const [showTopContributor, setShowTopContributor] = useState(false);
 
   const getGiftComment = () => {
     if (giftSupportInsights.totalGiftValue > 10000) {
-      return "Okay WOW! 💰 Your friends and family went ALL OUT!";
+      return 'Okay WOW! 💰 Your friends and family went ALL OUT!';
     } else if (giftSupportInsights.totalGiftValue > 5000) {
-      return "That's some serious love right there! 💝";
+      return 'That\'s some serious love right there! 💝';
     } else if (giftSupportInsights.totalGiftValue > 2000) {
-      return "Not too shabby! Your people came through! 🎁";
+      return 'Not too shabby! Your people came through! 🎁';
     } else {
-      return "It's the thought that counts! ❤️";
+      return 'It\'s the thought that counts! ❤️';
     }
   };
 
   const getWishlistComment = () => {
     const completion = giftSupportInsights.wishlistCompletion;
     if (completion >= 95) {
-      return "BINGO! Nearly a perfect score! 🎯";
+      return 'BINGO! Nearly a perfect score! 🎯';
     } else if (completion >= 75) {
-      return "Most boxes checked! Well done! ✅";
+      return 'Most boxes checked! Well done! ✅';
     } else if (completion >= 50) {
-      return "Halfway there! Living on a prayer! 🎵";
+      return 'Halfway there! Living on a prayer! 🎵';
     } else {
-      return "Room for more surprises! 🎁";
+      return 'Room for more surprises! 🎁';
     }
   };
 

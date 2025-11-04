@@ -190,7 +190,7 @@ Wedding Management Platform
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
         >
-          Here's everything that made your day special ✨
+          Here&apos;s everything that made your day special ✨
         </motion.p>
       )}
 

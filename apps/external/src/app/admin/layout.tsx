@@ -32,7 +32,6 @@ import {
   useProgressTrackerStore,
   createEmptyProgressTrackerData,
 } from '../store/progressTrackerStore';
-import { useUrgentChecklistItems } from '../hooks/useUrgentChecklistItems';
 import Link from 'next/link';
 
 const allowedRoutesWithoutWedding = [

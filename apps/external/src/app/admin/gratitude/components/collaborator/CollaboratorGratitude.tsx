@@ -61,7 +61,7 @@ export default function CollaboratorGratitude({
     if (guestCard) {
       setIsCollaboratorUpdateMode(!!guestCard.collaboratorCardMessage);
     }
-  }, [guestCard]);
+  }, [guestCard, setIsCollaboratorUpdateMode]);
 
   const handleOpenBroadcastDialog = () => {
     if (!guestCard) {
@@ -108,7 +108,7 @@ export default function CollaboratorGratitude({
       toast.success(
         isCollaboratorUpdateMode ? 'Gratitude card updated!' : 'Gratitude card created!',
       );
-    } catch (err) {
+    } catch {
       toast.error('Something went wrong while saving your card.');
     } finally {
       setIsSubmitting(false);
