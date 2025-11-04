@@ -2,12 +2,6 @@
 
 import { useMemo } from 'react';
 
-import { useUrgentChecklistItems } from '../../hooks/useUrgentChecklistItems';
-import {
-  createEmptyProgressTrackerData,
-  useProgressTrackerStore,
-} from '../../store/progressTrackerStore';
-import { signOut, useWeddingStore } from '../../store/sessionStore';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
   BellDot,
@@ -24,6 +18,12 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react';
+import { useUrgentChecklistItems } from '../../hooks/useUrgentChecklistItems';
+import {
+  createEmptyProgressTrackerData,
+  useProgressTrackerStore,
+} from '../../store/progressTrackerStore';
+import { signOut, useWeddingStore } from '../../store/sessionStore';
 
 export default function AdminSidebar() {
   const { weddings, firstPurchaseMade, selectedWeddingId } = useWeddingStore();
@@ -146,5 +146,11 @@ export default function AdminSidebar() {
     },
   ];
 
-  return <AppSidebar tabs={tabs} signOut={() => signOut()} basePath="admin" />;
+  return (
+    <AppSidebar
+      tabs={tabs}
+      signOut={() => signOut({ callbackUrl: window.location.origin, redirect: false })}
+      basePath="admin"
+    />
+  );
 }
