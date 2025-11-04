@@ -5,8 +5,11 @@ import { useSession } from 'next-auth/react';
 import { Input, PageHeader } from '@shared/components';
 import { Card, CardContent } from '@shared/components/ui/card';
 import { Button } from '@shared/components/ui/button';
-import { Download, Loader2, Receipt, Search } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@shared/components/ui/tabs';
+import { Download, Loader2, Receipt } from 'lucide-react';
 import { PaymentsService, OpenAPI, AllVendorsPayoutResponseDto } from '@shared/api';
+
+type PayoutType = 'vendor' | 'partner';
 
 export default function SuperAdminRevenuePage() {
   const { data: session } = useSession();
@@ -14,6 +17,7 @@ export default function SuperAdminRevenuePage() {
   const [filteredPayouts, setFilteredPayouts] = useState<AllVendorsPayoutResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState<PayoutType>('vendor');
 
   useEffect(() => {
     if (session?.user) {
@@ -125,13 +129,8 @@ export default function SuperAdminRevenuePage() {
     </div>
   );
 
-  return (
-    <div className="container mx-auto px-4 py-8 md:pt-6">
-      <PageHeader
-        title="Revenue & Payouts"
-        description="View all vendor payouts and download statements"
-      />
-
+  const renderPayoutsList = () => (
+    <>
       {/* Search/Filter Bar */}
       <div className="mt-6 flex items-center gap-2">
         <div className="relative max-w-md flex-1">
@@ -214,6 +213,34 @@ export default function SuperAdminRevenuePage() {
           )}
         </CardContent>
       </Card>
+    </>
+  );
+
+  return (
+    <div className="container mx-auto px-4 py-8 md:pt-6">
+      <PageHeader
+        title="Revenue & Payouts"
+        description="View all vendor payouts and partner commissions"
+      />
+
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as PayoutType)} className="mt-6">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="vendor">Vendor Payouts</TabsTrigger>
+          <TabsTrigger value="partner">Partner Commission</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="vendor">
+          {renderPayoutsList()}
+        </TabsContent>
+
+        <TabsContent value="partner">
+          <Card className="mt-6">
+            <CardContent className="mt-6">
+              <EmptyState message="Partner commission feature coming soon" />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
