@@ -126,11 +126,11 @@ export function useListingOperations(
       await ListingsService.listingControllerDelete(vendor.id, id);
       setListings(prev => prev.filter(listing => listing.id !== id));
       toast.success(MESSAGES.SUCCESS.LISTING_DELETED);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to delete listing:', err);
 
       // Check if it's a 400 error indicating the listing has orders
-      if (err?.status === 400) {
+      if (err && typeof err === 'object' && 'status' in err && err.status === 400) {
         toast.error(MESSAGES.ERROR.LISTING_HAS_ORDERS);
       } else {
         toast.error('Failed to delete listing. Please try again.');
