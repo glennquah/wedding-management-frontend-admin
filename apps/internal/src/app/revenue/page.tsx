@@ -135,7 +135,6 @@ export default function SuperAdminRevenuePage() {
       {/* Search/Filter Bar */}
       <div className="mt-6 flex items-center gap-2">
         <div className="relative max-w-md flex-1">
-          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
           <Input
             type="text"
             placeholder="Search by vendor name, email, or payout ID..."
