@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AllVendorsPayoutResponseDto } from '../models/AllVendorsPayoutResponseDto';
 import type { BatchPayoutDto } from '../models/BatchPayoutDto';
 import type { BatchPayoutResultDto } from '../models/BatchPayoutResultDto';
 import type { CheckoutSessionResponseDto } from '../models/CheckoutSessionResponseDto';
@@ -173,6 +174,17 @@ export class PaymentsService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/payments/vendor-payouts/trigger-scheduled',
+        });
+    }
+    /**
+     * Get all vendors payout history (Super Admin only)
+     * @returns AllVendorsPayoutResponseDto All vendors payouts retrieved successfully.
+     * @throws ApiError
+     */
+    public static paymentControllerGetAllVendorsPayout(): CancelablePromise<Array<AllVendorsPayoutResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/payments/vendor-payouts',
         });
     }
     /**
