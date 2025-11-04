@@ -101,6 +101,7 @@ export type { PaymentResponseDto } from './models/PaymentResponseDto';
 export { PaymentStatus } from './models/PaymentStatus';
 export type { PayoutResultDto } from './models/PayoutResultDto';
 export type { ProcessingStatusDto } from './models/ProcessingStatusDto';
+export type { RegisterDatingUserDto } from './models/RegisterDatingUserDto';
 export type { RequestCalendarAccessDto } from './models/RequestCalendarAccessDto';
 export type { RequestResetPasswordDto } from './models/RequestResetPasswordDto';
 export type { ReserveWishlistItemDto } from './models/ReserveWishlistItemDto';

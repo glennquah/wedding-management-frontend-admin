@@ -1,7 +1,7 @@
-import { Badge } from '../components/ui/badge';
-import { Button } from '../components/ui/button';
 import { VendorOnboardingStatus, VendorResponseDto } from '@shared/api';
 import { ColumnDef } from '@tanstack/react-table';
+import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
 
 // Helper functions for confirmation status
 const getVendorOnboardingStatusVariant = (
@@ -52,7 +52,7 @@ export const getVendorColumns = ({
     {
       accessorKey: 'name',
       header: 'Name',
-      cell: ({ row }) => <div className="font-medium text-foreground">{row.getValue('name')}</div>,
+      cell: ({ row }) => <div className="text-foreground font-medium">{row.getValue('name')}</div>,
     },
     {
       accessorKey: 'email',
@@ -61,7 +61,7 @@ export const getVendorColumns = ({
         const email = row.getValue('email') as string;
         const truncatedEmail = email && email.length > 12 ? email.substring(0, 12) + '...' : email;
         return (
-          <div className="text-sm text-foreground" title={email}>
+          <div className="text-foreground text-sm" title={email}>
             {truncatedEmail || '-'}
           </div>
         );
@@ -71,7 +71,7 @@ export const getVendorColumns = ({
       accessorKey: 'uenNumber',
       header: 'UEN Number',
       cell: ({ row }) => (
-        <div className="text-sm text-foreground">{row.getValue('uenNumber') || '-'}</div>
+        <div className="text-foreground text-sm">{row.getValue('uenNumber') || '-'}</div>
       ),
     },
     {
@@ -90,7 +90,7 @@ export const getVendorColumns = ({
             {website}
           </a>
         ) : (
-          <span className="text-sm text-foreground">-</span>
+          <span className="text-foreground text-sm">-</span>
         );
       },
     },
@@ -121,9 +121,12 @@ export const getVendorColumns = ({
       const vendor = row.original;
       return (
         <Button
-          className="flex items-center whitespace-nowrap text-xs px-1 py-1 min-w-0"
+          className="flex min-w-0 items-center px-1 py-1 text-xs whitespace-nowrap"
           size="sm"
-          onClick={() => onSelectVendor(vendor)}
+          onClick={() => {
+            console.log(vendor);
+            onSelectVendor(vendor);
+          }}
         >
           View
         </Button>

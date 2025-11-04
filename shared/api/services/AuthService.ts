@@ -7,6 +7,7 @@ import type { AuthResponseDto } from '../models/AuthResponseDto';
 import type { CreateAdminDto } from '../models/CreateAdminDto';
 import type { CreateVendorDto } from '../models/CreateVendorDto';
 import type { LoginDto } from '../models/LoginDto';
+import type { RegisterDatingUserDto } from '../models/RegisterDatingUserDto';
 import type { RequestResetPasswordDto } from '../models/RequestResetPasswordDto';
 import type { ResetPasswordDto } from '../models/ResetPasswordDto';
 import type { VendorResponseDto } from '../models/VendorResponseDto';
@@ -49,6 +50,26 @@ export class AuthService {
             mediaType: 'application/json',
             errors: {
                 400: `Bad request.`,
+            },
+        });
+    }
+    /**
+     * Register dating platform user onto knotly.
+     * @param requestBody
+     * @returns AdminResponseDto Dating platform user has been successfully invited.
+     * @throws ApiError
+     */
+    public static authControllerRegisterDatingUser(
+        requestBody: RegisterDatingUserDto,
+    ): CancelablePromise<AdminResponseDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/auth/register/dating-user',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                400: `Bad request.`,
+                409: `Conflict. This user is already registered on Knotly.`,
             },
         });
     }
