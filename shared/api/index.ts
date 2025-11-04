@@ -10,6 +10,8 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 export type { AddToCartDto } from './models/AddToCartDto';
 export type { AdminBasicStatsResponseDto } from './models/AdminBasicStatsResponseDto';
 export type { AdminBookingsOverTimeResponseDto } from './models/AdminBookingsOverTimeResponseDto';
+export type { AdminDetailsDto } from './models/AdminDetailsDto';
+export type { AdminInfoDto } from './models/AdminInfoDto';
 export type { AdminResponseDto } from './models/AdminResponseDto';
 export type { AdminRevenueByCategoryResponseDto } from './models/AdminRevenueByCategoryResponseDto';
 export type { AdminRevenueResponseDto } from './models/AdminRevenueResponseDto';
@@ -18,6 +20,7 @@ export type { AdminTopVendorsResponseDto } from './models/AdminTopVendorsRespons
 export type { AdminUserGrowthResponseDto } from './models/AdminUserGrowthResponseDto';
 export type { AdminWeddingDatesHeatmapResponseDto } from './models/AdminWeddingDatesHeatmapResponseDto';
 export type { AlbumResponseDto } from './models/AlbumResponseDto';
+export type { AllDatingPartnerCommissionResponseDto } from './models/AllDatingPartnerCommissionResponseDto';
 export { AllEmailNotificationHistoryResponseDto } from './models/AllEmailNotificationHistoryResponseDto';
 export type { AllVendorsPayoutResponseDto } from './models/AllVendorsPayoutResponseDto';
 export type { AttendeeAvailability } from './models/AttendeeAvailability';
