@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/ui/card';
-import { CheckCircle, DollarSign, Users } from 'lucide-react';
+import { CheckCircle, DollarSign, Gift, Users } from 'lucide-react';
 
 interface DashboardStatsCardsProps {
   guestCount?: {
@@ -22,6 +22,11 @@ interface DashboardStatsCardsProps {
     pending: number;
     rsvpPercentage: number;
   };
+  cashGifts?: {
+    totalAmount: number;
+    totalGifters: number;
+    currency: string;
+  };
   isLoading?: boolean;
 }
 
@@ -29,10 +34,11 @@ export const DashboardStatsCards = ({
   guestCount,
   spending,
   rsvpCount,
+  cashGifts,
   isLoading,
 }: DashboardStatsCardsProps) => {
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {/* Guest Count Card */}
       <Card className="bg-transparent border-brand-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -104,6 +110,25 @@ export const DashboardStatsCards = ({
             </>
           ) : (
             <div className="text-2xl font-bold">0 / 0</div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Cash Gifts Card */}
+      <Card className="bg-transparent border-brand-200">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Cash Gifting Value</CardTitle>
+          <Gift className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent className="pt-0">
+          {isLoading ? (
+            <div className="text-2xl font-bold">Loading...</div>
+          ) : cashGifts ? (
+            <div className="text-2xl font-bold">
+              {cashGifts.currency} {cashGifts.totalAmount.toFixed(2)}
+            </div>
+          ) : (
+            <div className="text-2xl font-bold">$0.00</div>
           )}
         </CardContent>
       </Card>
