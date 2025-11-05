@@ -7,6 +7,8 @@ import {
   LayoutDashboard,
   ListTodo,
   MailCheckIcon,
+  Package,
+  ShoppingCart,
   Timer,
   User2,
   UserStar,
@@ -57,6 +59,16 @@ const tabs = [
         title: 'Wedding Management',
         href: '/wedding-management',
         icon: Users,
+      },
+      {
+        title: 'Listing Management',
+        href: '/listing-management',
+        icon: Package,
+      },
+      {
+        title: 'Order Management',
+        href: '/order-management',
+        icon: ShoppingCart,
       },
       {
         title: 'Notifications Management',

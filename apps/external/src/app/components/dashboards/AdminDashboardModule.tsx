@@ -9,6 +9,8 @@ import { RecentOrdersList } from './RecentOrdersList';
 import { WeddingTasksChecklist } from './WeddingTasksChecklist';
 import {
   AnalyticsService,
+  CashGiftResponseDto,
+  CashGiftsService,
   GuestCountResponseDto,
   MicrositeService,
   OrderListingDetailResponseDto,
@@ -32,6 +34,7 @@ const AdminDashboardModule = () => {
   const [guestCount, setGuestCount] = useState<GuestCountResponseDto | undefined>();
   const [spending, setSpending] = useState<SpendingResponseDto | undefined>();
   const [rsvpCount, setRsvpCount] = useState<RsvpCountResponseDto | undefined>();
+  const [cashGifts, setCashGifts] = useState<CashGiftResponseDto[]>([]);
   const [listingDetails, setListingDetails] = useState<OrderListingDetailResponseDto[]>([]);
   const [successfulOrders, setSuccessfulOrders] = useState<OrderResponseDto[]>([]);
   const [micrositeUrl, setMicrositeUrl] = useState<string | null>(null);
@@ -58,6 +61,15 @@ const AdminDashboardModule = () => {
           : `Your wedding was ${Math.abs(daysUntilWedding)} day${Math.abs(daysUntilWedding) === 1 ? '' : 's'} ago`
       : 'Your wedding dashboard';
 
+  // Calculate cash gifts summary
+  const cashGiftsSummary = cashGifts.length > 0
+    ? {
+        totalAmount: cashGifts.reduce((sum, gift) => sum + gift.amount, 0),
+        totalGifters: cashGifts.length,
+        currency: spending?.currency || '$',
+      }
+    : undefined;
+
   // Fetch analytics data
   useEffect(() => {
     if (!selectedWeddingId) return;
@@ -65,15 +77,17 @@ const AdminDashboardModule = () => {
     const fetchAnalytics = async () => {
       setIsLoadingStats(true);
       try {
-        const [guestData, spendingData, rsvpData] = await Promise.all([
+        const [guestData, spendingData, rsvpData, cashGiftsData] = await Promise.all([
           AnalyticsService.analyticsControllerGetGuestCount(selectedWeddingId),
           AnalyticsService.analyticsControllerGetSpending(selectedWeddingId),
           AnalyticsService.analyticsControllerGetRsvpCount(selectedWeddingId),
+          CashGiftsService.cashGiftControllerGetCashGiftsByWedding(selectedWeddingId),
         ]);
 
         setGuestCount(guestData);
         setSpending(spendingData);
         setRsvpCount(rsvpData);
+        setCashGifts(cashGiftsData);
       } catch (error) {
         console.error('Error fetching analytics:', error);
       } finally {
@@ -175,6 +189,7 @@ const AdminDashboardModule = () => {
             guestCount={guestCount}
             spending={spending}
             rsvpCount={rsvpCount}
+            cashGifts={cashGiftsSummary}
             isLoading={isLoadingStats}
           />
         </div>

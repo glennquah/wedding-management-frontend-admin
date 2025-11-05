@@ -35,6 +35,7 @@ export const MESSAGES = {
     INVALID_LISTING_ID: 'Cannot update listing: Invalid listing ID. Please refresh the page and try again.',
     VALIDATION_FAILED: 'Please provide a valid listing name and price',
     VENDOR_UNAVAILABLE: 'Vendor information not available',
+    LISTING_HAS_ORDERS: 'Cannot delete listing: This listing has active orders associated with it. Please cancel or complete all orders before deleting.',
   },
   SUCCESS: {
     LISTING_CREATED: 'Listing created successfully!',
