@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { toast } from 'sonner';
-import { ListingsService, VendorsService, ListingResponseDto } from '@wedding/api-types';
-import { ListingTable } from '@shared/components/ListingTable';
 import { ListingWithVendor } from '@shared/columns/listing-columns';
-import { PageHeader, DeleteConfirmationModal } from '@shared/components';
+import { DeleteConfirmationModal, PageHeader } from '@shared/components';
+import { ListingTable } from '@shared/components/ListingTable';
+import { ListingResponseDto, ListingsService, VendorsService } from '@wedding/api-types';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -28,28 +28,20 @@ export default function ListingManagementPage() {
         const vendorsData = await VendorsService.vendorControllerGetAllVendors();
 
         // Create a map for quick vendor lookup
-        const vendorMap = new Map(vendorsData.map(v => [v.id, v]));
+        const vendorMap = new Map(vendorsData.map((v) => [v.id, v]));
 
         // Fetch listings from all categories in parallel
-        const [
-          venues,
-          catering,
-          photography,
-          decoration,
-          music,
-          attire,
-          makeup,
-          transportation
-        ] = await Promise.all([
-          ListingsService.listingControllerGetAllVenues().catch(() => []),
-          ListingsService.listingControllerGetAllCatering().catch(() => []),
-          ListingsService.listingControllerGetAllPhotography().catch(() => []),
-          ListingsService.listingControllerGetAllDecoration().catch(() => []),
-          ListingsService.listingControllerGetAllMusic().catch(() => []),
-          ListingsService.listingControllerGetAllAttire().catch(() => []),
-          ListingsService.listingControllerGetAllMakeup().catch(() => []),
-          ListingsService.listingControllerGetAllTransportation().catch(() => []),
-        ]);
+        const [venues, catering, photography, decoration, music, attire, makeup, transportation] =
+          await Promise.all([
+            ListingsService.listingControllerGetAllVenues().catch(() => []),
+            ListingsService.listingControllerGetAllCatering().catch(() => []),
+            ListingsService.listingControllerGetAllPhotography().catch(() => []),
+            ListingsService.listingControllerGetAllDecoration().catch(() => []),
+            ListingsService.listingControllerGetAllMusic().catch(() => []),
+            ListingsService.listingControllerGetAllAttire().catch(() => []),
+            ListingsService.listingControllerGetAllMakeup().catch(() => []),
+            ListingsService.listingControllerGetAllTransportation().catch(() => []),
+          ]);
 
         // Combine all listings
         const allListings: ListingResponseDto[] = [
@@ -64,7 +56,7 @@ export default function ListingManagementPage() {
         ];
 
         // Enrich listings with vendor information
-        const enrichedListings: ListingWithVendor[] = allListings.map(listing => {
+        const enrichedListings: ListingWithVendor[] = allListings.map((listing) => {
           const vendor = vendorMap.get(listing.vendorId);
           return {
             ...listing,
@@ -101,11 +93,11 @@ export default function ListingManagementPage() {
     try {
       await ListingsService.listingControllerDelete(
         deleteConfirmListing.vendorId,
-        deleteConfirmListing.id
+        deleteConfirmListing.id,
       );
 
       // Remove from local state
-      setListings(prev => prev.filter(l => l.id !== deleteConfirmListing.id));
+      setListings((prev) => prev.filter((l) => l.id !== deleteConfirmListing.id));
 
       toast.success('Listing deleted successfully');
       closeDeleteConfirmModal();
@@ -113,13 +105,17 @@ export default function ListingManagementPage() {
       console.error('Error deleting listing:', error);
 
       // Check if it's a bad request error due to existing orders
-      const err = error as { status?: number; body?: { statusCode?: number; message?: string }; message?: string };
+      const err = error as {
+        status?: number;
+        body?: { statusCode?: number; message?: string };
+        message?: string;
+      };
       if (err?.status === 400 || err?.body?.statusCode === 400) {
         const errorMessage = err?.body?.message || err?.message || '';
         if (errorMessage.includes('existing orders')) {
           toast.error(
             'Cannot delete this listing because there are existing orders associated with it.',
-            { duration: 5000 }
+            { duration: 5000 },
           );
         } else {
           toast.error(errorMessage || 'Failed to delete listing');
@@ -139,18 +135,22 @@ export default function ListingManagementPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={`Listing Management (${listings.length})`}
-        description="View and manage all vendor listings across the platform"
-      />
+    <div className="w-full max-w-full min-w-0 overflow-x-hidden px-4 py-8">
+      <div className="flex items-center justify-between">
+        <PageHeader
+          title={'Listing Management'}
+          description="View and manage all vendor listings across the platform"
+        />
+      </div>
 
-      <ListingTable
-        listings={listings}
-        onDelete={openDeleteConfirmModal}
-        onView={handleView}
-        isLoading={isLoading}
-      />
+      <div className="w-full">
+        <ListingTable
+          listings={listings}
+          onDelete={openDeleteConfirmModal}
+          onView={handleView}
+          isLoading={isLoading}
+        />
+      </div>
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
@@ -161,7 +161,8 @@ export default function ListingManagementPage() {
           deleteConfirmListing && (
             <>
               Are you sure you want to delete <strong>{deleteConfirmListing.listingName}</strong>?
-              This action cannot be undone and will permanently remove the listing from the platform.
+              This action cannot be undone and will permanently remove the listing from the
+              platform.
             </>
           )
         }
