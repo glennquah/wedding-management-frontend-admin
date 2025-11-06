@@ -55,7 +55,16 @@ export const RatingButton = ({
     setFocusedStar,
   } = useRating();
   const index = providedIndex ?? 0;
-  const isActive = index < (hoverValue ?? focusedStar ?? value ?? 0);
+  const displayValue = hoverValue ?? focusedStar ?? value ?? 0;
+  const isActive = index < displayValue;
+
+  // Calculate fill percentage for half stars (only in readOnly mode)
+  const fillPercentage = readOnly
+    ? Math.min(100, Math.max(0, (displayValue - index) * 100))
+    : isActive
+      ? 100
+      : 0;
+
   let tabIndex = -1;
   if (!readOnly) {
     tabIndex = value === index + 1 ? 0 : -1;
@@ -77,6 +86,37 @@ export const RatingButton = ({
   const handleBlur = useCallback(() => {
     setFocusedStar(null);
   }, [setFocusedStar]);
+
+  // For readOnly with half stars, use a special rendering
+  if (readOnly && fillPercentage > 0 && fillPercentage < 100) {
+    return (
+      <div
+        className={cn(
+          'relative inline-block p-0.5',
+          className
+        )}
+      >
+        {/* Background (unfilled) star */}
+        {cloneElement(icon, {
+          size,
+          className: 'text-muted-foreground',
+          'aria-hidden': 'true',
+        })}
+        {/* Foreground (filled) star with clip mask */}
+        <div
+          className="absolute left-0 top-0 overflow-hidden p-0.5"
+          style={{ width: `${fillPercentage}%` }}
+        >
+          {cloneElement(icon, {
+            size,
+            className: 'fill-primary text-primary',
+            'aria-hidden': 'true',
+          })}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <button
       className={cn(

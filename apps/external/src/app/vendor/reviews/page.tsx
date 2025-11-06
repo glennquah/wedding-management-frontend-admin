@@ -134,7 +134,7 @@ export default function VendorReviewsPage() {
                   <p className="text-muted-foreground text-sm">Average Rating</p>
                   <div className="mt-1 flex items-center gap-2">
                     <p className="text-3xl font-bold">{averageRating.toFixed(1)}</p>
-                    <Rating value={Math.round(averageRating)} readOnly>
+                    <Rating value={averageRating} readOnly>
                       {Array.from({ length: 5 }, (_, i) => (
                         <RatingButton key={i} index={i} size={20} />
                       ))}
