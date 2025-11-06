@@ -172,13 +172,12 @@ const AdminDashboardModule = () => {
     try {
       await AnalyticsService.analyticsControllerGenerateWeddingWrapped(selectedWeddingId);
       setHasExistingWrapped(true);
-      toast.success('Wedding Wrapped Generated! Your wedding analytics have been successfully generated.');
-      // Navigate to the fullscreen view
+      // Navigate directly to the fullscreen view without showing toast
+      // The view page will handle the display
       router.push('/admin/wedding-wrapped/view');
     } catch (error) {
       console.error('Error generating Wedding Wrapped:', error);
       toast.error('Failed to generate Wedding Wrapped. Please try again.');
-    } finally {
       setIsGeneratingWrapped(false);
     }
   };

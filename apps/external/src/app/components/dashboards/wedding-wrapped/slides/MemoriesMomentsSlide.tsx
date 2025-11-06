@@ -21,7 +21,7 @@ export function MemoriesMomentsSlide({ emotionalTouchInsights }: MemoriesMoments
   return {
     background: FlowerPetals, // Beautiful flower petals for memories!
     content: (
-      <div className="max-w-6xl space-y-10">
+      <div className="max-w-[90vw] space-y-10">
         <motion.h2
           className="mb-10 text-8xl font-bold text-white"
           initial={{ opacity: 0, x: -50 }}
@@ -55,13 +55,6 @@ export function MemoriesMomentsSlide({ emotionalTouchInsights }: MemoriesMoments
                 icon: '👥',
                 delay: 4.5,
               },
-              {
-                label: 'Unique People',
-                value: emotionalTouchInsights.totalPeopleClusters,
-                color: 'from-green-400 to-teal-600',
-                icon: '✨',
-                delay: 6.0,
-              },
             ] as const satisfies readonly SlideMemoryItem[]
           ).map((item, idx) => (
             <motion.div
@@ -82,11 +75,11 @@ export function MemoriesMomentsSlide({ emotionalTouchInsights }: MemoriesMoments
           className="rounded-3xl border-2 border-white/20 bg-white/10 p-10 text-center backdrop-blur-lg"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 7.5, duration: 0.8 }}
+          transition={{ delay: 6.0, duration: 0.8 }}
         >
-          <p className="text-4xl text-white">
+          <h3 className="text-7xl text-white">
             <TypingText text="These moments will last forever in your hearts ❤️" delay={500} speed={80} />
-          </p>
+          </h3>
         </motion.div>
       </div>
     ),

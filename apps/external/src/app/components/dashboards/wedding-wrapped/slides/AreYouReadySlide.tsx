@@ -23,13 +23,13 @@ function AreYouReadySlideContent({ wedding }: AreYouReadySlideProps) {
   const [showFinalText, setShowFinalText] = useState(false);
 
   return (
-    <div className="max-w-6xl space-y-10 text-center">
+    <div className="max-w-[90vw] space-y-10 text-center">
       <motion.div
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ duration: 1.5, type: 'spring', bounce: 0.5 }}
       >
-        <h1 className="mb-8 bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 bg-clip-text text-9xl font-black text-transparent">
+        <h1 className="mb-8 bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 bg-clip-text text-[180px] leading-tight font-black text-transparent">
           <TypingText
             text="ARE YOU READY?"
             delay={1500}
@@ -45,14 +45,14 @@ function AreYouReadySlideContent({ wedding }: AreYouReadySlideProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <p className="text-4xl font-semibold text-pink-300">
+          <h3 className="font-semibold text-pink-300">
             <TypingText
               text="(Spoiler alert: It's going to be emotional 😭)"
               delay={300}
               speed={70}
               onComplete={() => setTimeout(() => setShowCoupleName(true), 1000)}
             />
-          </p>
+          </h3>
         </motion.div>
       )}
 
@@ -62,14 +62,14 @@ function AreYouReadySlideContent({ wedding }: AreYouReadySlideProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
         >
-          <p className="mb-6 text-6xl font-bold text-white">
+          <h3 className="mb-6 text-[120px] leading-tight font-bold text-white">
             <TypingText
               text={`${coupleName}'s Wedding Wrapped`}
               delay={300}
               speed={100}
               onComplete={() => setTimeout(() => setShowEmojis(true), 800)}
             />
-          </p>
+          </h3>
         </motion.div>
       )}
 
@@ -98,29 +98,29 @@ function AreYouReadySlideContent({ wedding }: AreYouReadySlideProps) {
           transition={{ duration: 0.8 }}
           className="rounded-2xl border-2 border-yellow-400 bg-yellow-500/20 p-6 backdrop-blur-lg"
         >
-          <p className="mb-3 text-3xl font-bold text-yellow-300">
+          <h3 className="mb-3 text-8xl font-bold text-yellow-300">
             <TypingText text="⚠️ WARNING ⚠️" delay={200} speed={120} />
-          </p>
-          <p className="text-2xl text-white/90">
+          </h3>
+          <h3 className="text-6xl text-white/90">
             <TypingText
               text="Side effects may include: happy tears, uncontrollable smiling, and an overwhelming urge to renew your vows immediately"
               delay={1500}
               speed={50}
               onComplete={() => setTimeout(() => setShowFinalText(true), 1200)}
             />
-          </p>
+          </h3>
         </motion.div>
       )}
 
       {showFinalText && (
-        <motion.p
-          className="text-4xl font-semibold text-white/80"
+        <motion.h3
+          className="text-9xl font-semibold text-white/80"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
         >
           <TypingText text="Let's relive the magic... ✨" delay={200} speed={90} />
-        </motion.p>
+        </motion.h3>
       )}
     </div>
   );

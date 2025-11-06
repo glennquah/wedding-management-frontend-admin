@@ -157,7 +157,7 @@ Wedding Management Platform
   };
 
   return (
-    <div className="text-center space-y-10 max-w-4xl">
+    <div className="text-center space-y-10 max-w-[90vw]">
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
@@ -165,14 +165,14 @@ Wedding Management Platform
       >
         <h1 className="text-8xl font-bold text-white mb-6">Thank You for Celebrating</h1>
       </motion.div>
-      <motion.p
-        className="text-4xl text-white/90 mb-10"
+      <motion.h3
+        className="text-7xl text-white/90 mb-10"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8, duration: 1 }}
       >
         <TypingText text="Your special day was truly magical ✨" delay={800} speed={90} />
-      </motion.p>
+      </motion.h3>
 
       {/* Action Buttons */}
       <motion.div
@@ -208,10 +208,10 @@ Wedding Management Platform
             animate={{ opacity: 1 }}
             transition={{ delay: 2.0, duration: 0.8 }}
           >
-            <p className="text-2xl text-white/70 mb-4 flex items-center justify-center gap-2">
+            <h3 className="text-2xl text-white/70 mb-4 flex items-center justify-center gap-2">
               <Share2 className="w-5 h-5" />
               Share your memories
-            </p>
+            </h3>
             <div className="flex flex-row gap-4 justify-center">
               <Button
                 onClick={handleDownload}

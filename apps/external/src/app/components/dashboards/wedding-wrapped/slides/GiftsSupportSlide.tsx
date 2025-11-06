@@ -44,9 +44,9 @@ function GiftsSupportSlideContent({ giftSupportInsights, formatCurrency }: Gifts
   };
 
   return (
-    <div className="space-y-6 max-w-4xl w-full">
+    <div className="space-y-6 max-w-[90vw] w-full">
         <motion.h2
-          className="text-6xl font-bold text-white mb-6"
+          className="text-[120px] font-bold text-white mb-6 leading-tight"
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
@@ -61,13 +61,13 @@ function GiftsSupportSlideContent({ giftSupportInsights, formatCurrency }: Gifts
             transition={{ delay: 1.2 }}
             onAnimationComplete={() => setTimeout(() => setShowQuestion(true), 1500)}
           >
-            <p className="text-2xl text-white/90 text-center">
+            <h3 className="text-8xl text-white/90 text-center">
               <TypingText
                 text="Time to count the love... 💕"
                 delay={1200}
                 speed={70}
               />
-            </p>
+            </h3>
           </motion.div>
 
           {showQuestion && (
@@ -75,14 +75,14 @@ function GiftsSupportSlideContent({ giftSupportInsights, formatCurrency }: Gifts
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              <p className="text-3xl text-white font-bold text-center">
+              <h3 className="text-9xl text-white font-bold text-center">
                 <TypingText
                   text="How generous were your guests?"
                   delay={300}
                   speed={60}
                   onComplete={() => setTimeout(() => setShowGiftValue(true), 1000)}
                 />
-              </p>
+              </h3>
             </motion.div>
           )}
 
@@ -104,14 +104,14 @@ function GiftsSupportSlideContent({ giftSupportInsights, formatCurrency }: Gifts
                 <div className="text-xl text-white/90">Total Gift Value</div>
               </motion.div>
 
-              <p className="text-2xl text-pink-200 font-semibold text-center">
+              <h3 className="text-8xl text-pink-200 font-semibold text-center">
                 <TypingText
                   text={getGiftComment()}
                   delay={800}
                   speed={50}
                   onComplete={() => setTimeout(() => setShowWishlist(true), 1200)}
                 />
-              </p>
+              </h3>
             </motion.div>
           )}
 
@@ -133,49 +133,49 @@ function GiftsSupportSlideContent({ giftSupportInsights, formatCurrency }: Gifts
                 <div className="text-xl text-white/90">Wishlist Completion</div>
               </motion.div>
 
-              <p className="text-2xl text-purple-200 font-semibold text-center">
+              <h3 className="text-8xl text-purple-200 font-semibold text-center">
                 <TypingText
                   text={getWishlistComment()}
                   delay={1000}
                   speed={50}
                   onComplete={() => setTimeout(() => setShowMostWanted(true), 1000)}
                 />
-              </p>
+              </h3>
             </motion.div>
           )}
 
-          {showMostWanted && giftSupportInsights.mostWantedItem && (
+          {showMostWanted && giftSupportInsights.topWishlistContributorName && (
             <motion.div
               className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border-2 border-white/20"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <p className="text-xl text-pink-300 font-semibold mb-3">
-                <TypingText text="💖 The Crowd Favorite" delay={300} speed={70} />
-              </p>
-              <p className="text-lg text-white/70 mb-2">
+              <h3 className="text-7xl text-pink-300 font-semibold mb-3">
+                <TypingText text="💖 Wishlist Champion!" delay={300} speed={70} />
+              </h3>
+              <h3 className="text-6xl text-white/70 mb-2">
                 <TypingText
-                  text="Everyone wanted to get you this!"
+                  text="Reserved the most wishlist items!"
                   delay={1500}
                   speed={60}
                 />
-              </p>
-              <p className="text-3xl text-white font-bold pt-1">
+              </h3>
+              <h3 className="text-9xl text-white font-bold pt-1">
                 <TypingText
-                  text={giftSupportInsights.mostWantedItem}
+                  text={giftSupportInsights.topWishlistContributorName}
                   delay={3200}
                   speed={60}
                 />
-              </p>
-              <p className="text-lg text-white/60 mt-2">
+              </h3>
+              <h3 className="text-6xl text-white/60 mt-2">
                 <TypingText
-                  text={`${giftSupportInsights.mostWantedItemCount} ${giftSupportInsights.mostWantedItemCount === 1 ? 'reservation' : 'reservations'} 🎯`}
+                  text={`${giftSupportInsights.topWishlistContributorCount} ${giftSupportInsights.topWishlistContributorCount === 1 ? 'item' : 'items'} reserved 🎯`}
                   delay={4500}
                   speed={50}
                   onComplete={() => setTimeout(() => setShowTopContributor(true), 800)}
                 />
-              </p>
+              </h3>
             </motion.div>
           )}
 
@@ -186,37 +186,37 @@ function GiftsSupportSlideContent({ giftSupportInsights, formatCurrency }: Gifts
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <p className="text-xl text-yellow-300 font-semibold mb-3">
+              <h3 className="text-7xl text-yellow-300 font-semibold mb-3">
                 <TypingText text="🌟 MVP - Most Valuable Present!" delay={300} speed={70} />
-              </p>
-              <p className="text-lg text-white/70 mb-2">
+              </h3>
+              <h3 className="text-6xl text-white/70 mb-2">
                 <TypingText
                   text="The ultimate gift-giver! 🏆"
                   delay={1800}
                   speed={60}
                 />
-              </p>
-              <p className="text-3xl text-white font-bold pt-1">
+              </h3>
+              <h3 className="text-9xl text-white font-bold pt-1">
                 <TypingText
                   text={giftSupportInsights.topContributorName}
                   delay={3200}
                   speed={70}
                 />
-              </p>
-              <p className="text-2xl text-white/80 mt-2">
+              </h3>
+              <h3 className="text-8xl text-white/80 mt-2">
                 <TypingText
                   text={formatCurrency(giftSupportInsights.topContribution || 0)}
                   delay={4500}
                   speed={50}
                 />
-              </p>
-              <p className="text-sm text-white/50 mt-2">
+              </h3>
+              <h3 className="text-5xl text-white/50 mt-2">
                 <TypingText
                   text="You better send a REALLY good thank you card! 😄"
                   delay={5500}
                   speed={50}
                 />
-              </p>
+              </h3>
             </motion.div>
           )}
         </div>

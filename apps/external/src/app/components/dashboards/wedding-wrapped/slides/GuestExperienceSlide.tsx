@@ -44,9 +44,9 @@ function GuestExperienceSlideContent({
   };
 
   return (
-    <div className="w-full max-w-4xl space-y-6">
+    <div className="w-full max-w-[90vw] space-y-6">
       <motion.h2
-        className="mb-6 text-6xl font-bold text-white"
+        className="mb-6 text-[120px] font-bold text-white leading-tight"
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8 }}
@@ -56,14 +56,14 @@ function GuestExperienceSlideContent({
 
       <div className="space-y-6">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}>
-          <p className="mb-4 text-2xl text-white/90">
+          <h3 className="mb-4 text-8xl text-white/90">
             <TypingText
               text="Let's talk about the people who celebrated with you..."
               delay={1200}
               speed={60}
               onComplete={() => setTimeout(() => setShowIntro(true), 600)}
             />
-          </p>
+          </h3>
         </motion.div>
 
         {showIntro && (
@@ -121,14 +121,14 @@ function GuestExperienceSlideContent({
 
         {showComment && (
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-            <p className="text-center text-2xl font-semibold text-yellow-300">
+            <h3 className="text-center text-8xl font-semibold text-yellow-300">
               <TypingText
                 text={getAttendanceComment()}
                 delay={200}
                 speed={50}
                 onComplete={() => setTimeout(() => setShowFirst(true), 1000)}
               />
-            </p>
+            </h3>
           </motion.div>
         )}
 
@@ -139,27 +139,27 @@ function GuestExperienceSlideContent({
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <p className="mb-3 text-xl font-semibold text-yellow-300">
+            <h3 className="mb-3 text-7xl font-semibold text-yellow-300">
               <TypingText text="🏆 First to Arrive" delay={300} speed={70} />
-            </p>
-            <p className="mb-2 text-lg text-white/70">
+            </h3>
+            <h3 className="mb-2 text-6xl text-white/70">
               <TypingText
                 text="The early bird who couldn't wait to celebrate!"
                 delay={1500}
                 speed={50}
               />
-            </p>
-            <p className="pt-1 text-3xl font-bold text-white">
+            </h3>
+            <h3 className="pt-1 text-9xl font-bold text-white">
               <TypingText text={`${guestInsights.firstGuestName}`} delay={3500} speed={70} />
-            </p>
-            <p className="mt-2 text-lg text-white/60">
+            </h3>
+            <h3 className="mt-2 text-6xl text-white/60">
               <TypingText
                 text={`at ${formatDate(guestInsights.firstGuestTime)}`}
                 delay={4500}
                 speed={40}
                 onComplete={() => setTimeout(() => setShowFastest(true), 800)}
               />
-            </p>
+            </h3>
           </motion.div>
         )}
 
@@ -170,22 +170,22 @@ function GuestExperienceSlideContent({
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <p className="mb-3 text-xl font-semibold text-green-300">
+            <h3 className="mb-3 text-7xl font-semibold text-green-300">
               <TypingText text="⚡ Fastest RSVP" delay={300} speed={70} />
-            </p>
-            <p className="mb-2 text-lg text-white/70">
+            </h3>
+            <h3 className="mb-2 text-6xl text-white/70">
               <TypingText text="Someone was EAGER! 🏃‍♂️💨" delay={1200} speed={60} />
-            </p>
-            <p className="pt-1 text-3xl font-bold text-white">
+            </h3>
+            <h3 className="pt-1 text-9xl font-bold text-white">
               <TypingText text={guestInsights.fastestRsvpName} delay={2500} speed={70} />
-            </p>
-            <p className="mt-2 text-xl text-white/80">
+            </h3>
+            <h3 className="mt-2 text-7xl text-white/80">
               <TypingText
                 text={`Lightning speed: ${guestInsights.fastestRsvpDuration?.toFixed(1)} hours ⚡`}
                 delay={3800}
                 speed={50}
               />
-            </p>
+            </h3>
           </motion.div>
         )}
       </div>

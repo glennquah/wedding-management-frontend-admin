@@ -103,6 +103,8 @@ export { OrderStatus } from './models/OrderStatus';
 export type { PaymentResponseDto } from './models/PaymentResponseDto';
 export { PaymentStatus } from './models/PaymentStatus';
 export type { PayoutResultDto } from './models/PayoutResultDto';
+export type { PersonClusterItem } from './models/PersonClusterItem';
+export type { PhotoItem } from './models/PhotoItem';
 export { PlanningJourneyInsights } from './models/PlanningJourneyInsights';
 export type { ProcessingStatusDto } from './models/ProcessingStatusDto';
 export type { RequestCalendarAccessDto } from './models/RequestCalendarAccessDto';
@@ -169,6 +171,8 @@ export { WeddingService } from './models/WeddingService';
 export { WeddingStyle } from './models/WeddingStyle';
 export { WeddingType } from './models/WeddingType';
 export type { WeddingWrappedResponseDto } from './models/WeddingWrappedResponseDto';
+export type { WellWishItem } from './models/WellWishItem';
+export type { WishlistItemDetail } from './models/WishlistItemDetail';
 export type { WishlistItemResponseDto } from './models/WishlistItemResponseDto';
 
 export { AdminsService } from './services/AdminsService';

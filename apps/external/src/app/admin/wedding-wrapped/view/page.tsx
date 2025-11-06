@@ -17,6 +17,8 @@ import { GuestExperienceSlide } from '@/app/components/dashboards/wedding-wrappe
 import { GiftsSupportSlide } from '@/app/components/dashboards/wedding-wrapped/slides/GiftsSupportSlide';
 import { PlanningJourneySlide } from '@/app/components/dashboards/wedding-wrapped/slides/PlanningJourneySlide';
 import { MemoriesMomentsSlide } from '@/app/components/dashboards/wedding-wrapped/slides/MemoriesMomentsSlide';
+import { MostFrequentPersonSlide } from '@/app/components/dashboards/wedding-wrapped/slides/MostFrequentPersonSlide';
+import { WellWishesSlide } from '@/app/components/dashboards/wedding-wrapped/slides/WellWishesSlide';
 import { FinalSlide } from '@/app/components/dashboards/wedding-wrapped/slides/FinalSlide';
 
 // Music options
@@ -75,6 +77,7 @@ export default function WeddingWrappedViewPage() {
   const [isSaving, setIsSaving] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentMusicIndex, setCurrentMusicIndex] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch wedding wrapped data
   useEffect(() => {
@@ -110,6 +113,47 @@ export default function WeddingWrappedViewPage() {
     }
   }, [isLoading, data]);
 
+  // Auto-scroll effect - smooth scroll to keep content visible
+  useEffect(() => {
+    if (isLoading || !data || !scrollContainerRef.current) return;
+
+    const scrollContainer = scrollContainerRef.current;
+    let scrollInterval: NodeJS.Timeout;
+
+    // Start auto-scrolling after a short delay
+    const startScrolling = () => {
+      scrollInterval = setInterval(() => {
+        if (scrollContainer) {
+          const maxScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+          const currentScroll = scrollContainer.scrollTop;
+
+          // If not at bottom, scroll down smoothly
+          if (currentScroll < maxScroll) {
+            scrollContainer.scrollTo({
+              top: currentScroll + 2,
+              behavior: 'smooth',
+            });
+          }
+        }
+      }, 50);
+    };
+
+    // Start scrolling after 2 seconds to let initial animations play
+    const timeout = setTimeout(startScrolling, 2000);
+
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(scrollInterval);
+    };
+  }, [isLoading, data, currentSlide]);
+
+  // Reset scroll position when slide changes
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+  }, [currentSlide]);
+
   // Each slide gets its own music track
   const getMusicIndexForSlide = (slideIndex: number): number => {
     return Math.min(slideIndex, audioOptions.length - 1);
@@ -125,40 +169,21 @@ export default function WeddingWrappedViewPage() {
       setCurrentMusicIndex(newMusicIndex);
       const audio = audioRef.current;
 
-      // Fade out old music
-      const fadeOut = setInterval(() => {
-        if (audio.volume > 0.1) {
-          audio.volume = Math.max(0, audio.volume - 0.1);
-        } else {
-          clearInterval(fadeOut);
-          audio.pause();
+      // Immediately stop old music and start new music
+      audio.pause();
+      const sourceElement = audio.querySelector('source');
+      if (sourceElement) {
+        sourceElement.src = audioOptions[newMusicIndex].url;
+        audio.load();
+        audio.volume = 1;
+        audio.muted = isMuted;
 
-          // Change source and fade in new music
-          const sourceElement = audio.querySelector('source');
-          if (sourceElement) {
-            sourceElement.src = audioOptions[newMusicIndex].url;
-            audio.load();
-            audio.volume = 0;
-            audio.muted = isMuted;
-
-            audio
-              .play()
-              .then(() => {
-                const fadeIn = setInterval(() => {
-                  if (audio.volume < 0.9) {
-                    audio.volume = Math.min(1, audio.volume + 0.1);
-                  } else {
-                    audio.volume = 1;
-                    clearInterval(fadeIn);
-                  }
-                }, 50);
-              })
-              .catch((error: unknown) => {
-                console.log('Auto-play prevented:', error);
-              });
-          }
-        }
-      }, 50);
+        audio
+          .play()
+          .catch((error: unknown) => {
+            console.log('Auto-play prevented:', error);
+          });
+      }
     }
   }, [currentSlide, currentMusicIndex, isMuted, data]);
 
@@ -223,11 +248,13 @@ export default function WeddingWrappedViewPage() {
 
   const slides: SlideContent[] = [
     { ...AreYouReadySlide({ wedding: selectedWedding }), musicIndex: 0 },
-    { ...IntroSlide({ wedding: selectedWedding }), musicIndex: 1 },
+    { ...IntroSlide({ wedding: selectedWedding, photos: emotionalTouchInsights.photos }), musicIndex: 1 },
     { ...GuestExperienceSlide({ guestInsights, formatDate }), musicIndex: 2 },
     { ...GiftsSupportSlide({ giftSupportInsights, formatCurrency }), musicIndex: 3 },
     { ...PlanningJourneySlide({ planningJourneyInsights, formatCurrency }), musicIndex: 4 },
     { ...MemoriesMomentsSlide({ emotionalTouchInsights }), musicIndex: 5 },
+    { ...MostFrequentPersonSlide({ emotionalTouchInsights }), musicIndex: 5 },
+    { ...WellWishesSlide({ emotionalTouchInsights }), musicIndex: 6 },
     {
       ...FinalSlide({
         onSave: handleSave,
@@ -271,7 +298,7 @@ export default function WeddingWrappedViewPage() {
       </div>
 
       {/* Content Overlay - FULLSCREEN WITH SCROLL */}
-      <div className="relative z-10 h-full overflow-x-hidden overflow-y-auto">
+      <div ref={scrollContainerRef} className="relative z-10 h-full overflow-x-hidden overflow-y-auto">
         <div className="flex min-h-screen items-center justify-center p-8 py-32">
           <AnimatePresence mode="wait">
             <motion.div

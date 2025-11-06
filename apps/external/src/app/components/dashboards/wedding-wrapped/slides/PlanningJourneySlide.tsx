@@ -49,9 +49,9 @@ function PlanningJourneySlideContent({
   };
 
   return (
-    <div className="space-y-6 max-w-4xl w-full">
+    <div className="space-y-6 max-w-[90vw] w-full">
         <motion.h2
-          className="text-6xl font-bold text-white mb-6"
+          className="text-8xl font-bold text-white mb-6"
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -67,14 +67,14 @@ function PlanningJourneySlideContent({
             transition={{ delay: 1.5 }}
             className="space-y-4"
           >
-            <p className="text-2xl text-white/80">
+            <h3 className="text-5xl text-white/80">
               <TypingText
                 text="Let's see... how long did this journey take?"
                 delay={1500}
                 speed={60}
                 onComplete={() => setTimeout(() => setShowDays(true), 800)}
               />
-            </p>
+            </h3>
 
             {showDays && (
               <motion.div
@@ -84,21 +84,21 @@ function PlanningJourneySlideContent({
                 transition={{ type: 'spring', bounce: 0.5 }}
               >
                 <div className="text-6xl font-bold text-white mb-2">
-                  {planningJourneyInsights.planningDays}
+                  {Math.abs(planningJourneyInsights.planningDays)}
                 </div>
                 <div className="text-xl text-white/90">Days of Planning</div>
               </motion.div>
             )}
 
             {showDays && (
-              <p className="text-2xl text-yellow-300 font-semibold text-center">
+              <h3 className="text-5xl text-yellow-300 font-semibold text-center">
                 <TypingText
                   text={getDaysComment()}
                   delay={500}
                   speed={50}
                   onComplete={() => setTimeout(() => setShowBudget(true), 1200)}
                 />
-              </p>
+              </h3>
             )}
           </motion.div>
 
@@ -109,21 +109,21 @@ function PlanningJourneySlideContent({
               animate={{ opacity: 1 }}
               className="space-y-4"
             >
-              <p className="text-3xl text-white/80 text-center">
+              <h3 className="text-6xl text-white/80 text-center">
                 <TypingText
                   text="Now for the real question... 💰"
                   delay={200}
                   speed={70}
                 />
-              </p>
-              <p className="text-3xl text-white font-bold text-center">
+              </h3>
+              <h3 className="text-6xl text-white font-bold text-center">
                 <TypingText
                   text="Did you break the bank?"
                   delay={2000}
                   speed={60}
                   onComplete={() => setTimeout(() => setShowBudgetReveal(true), 1000)}
                 />
-              </p>
+              </h3>
             </motion.div>
           )}
 
@@ -146,14 +146,14 @@ function PlanningJourneySlideContent({
                 <div className="text-xl text-white/90">Budget Used</div>
               </motion.div>
 
-              <p className="text-2xl text-cyan-300 font-semibold text-center">
+              <h3 className="text-5xl text-cyan-300 font-semibold text-center">
                 <TypingText
                   text={getBudgetComment()}
                   delay={800}
                   speed={50}
                   onComplete={() => setTimeout(() => setShowSpent(true), 1000)}
                 />
-              </p>
+              </h3>
             </motion.div>
           )}
 
@@ -170,10 +170,10 @@ function PlanningJourneySlideContent({
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                <p className="text-lg text-green-300 font-semibold mb-2">Total Spent</p>
-                <p className="text-3xl text-white font-bold">
+                <h3 className="text-lg text-green-300 font-semibold mb-2">Total Spent</h3>
+                <h3 className="text-3xl text-white font-bold">
                   {formatCurrency(planningJourneyInsights.totalSpent)}
-                </p>
+                </h3>
               </motion.div>
 
               <motion.div
@@ -183,10 +183,10 @@ function PlanningJourneySlideContent({
                 transition={{ delay: 0.4 }}
                 onAnimationComplete={() => setTimeout(() => setShowVendor(true), 800)}
               >
-                <p className="text-lg text-blue-300 font-semibold mb-2">Allocated Budget</p>
-                <p className="text-3xl text-white font-bold">
+                <h3 className="text-lg text-blue-300 font-semibold mb-2">Allocated Budget</h3>
+                <h3 className="text-3xl text-white font-bold">
                   {formatCurrency(planningJourneyInsights.allocatedBudget)}
-                </p>
+                </h3>
               </motion.div>
             </motion.div>
           )}
@@ -199,23 +199,23 @@ function PlanningJourneySlideContent({
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <p className="text-xl text-yellow-300 font-semibold mb-3">
+              <h3 className="text-4xl text-yellow-300 font-semibold mb-3">
                 <TypingText text="💰 Your Biggest Splurge?" delay={300} speed={60} />
-              </p>
-              <p className="text-3xl text-white pt-1">
+              </h3>
+              <h3 className="text-6xl text-white pt-1">
                 <TypingText
                   text={`${planningJourneyInsights.topVendorCategory} - ${formatCurrency(planningJourneyInsights.topVendorAmount || 0)}`}
                   delay={1500}
                   speed={50}
                 />
-              </p>
-              <p className="text-lg text-white/60 mt-3">
+              </h3>
+              <h3 className="text-3xl text-white/60 mt-3">
                 <TypingText
                   text="Worth every cent! 🌟"
                   delay={3500}
                   speed={60}
                 />
-              </p>
+              </h3>
             </motion.div>
           )}
         </div>
