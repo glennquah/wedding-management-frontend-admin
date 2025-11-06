@@ -26,7 +26,8 @@ function SummarySlideContent({ data, wedding, formatCurrency, formatDate }: Summ
   const [showMemoriesCard, setShowMemoriesCard] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
 
-  const { guestInsights, giftSupportInsights, planningJourneyInsights, emotionalTouchInsights } = data;
+  const { guestInsights, giftSupportInsights, planningJourneyInsights, emotionalTouchInsights } =
+    data;
 
   // Cascade the reveals with suspense
   useState(() => {
@@ -67,7 +68,6 @@ GIFTS & SUPPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 • Total Gift Value: ${formatCurrency(giftSupportInsights.totalGiftValue)}
 • Wishlist Completion: ${giftSupportInsights.wishlistCompletion.toFixed(0)}%
-${giftSupportInsights.mostWantedItem ? `• Most Wanted Item: ${giftSupportInsights.mostWantedItem} (${giftSupportInsights.mostWantedItemCount} reservations)` : ''}
 ${giftSupportInsights.topContributorName ? `• Top Contributor: ${giftSupportInsights.topContributorName} - ${formatCurrency(giftSupportInsights.topContribution || 0)}` : ''}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -153,7 +153,7 @@ MEMORIES & MOMENTS
 These moments will last forever in your hearts! ❤️
 
 Best wishes,
-Wedding Management Platform
+Team at Knotly
       `.trim();
 
       // Open default email client
@@ -170,11 +170,11 @@ Wedding Management Platform
   };
 
   return (
-    <div className="space-y-8 max-w-6xl">
+    <div className="max-w-6xl space-y-8">
       {/* Title with drum roll effect */}
       {showTitle && (
         <motion.h2
-          className="text-8xl font-bold text-white mb-8 text-center"
+          className="mb-8 text-center text-8xl font-bold text-white"
           initial={{ opacity: 0, scale: 0.5, y: -50 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 1, type: 'spring', bounce: 0.5 }}
@@ -185,7 +185,7 @@ Wedding Management Platform
 
       {showSubtitle && (
         <motion.p
-          className="text-4xl text-white/80 text-center mb-8"
+          className="mb-8 text-center text-4xl text-white/80"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
@@ -199,12 +199,12 @@ Wedding Management Platform
         {/* Guest Experience */}
         {showGuestCard && (
           <motion.div
-            className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-lg rounded-3xl p-8 border-2 border-white/30"
+            className="rounded-3xl border-2 border-white/30 bg-gradient-to-br from-blue-500/20 to-purple-500/20 p-8 backdrop-blur-lg"
             initial={{ opacity: 0, scale: 0.3, rotateY: -90 }}
             animate={{ opacity: 1, scale: 1, rotateY: 0 }}
             transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
           >
-            <h3 className="text-3xl font-bold text-blue-300 mb-4">👥 Guest Experience</h3>
+            <h3 className="mb-4 text-3xl font-bold text-blue-300">👥 Guest Experience</h3>
             <div className="space-y-3 text-white">
               <motion.p
                 className="text-xl"
@@ -232,7 +232,7 @@ Wedding Management Platform
               </motion.p>
               {guestInsights.firstGuestName && (
                 <motion.p
-                  className="text-lg text-white/70 mt-3"
+                  className="mt-3 text-lg text-white/70"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.9 }}
@@ -247,12 +247,12 @@ Wedding Management Platform
         {/* Gifts & Support */}
         {showGiftsCard && (
           <motion.div
-            className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 backdrop-blur-lg rounded-3xl p-8 border-2 border-white/30"
+            className="rounded-3xl border-2 border-white/30 bg-gradient-to-br from-pink-500/20 to-rose-500/20 p-8 backdrop-blur-lg"
             initial={{ opacity: 0, scale: 0.3, rotateY: 90 }}
             animate={{ opacity: 1, scale: 1, rotateY: 0 }}
             transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
           >
-            <h3 className="text-3xl font-bold text-pink-300 mb-4">🎁 Gifts & Support</h3>
+            <h3 className="mb-4 text-3xl font-bold text-pink-300">🎁 Gifts & Support</h3>
             <div className="space-y-3 text-white">
               <motion.p
                 className="text-xl"
@@ -260,7 +260,10 @@ Wedding Management Platform
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                Total: <span className="font-semibold">{formatCurrency(giftSupportInsights.totalGiftValue)}</span>
+                Total:{' '}
+                <span className="font-semibold">
+                  {formatCurrency(giftSupportInsights.totalGiftValue)}
+                </span>
               </motion.p>
               <motion.p
                 className="text-xl"
@@ -268,18 +271,11 @@ Wedding Management Platform
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 }}
               >
-                Wishlist: <span className="font-semibold">{giftSupportInsights.wishlistCompletion.toFixed(0)}%</span>
+                Wishlist:{' '}
+                <span className="font-semibold">
+                  {giftSupportInsights.wishlistCompletion.toFixed(0)}%
+                </span>
               </motion.p>
-              {giftSupportInsights.mostWantedItem && (
-                <motion.p
-                  className="text-lg text-white/70 mt-3"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.7 }}
-                >
-                  💖 {giftSupportInsights.mostWantedItem} was most wanted
-                </motion.p>
-              )}
             </div>
           </motion.div>
         )}
@@ -287,12 +283,12 @@ Wedding Management Platform
         {/* Planning Journey */}
         {showPlanningCard && (
           <motion.div
-            className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 backdrop-blur-lg rounded-3xl p-8 border-2 border-white/30"
+            className="rounded-3xl border-2 border-white/30 bg-gradient-to-br from-amber-500/20 to-orange-500/20 p-8 backdrop-blur-lg"
             initial={{ opacity: 0, scale: 0.3, rotateY: -90 }}
             animate={{ opacity: 1, scale: 1, rotateY: 0 }}
             transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
           >
-            <h3 className="text-3xl font-bold text-amber-300 mb-4">📅 Planning Journey</h3>
+            <h3 className="mb-4 text-3xl font-bold text-amber-300">📅 Planning Journey</h3>
             <div className="space-y-3 text-white">
               <motion.p
                 className="text-xl"
@@ -300,7 +296,8 @@ Wedding Management Platform
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <span className="font-semibold">{planningJourneyInsights.planningDays}</span> days of planning
+                <span className="font-semibold">{planningJourneyInsights.planningDays}</span> days
+                of planning
               </motion.p>
               <motion.p
                 className="text-xl"
@@ -308,7 +305,10 @@ Wedding Management Platform
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 }}
               >
-                Spent: <span className="font-semibold">{formatCurrency(planningJourneyInsights.totalSpent)}</span>
+                Spent:{' '}
+                <span className="font-semibold">
+                  {formatCurrency(planningJourneyInsights.totalSpent)}
+                </span>
               </motion.p>
               <motion.p
                 className="text-xl"
@@ -316,7 +316,10 @@ Wedding Management Platform
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.7 }}
               >
-                Budget used: <span className="font-semibold">{planningJourneyInsights.budgetUtilization.toFixed(0)}%</span>
+                Budget used:{' '}
+                <span className="font-semibold">
+                  {planningJourneyInsights.budgetUtilization.toFixed(0)}%
+                </span>
               </motion.p>
             </div>
           </motion.div>
@@ -325,12 +328,12 @@ Wedding Management Platform
         {/* Memories & Moments */}
         {showMemoriesCard && (
           <motion.div
-            className="bg-gradient-to-br from-green-500/20 to-teal-500/20 backdrop-blur-lg rounded-3xl p-8 border-2 border-white/30"
+            className="rounded-3xl border-2 border-white/30 bg-gradient-to-br from-green-500/20 to-teal-500/20 p-8 backdrop-blur-lg"
             initial={{ opacity: 0, scale: 0.3, rotateY: 90 }}
             animate={{ opacity: 1, scale: 1, rotateY: 0 }}
             transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
           >
-            <h3 className="text-3xl font-bold text-green-300 mb-4">📸 Memories & Moments</h3>
+            <h3 className="mb-4 text-3xl font-bold text-green-300">📸 Memories & Moments</h3>
             <div className="space-y-3 text-white">
               <motion.p
                 className="text-xl"
@@ -346,7 +349,8 @@ Wedding Management Platform
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 }}
               >
-                <span className="font-semibold">{emotionalTouchInsights.totalWellWishes}</span> well wishes
+                <span className="font-semibold">{emotionalTouchInsights.totalWellWishes}</span> well
+                wishes
               </motion.p>
               <motion.p
                 className="text-xl"
@@ -354,7 +358,8 @@ Wedding Management Platform
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.7 }}
               >
-                <span className="font-semibold">{emotionalTouchInsights.totalFacesDetected}</span> faces detected
+                <span className="font-semibold">{emotionalTouchInsights.totalFacesDetected}</span>{' '}
+                faces detected
               </motion.p>
             </div>
           </motion.div>
@@ -364,7 +369,7 @@ Wedding Management Platform
       {/* Action Buttons */}
       {showButtons && (
         <motion.div
-          className="flex flex-row gap-6 justify-center items-center pt-6"
+          className="flex flex-row items-center justify-center gap-6 pt-6"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -373,16 +378,16 @@ Wedding Management Platform
             onClick={handleDownload}
             disabled={isDownloading}
             size="lg"
-            className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xl px-10 py-6 rounded-full shadow-2xl"
+            className="rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-10 py-6 text-xl text-white shadow-2xl hover:from-cyan-600 hover:to-blue-700"
           >
             {isDownloading ? (
               <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 Downloading...
               </>
             ) : (
               <>
-                <Download className="w-5 h-5 mr-2" />
+                <Download className="mr-2 h-5 w-5" />
                 Download Summary
               </>
             )}
@@ -392,16 +397,16 @@ Wedding Management Platform
             onClick={handleSendEmail}
             disabled={isSendingEmail}
             size="lg"
-            className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white text-xl px-10 py-6 rounded-full shadow-2xl"
+            className="rounded-full bg-gradient-to-r from-purple-500 to-pink-600 px-10 py-6 text-xl text-white shadow-2xl hover:from-purple-600 hover:to-pink-700"
           >
             {isSendingEmail ? (
               <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 Opening...
               </>
             ) : (
               <>
-                <Mail className="w-5 h-5 mr-2" />
+                <Mail className="mr-2 h-5 w-5" />
                 Email Summary
               </>
             )}
@@ -415,6 +420,13 @@ Wedding Management Platform
 export function SummarySlide({ data, wedding, formatCurrency, formatDate }: SummarySlideProps) {
   return {
     background: SparklingStars,
-    content: <SummarySlideContent data={data} wedding={wedding} formatCurrency={formatCurrency} formatDate={formatDate} />,
+    content: (
+      <SummarySlideContent
+        data={data}
+        wedding={wedding}
+        formatCurrency={formatCurrency}
+        formatDate={formatDate}
+      />
+    ),
   };
 }

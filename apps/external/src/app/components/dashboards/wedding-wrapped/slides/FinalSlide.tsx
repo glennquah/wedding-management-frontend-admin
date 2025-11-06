@@ -6,8 +6,9 @@ import { WeddingResponseDto, WeddingWrappedResponseDto } from '@shared/api';
 import { Button } from '@shared/components/ui/button';
 import { TypingText } from '../TypingText';
 import { FireworksParticles } from '../ParticleEffects';
-import { Download, Mail, Loader2, Share2 } from 'lucide-react';
+import { Download, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 interface FinalSlideProps {
   onSave: () => void;
@@ -20,7 +21,7 @@ interface FinalSlideProps {
 
 function FinalSlideContent({ onSave, isSaving, data, wedding, formatCurrency, formatDate }: FinalSlideProps) {
   const [isDownloading, setIsDownloading] = useState(false);
-  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(false);
 
   const handleDownload = async () => {
     if (!data || !wedding || !formatCurrency || !formatDate) return;
@@ -98,63 +99,6 @@ Made with ❤️ by Wedding Management Platform
     }
   };
 
-  const handleSendEmail = async () => {
-    if (!data || !wedding || !formatCurrency || !formatDate) return;
-
-    setIsSendingEmail(true);
-    try {
-      const { guestInsights, giftSupportInsights, planningJourneyInsights, emotionalTouchInsights } = data;
-
-      const emailSubject = `Wedding Wrapped Summary - ${wedding.name}`;
-      const emailBody = `
-Hi there!
-
-Here's your Wedding Wrapped Summary for ${wedding.name}:
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-GUEST EXPERIENCE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Total Invited: ${guestInsights.totalInvited}
-• Total Confirmed: ${guestInsights.totalConfirmed}
-• Total Attended: ${guestInsights.totalAttended}
-${guestInsights.firstGuestName ? `• First to Arrive: ${guestInsights.firstGuestName}` : ''}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-GIFTS & SUPPORT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Total Gift Value: ${formatCurrency(giftSupportInsights.totalGiftValue)}
-• Wishlist Completion: ${giftSupportInsights.wishlistCompletion.toFixed(0)}%
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-PLANNING JOURNEY
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Planning Duration: ${planningJourneyInsights.planningDays} days
-• Total Spent: ${formatCurrency(planningJourneyInsights.totalSpent)}
-• Budget Utilization: ${planningJourneyInsights.budgetUtilization.toFixed(0)}%
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-MEMORIES & MOMENTS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Photos Uploaded: ${emotionalTouchInsights.totalPhotos}
-• Well Wishes: ${emotionalTouchInsights.totalWellWishes}
-
-These moments will last forever in your hearts! ❤️
-
-Best wishes,
-Wedding Management Platform
-      `.trim();
-
-      const mailtoLink = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-      window.location.href = mailtoLink;
-
-      toast.success('Email client opened! Compose your message.');
-    } catch (error) {
-      console.error('Error opening email:', error);
-      toast.error('Failed to open email client. Please try again.');
-    } finally {
-      setIsSendingEmail(false);
-    }
-  };
 
   return (
     <div className="text-center space-y-10 max-w-[90vw]">
@@ -200,7 +144,7 @@ Wedding Management Platform
           </Button>
         </div>
 
-        {/* Share Options */}
+        {/* Download Summary */}
         {data && wedding && formatCurrency && formatDate && (
           <motion.div
             className="pt-4"
@@ -208,53 +152,82 @@ Wedding Management Platform
             animate={{ opacity: 1 }}
             transition={{ delay: 2.0, duration: 0.8 }}
           >
-            <h3 className="text-2xl text-white/70 mb-4 flex items-center justify-center gap-2">
-              <Share2 className="w-5 h-5" />
-              Share your memories
-            </h3>
-            <div className="flex flex-row gap-4 justify-center">
-              <Button
-                onClick={handleDownload}
-                disabled={isDownloading}
-                size="lg"
-                variant="outline"
-                className="bg-white/10 hover:bg-white/20 text-white border-white/30 text-lg px-8 py-5 rounded-full backdrop-blur-lg"
-              >
-                {isDownloading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Downloading...
-                  </>
-                ) : (
-                  <>
-                    <Download className="w-5 h-5 mr-2" />
-                    Download Summary
-                  </>
-                )}
-              </Button>
-
-              <Button
-                onClick={handleSendEmail}
-                disabled={isSendingEmail}
-                size="lg"
-                variant="outline"
-                className="bg-white/10 hover:bg-white/20 text-white border-white/30 text-lg px-8 py-5 rounded-full backdrop-blur-lg"
-              >
-                {isSendingEmail ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Opening...
-                  </>
-                ) : (
-                  <>
-                    <Mail className="w-5 h-5 mr-2" />
-                    Email Summary
-                  </>
-                )}
-              </Button>
-            </div>
+            <Button
+              onClick={handleDownload}
+              disabled={isDownloading}
+              size="lg"
+              variant="outline"
+              className="bg-white/10 hover:bg-white/20 text-white border-white/30 text-lg px-8 py-5 rounded-full backdrop-blur-lg"
+            >
+              {isDownloading ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Downloading...
+                </>
+              ) : (
+                <>
+                  <Download className="w-5 h-5 mr-2" />
+                  Download Summary
+                </>
+              )}
+            </Button>
           </motion.div>
         )}
+      </motion.div>
+
+      {/* From the Creators Section */}
+      <motion.div
+        className="pt-12 space-y-6"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 2.5, duration: 0.8 }}
+      >
+        <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border-2 border-white/20">
+          <h3 className="text-4xl font-bold text-white mb-6">
+            <TypingText text="From the creators of Knotly 💝" delay={500} speed={80} />
+          </h3>
+          <h3 className="text-2xl text-white/90 leading-relaxed mb-6">
+            <TypingText
+              text="Thank you for using Knotly to help you with your journey and to make your special day unforgettable. We hope that everything went well on your end! We are just 6 broke students from NUS who want to do well for this module and to earn a living. If you think this benefited you, do consider tipping us! 🙏"
+              delay={3000}
+              speed={30}
+            />
+          </h3>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 13.0, duration: 0.8 }}
+          >
+            <Button
+              onClick={() => setShowQRCode(!showQRCode)}
+              size="lg"
+              className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white text-xl px-10 py-5 rounded-full shadow-2xl font-bold"
+            >
+              ✨ Get Good Karma ✨
+            </Button>
+          </motion.div>
+
+          {/* QR Code Modal */}
+          {showQRCode && (
+            <motion.div
+              className="mt-6 bg-white rounded-2xl p-6 inline-block"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: 'spring', bounce: 0.4 }}
+            >
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">Scan to Support Us!</h3>
+              <div className="relative w-64 h-64 rounded-xl overflow-hidden">
+                <Image
+                  src="/paylah_qr.jpeg"
+                  alt="PayLah QR Code"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <h3 className="text-lg text-gray-600 mt-4">Every little bit helps! 🙏</h3>
+            </motion.div>
+          )}
+        </div>
       </motion.div>
     </div>
   );

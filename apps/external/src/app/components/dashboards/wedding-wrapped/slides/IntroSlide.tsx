@@ -26,24 +26,12 @@ function IntroSlideContent({ wedding, photos = [] }: IntroSlideProps) {
     if (!showPhotos || photos.length === 0) return;
 
     let currentIndex = 0;
-    let delay = 1000; // Start slow
+    const delay = 300; // Consistent speed throughout
 
     const showNextPhoto = () => {
       if (currentIndex < photos.length) {
         setVisiblePhotos((prev) => [...prev, currentIndex]);
         currentIndex++;
-
-        // Speed up progressively
-        if (currentIndex < 3) {
-          delay = 1000; // First few photos slow
-        } else if (currentIndex < 8) {
-          delay = 500; // Medium speed
-        } else if (currentIndex < 15) {
-          delay = 200; // Getting faster
-        } else {
-          delay = 50; // Very fast to fill the screen
-        }
-
         setTimeout(showNextPhoto, delay);
       }
     };
@@ -53,14 +41,22 @@ function IntroSlideContent({ wedding, photos = [] }: IntroSlideProps) {
     return () => clearTimeout(startTimeout);
   }, [showPhotos, photos]);
 
+  // Trigger photos if no location
+  useEffect(() => {
+    if (showLocation && (!wedding || !wedding.location)) {
+      const timeout = setTimeout(() => setShowPhotos(true), 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [showLocation, wedding]);
+
   return (
-    <div className="max-w-[90vw] space-y-8 text-center relative z-10">
+    <div className="relative z-10 max-w-[90vw] space-y-8 text-center">
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ duration: 0.8, type: 'spring' }}
       >
-        <h1 className="mb-4 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-[180px] font-bold text-transparent leading-tight">
+        <h1 className="mb-4 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-[180px] leading-tight font-bold text-transparent">
           <TypingText
             text="Wedding Wrapped"
             delay={500}
@@ -78,7 +74,7 @@ function IntroSlideContent({ wedding, photos = [] }: IntroSlideProps) {
             transition={{ duration: 0.8 }}
             className="space-y-8"
           >
-            <h3 className="text-[120px] font-bold text-white leading-tight">
+            <h3 className="text-[120px] leading-tight font-bold text-white">
               <TypingText
                 text={`On ${new Date(wedding.date).toLocaleDateString('en-US', {
                   month: 'long',
@@ -112,7 +108,7 @@ function IntroSlideContent({ wedding, photos = [] }: IntroSlideProps) {
                   </motion.div>
                 )}
                 {showTiedKnot && (
-                  <h3 className="text-[120px] font-semibold text-pink-300 leading-tight">
+                  <h3 className="text-[120px] leading-tight font-semibold text-pink-300">
                     <TypingText
                       text="tied the knot with"
                       delay={200}
@@ -155,7 +151,7 @@ function IntroSlideContent({ wedding, photos = [] }: IntroSlideProps) {
                   </motion.div>
                 )}
                 {showTiedKnot && (
-                  <h3 className="text-[100px] font-semibold text-pink-300 leading-tight">
+                  <h3 className="text-[100px] leading-tight font-semibold text-pink-300">
                     <TypingText
                       text="celebrated their special day"
                       delay={200}
@@ -178,7 +174,7 @@ function IntroSlideContent({ wedding, photos = [] }: IntroSlideProps) {
               <h3 className="mb-4 text-9xl text-white/80">
                 <TypingText text="📍 Celebrated at" delay={300} speed={80} />
               </h3>
-              <h3 className="text-[120px] font-bold text-white leading-tight">
+              <h3 className="text-[120px] leading-tight font-bold text-white">
                 <TypingText
                   text={wedding.location}
                   delay={1500}
@@ -187,13 +183,6 @@ function IntroSlideContent({ wedding, photos = [] }: IntroSlideProps) {
                 />
               </h3>
             </motion.div>
-          )}
-
-          {/* Trigger photos even if no location */}
-          {!wedding.location && showLocation && (
-            <div style={{ display: 'none' }}>
-              {setTimeout(() => setShowPhotos(true), 2000)}
-            </div>
           )}
         </>
       )}
@@ -209,55 +198,46 @@ function IntroSlideContent({ wedding, photos = [] }: IntroSlideProps) {
         </motion.h3>
       )}
 
-      {/* Photo Overlay Animation */}
+      {/* Photo Grid Overlay Animation */}
       {showPhotos && photos.length > 0 && (
-        <div className="fixed inset-0 z-50 pointer-events-none">
-          <AnimatePresence>
-            {visiblePhotos.map((index) => {
-              const photo = photos[index];
-              if (!photo) return null;
+        <motion.div
+          className="pointer-events-none fixed inset-0 z-50 bg-black/50 p-8 backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="grid h-full w-full grid-cols-4 gap-4 md:grid-cols-5 lg:grid-cols-6">
+            <AnimatePresence>
+              {visiblePhotos.map((index) => {
+                const photo = photos[index];
+                if (!photo) return null;
 
-              // Random position and rotation for each photo
-              const randomX = Math.random() * 80 - 40; // -40% to 40%
-              const randomY = Math.random() * 80 - 40;
-              const randomRotate = Math.random() * 40 - 20; // -20deg to 20deg
-              const size = Math.random() * 200 + 150; // 150px to 350px
-
-              return (
-                <motion.div
-                  key={index}
-                  className="absolute"
-                  style={{
-                    left: `${50 + randomX}%`,
-                    top: `${50 + randomY}%`,
-                    width: size,
-                    height: size,
-                  }}
-                  initial={{ opacity: 0, scale: 0, rotate: 0 }}
-                  animate={{
-                    opacity: 0.8,
-                    scale: 1,
-                    rotate: randomRotate,
-                  }}
-                  transition={{
-                    duration: 0.6,
-                    type: 'spring',
-                    bounce: 0.4,
-                  }}
-                >
-                  <div className="relative w-full h-full rounded-xl overflow-hidden border-4 border-white shadow-2xl">
-                    <Image
-                      src={photo.url}
-                      alt={`Wedding photo ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        </div>
+                return (
+                  <motion.div
+                    key={index}
+                    className="relative aspect-square w-full"
+                    initial={{ opacity: 0, scale: 0, rotate: -10 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    transition={{
+                      duration: 0.5,
+                      type: 'spring',
+                      bounce: 0.4,
+                    }}
+                  >
+                    <div className="relative h-full w-full overflow-hidden rounded-xl border-4 border-white shadow-2xl">
+                      <Image
+                        src={photo.url}
+                        alt={`Wedding photo ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+        </motion.div>
       )}
     </div>
   );

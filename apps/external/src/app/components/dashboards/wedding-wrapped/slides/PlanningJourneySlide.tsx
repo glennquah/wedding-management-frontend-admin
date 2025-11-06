@@ -22,12 +22,18 @@ function PlanningJourneySlideContent({
   const [showVendor, setShowVendor] = useState(false);
 
   const getDaysComment = () => {
-    if (planningJourneyInsights.planningDays > 365) {
-      return 'Whoa! That\'s over a year of planning! 😮 Talk about dedication...';
-    } else if (planningJourneyInsights.planningDays > 180) {
+    const days = Math.abs(planningJourneyInsights.planningDays);
+
+    if (days > 730) {
+      return 'Over 2 years of planning?! 😱 Super kiasu but all worth it! 💯';
+    } else if (days > 365) {
+      return 'More than a year! 🗓️ Super kiasu but all worth it! 💪';
+    } else if (days > 180) {
       return 'Half a year of planning? You really took your time! 🗓️';
-    } else if (planningJourneyInsights.planningDays > 90) {
+    } else if (days > 100) {
       return 'A solid few months! Well-planned and well-paced 👌';
+    } else if (days > 60) {
+      return 'Just the right amount of time! Balanced approach 🎯';
     } else {
       return 'Speed run champion! 🏃‍♀️💨 Quick but efficient!';
     }

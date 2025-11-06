@@ -17,7 +17,6 @@ import { GuestExperienceSlide } from '@/app/components/dashboards/wedding-wrappe
 import { GiftsSupportSlide } from '@/app/components/dashboards/wedding-wrapped/slides/GiftsSupportSlide';
 import { PlanningJourneySlide } from '@/app/components/dashboards/wedding-wrapped/slides/PlanningJourneySlide';
 import { MemoriesMomentsSlide } from '@/app/components/dashboards/wedding-wrapped/slides/MemoriesMomentsSlide';
-import { MostFrequentPersonSlide } from '@/app/components/dashboards/wedding-wrapped/slides/MostFrequentPersonSlide';
 import { WellWishesSlide } from '@/app/components/dashboards/wedding-wrapped/slides/WellWishesSlide';
 import { FinalSlide } from '@/app/components/dashboards/wedding-wrapped/slides/FinalSlide';
 
@@ -36,16 +35,16 @@ const audioOptions = [
     url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1762106183/TRIMMED_ennzu7.m4a',
   },
   {
+    name: '24K',
+    url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1762106463/24K_pjbqiv.m4a',
+  },
+  {
     name: 'Love i need',
     url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1762106383/LOVE_I_NEED_byaho0.m4a',
   },
   {
     name: 'DANCE',
     url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1762106594/DANCE_mz2tfq.m4a',
-  },
-  {
-    name: 'SUGAR',
-    url: 'https://res.cloudinary.com/dnyxxyolp/video/upload/v1762106687/sugar_wuc7u9.m4a',
   },
   {
     name: 'SUGAR',
@@ -130,7 +129,7 @@ export default function WeddingWrappedViewPage() {
           // If not at bottom, scroll down smoothly
           if (currentScroll < maxScroll) {
             scrollContainer.scrollTo({
-              top: currentScroll + 2,
+              top: currentScroll + 5,
               behavior: 'smooth',
             });
           }
@@ -178,11 +177,9 @@ export default function WeddingWrappedViewPage() {
         audio.volume = 1;
         audio.muted = isMuted;
 
-        audio
-          .play()
-          .catch((error: unknown) => {
-            console.log('Auto-play prevented:', error);
-          });
+        audio.play().catch((error: unknown) => {
+          console.log('Auto-play prevented:', error);
+        });
       }
     }
   }, [currentSlide, currentMusicIndex, isMuted, data]);
@@ -248,12 +245,14 @@ export default function WeddingWrappedViewPage() {
 
   const slides: SlideContent[] = [
     { ...AreYouReadySlide({ wedding: selectedWedding }), musicIndex: 0 },
-    { ...IntroSlide({ wedding: selectedWedding, photos: emotionalTouchInsights.photos }), musicIndex: 1 },
+    {
+      ...IntroSlide({ wedding: selectedWedding, photos: emotionalTouchInsights.photos }),
+      musicIndex: 1,
+    },
     { ...GuestExperienceSlide({ guestInsights, formatDate }), musicIndex: 2 },
     { ...GiftsSupportSlide({ giftSupportInsights, formatCurrency }), musicIndex: 3 },
     { ...PlanningJourneySlide({ planningJourneyInsights, formatCurrency }), musicIndex: 4 },
     { ...MemoriesMomentsSlide({ emotionalTouchInsights }), musicIndex: 5 },
-    { ...MostFrequentPersonSlide({ emotionalTouchInsights }), musicIndex: 5 },
     { ...WellWishesSlide({ emotionalTouchInsights }), musicIndex: 6 },
     {
       ...FinalSlide({
@@ -298,7 +297,10 @@ export default function WeddingWrappedViewPage() {
       </div>
 
       {/* Content Overlay - FULLSCREEN WITH SCROLL */}
-      <div ref={scrollContainerRef} className="relative z-10 h-full overflow-x-hidden overflow-y-auto">
+      <div
+        ref={scrollContainerRef}
+        className="relative z-10 h-full overflow-x-hidden overflow-y-auto"
+      >
         <div className="flex min-h-screen items-center justify-center p-8 py-32">
           <AnimatePresence mode="wait">
             <motion.div
