@@ -9,6 +9,7 @@ import { FireworksParticles } from '../ParticleEffects';
 import { Download, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import qrCode from '../../../../../../public/images/paylah_qr.jpeg';
 
 interface FinalSlideProps {
   onSave: () => void;
@@ -19,16 +20,29 @@ interface FinalSlideProps {
   formatDate?: (dateString: string | null) => string;
 }
 
-function FinalSlideContent({ onSave, isSaving, data, wedding, formatCurrency, formatDate }: FinalSlideProps) {
+function FinalSlideContent({
+  onSave,
+  isSaving,
+  data,
+  wedding,
+  formatCurrency,
+  formatDate,
+}: FinalSlideProps) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
+  const [showCreatorsSection, setShowCreatorsSection] = useState(false);
 
   const handleDownload = async () => {
     if (!data || !wedding || !formatCurrency || !formatDate) return;
 
     setIsDownloading(true);
     try {
-      const { guestInsights, giftSupportInsights, planningJourneyInsights, emotionalTouchInsights } = data;
+      const {
+        guestInsights,
+        giftSupportInsights,
+        planningJourneyInsights,
+        emotionalTouchInsights,
+      } = data;
 
       const summary = `
 ╔════════════════════════════════════════════════════════════════╗
@@ -54,7 +68,6 @@ GIFTS & SUPPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 • Total Gift Value: ${formatCurrency(giftSupportInsights.totalGiftValue)}
 • Wishlist Completion: ${giftSupportInsights.wishlistCompletion.toFixed(0)}%
-${giftSupportInsights.mostWantedItem ? `• Most Wanted Item: ${giftSupportInsights.mostWantedItem} (${giftSupportInsights.mostWantedItemCount} reservations)` : ''}
 ${giftSupportInsights.topContributorName ? `• Top Contributor: ${giftSupportInsights.topContributorName} - ${formatCurrency(giftSupportInsights.topContribution || 0)}` : ''}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -99,18 +112,17 @@ Made with ❤️ by Wedding Management Platform
     }
   };
 
-
   return (
-    <div className="text-center space-y-10 max-w-[90vw]">
+    <div className="max-w-[90vw] space-y-10 text-center">
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ duration: 0.8, type: 'spring' }}
       >
-        <h1 className="text-8xl font-bold text-white mb-6">Thank You for Celebrating</h1>
+        <h1 className="mb-6 text-8xl font-bold text-white">Thank You for Celebrating</h1>
       </motion.div>
       <motion.h3
-        className="text-7xl text-white/90 mb-10"
+        className="mb-10 text-7xl text-white/90"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8, duration: 1 }}
@@ -131,11 +143,11 @@ Made with ❤️ by Wedding Management Platform
             onClick={onSave}
             disabled={isSaving}
             size="lg"
-            className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white text-2xl px-12 py-6 rounded-full shadow-2xl"
+            className="rounded-full bg-gradient-to-r from-pink-500 to-purple-600 px-12 py-6 text-2xl text-white shadow-2xl hover:from-pink-600 hover:to-purple-700"
           >
             {isSaving ? (
               <>
-                <Loader2 className="w-6 h-6 mr-2 animate-spin" />
+                <Loader2 className="mr-2 h-6 w-6 animate-spin" />
                 Saving...
               </>
             ) : (
@@ -157,16 +169,16 @@ Made with ❤️ by Wedding Management Platform
               disabled={isDownloading}
               size="lg"
               variant="outline"
-              className="bg-white/10 hover:bg-white/20 text-white border-white/30 text-lg px-8 py-5 rounded-full backdrop-blur-lg"
+              className="rounded-full border-white/30 bg-white/10 px-8 py-5 text-lg text-white backdrop-blur-lg hover:bg-white/20"
             >
               {isDownloading ? (
                 <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Downloading...
                 </>
               ) : (
                 <>
-                  <Download className="w-5 h-5 mr-2" />
+                  <Download className="mr-2 h-5 w-5" />
                   Download Summary
                 </>
               )}
@@ -177,55 +189,55 @@ Made with ❤️ by Wedding Management Platform
 
       {/* From the Creators Section */}
       <motion.div
-        className="pt-12 space-y-6"
+        className="space-y-6 pt-12"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 2.5, duration: 0.8 }}
+        transition={{ delay: 4.0, duration: 0.8 }}
+        onAnimationComplete={() => setShowCreatorsSection(true)}
       >
-        <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border-2 border-white/20">
-          <h3 className="text-4xl font-bold text-white mb-6">
-            <TypingText text="From the creators of Knotly 💝" delay={500} speed={80} />
-          </h3>
-          <h3 className="text-2xl text-white/90 leading-relaxed mb-6">
-            <TypingText
-              text="Thank you for using Knotly to help you with your journey and to make your special day unforgettable. We hope that everything went well on your end! We are just 6 broke students from NUS who want to do well for this module and to earn a living. If you think this benefited you, do consider tipping us! 🙏"
-              delay={3000}
-              speed={30}
-            />
-          </h3>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 13.0, duration: 0.8 }}
-          >
-            <Button
-              onClick={() => setShowQRCode(!showQRCode)}
-              size="lg"
-              className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white text-xl px-10 py-5 rounded-full shadow-2xl font-bold"
-            >
-              ✨ Get Good Karma ✨
-            </Button>
-          </motion.div>
-
-          {/* QR Code Modal */}
-          {showQRCode && (
-            <motion.div
-              className="mt-6 bg-white rounded-2xl p-6 inline-block"
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: 'spring', bounce: 0.4 }}
-            >
-              <h3 className="text-2xl font-bold text-gray-800 mb-4">Scan to Support Us!</h3>
-              <div className="relative w-64 h-64 rounded-xl overflow-hidden">
-                <Image
-                  src="/paylah_qr.jpeg"
-                  alt="PayLah QR Code"
-                  fill
-                  className="object-contain"
+        <div className="rounded-3xl border-2 border-white/20 bg-white/10 p-8 backdrop-blur-lg">
+          {showCreatorsSection && (
+            <>
+              <h3 className="mb-6 text-4xl font-bold text-white">
+                <TypingText text="From the creators of Knotly 💝" delay={500} speed={60} />
+              </h3>
+              <h3 className="mb-6 text-2xl leading-relaxed text-white/90">
+                <TypingText
+                  text="Thank you for using Knotly to help you with your journey and to make your special day unforgettable. We hope that everything went well on your end! We are just 6 broke students from NUS who want to do well for this module and to earn a living. If you think this benefited you, do consider helping us! 🙏"
+                  delay={3000}
+                  speed={50}
                 />
-              </div>
-              <h3 className="text-lg text-gray-600 mt-4">Every little bit helps! 🙏</h3>
-            </motion.div>
+              </h3>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 17.0, duration: 0.8 }}
+              >
+                <Button
+                  onClick={() => setShowQRCode(!showQRCode)}
+                  size="lg"
+                  className="rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 px-10 py-5 text-xl font-bold text-white shadow-2xl hover:from-yellow-500 hover:to-orange-600"
+                >
+                  ✨ Get Good Karma ✨
+                </Button>
+              </motion.div>
+
+              {/* QR Code Modal */}
+              {showQRCode && (
+                <motion.div
+                  className="mt-6 inline-block rounded-2xl bg-white p-6"
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: 'spring', bounce: 0.4 }}
+                >
+                  <h3 className="mb-4 text-2xl font-bold text-gray-800">Scan to Support Us!</h3>
+                  <div className="relative mx-auto h-64 w-64 overflow-hidden rounded-xl">
+                    <Image src={qrCode} alt="PayLah QR Code" fill className="object-contain" />
+                  </div>
+                  <h3 className="mt-4 text-lg text-gray-600">Every little bit helps! 🙏</h3>
+                </motion.div>
+              )}
+            </>
           )}
         </div>
       </motion.div>
@@ -233,9 +245,25 @@ Made with ❤️ by Wedding Management Platform
   );
 }
 
-export function FinalSlide({ onSave, isSaving, data, wedding, formatCurrency, formatDate }: FinalSlideProps) {
+export function FinalSlide({
+  onSave,
+  isSaving,
+  data,
+  wedding,
+  formatCurrency,
+  formatDate,
+}: FinalSlideProps) {
   return {
     background: FireworksParticles,
-    content: <FinalSlideContent onSave={onSave} isSaving={isSaving} data={data} wedding={wedding} formatCurrency={formatCurrency} formatDate={formatDate} />,
+    content: (
+      <FinalSlideContent
+        onSave={onSave}
+        isSaving={isSaving}
+        data={data}
+        wedding={wedding}
+        formatCurrency={formatCurrency}
+        formatDate={formatDate}
+      />
+    ),
   };
 }
