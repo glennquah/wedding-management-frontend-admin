@@ -79,7 +79,7 @@ export function CollaboratorCardInformation({
                 onUpload={async (url) => {
                   try {
                     handleInputChange('collaboratorCardPhotoURL', url);
-                  } catch (err) {
+                  } catch {
                     toast.error('Failed to add photo');
                   }
                 }}

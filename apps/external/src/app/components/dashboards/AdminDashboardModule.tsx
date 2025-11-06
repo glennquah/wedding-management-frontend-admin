@@ -21,9 +21,15 @@ import {
   SpendingResponseDto,
 } from '@shared/api';
 import { PageHeader } from '@shared/components';
+import { Button } from '@shared/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/ui/card';
 import { useSession } from 'next-auth/react';
+import { Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 const AdminDashboardModule = () => {
+  const router = useRouter();
   const { data: session } = useSession();
   const selectedWeddingId = useWeddingStore((state) => state.selectedWeddingId);
   const weddings = useWeddingStore((state) => state.weddings);
@@ -43,6 +49,10 @@ const AdminDashboardModule = () => {
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
   const [isLoadingChecklist, setIsLoadingChecklist] = useState(false);
+
+  // Wedding Wrapped state
+  const [isGeneratingWrapped, setIsGeneratingWrapped] = useState(false);
+  const [hasExistingWrapped, setHasExistingWrapped] = useState(false);
 
   // Calculate days until wedding
   const daysUntilWedding = selectedWedding
@@ -121,7 +131,7 @@ const AdminDashboardModule = () => {
     fetchOrders();
   }, [selectedWeddingId]);
 
-  // Fetch checklist data (microsite, seating)
+  // Fetch checklist data (microsite, seating, wedding wrapped)
   useEffect(() => {
     if (!selectedWeddingId) return;
 
@@ -149,6 +159,15 @@ const AdminDashboardModule = () => {
           // Seating doesn't exist
           setHasSeating(false);
         }
+
+        // Check if Wedding Wrapped already exists
+        try {
+          await AnalyticsService.analyticsControllerGetWeddingWrapped(selectedWeddingId);
+          setHasExistingWrapped(true);
+        } catch {
+          // Wedding Wrapped doesn't exist
+          setHasExistingWrapped(false);
+        }
       } catch (error) {
         console.error('Error fetching checklist data:', error);
       } finally {
@@ -158,6 +177,24 @@ const AdminDashboardModule = () => {
 
     fetchChecklistData();
   }, [selectedWeddingId]);
+
+  // Wedding Wrapped handlers
+  const handleGenerateWeddingWrapped = async () => {
+    if (!selectedWeddingId) return;
+
+    setIsGeneratingWrapped(true);
+    try {
+      await AnalyticsService.analyticsControllerGenerateWeddingWrapped(selectedWeddingId);
+      setHasExistingWrapped(true);
+      // Navigate directly to the fullscreen view without showing toast
+      // The view page will handle the display
+      router.push('/admin/wedding-wrapped/view');
+    } catch (error) {
+      console.error('Error generating Wedding Wrapped:', error);
+      toast.error('Failed to generate Wedding Wrapped. Please try again.');
+      setIsGeneratingWrapped(false);
+    }
+  };
 
   if (!selectedWeddingId || !selectedWedding) {
     return (
@@ -182,6 +219,39 @@ const AdminDashboardModule = () => {
           title={`Welcome back, ${session?.user?.name || 'there'}!`}
           description={headerDescription}
         />
+
+        {/* Wedding Wrapped Card - Only show when wedding has passed and hasn't been generated yet */}
+        {daysUntilWedding !== null && daysUntilWedding < 0 && !hasExistingWrapped && (
+          <div className="mb-6">
+            <Card className="border-2 border-brand-200 bg-gradient-to-r from-brand-25 to-brand-50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-brand-500" />
+                  Wedding Wrapped
+                </CardTitle>
+                <CardDescription>
+                  Relive your special day with a comprehensive look at all your wedding analytics and memories
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  onClick={handleGenerateWeddingWrapped}
+                  disabled={isGeneratingWrapped}
+                  className="bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700"
+                >
+                  {isGeneratingWrapped ? (
+                    <>Generating...</>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Generate Wedding Wrapped
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* First Row - Stats Cards */}
         <div className="mb-4">

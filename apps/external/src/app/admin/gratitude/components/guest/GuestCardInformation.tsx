@@ -79,7 +79,7 @@ export function GuestCardInformation({
                 onUpload={async (url) => {
                   try {
                     handleInputChange('guestCardPhotoURL', url);
-                  } catch (err) {
+                  } catch {
                     toast.error('Failed to add photo');
                   }
                 }}

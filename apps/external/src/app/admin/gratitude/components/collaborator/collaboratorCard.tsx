@@ -30,6 +30,7 @@ export const CollaboratorCard = ({
 
           {photoUrl && (
             <div className="w-[120px] h-[120px] mb-6 rounded-full overflow-hidden border-2 border-[#c9a24a]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={photoUrl} alt="Collaborator" className="object-cover w-full h-full" />
             </div>
           )}

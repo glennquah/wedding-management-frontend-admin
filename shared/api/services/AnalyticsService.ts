@@ -17,6 +17,7 @@ import type { SpendingResponseDto } from '../models/SpendingResponseDto';
 import type { VendorBookingsResponseDto } from '../models/VendorBookingsResponseDto';
 import type { VendorRevenueResponseDto } from '../models/VendorRevenueResponseDto';
 import type { VendorTopProductsResponseDto } from '../models/VendorTopProductsResponseDto';
+import type { WeddingWrappedResponseDto } from '../models/WeddingWrappedResponseDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -313,6 +314,48 @@ export class AnalyticsService {
             url: '/analytics/admin/user-growth',
             query: {
                 'period': period,
+            },
+        });
+    }
+    /**
+     * Generate Wedding Wrapped analytics
+     * Generates and saves a comprehensive Wedding Wrapped snapshot with all analytics including guest insights, gift statistics, planning journey metrics, and emotional touch data. This endpoint can be called multiple times to regenerate/update the snapshot.
+     * @param weddingId
+     * @returns WeddingWrappedResponseDto Wedding Wrapped generated successfully
+     * @throws ApiError
+     */
+    public static analyticsControllerGenerateWeddingWrapped(
+        weddingId: number,
+    ): CancelablePromise<WeddingWrappedResponseDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/analytics/wedding-wrapped/{weddingId}',
+            path: {
+                'weddingId': weddingId,
+            },
+            errors: {
+                404: `Wedding not found`,
+            },
+        });
+    }
+    /**
+     * Get Wedding Wrapped analytics
+     * Retrieves the saved Wedding Wrapped analytics snapshot for a wedding. Returns comprehensive statistics about the wedding including guest insights, gifts, spending, and more.
+     * @param weddingId
+     * @returns WeddingWrappedResponseDto Wedding Wrapped retrieved successfully
+     * @throws ApiError
+     */
+    public static analyticsControllerGetWeddingWrapped(
+        weddingId: number,
+    ): CancelablePromise<WeddingWrappedResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/analytics/wedding-wrapped/{weddingId}',
+            path: {
+                'weddingId': weddingId,
+            },
+            errors: {
+                404: `Wedding Wrapped not found - please generate it first`,
             },
         });
     }
