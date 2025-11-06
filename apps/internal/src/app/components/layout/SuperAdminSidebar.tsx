@@ -4,6 +4,7 @@ import AppSidebar from '@shared/components/AppSidebar';
 import {
   Bell,
   CheckSquare,
+  DollarSign,
   LayoutDashboard,
   ListTodo,
   MailCheckIcon,
@@ -84,6 +85,11 @@ const tabs = [
         title: 'Dashboard',
         href: '/dashboard',
         icon: Timer,
+      },
+      {
+        title: 'Revenue & Payouts',
+        href: '/revenue',
+        icon: DollarSign,
       },
       {
         title: 'Reports',
