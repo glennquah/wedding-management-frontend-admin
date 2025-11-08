@@ -8,6 +8,7 @@ import type { GenerateAiEmailTemplateDto } from '../models/GenerateAiEmailTempla
 import type { SendBulkEmailDto } from '../models/SendBulkEmailDto';
 import type { SendRsvpInvitationDto } from '../models/SendRsvpInvitationDto';
 import type { SendSingleEmailDto } from '../models/SendSingleEmailDto';
+import type { SendVendorListingDeletionDto } from '../models/SendVendorListingDeletionDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -147,6 +148,22 @@ export class EmailNotificationService {
             path: {
                 'weddingId': weddingId,
             },
+        });
+    }
+    /**
+     * Send listing deletion notice to a vendor
+     * @param requestBody
+     * @returns any The listing deletion email has been successfully sent.
+     * @throws ApiError
+     */
+    public static emailNotificationControllerSendListingDeletionEmail(
+        requestBody: SendVendorListingDeletionDto,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/email-notification/send-vendor-listing-deletion',
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 }

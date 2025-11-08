@@ -3,7 +3,12 @@
 import { ListingWithVendor } from '@shared/columns/listing-columns';
 import { DeleteConfirmationModal, PageHeader } from '@shared/components';
 import { ListingTable } from '@shared/components/ListingTable';
-import { ListingResponseDto, ListingsService, VendorsService } from '@wedding/api-types';
+import {
+  EmailNotificationService,
+  ListingResponseDto,
+  ListingsService,
+  VendorsService,
+} from '@wedding/api-types';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -86,8 +91,14 @@ export default function ListingManagementPage() {
     setDeleteConfirmListing(null);
   };
 
-  const confirmDeleteListing = async () => {
+  const confirmDeleteListing = async (data: { reason?: string }) => {
     if (!deleteConfirmListing?.id) return;
+
+    const { reason } = data;
+    if (!reason || reason.trim() === '') {
+      toast.error('A reason is required to delete the listing.');
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -95,11 +106,23 @@ export default function ListingManagementPage() {
         deleteConfirmListing.vendorId,
         deleteConfirmListing.id,
       );
+      toast.success('Listing deleted successfully');
+
+      try {
+        await EmailNotificationService.emailNotificationControllerSendListingDeletionEmail({
+          vendorId: deleteConfirmListing.vendorId,
+          listingName: deleteConfirmListing.listingName,
+          dateRemoved: new Date().toISOString().split('T')[0],
+          reasonForRemoval: reason,
+        });
+        toast.success('Vendor notified via email');
+      } catch (emailError) {
+        console.error('Failed to send email:', emailError);
+        toast.error('Listing was deleted, but the notification email failed to send.');
+      }
 
       // Remove from local state
       setListings((prev) => prev.filter((l) => l.id !== deleteConfirmListing.id));
-
-      toast.success('Listing deleted successfully');
       closeDeleteConfirmModal();
     } catch (error: unknown) {
       console.error('Error deleting listing:', error);
@@ -169,6 +192,7 @@ export default function ListingManagementPage() {
         onConfirm={confirmDeleteListing}
         onCancel={closeDeleteConfirmModal}
         isLoading={isSubmitting}
+        requireReason={true}
       />
     </div>
   );
