@@ -159,75 +159,78 @@ export const useEditProfile = ({ userId, userRole, onProfileUpdate }: UseEditPro
     [validationErrors],
   );
 
-  const validateForm = useCallback((weddingFormData?: any) => {
-    const errors: { [key: string]: string } = {};
+  const validateForm = useCallback(
+    (weddingFormData?: any) => {
+      const errors: { [key: string]: string } = {};
 
-    // Validate required user fields
-    if (!formData.name.trim()) {
-      errors.name = 'Name is required';
-    }
-
-    if (!formData.email.trim()) {
-      errors.email = 'Email is required';
-    }
-
-    // Validate wedding fields if wedding data is provided (for admin users)
-    if (userRole === UserRole.ADMIN && weddingFormData) {
-      if (!weddingFormData.name?.trim()) {
-        errors.weddingName = 'Wedding name is required';
+      // Validate required user fields
+      if (!formData.name.trim()) {
+        errors.name = 'Name is required';
       }
 
-      if (!weddingFormData.preferredServices || weddingFormData.preferredServices.length === 0) {
-        errors.preferredServices = 'At least one preferred service must be selected';
+      if (!formData.email.trim()) {
+        errors.email = 'Email is required';
       }
 
-      if (!weddingFormData.weddingType) {
-        errors.weddingType = 'Wedding type is required';
+      // Validate wedding fields if wedding data is provided (for admin users)
+      if (userRole === UserRole.ADMIN && weddingFormData) {
+        if (!weddingFormData.name?.trim()) {
+          errors.weddingName = 'Wedding name is required';
+        }
+
+        if (!weddingFormData.preferredServices || weddingFormData.preferredServices.length === 0) {
+          errors.preferredServices = 'At least one preferred service must be selected';
+        }
+
+        if (!weddingFormData.weddingType) {
+          errors.weddingType = 'Wedding type is required';
+        }
+
+        if (!weddingFormData.budgetBucket) {
+          errors.budgetBucket = 'Budget range is required';
+        }
+
+        if (!weddingFormData.guestCountBucket) {
+          errors.guestCountBucket = 'Guest count is required';
+        }
+
+        if (!weddingFormData.preferredStyle) {
+          errors.preferredStyle = 'Preferred style is required';
+        }
       }
 
-      if (!weddingFormData.budgetBucket) {
-        errors.budgetBucket = 'Budget range is required';
+      // Validate vendor required fields
+      if (userRole === UserRole.VENDOR) {
+        if (!formData.serviceOffered) {
+          errors.serviceOffered = 'Service offered is required';
+        }
+
+        if (!formData.styleOffered) {
+          errors.styleOffered = 'Style offered is required';
+        }
+
+        if (!formData.weddingTypes || formData.weddingTypes.length === 0) {
+          errors.weddingTypes = 'At least one wedding type must be selected';
+        }
       }
 
-      if (!weddingFormData.guestCountBucket) {
-        errors.guestCountBucket = 'Guest count is required';
+      // Validate venue capacity
+      if (userRole === UserRole.VENDOR && formData.serviceOffered === WeddingService.VENUE) {
+        if (!formData.capacity || formData.capacity <= 0) {
+          errors.capacity = 'Capacity is required and must be greater than 0 for venue services';
+        }
       }
 
-      if (!weddingFormData.preferredStyle) {
-        errors.preferredStyle = 'Preferred style is required';
-      }
-    }
-
-    // Validate vendor required fields
-    if (userRole === UserRole.VENDOR) {
-      if (!formData.serviceOffered) {
-        errors.serviceOffered = 'Service offered is required';
+      // Validate password confirmation
+      if (formData.password.trim() && formData.password !== formData.confirmPassword) {
+        errors.confirmPassword = 'Passwords do not match';
       }
 
-      if (!formData.styleOffered) {
-        errors.styleOffered = 'Style offered is required';
-      }
-
-      if (!formData.weddingTypes || formData.weddingTypes.length === 0) {
-        errors.weddingTypes = 'At least one wedding type must be selected';
-      }
-    }
-
-    // Validate venue capacity
-    if (userRole === UserRole.VENDOR && formData.serviceOffered === WeddingService.VENUE) {
-      if (!formData.capacity || formData.capacity <= 0) {
-        errors.capacity = 'Capacity is required and must be greater than 0 for venue services';
-      }
-    }
-
-    // Validate password confirmation
-    if (formData.password.trim() && formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
-    }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  }, [userRole, formData]);
+      setValidationErrors(errors);
+      return Object.keys(errors).length === 0;
+    },
+    [userRole, formData],
+  );
 
   const updateUserProfile = useCallback(async () => {
     if (!userId || !userRole || !userData) return;
@@ -304,11 +307,19 @@ export const useEditProfile = ({ userId, userRole, onProfileUpdate }: UseEditPro
   }, [userId, userRole, userData, formData, populateFormData]);
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent, weddingFormData?: any, silentSuccess?: boolean): Promise<boolean> => {
+    async (
+      e: React.FormEvent,
+      weddingFormData?: any,
+      silentSuccess?: boolean,
+    ): Promise<boolean> => {
       e.preventDefault();
 
       if (!validateForm(weddingFormData)) {
-        toast.error(validationErrors ? 'Please fix the validation errors before submitting' : 'Please fix the validation errors');
+        toast.error(
+          validationErrors
+            ? 'Please fix the validation errors before submitting'
+            : 'Please fix the validation errors',
+        );
         return false;
       }
 
@@ -340,7 +351,8 @@ export const useEditProfile = ({ userId, userRole, onProfileUpdate }: UseEditPro
   }, [userData, populateFormData]);
 
   const handleDeleteProfile = useCallback(
-    async (password?: string) => {
+    async (data: { password?: string }) => {
+      const { password } = data;
       if (!password || !userId || !userRole) return;
 
       try {

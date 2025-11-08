@@ -128,6 +128,7 @@ export type { SeatingResultDto } from './models/SeatingResultDto';
 export type { SendBulkEmailDto } from './models/SendBulkEmailDto';
 export type { SendRsvpInvitationDto } from './models/SendRsvpInvitationDto';
 export type { SendSingleEmailDto } from './models/SendSingleEmailDto';
+export type { SendVendorListingDeletionDto } from './models/SendVendorListingDeletionDto';
 export type { SetWeddingDateDto } from './models/SetWeddingDateDto';
 export type { SpendingResponseDto } from './models/SpendingResponseDto';
 export type { SquadBreakdownItem } from './models/SquadBreakdownItem';

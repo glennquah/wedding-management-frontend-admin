@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 
 import { Button } from './button';
 import {
@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from './dialog';
 import { Input } from './form/input';
+import { Textarea } from './textarea';
 
 interface DeleteConfirmationModalProps {
   open: boolean;
@@ -17,12 +18,13 @@ interface DeleteConfirmationModalProps {
   title?: string;
   itemName: string;
   description?: string | ReactNode;
-  onConfirm: (password?: string) => void;
+  onConfirm: (data: { password?: string; reason?: string }) => void;
   onCancel: () => void;
   isLoading?: boolean;
   confirmButtonText?: string;
   cancelButtonText?: string;
   requirePasswordConfirmation?: boolean;
+  requireReason?: boolean;
 }
 
 export function DeleteConfirmationModal({
@@ -37,28 +39,55 @@ export function DeleteConfirmationModal({
   confirmButtonText = 'Delete',
   cancelButtonText = 'Cancel',
   requirePasswordConfirmation = false,
+  requireReason = false,
 }: DeleteConfirmationModalProps) {
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [reason, setReason] = useState('');
+  const [reasonError, setReasonError] = useState('');
+
+  useEffect(() => {
+    if (!open) {
+      const timer = setTimeout(() => {
+        setPassword('');
+        setPasswordError('');
+        setReason('');
+        setReasonError('');
+      }, 150);
+
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
 
   const defaultDescription = `Are you sure you want to delete ${itemName}? This action cannot be undone.`;
   const passwordDescription = `Are you sure you want to delete ${itemName}? This action cannot be undone. Please enter your password to confirm.`;
 
   const handleConfirm = () => {
+    let passwordOk = true;
+    let reasonOk = true;
+
     if (requirePasswordConfirmation) {
       if (!password.trim()) {
         setPasswordError('Password is required');
-        return;
+        passwordOk = false;
       }
-      onConfirm(password);
-    } else {
-      onConfirm();
     }
+
+    if (requireReason) {
+      if (!reason.trim()) {
+        setReasonError('Reason is required');
+        reasonOk = false;
+      }
+    }
+
+    if (!passwordOk || !reasonOk) {
+      return;
+    }
+
+    onConfirm({ password, reason });
   };
 
   const handleCancel = () => {
-    setPassword('');
-    setPasswordError('');
     onCancel();
   };
 
@@ -66,6 +95,13 @@ export function DeleteConfirmationModal({
     setPassword(value);
     if (passwordError) {
       setPasswordError('');
+    }
+  };
+
+  const handleReasonChange = (value: string) => {
+    setReason(value);
+    if (reasonError) {
+      setReasonError('');
     }
   };
 
@@ -80,17 +116,40 @@ export function DeleteConfirmationModal({
           </DialogDescription>
         </DialogHeader>
 
-        {requirePasswordConfirmation && (
-          <div className="space-y-2 px-6">
-            <label className="text-sm font-medium">Password</label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => handlePasswordChange(e.target.value)}
-              placeholder="Enter your password"
-              className={passwordError ? 'border-red-500' : ''}
-            />
-            {passwordError && <p className="text-sm text-red-500">{passwordError}</p>}
+        {(requireReason || requirePasswordConfirmation) && (
+          <div className="grid py-2">
+            {requireReason && (
+              <div className="space-y-2">
+                <label htmlFor="deleteReason" className="text-sm font-medium">
+                  Reason for Deletion
+                </label>
+                <Textarea
+                  id="deleteReason"
+                  value={reason}
+                  onChange={(e) => handleReasonChange(e.target.value)}
+                  placeholder="Enter the reason for deleting..."
+                  className={reasonError ? 'border-red-500' : ''}
+                />
+                {reasonError && <p className="text-sm text-red-500">{reasonError}</p>}
+              </div>
+            )}
+
+            {requirePasswordConfirmation && (
+              <div className="space-y-2">
+                <label htmlFor="deletePassword" className="text-sm font-medium">
+                  Password
+                </label>
+                <Input
+                  id="deletePassword"
+                  type="password"
+                  value={password}
+                  onChange={(e) => handlePasswordChange(e.target.value)}
+                  placeholder="Enter your password"
+                  className={passwordError ? 'border-red-500' : ''}
+                />
+                {passwordError && <p className="text-sm text-red-500">{passwordError}</p>}
+              </div>
+            )}
           </div>
         )}
 
