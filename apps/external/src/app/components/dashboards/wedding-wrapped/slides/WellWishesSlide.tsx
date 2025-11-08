@@ -100,6 +100,7 @@ function WellWishesSlideContent({ emotionalTouchInsights }: WellWishesSlideProps
         <AnimatePresence>
           {visibleWishes.map((index) => {
             const wish = wellWishes[index];
+            if (!wish) return null;
             return (
               <motion.div
                 key={index}
