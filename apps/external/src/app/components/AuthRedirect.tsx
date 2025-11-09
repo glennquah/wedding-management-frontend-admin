@@ -19,10 +19,25 @@ export function AuthRedirect() {
 
     if (session?.user) {
       // Define public paths that should not trigger role-based redirects
-      const publicPaths = ['/', '/login', '/forgot-password', '/reset-password', '/get-started', '/essentials', '/the-big-day', '/for-businesses', '/guest-&-vendor'];
+      const publicPaths = [
+        '/',
+        '/login',
+        '/forgot-password',
+        '/reset-password',
+        '/get-started',
+        '/essentials',
+        '/the-big-day',
+        '/for-businesses',
+        '/guest-&-vendor',
+      ];
 
       // Check if pathname matches public paths or starts with /cashgift
-      if (pathname && (publicPaths.includes(pathname) || pathname.startsWith('/cashgift'))) {
+      if (
+        pathname &&
+        (publicPaths.includes(pathname) ||
+          pathname.startsWith('/cashgift') ||
+          pathname.startsWith('/self-attendance'))
+      ) {
         return;
       }
 
@@ -30,7 +45,11 @@ export function AuthRedirect() {
         return router.push('/login');
       }
 
-      if (pathname && !pathname.startsWith(`/${session.user.role.toLowerCase()}`) && !pathname.startsWith('/cashgift')) {
+      if (
+        pathname &&
+        !pathname.startsWith(`/${session.user.role.toLowerCase()}`) &&
+        !pathname.startsWith('/cashgift')
+      ) {
         return router.push(`/${session.user.role.toLowerCase()}`);
       }
     }
