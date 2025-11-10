@@ -131,7 +131,8 @@ export default function Home() {
   // Close sidebar by default when landing on this page
   useEffect(() => {
     setOpen(false);
-  }, [setOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getHeaderDescription = () => {
     if (!selectedWedding) {

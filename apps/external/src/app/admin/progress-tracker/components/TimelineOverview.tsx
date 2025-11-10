@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSidebar } from '@shared/components/ui/sidebar';
@@ -444,7 +444,7 @@ export default function TimelineOverview({
   };
 
   // Compute smooth SVG path that snakes through dots across rows
-  const recomputePath = () => {
+  const recomputePath = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
     type Pt = { x: number; y: number };
@@ -488,7 +488,7 @@ export default function TimelineOverview({
       d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${curr.x} ${curr.y}`;
     }
     setPathD(d);
-  };
+  }, [rows]);
 
   useEffect(() => {
     recomputePath();
