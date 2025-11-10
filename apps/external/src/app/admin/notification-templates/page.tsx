@@ -11,9 +11,11 @@ import {
   PageHeader,
   SendNotificationsDialog,
 } from '@shared/components';
+import useIsMobileScreen from '@shared/hooks/useIsMobileScreen';
 import { Bell, Plus } from 'lucide-react';
 
 const NotificationTemplatesPage = () => {
+  const isMobile = useIsMobileScreen();
   const currentWeddingId = useWeddingStore((state) => state.selectedWeddingId);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showSendDialog, setShowSendDialog] = useState(false);
@@ -26,7 +28,9 @@ const NotificationTemplatesPage = () => {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
-      <div className="p-6">
+      {!isMobile && <div className="mt-6 w-full"></div>}
+
+      <div className="container mx-auto px-4 pt-4 md:pt-6">
         <div className="flex items-center justify-between">
         <PageHeader
           title="Notification Templates"

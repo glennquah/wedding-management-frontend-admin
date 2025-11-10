@@ -23,7 +23,7 @@ export default function FormField({
   min,
 }: FieldProps) {
   return (
-    <div className="mt-4 gap-2 flex flex-col">
+    <div className="gap-2 flex flex-col">
       <Label htmlFor={id}>{label}</Label>
       <Input
         type={type}

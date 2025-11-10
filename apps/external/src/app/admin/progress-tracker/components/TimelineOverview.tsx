@@ -719,15 +719,16 @@ export default function TimelineOverview({
                           className={`${shouldAnimate && 'pt-2'} h-24 w-24`}
                           style={{
                             transform:
-                              [
-                                ['behind', 'ahead'].includes(progressInfo.scheduleStatus) &&
-                                isEvenNumberedRow
-                                  ? 'scaleX(-1)'
-                                  : '',
-                                endOfRow ? `rotate(${isEvenNumberedRow ? 45 : -45}deg)` : '',
-                              ]
-                                .filter(Boolean)
-                                .join(' ') || undefined,
+                              // At end of row, face the direction the next row will flow
+                              // In even rows (R->L), at end we're on left, next row goes L->R, so face right
+                              // In odd rows (L->R), at end we're on right, next row goes R->L, so face left
+                              endOfRow
+                                ? isEvenNumberedRow
+                                  ? undefined // Face right for next row
+                                  : 'scaleX(-1)' // Face left for next row
+                                : isEvenNumberedRow
+                                  ? 'scaleX(-1)' // Face left in even rows (timeline goes R->L)
+                                  : undefined, // Face right in odd rows (timeline goes L->R)
                           }}
                         />
                       </div>
@@ -780,9 +781,14 @@ export default function TimelineOverview({
                           height={96}
                           className="h-24 w-24"
                           style={{
-                            transform: endOfRow
-                              ? `rotate(${isEvenNumberedRow ? 30 : -30}deg)`
-                              : undefined,
+                            transform:
+                              endOfRow
+                                ? isEvenNumberedRow
+                                  ? undefined // Face right for next row
+                                  : 'scaleX(-1)' // Face left for next row
+                                : isEvenNumberedRow
+                                  ? 'scaleX(-1)' // Face left in even rows
+                                  : undefined, // Face right in odd rows
                           }}
                         />
                       </div>
@@ -795,7 +801,7 @@ export default function TimelineOverview({
             {rows.map((row, rowIndex) => (
               <div key={rowIndex} className="relative mb-26">
                 {/* Row container */}
-                <div className={'relative flex flex-row items-center justify-between'}>
+                <div className={'relative flex flex-row items-start justify-between'}>
                   {/* Timeline items for this row */}
                   {row.items.map((item, itemIndex) => {
                     const isHovered = hoveredItem === item.id;
@@ -881,7 +887,7 @@ export default function TimelineOverview({
                           }}
                           className={`${
                             item.isWeddingDay
-                              ? 'h-12 w-12 transform cursor-pointer border-4 border-white bg-gradient-to-br from-sky-400 to-teal-500 shadow-lg ring-2 ring-teal-300 hover:scale-110 hover:shadow-xl'
+                              ? 'h-12 w-12 -mt-4 transform cursor-pointer border-4 border-white bg-gradient-to-br from-sky-400 to-teal-500 shadow-lg ring-2 ring-teal-300 hover:scale-110 hover:shadow-xl'
                               : `${dotSize} ${getItemColor(item, isHovered)}`
                           } rounded-full transition-all duration-200 ${isHovered && !item.isWeddingDay ? 'scale-110 shadow-lg' : ''}`}
                           onClick={() => {
