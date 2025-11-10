@@ -20,6 +20,7 @@ export default $config({
       },
       environment: {
         NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080',
+        NEXTAUTH_URL: 'https://knotly.app',
         NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || 'fallback-secret-change-this',
         GITHUB_ID: process.env.GITHUB_ID || '',
         GITHUB_SECRET: process.env.GITHUB_SECRET || '',
@@ -42,6 +43,7 @@ export default $config({
       },
       environment: {
         NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080',
+        NEXTAUTH_URL: 'https://core.knotly.app',
         NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || 'fallback-secret-change-this',
         GITHUB_ID: process.env.GITHUB_ID || '',
         GITHUB_SECRET: process.env.GITHUB_SECRET || '',
