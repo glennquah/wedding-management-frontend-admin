@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { ChecklistItem, useProgressTrackerStore } from '../../../store/progressTrackerStore';
 import { useWeddingStore } from '../../../store/sessionStore';
@@ -47,7 +47,7 @@ export default function ChecklistTable({
     return decorated.map((d) => d.item);
   }, [checklist]);
 
-  const handleCheckboxChange = async (itemId: string, completed: boolean) => {
+  const handleCheckboxChange = useCallback(async (itemId: string, completed: boolean) => {
     // Immediately update the optimistic state so checkbox shows the new state
     setOptimisticStates((prev) => new Map(prev).set(itemId, completed));
 
@@ -73,7 +73,7 @@ export default function ChecklistTable({
         return next;
       });
     }, 500); // Match this to CSS transition duration
-  };
+  }, [onToggleCompletion, selectedWeddingId, updateChecklistItem]);
 
   const getCategoryColor = (category: string) => {
     const colors = {
@@ -182,7 +182,7 @@ export default function ChecklistTable({
     }
 
     return baseColumns;
-  }, [onEditItem, onDeleteItem, optimisticStates]);
+  }, [onEditItem, onDeleteItem, optimisticStates, handleCheckboxChange]);
 
   return (
     <>

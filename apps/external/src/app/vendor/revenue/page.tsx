@@ -99,13 +99,15 @@ export default function RevenuePage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 pt-4 md:pt-6">
-        <PageHeader
-          title="Revenue & Payouts"
-          description="Track your earnings and download payout statements"
-        />
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="text-primary h-8 w-8 animate-spin" />
+      <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+        <div className="container mx-auto px-4 pt-4 md:pt-6">
+          <PageHeader
+            title="Revenue & Payouts"
+            description="Track your earnings and download payout statements"
+          />
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="text-primary h-8 w-8 animate-spin" />
+          </div>
         </div>
       </div>
     );
@@ -119,11 +121,12 @@ export default function RevenuePage() {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8 md:pt-6">
-      <PageHeader
-        title="Revenue & Payouts"
-        description="Track your earnings and download payout statements"
-      />
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+      <div className="container mx-auto px-4 py-8 md:pt-6">
+        <PageHeader
+          title="Revenue & Payouts"
+          description="Track your earnings and download payout statements"
+        />
 
       <Card className="mt-6">
         <CardContent className="mt-6">
@@ -172,6 +175,7 @@ export default function RevenuePage() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

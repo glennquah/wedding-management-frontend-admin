@@ -119,7 +119,7 @@ export default function Home() {
           setStage(selectedWeddingId, 'GETTING_STARTED');
         });
     }
-  }, [selectedWeddingId, ensureDraft, hasHydrated, setStage]);
+  }, [selectedWeddingId, ensureDraft, hasHydrated, setStage, fetchChecklistFromBackend]);
 
   useEffect(() => {
     if (selectedWeddingId && weddings.length > 0) {
@@ -131,6 +131,7 @@ export default function Home() {
   // Close sidebar by default when landing on this page
   useEffect(() => {
     setOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getHeaderDescription = () => {

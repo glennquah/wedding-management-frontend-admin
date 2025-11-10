@@ -10,7 +10,6 @@ import {
   MailCheckIcon,
   Package,
   ShoppingCart,
-  Timer,
   User2,
   UserStar,
   Users,
@@ -82,19 +81,9 @@ const tabs = [
     sectionHeader: 'Analytics',
     items: [
       {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: Timer,
-      },
-      {
         title: 'Revenue & Payouts',
         href: '/revenue',
         icon: DollarSign,
-      },
-      {
-        title: 'Reports',
-        href: '/reports',
-        icon: CheckSquare,
       },
     ],
   },

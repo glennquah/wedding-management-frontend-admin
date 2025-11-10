@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSidebar } from '@shared/components/ui/sidebar';
 import { ChecklistItem } from '../../../store/progressTrackerStore';
 import { parseAndRenderText } from '../../../utils/linkParser';
@@ -443,7 +444,7 @@ export default function TimelineOverview({
   };
 
   // Compute smooth SVG path that snakes through dots across rows
-  const recomputePath = () => {
+  const recomputePath = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
     type Pt = { x: number; y: number };
@@ -487,11 +488,11 @@ export default function TimelineOverview({
       d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${curr.x} ${curr.y}`;
     }
     setPathD(d);
-  };
+  }, [rows]);
 
   useEffect(() => {
     recomputePath();
-  }, [rows]);
+  }, [rows, recomputePath]);
 
   // Recompute on window resize
   useEffect(() => {
@@ -500,7 +501,7 @@ export default function TimelineOverview({
     };
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  }, []);
+  }, [recomputePath]);
 
   // Recompute on scroll within the container so the path stays aligned during scroll
   useEffect(() => {
@@ -511,7 +512,7 @@ export default function TimelineOverview({
     };
     el.addEventListener('scroll', onScroll, { passive: true });
     return () => el.removeEventListener('scroll', onScroll);
-  }, [rows]);
+  }, [rows, recomputePath]);
 
   // Recompute when sidebar opens/closes (layout shifts without window resize)
   useEffect(() => {
@@ -519,7 +520,7 @@ export default function TimelineOverview({
       recomputePath();
     });
     return () => cancelAnimationFrame(id);
-  }, [open, openMobile, rows]);
+  }, [open, openMobile, rows, recomputePath]);
 
   // Observe container size changes (e.g., row wrapping, font load, sidebar shift)
   useEffect(() => {
@@ -530,7 +531,7 @@ export default function TimelineOverview({
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, [rows]);
+  }, [rows, recomputePath]);
 
   // Handle Escape key to close modal
   useEffect(() => {
@@ -710,9 +711,11 @@ export default function TimelineOverview({
                             : undefined,
                         }}
                       >
-                        <img
+                        <Image
                           src={imageSrc}
                           alt={label}
+                          width={96}
+                          height={96}
                           className={`${shouldAnimate && 'pt-2'} h-24 w-24`}
                           style={{
                             transform:
@@ -770,9 +773,11 @@ export default function TimelineOverview({
                         >
                           ▼
                         </div>
-                        <img
+                        <Image
                           src={imageSrc}
                           alt="Current month"
+                          width={96}
+                          height={96}
                           className="h-24 w-24"
                           style={{
                             transform: endOfRow
@@ -935,7 +940,7 @@ export default function TimelineOverview({
 
                               {/* Activities List */}
                               <div className="scrollbar-hide max-h-80 space-y-3 overflow-y-auto">
-                                {item.branchItems?.map((branchItem, index) => (
+                                {item.branchItems?.map((branchItem) => (
                                   <div
                                     key={branchItem.id}
                                     className="border-b border-gray-100 pb-3 last:border-b-0 last:pb-0"

@@ -158,8 +158,9 @@ export default function ListingManagementPage() {
   };
 
   return (
-    <div className="w-full max-w-full min-w-0 overflow-x-hidden px-4 py-8">
-      <div className="flex items-center justify-between">
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+      <div className="w-full max-w-full min-w-0 overflow-x-hidden px-4 py-8">
+        <div className="flex items-center justify-between">
         <PageHeader
           title={'Listing Management'}
           description="View and manage all vendor listings across the platform"
@@ -194,6 +195,7 @@ export default function ListingManagementPage() {
         isLoading={isSubmitting}
         requireReason={true}
       />
+      </div>
     </div>
   );
 }

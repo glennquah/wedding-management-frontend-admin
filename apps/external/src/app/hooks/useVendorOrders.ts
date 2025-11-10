@@ -7,7 +7,7 @@ import {
   WeddingResponseDto,
   WeddingsService,
 } from '@shared/api';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export type ListingWithBookedSlots = ListingResponseDto & {
@@ -32,7 +32,7 @@ export function useVendorOrders(vendorId?: number) {
     return value.every(item => typeof item === 'object' && item !== null && ('id' in item || 'listingName' in item || 'price' in item));
   };
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     if (!vendorId) {
       setIsLoading(false);
       return;
@@ -81,11 +81,11 @@ export function useVendorOrders(vendorId?: number) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [vendorId]);
 
   useEffect(() => {
     if (vendorId) fetchOrders();
-  }, [vendorId]);
+  }, [vendorId, fetchOrders]);
 
   const handleConfirmListing = async (orderId: number, listingId: number) => {
     try {

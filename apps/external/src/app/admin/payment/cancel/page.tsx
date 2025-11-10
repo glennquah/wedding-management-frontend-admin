@@ -15,10 +15,10 @@ export default function PaymentCancelPage() {
   useEffect(() => {
     setTimeout(() => {
         if (session?.user.id) {
-          clearCart(session.user.id, true); 
+          clearCart(session.user.id, true);
         }
     }, 1000);
-  }, [session]);
+  }, [session, clearCart]);
 
   const handleRetryPayment = async () => {
     if (!order) {

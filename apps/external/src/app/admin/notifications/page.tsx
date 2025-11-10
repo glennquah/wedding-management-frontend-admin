@@ -34,17 +34,21 @@ const NotificationsPage = () => {
 
   if (!currentWeddingId) {
     return (
-      <div className="p-6">
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">Please select a wedding to view notifications.</p>
+      <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+        <div className="p-6">
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Please select a wedding to view notifications.</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <NotificationList data={notifications} isLoading={isLoading} />
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+      <div className="p-6">
+        <NotificationList data={notifications} isLoading={isLoading} />
+      </div>
     </div>
   );
 };

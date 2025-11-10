@@ -24,10 +24,12 @@ export default function VendorOrdersPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 pt-4 md:pt-6">
-        <PageHeader title="My Orders" description="Manage your customer orders" />
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+        <div className="container mx-auto px-4 pt-4 md:pt-6">
+          <PageHeader title="My Orders" description="Manage your customer orders" />
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
         </div>
       </div>
     );
@@ -74,8 +76,9 @@ export default function VendorOrdersPage() {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8 md:pt-6">
-      <PageHeader title="My Orders" description="Manage your customer orders" />
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+      <div className="container mx-auto px-4 py-8 md:pt-6">
+        <PageHeader title="My Orders" description="Manage your customer orders" />
 
       <Tabs defaultValue="all" className="mt-6">
         <TabsList className="bg-muted/50 rounded-lg p-1 grid w-full grid-cols-4 md:flex md:space-x-2 md:w-fit">
@@ -156,6 +159,7 @@ export default function VendorOrdersPage() {
           )}
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }

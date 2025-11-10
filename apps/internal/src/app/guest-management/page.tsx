@@ -172,8 +172,9 @@ export default function GuestManagementPage() {
   ];
 
   return (
-    <div className="w-full max-w-full px-4 py-8 min-w-0 overflow-x-hidden">
-      <div className="flex items-center justify-between">
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+      <div className="w-full max-w-full px-4 py-8 min-w-0 overflow-x-hidden">
+        <div className="flex items-center justify-between">
         <PageHeader title="Guest Management" description="Manage guests across all weddings" />
       </div>
 
@@ -279,6 +280,7 @@ export default function GuestManagementPage() {
           email={emailModalGuest.email}
         />
       )}
+      </div>
     </div>
   );
 }

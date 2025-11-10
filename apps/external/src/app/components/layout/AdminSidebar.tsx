@@ -97,12 +97,6 @@ export default function AdminSidebar() {
           disabled: !hasWedding || !firstPurchaseMade,
         },
         {
-          title: 'Timeline',
-          href: '/timeline',
-          icon: Calendar,
-          disabled: !hasWedding || !firstPurchaseMade,
-        },
-        {
           title: 'Date Optimizer',
           href: '/date-optimizer',
           icon: Sparkles,

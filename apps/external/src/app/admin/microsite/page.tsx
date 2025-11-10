@@ -327,7 +327,7 @@ export default function CreateMicrositePage() {
 
   if (!selectedWeddingId) {
     return (
-      <div className="to-brand-100 text-foreground min-h-screen w-full bg-gradient-to-b from-white py-6">
+      <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground py-6">
         <div className="container mx-auto px-4 pt-4 md:pt-6">
           <PageHeader
             title="Create Microsite"
@@ -340,7 +340,7 @@ export default function CreateMicrositePage() {
 
   if (isLoading) {
     return (
-      <div className="to-brand-100 text-foreground min-h-screen w-full bg-gradient-to-b from-white py-6">
+      <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground py-6">
         <div className="container mx-auto px-4 pt-4 md:pt-6">
           <PageHeader title="Loading..." description="Checking for existing microsite..." />
         </div>
@@ -349,7 +349,7 @@ export default function CreateMicrositePage() {
   }
 
   return (
-    <div className="to-brand-100 text-foreground min-h-screen w-full bg-gradient-to-b from-white py-6">
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground py-6">
       <div className="relative container mx-auto px-4 pt-4 md:pt-6">
         <PageHeader
           title={isUpdateMode ? 'Edit Microsite' : 'Create Microsite'}

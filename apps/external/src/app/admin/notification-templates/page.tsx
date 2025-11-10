@@ -25,8 +25,9 @@ const NotificationTemplatesPage = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between">
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+      <div className="p-6">
+        <div className="flex items-center justify-between">
         <PageHeader
           title="Notification Templates"
           description={'Manage your wedding notification templates'}
@@ -68,6 +69,7 @@ const NotificationTemplatesPage = () => {
           weddingId={currentWeddingId}
         />
       )}
+      </div>
     </div>
   );
 };

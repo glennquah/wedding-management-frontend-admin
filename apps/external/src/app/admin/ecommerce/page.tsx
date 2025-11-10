@@ -30,7 +30,8 @@ export default function EcommercePage() {
   }
 
   return (
-    <div className='container mx-auto px-4 py-8'>
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+      <div className='container mx-auto px-4 py-8'>
       <PageHeader
         title='Wedding Services Marketplace'
         description={`Discover and book the perfect wedding services for your special day. Browse through our curated collection of venues, catering, photography, and more from trusted vendors. ${totalListings} total listings • ${vendors.length} trusted vendors • ${categories.length} service categories`}
@@ -54,6 +55,7 @@ export default function EcommercePage() {
       ))}
 
       <EmptyState loading={loading} totalListings={totalListings} />
+      </div>
     </div>
   );
 }

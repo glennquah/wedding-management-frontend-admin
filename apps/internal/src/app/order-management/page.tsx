@@ -114,8 +114,9 @@ export default function OrderManagementPage() {
   };
 
   return (
-    <div className="w-full max-w-full px-4 py-8 min-w-0 overflow-x-hidden">
-      <div className="flex items-center justify-between">
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+      <div className="w-full max-w-full px-4 py-8 min-w-0 overflow-x-hidden">
+        <div className="flex items-center justify-between">
         <PageHeader
           title="Order Management"
           description="View and manage all orders placed by users"
@@ -143,6 +144,7 @@ export default function OrderManagementPage() {
             setOrder: setEditOrder,
           })}
         />
+      </div>
       </div>
     </div>
   );

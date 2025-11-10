@@ -17,17 +17,20 @@ export default function AccountPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 pt-8">
-        <div className="flex items-center justify-center">
-          <div>Loading vendor information...</div>
+      <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+        <div className="container mx-auto px-4 pt-8">
+          <div className="flex items-center justify-center">
+            <div>Loading vendor information...</div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 pt-8">
-      <div className="flex items-center justify-between">
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+      <div className="container mx-auto px-4 pt-8">
+        <div className="flex items-center justify-between">
         <PageHeader
           title="Account Settings"
           description="Manage your profile information and settings"
@@ -40,6 +43,7 @@ export default function AccountPage() {
           userRole={UserRole.VENDOR}
           onProfileUpdate={handleProfileUpdate}
         />
+      </div>
       </div>
     </div>
   );

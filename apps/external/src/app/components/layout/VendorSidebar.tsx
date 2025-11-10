@@ -5,12 +5,11 @@ import { useEffect, useState } from 'react';
 import { VendorsService } from '@shared/api';
 import AppSidebar from '@shared/components/AppSidebar';
 import {
-  CalendarDays,
   CircleDollarSign,
   ClipboardList,
   FileSpreadsheet,
   LayoutDashboard,
-  Star
+  Star,
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 
@@ -34,7 +33,7 @@ export default function VendorSidebar() {
 
         // Check Stripe onboarding status
         const stripeStatus = await VendorsService.vendorControllerGetVendorStripeStatus(
-          session.user.id
+          session.user.id,
         );
         const stripeComplete = stripeStatus?.stripeAccountOnboardingComplete || false;
         setHasStripeOnboarding(stripeComplete);
@@ -84,18 +83,6 @@ export default function VendorSidebar() {
           title: 'Reviews',
           href: '/reviews',
           icon: Star,
-          disabled: !hasVendorDetails || !hasStripeOnboarding,
-        },
-        {
-          title: 'Services',
-          href: '/services',
-          icon: FileSpreadsheet,
-          disabled: !hasVendorDetails || !hasStripeOnboarding,
-        },
-        {
-          title: 'Calendar',
-          href: '/calendar',
-          icon: CalendarDays,
           disabled: !hasVendorDetails || !hasStripeOnboarding,
         },
       ],
