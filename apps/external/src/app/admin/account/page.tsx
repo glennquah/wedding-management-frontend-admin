@@ -27,8 +27,9 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 pt-8">
-      <div className="flex items-center justify-between">
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+      <div className="container mx-auto px-4 pt-8">
+        <div className="flex items-center justify-between">
         <PageHeader
           title="Account Settings"
           description="Manage your profile information and settings"
@@ -41,6 +42,7 @@ export default function AccountPage() {
           userRole={userRole}
           onProfileUpdate={handleProfileUpdate}
         />
+      </div>
       </div>
     </div>
   );

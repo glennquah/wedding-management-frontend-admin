@@ -85,7 +85,7 @@ export function useVendorOrders(vendorId?: number) {
 
   useEffect(() => {
     if (vendorId) fetchOrders();
-  }, [vendorId]);
+  }, [vendorId, fetchOrders]);
 
   const handleConfirmListing = async (orderId: number, listingId: number) => {
     try {

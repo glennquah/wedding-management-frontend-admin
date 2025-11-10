@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { ChecklistItem, useProgressTrackerStore } from '../../../store/progressTrackerStore';
 import { useWeddingStore } from '../../../store/sessionStore';
@@ -182,7 +182,7 @@ export default function ChecklistTable({
     }
 
     return baseColumns;
-  }, [onEditItem, onDeleteItem, optimisticStates]);
+  }, [onEditItem, onDeleteItem, optimisticStates, handleCheckboxChange]);
 
   return (
     <>

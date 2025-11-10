@@ -49,24 +49,27 @@ export default function SuperAdminRevenuePage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 pt-4 md:pt-6">
-        <PageHeader
-          title="Revenue & Payouts"
-          description="View all vendor payouts and download statements"
-        />
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="text-primary h-8 w-8 animate-spin" />
+      <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+        <div className="container mx-auto px-4 pt-4 md:pt-6">
+          <PageHeader
+            title="Revenue & Payouts"
+            description="View all vendor payouts and download statements"
+          />
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="text-primary h-8 w-8 animate-spin" />
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 md:pt-6">
-      <PageHeader
-        title="Revenue & Payouts"
-        description="View all vendor payouts and partner commissions"
-      />
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+      <div className="container mx-auto px-4 py-8 md:pt-6">
+        <PageHeader
+          title="Revenue & Payouts"
+          description="View all vendor payouts and partner commissions"
+        />
 
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as PayoutType)}>
         <TabsList className="grid w-full max-w-md grid-cols-2">
@@ -82,6 +85,7 @@ export default function SuperAdminRevenuePage() {
           <PartnerCommissionsList commissions={commissions} />
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }

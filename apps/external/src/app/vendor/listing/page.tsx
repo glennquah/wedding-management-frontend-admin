@@ -103,8 +103,9 @@ export default function ListingPage() {
     : `${filteredListings.length} of ${listings.length} listings match your filters`;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-12">
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-12">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-4">
@@ -153,6 +154,7 @@ export default function ListingPage() {
         onConfirm={confirmDeleteListing}
         onCancel={closeDeleteConfirmModal}
       />
+      </div>
     </div>
   );
 }

@@ -22,8 +22,9 @@ const NotificationTemplatesPage = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between">
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+      <div className="p-6">
+        <div className="flex items-center justify-between">
         <PageHeader
           title="All Notification Templates"
           description={'View all notification templates across all weddings'}
@@ -55,6 +56,7 @@ const NotificationTemplatesPage = () => {
         open={showSendDialog}
         onOpenChange={setShowSendDialog}
       />
+      </div>
     </div>
   );
 };

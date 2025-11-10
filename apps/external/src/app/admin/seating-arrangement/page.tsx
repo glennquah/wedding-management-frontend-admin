@@ -246,8 +246,8 @@ export default function SeatingArrangementPage() {
           additionalActions={additionalActionsComponent}
         />
 
-        {/* Seating Visualization */}
-        {layout && (
+        {/* Seating Visualization or Empty State */}
+        {layout && seatingResult ? (
           <SeatingVisualization
             layout={layout}
             seatingResult={seatingResult}
@@ -255,7 +255,26 @@ export default function SeatingArrangementPage() {
             onGuestMove={moveGuest}
             onTableSwap={handleTableSwap}
           />
-        )}
+        ) : !seatingResult && !isOptimizing && confirmedPrimaryGuests.length > 0 ? (
+          <div className="mt-8 flex flex-col items-center justify-center py-16 text-center">
+            <div className="mb-6 w-24 h-24 rounded-full bg-brand-100 flex items-center justify-center">
+              <Settings2 className="w-12 h-12 text-brand-600" />
+            </div>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-3">
+              No Seating Arrangement Yet
+            </h3>
+            <p className="text-gray-600 max-w-md mb-6">
+              Click the &quot;Generate Seating&quot; button above to create an optimal seating arrangement
+              for your {confirmedPrimaryGuests.length} confirmed guest{confirmedPrimaryGuests.length === 1 ? '' : 's'}.
+            </p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-lg">
+              <p className="text-sm text-blue-800">
+                💡 <strong>Tip:</strong> Our AI-powered algorithm will organize your guests based on their
+                groups and your priority settings to create the perfect seating arrangement.
+              </p>
+            </div>
+          </div>
+        ) : null}
 
         {/* Warnings and Info Messages */}
         {totalConfirmed > availableSeats && availableSeats > 0 && (

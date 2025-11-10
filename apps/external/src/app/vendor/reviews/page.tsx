@@ -105,21 +105,24 @@ export default function VendorReviewsPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 pt-4 md:pt-6">
-        <PageHeader
-          title="Reviews"
-          description="See what customers are saying about your services"
-        />
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="text-primary h-8 w-8 animate-spin" />
+      <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+        <div className="container mx-auto px-4 pt-4 md:pt-6">
+          <PageHeader
+            title="Reviews"
+            description="See what customers are saying about your services"
+          />
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="text-primary h-8 w-8 animate-spin" />
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 md:pt-6">
-      <PageHeader title="Reviews" description="See what customers are saying about your services" />
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-brand-100 text-foreground">
+      <div className="container mx-auto px-4 py-8 md:pt-6">
+        <PageHeader title="Reviews" description="See what customers are saying about your services" />
 
       {/* Summary Statistics */}
       {reviews.length > 0 && (
@@ -328,6 +331,7 @@ export default function VendorReviewsPage() {
             )}
           </>
         )}
+      </div>
       </div>
     </div>
   );
