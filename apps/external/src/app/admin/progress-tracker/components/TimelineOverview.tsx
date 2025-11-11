@@ -164,16 +164,22 @@ export default function TimelineOverview({
 
       // Both are positive months: sort descending (higher months first)
       if (a.monthsBeforeWedding > 0 && b.monthsBeforeWedding > 0) {
-        return b.monthsBeforeWedding - a.monthsBeforeWedding;
+        const monthDiff = b.monthsBeforeWedding - a.monthsBeforeWedding;
+        // Add stable secondary sort by ID to prevent position jumping
+        return monthDiff !== 0 ? monthDiff : a.id.localeCompare(b.id);
       }
 
       // Both are negative months: sort ascending (closer to wedding day first)
       if (a.monthsBeforeWedding < 0 && b.monthsBeforeWedding < 0) {
-        return a.monthsBeforeWedding - b.monthsBeforeWedding;
+        const monthDiff = a.monthsBeforeWedding - b.monthsBeforeWedding;
+        // Add stable secondary sort by ID to prevent position jumping
+        return monthDiff !== 0 ? monthDiff : a.id.localeCompare(b.id);
       }
 
       // Mixed positive and negative (shouldn't happen due to wedding day in between)
-      return b.monthsBeforeWedding - a.monthsBeforeWedding;
+      const monthDiff = b.monthsBeforeWedding - a.monthsBeforeWedding;
+      // Add stable secondary sort by ID to prevent position jumping
+      return monthDiff !== 0 ? monthDiff : a.id.localeCompare(b.id);
     });
   }, [checklist, selectedWedding]);
 
@@ -192,7 +198,11 @@ export default function TimelineOverview({
     // The user's position should be at the last completed item before the first uncompleted item
     const sortedItems = [...timelineItems]
       .filter((item) => !item.isWeddingDay)
-      .sort((a, b) => b.monthsBeforeWedding - a.monthsBeforeWedding); // Sort by monthsBeforeWedding descending
+      .sort((a, b) => {
+        const monthDiff = b.monthsBeforeWedding - a.monthsBeforeWedding;
+        // Add stable secondary sort by ID to prevent position jumping
+        return monthDiff !== 0 ? monthDiff : a.id.localeCompare(b.id);
+      }); // Sort by monthsBeforeWedding descending
 
     // Find the first uncompleted item in the sorted list (furthest from wedding)
     const firstUncompletedItem = sortedItems.find((item) => !item.completed);
@@ -243,7 +253,11 @@ export default function TimelineOverview({
       // Consider only pre-wedding items when comparing against current month
       const preWeddingItems = [...timelineItems]
         .filter((it) => !it.isWeddingDay && it.monthsBeforeWedding > 0)
-        .sort((a, b) => b.monthsBeforeWedding - a.monthsBeforeWedding);
+        .sort((a, b) => {
+          const monthDiff = b.monthsBeforeWedding - a.monthsBeforeWedding;
+          // Add stable secondary sort by ID to prevent position jumping
+          return monthDiff !== 0 ? monthDiff : a.id.localeCompare(b.id);
+        });
 
       const preCompleted = preWeddingItems.filter((it) => it.completed);
       const preUncompleted = preWeddingItems.filter((it) => !it.completed);
