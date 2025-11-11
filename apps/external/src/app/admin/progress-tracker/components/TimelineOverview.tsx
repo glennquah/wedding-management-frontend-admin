@@ -795,12 +795,8 @@ export default function TimelineOverview({
                           className="h-24 w-24"
                           style={{
                             transform: endOfRow
-                              ? isEvenNumberedRow
-                                ? undefined // Face right for next row
-                                : 'scaleX(-1)' // Face left for next row
-                              : isEvenNumberedRow
-                                ? 'scaleX(-1)' // Face left in even rows
-                                : undefined, // Face right in odd rows
+                              ? `rotate(${isEvenNumberedRow ? 30 : -30}deg)`
+                              : undefined,
                           }}
                         />
                       </div>
