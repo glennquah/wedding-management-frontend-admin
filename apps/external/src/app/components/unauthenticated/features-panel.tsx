@@ -9,7 +9,7 @@ export default function FeaturesPanel({
   features: { title: string; desc: string; icon: React.ReactNode }[];
 }) {
   return (
-    <section className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto py-10 px-6">
+    <section className="mx-auto grid max-w-6xl gap-12 px-6 py-10 md:grid-cols-2">
       {features.map((feature, i) => {
         // Center last card if odd number of features
         const isLast = i === features.length - 1;
@@ -29,15 +29,15 @@ export default function FeaturesPanel({
             >
               {feature.icon}
             </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">{feature.title}</h3>
-            <p className="text-gray-600 mb-4">{feature.desc}</p>
-            <Image
+            <h3 className="text-foreground mb-2 text-xl font-semibold">{feature.title}</h3>
+            <p className="mb-4 text-gray-600">{feature.desc}</p>
+            {/* <Image
               src="/images/placeholder-image.png"
               alt="Feature illustration"
               width={300}
               height={180}
               className="rounded-lg"
-            />
+            /> */}
           </motion.div>
         );
       })}
