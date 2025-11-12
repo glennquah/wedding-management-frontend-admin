@@ -10,6 +10,7 @@ import { Download, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import qrCode from '../../../../../../public/images/paylah_qr.jpeg';
+import groupPhoto from '../../../../../../public/images/groupphoto.jpg';
 
 interface FinalSlideProps {
   onSave: () => void;
@@ -198,7 +199,10 @@ Made with ❤️ by Wedding Management Platform
         <div className="rounded-3xl border-2 border-white/20 bg-white/10 p-8 backdrop-blur-lg">
           {showCreatorsSection && (
             <>
-              <h3 className="mb-6 text-4xl font-bold text-white">
+              <div className="relative mx-auto h-96 w-full overflow-hidden rounded-xl pb-4">
+                <Image src={groupPhoto} alt="PayLah QR Code" fill className="object-contain" />
+              </div>
+              <h3 className="my-6 text-4xl font-bold text-white">
                 <TypingText text="From the creators of Knotly 💝" delay={500} speed={60} />
               </h3>
               <h3 className="mb-6 text-2xl leading-relaxed text-white/90">
