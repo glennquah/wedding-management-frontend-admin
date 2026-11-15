@@ -3,30 +3,8 @@ import type { NextRequestWithAuth } from 'next-auth/middleware';
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
 
-// Define public pages that don't require authentication
-const publicPages = [
-  '/',
-  '/login',
-  '/forgot-password',
-  '/reset-password',
-  '/get-started',
-  '/essentials',
-  '/the-big-day',
-  '/for-businesses',
-  '/guest-&-vendor',
-  '/cashgift',
-  '/self-attendance',
-];
-
 export default withAuth(
   function middleware(req: NextRequestWithAuth) {
-    const { pathname } = req.nextUrl;
-
-    // For public pages, bypass NextAuth authentication check
-    if (publicPages.some((page) => pathname.startsWith(page))) {
-      return NextResponse.next();
-    }
-
     const token = req.nextauth.token;
 
     // Check if user is authenticated for protected pages
@@ -42,11 +20,9 @@ export default withAuth(
     return NextResponse.next();
   },
   {
+    secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
-      authorized: ({ token }) => {
-        // Always authorize to let middleware function handle the logic
-        return !!token || true;
-      },
+      authorized: () => true,
     },
     cookies: {
       sessionToken: {
@@ -56,15 +32,8 @@ export default withAuth(
   },
 );
 
+// Restrict the guard to authenticated portals. Landing pages, guest microsites,
+// guest attendance links, auth endpoints, and static assets remain public.
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones we want to exclude
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|api).*)',
-  ],
+  matcher: ['/admin/:path*', '/vendor/:path*'],
 };

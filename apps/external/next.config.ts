@@ -9,10 +9,6 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const nextConfig: NextConfig = {
-  experimental: {
-    // Enable for better compatibility with OpenNext
-    esmExternals: 'loose',
-  },
   images: {
     // Configure for CloudFront/S3 compatibility
     unoptimized: process.env.NODE_ENV === 'production',

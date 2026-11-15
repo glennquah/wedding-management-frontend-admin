@@ -30,9 +30,33 @@ Screenshots from the project report illustrate the original capstone application
 
 ![Venue marketplace with search, filters, ratings, and listing cards](docs/screenshots/vendor-marketplace.png)
 
+### Wedding microsite
+
+![A published wedding microsite with RSVP, album, and guestbook access](docs/screenshots/wedding-microsite.png)
+
+### Microsite builder
+
+![Microsite editing with template selection, AI generation, and image uploads](docs/screenshots/microsite-builder.png)
+
+### Planning timeline
+
+![Wedding planning timeline with wedding-day activities and task status](docs/screenshots/planning-timeline.png)
+
+### Vendor recommendations
+
+![Personalized vendor recommendations with match scores and service categories](docs/screenshots/vendor-recommendations.png)
+
+### Vendor bookings
+
+![Vendor order management with booking confirmation and completion status](docs/screenshots/vendor-bookings.png)
+
+### Wedding Wrapped
+
+![Post-wedding recap showing guest invitation, RSVP, and attendance statistics](docs/screenshots/wedding-wrapped.jpg)
+
 ## Stack and structure
 
-Next.js 15, React 19, TypeScript, Tailwind CSS, Radix UI, Zustand, NextAuth, and Turborepo. The API client is generated from the backend's OpenAPI schema. AWS deployment uses SST and OpenNext.
+Next.js 16, React 19, TypeScript, Tailwind CSS, Radix UI, Zustand, NextAuth, and Turborepo. The API client is generated from the backend's OpenAPI schema. AWS deployment uses SST 4 and OpenNext. Development and builds explicitly use Webpack to preserve the existing alias configuration. Both apps pin the same React and React DOM version to avoid workspace runtime mismatches.
 
 ```text
 apps/external/       Couples, vendors, guests, and public microsites (port 3000)
@@ -45,7 +69,7 @@ sst.config.ts       AWS deployment configuration
 
 ## Local setup
 
-Use Node.js 22 and npm 10. Install dependencies from the repository root:
+Use Node.js 22.22.3 or newer and npm 10 or newer. Install dependencies from the repository root:
 
 ```bash
 npm ci
@@ -74,15 +98,19 @@ Accounts, weddings, and listings come from your backend database. There is no st
 | `npm run build` | Build all workspaces |
 | `npm run build:external` | Build the customer portal |
 | `npm run build:internal` | Build the internal portal |
+| `npm run lint` | Lint both apps |
+| `npm run test:auth` | Check production portal guards after building |
 | `npm run generate-api-types` | Regenerate `shared/api` from http://localhost:8080/api-json |
 
 Run API generation with the backend running, then inspect the generated diff. Import shared components from `shared/components` using the aliases configured in each app.
 
-The existing `lint` scripts use `next lint`, which is incompatible with the installed Next.js 15 tooling. There are no frontend test scripts in the app workspaces; the root Turbo test command does not establish test coverage.
+Run `npm run lint` to check both apps with ESLint. Existing React Compiler diagnostics are warnings while the app remains uncompiled; hooks correctness rules retain their existing severity. Run `npm run build` followed by `npm run test:auth` to check anonymous/wrong-role redirects and valid-role access in both production portals, plus public login/auth endpoints. There are no app workspace test scripts; the root Turbo test command does not run these smoke checks.
 
 ## Deployment
 
 `sst.config.ts` describes two AWS Next.js deployments. It currently targets the original project's domains and Route 53 hosted zone; replace these with infrastructure you own before deploying. Configure secrets through your deployment environment and review `.github/workflows` before enabling automated deployments. `NEXTAUTH_SECRET` is required and has no deployment fallback.
+
+The toolchain now uses SST 4. Existing SST 3 deployments require a reviewed state migration before deployment: follow the [SST migration guide](https://sst.dev/docs/migrate-from-v3/), review `sst diff`, then run a full `sst refresh --stage production` against your own account. This state migration has not been performed by this PR.
 
 `npm run deploy` targets the production stage and creates or updates AWS resources. Local development does not require AWS access.
 
@@ -93,6 +121,10 @@ Include a clear description and verification steps with contributions. Keep gene
 ## License and assets
 
 A project license has not been selected. Public source availability alone does not grant an open-source license. The maintainers must choose a license and confirm contributor rights before release. Screenshots, photos, fonts, and externally hosted audio may have separate rights; review those assets before redistributing them.
+
+## Dependency maintenance
+
+The npm overrides select patched Undici, multipart-parser, and glob-matcher releases while upstream packages catch up. Revisit them when updating the parent packages. CI fails on high or critical dependency advisories, and Dependabot checks for updates weekly.
 
 ## Release review
 

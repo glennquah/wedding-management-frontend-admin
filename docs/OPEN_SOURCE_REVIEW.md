@@ -27,34 +27,35 @@ Cloudinary deployment defaults were removed so a new deployment cannot silently 
 
 Historical `apps/external/.env` and `apps/internal/.env` files were found and inspected; their committed contents were empty. No current tracked real `.env` file was found. Ignore rules now cover `.env.*` variants and allow only the committed example templates.
 
-## Dependency review
+## Authentication guard correction
 
-`npm ci --ignore-scripts` completed successfully. `npm audit` reported **66 advisories**: 7 critical, 26 high, 27 moderate, and 6 low. These counts include transitive and development dependencies and can change as the registry updates. Packages marked critical: `fast-xml-parser`, `handlebars`, `jspdf`, `next`, `next-auth`, `proxy-addr`, `tar`.
+Production smoke testing found that the external portal treated `/` as a public path prefix, so every URL bypassed its middleware checks. The external matcher now targets the authenticated `/admin` and `/vendor` portals directly. Both portals explicitly use the configured session secret, and the internal matcher now clearly excludes auth/API and Next.js asset routes. Landing pages and guest microsites remain outside the external portal guard.
 
-Dependency upgrades were not applied as part of the documentation/credential changes. Review `npm audit` and validate compatible fixes before operating a public deployment; some fixes require major-version changes.
+`npm run test:auth` runs real production HTTP checks for anonymous/wrong-role redirects and valid-role access, public login pages, auth provider endpoints, and the public frontend landing page. It uses random local secrets and no production accounts. The backend remains responsible for authorization of API operations.
 
-## Critical dependency details
+## Dependency remediation
 
-These are package advisory matches, not confirmed exploits in the application. Development-only packages can affect build tooling. Runtime exploitability depends on the vulnerable feature and inputs being reachable.
+The initial audit reported 66 affected package entries, including 7 critical and 26 high. After updating the manifests and lockfile, the final audit reports **zero vulnerabilities**.
 
-| Package | Locked versions | Dependency context | Critical advisories |
-| --- | --- | --- | --- |
-| `fast-xml-parser` | 5.2.5 | Development only | [fast-xml-parser has an entity encoding bypass via regex injection in DOCTYPE entity names](https://github.com/advisories/GHSA-m7jm-9gc2-mpf2) |
-| `handlebars` | 4.7.8 | Development only | [Handlebars.js has JavaScript Injection via AST Type Confusion](https://github.com/advisories/GHSA-2w6w-674q-4c4q); [Handlebars: JavaScript Injection via AST Type Confusion in compile (bypass of CVE-2026-33937)](https://github.com/advisories/GHSA-8r5x-fm3f-whwj); [Handlebars: JavaScript Injection via Own Property Check Bypass](https://github.com/advisories/GHSA-p8wg-vrv2-v86f) |
-| `jspdf` | 3.0.3 | Includes runtime dependency | [jsPDF has Local File Inclusion/Path Traversal vulnerability](https://github.com/advisories/GHSA-f8cm-6447-x5h2); [jsPDF has HTML Injection in New Window paths](https://github.com/advisories/GHSA-wfv2-pwc8-crg5) |
-| `next` | 15.4.6, 15.5.4 | Includes runtime dependency | [Next.js is vulnerable to RCE in React flight protocol](https://github.com/advisories/GHSA-9qr9-h5gf-34mp); [Next.js is vulnerable to RCE in React flight protocol](https://github.com/advisories/GHSA-9qr9-h5gf-34mp); [Next.js: Unauthenticated Remote Code Execution on windows-hosted servers](https://github.com/advisories/GHSA-p293-qw3h-jr36); [Next.js: Unauthenticated Remote Code Execution in Image Optimization API when AVIF files are used](https://github.com/advisories/GHSA-2xp9-vwfh-vxw4); [Next.js: Unauthenticated Remote Code Execution in Image Optimization API when SVG files are used](https://github.com/advisories/GHSA-2464-fhr4-w9xw) |
-| `next-auth` | 4.24.11 | Includes runtime dependency | [Auth.js: Email normalizer validates the address before Unicode normalization, allowing a homoglyph @ bypass](https://github.com/advisories/GHSA-7rqj-j65f-68wh) |
-| `proxy-addr` | 2.0.7 | Development only | [proxy-addr vulnerable to IP spoofing via IPv4-mapped IPv6 trust subnet](https://github.com/advisories/GHSA-jqcg-44mw-7w3h) |
-| `tar` | 7.5.1 | Includes runtime dependency | [node-tar: Decompression/parse DoS via unlimited input](https://github.com/advisories/GHSA-23hp-3jrh-7fpw) |
+- Upgraded both apps and the root workspace to Next.js 16.4.6 and matching React/React DOM 19.3.1. Builds and development explicitly retain Webpack for the existing aliases; TypeScript now uses bundler module resolution and the React JSX transform.
+- Upgraded jsPDF to 4.2.1, NextAuth to the patched v4 release, next-cloudinary to v7, OpenAI to v6, and SST to v4. Removed unused AWS CDK/S3 SDK dependencies from the frontend.
+- Updated compatible transitive packages and pinned patched Undici, multipart parser, and minimatch versions through documented npm overrides where parents lag.
+- Replaced `next lint` with ESLint CLI and migrated to the Next.js 16 flat config. Newly introduced React Compiler diagnostics are warnings for existing code; pre-existing hooks correctness rules retain their severity. React Compiler itself is not enabled.
+- CI now checks dependency advisories at the high severity threshold, and Dependabot checks npm packages and GitHub Actions weekly.
 
-The count is affected package entries, not a count of proven independent attacks. Update and test dependency fixes separately from this preparation.
+### Deployment compatibility
+
+Existing SST 3 deployments need an explicit, reviewed state migration before deployment. Follow the [official migration guide](https://sst.dev/docs/migrate-from-v3/) and run `sst diff`, then a full `sst refresh` for each stage against infrastructure you own. This review did not run these commands, change AWS state, or test a deployed OpenNext bundle. The existing Edge middleware is retained, as Next.js 16 still supports that runtime via `middleware.ts`.
 
 ## Validation
 
-- Both app TypeScript checks passed (`tsc --noEmit`, incremental output disabled).
-- Diff whitespace checks passed; environment variants are ignored and example templates are visible to Git.
-- A production frontend build and browser flows were not exercised; they require configured integrations and may fetch external resources.
-- Existing app lint commands use `next lint`, which is incompatible with Next.js 15. Migrate these commands to the ESLint CLI before relying on CI.
+- Both frontend production builds passed with Next.js 16.
+- ESLint passed with warnings from existing code and the newly introduced compiler diagnostics.
+- A jsPDF smoke check generated a two-page PDF after the major version upgrade.
+- Production authentication smoke tests exercise both portals after building.
+- A clean `npm ci` and final `npm audit` checked lockfile reproducibility.
+- Source scans, diff whitespace checks, and local documentation links were checked.
+- Browser payment, email, AI, and Cloudinary upload flows were not exercised with live integrations.
 
 ## Remaining release decisions
 
@@ -63,4 +64,4 @@ The count is affected package entries, not a count of proven independent attacks
 - Review sample names/emails and third-party infrastructure identifiers before publishing. Screenshots selected for the frontend README avoid email/account-management tables; the report itself is not copied into either repository.
 - Configure a private vulnerability-reporting channel and your own infrastructure before deployment.
 
-This preparation does not change repository visibility, rotate deployed secrets, deploy applications, or rewrite Git history. Dependency fixes remain follow-up work.
+This preparation does not change repository visibility, rotate deployed secrets, deploy applications, or rewrite Git history. Deployment credential rotation and license selection remain follow-up work.
