@@ -9,6 +9,9 @@ export default $config({
     };
   },
   async run() {
+    if (!process.env.NEXTAUTH_SECRET) {
+      throw new Error('NEXTAUTH_SECRET must be set before deployment');
+    }
     // External app (public-facing) - knotly.app
     const external = new sst.aws.Nextjs('WeddingExternal', {
       path: './apps/external',
@@ -21,14 +24,14 @@ export default $config({
       environment: {
         NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080',
         NEXTAUTH_URL: 'https://knotly.app',
-        NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || 'fallback-secret-change-this',
+        NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
         GITHUB_ID: process.env.GITHUB_ID || '',
         GITHUB_SECRET: process.env.GITHUB_SECRET || '',
         OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
         NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME:
-          process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnyxxyolp',
+          process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '',
         NEXT_PUBLIC_CLOUDINARY_PRESET_NAME:
-          process.env.NEXT_PUBLIC_CLOUDINARY_PRESET_NAME || 'capstone',
+          process.env.NEXT_PUBLIC_CLOUDINARY_PRESET_NAME || '',
       },
     });
 
@@ -44,14 +47,14 @@ export default $config({
       environment: {
         NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080',
         NEXTAUTH_URL: 'https://core.knotly.app',
-        NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || 'fallback-secret-change-this',
+        NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
         GITHUB_ID: process.env.GITHUB_ID || '',
         GITHUB_SECRET: process.env.GITHUB_SECRET || '',
         OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
         NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME:
-          process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnyxxyolp',
+          process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '',
         NEXT_PUBLIC_CLOUDINARY_PRESET_NAME:
-          process.env.NEXT_PUBLIC_CLOUDINARY_PRESET_NAME || 'capstone',
+          process.env.NEXT_PUBLIC_CLOUDINARY_PRESET_NAME || '',
       },
     });
 
